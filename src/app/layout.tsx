@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Stock HappyBoy - Factory & Store",
+  title: "Happy Boy&Girl",
   description: "Management system for Stock HappyBoy factory and stores.",
 };
 
@@ -17,11 +17,12 @@ export default function RootLayout({
         <header className="app-header">
           <div className="container">
             <div className="logo">
-              <span>👕</span>
-              <span>Stock HappyBoy</span>
+              {/* This will use the same red color due to the CSS classes */}
+              <span style={{ color: "var(--secondary)", fontSize: "1.2em", fontWeight: "900" }}>OIO</span>
+              <span>Happy Boy&Girl</span>
             </div>
             <nav className="flex gap-4">
-              <a href="/login" className="btn btn-outline">تسجيل الدخول</a>
+              <a href="/" className="btn btn-outline">تسجيل الدخول</a>
             </nav>
           </div>
         </header>
