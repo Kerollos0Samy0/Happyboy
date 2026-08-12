@@ -17,8 +17,7 @@ export default function RootLayout({
         <header className="app-header">
           <div className="container">
             <div className="logo">
-              {/* This will use the same red color due to the CSS classes */}
-              <span style={{ color: "var(--secondary)", fontSize: "1.2em", fontWeight: "900" }}>OIO</span>
+              <img src="/face-logo.png" alt="HappyBoy Face Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
               <span>Happy Boy&Girl</span>
             </div>
             <nav className="flex gap-4">
