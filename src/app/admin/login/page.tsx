@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function AdminLoginPage() {
@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
     <div className="animate-fade-in flex flex-col items-center justify-center mt-10">
       <div className="card w-full" style={{ maxWidth: '400px' }}>
         <div className="text-center mb-6">
-          <h2 className="mb-2" style={{ color: 'var(--primary)' }}>نظام إدارة Stock HappyBoy 🔐</h2>
+          <h2 className="mb-2" style={{ color: 'var(--primary)' }}>تسجيل دخول الإدارة 🔐</h2>
           <p>أدخل بياناتك للوصول للوحة التحكم.</p>
         </div>
         
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
           </div>
           
           <button type="submit" className="btn btn-primary w-full mt-4">
-            تسجيل الدخول
+            دخول
           </button>
         </form>
       </div>

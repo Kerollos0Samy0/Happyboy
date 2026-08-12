@@ -1,0 +1,78 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "../../../lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { QRCodeSVG } from "qrcode.react";
+
+export default function AdminDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // In production, this would be your actual deployed Vercel domain.
+  // For local testing, we use the local IP or localhost.
+  const websiteUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/admin/login");
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading) {
+    return <div className="p-10 text-center">جاري التحميل...</div>;
+  }
+
+  return (
+    <div className="animate-fade-in flex flex-col items-center mt-6">
+      <div className="w-full flex justify-between items-center mb-6">
+        <h1>لوحة تحكم الإدارة 📊</h1>
+        <button 
+          className="btn btn-outline"
+          onClick={() => signOut(auth)}
+        >
+          تسجيل الخروج
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 w-full" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+        {/* QR Code Card */}
+        <div className="card flex flex-col items-center text-center">
+          <h2 className="mb-4" style={{ color: 'var(--primary)' }}>QR Code بوابة العملاء</h2>
+          <p className="text-sm mb-6">اطبع هذا الرمز وضعه في المحل. سيقوم العميل بمسحه بهاتفه ليتمكن من تسجيل بياناته وعمل الطلب بنفسه.</p>
+          
+          <div className="p-4" style={{ background: 'white', borderRadius: '1rem', border: '2px dashed var(--border)' }}>
+            <QRCodeSVG value={`${websiteUrl}/customer`} size={200} level="H" />
+          </div>
+          
+          <p className="mt-4 text-sm font-bold" style={{ color: 'var(--text-muted)' }}>الرابط: {websiteUrl}/customer</p>
+        </div>
+
+        {/* Quick Stats Card */}
+        <div className="card">
+          <h2 className="mb-4" style={{ color: 'var(--primary)' }}>إحصائيات سريعة</h2>
+          <div className="flex flex-col gap-4">
+            <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
+              <p className="text-sm">طلبات اليوم</p>
+              <h3 className="text-2xl mt-1">0</h3>
+            </div>
+            <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
+              <p className="text-sm">منتجات في المخزن</p>
+              <h3 className="text-2xl mt-1">0</h3>
+            </div>
+            
+            <a href="/admin/inventory" className="btn btn-primary mt-2" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+              إضافة منتج جديد
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
