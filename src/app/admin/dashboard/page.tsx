@@ -67,9 +67,14 @@ export default function AdminDashboardPage() {
               <h3 className="text-2xl mt-1">0</h3>
             </div>
             
-            <a href="/admin/inventory" className="btn btn-primary mt-2" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
-              إضافة منتج جديد
-            </a>
+            <div className="flex gap-2 w-full">
+              <a href="/admin/inventory" className="btn btn-primary mt-2 flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                إضافة منتج
+              </a>
+              <a href="/admin/orders" className="btn btn-secondary mt-2 flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                الطلبات الحية
+              </a>
+            </div>
           </div>
         </div>
       </div>
