@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../lib/firebase";
+import { db } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
-import { db } from "../../../lib/firebase";
+import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
