@@ -143,9 +143,9 @@ export default function LiveOrdersPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f1f5f9", padding: "1.5rem" }}>
+    <div style={{ minHeight: "100vh", background: "#f1f5f9", padding: "1rem 1.5rem", marginLeft: "calc(-50vw + 50%)", marginRight: "calc(-50vw + 50%)", width: "100vw" }}>
       {/* Header */}
-      <div style={{ maxWidth: "100%", margin: "0 auto" }}>
+      <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>
           <h2 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
             🔔 الطلبات الحية <span style={{ color: "#A62E2E" }}>Live Orders</span>
