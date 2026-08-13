@@ -82,7 +82,7 @@ export default function CartPage() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`invoice_${orderNum}.pdf`);
+      pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
     } catch (err) {
       console.error("Failed to generate PDF", err);
       alert("حدث خطأ أثناء استخراج الفاتورة");

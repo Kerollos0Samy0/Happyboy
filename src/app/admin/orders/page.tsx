@@ -120,7 +120,7 @@ export default function LiveOrdersPage() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`invoice_${order.orderNumber || order.id.slice(0, 8)}.pdf`);
+      pdf.save(`فاتورة_${order.customerName.replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
       console.error("Failed to generate PDF", err);
       alert("حدث خطأ أثناء استخراج الفاتورة");
