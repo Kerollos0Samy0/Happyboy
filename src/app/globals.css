@@ -2,12 +2,12 @@
 
 :root {
   /* Modern Vibrant Color Palette - Matching Logo */
-  --primary: #3F949F;
-  --primary-hover: #317882;
-  --primary-light: #e6f2f4;
+  --primary: #A62E2E;
+  --primary-hover: #8A2525;
+  --primary-light: #FCE8E8;
   
-  --secondary: #A62E2E;
-  --secondary-hover: #8A2525;
+  --secondary: #0f172a;
+  --secondary-hover: #1e293b;
   
   --danger: #EF4444;
   --warning: #F59E0B;
@@ -42,7 +42,7 @@
     --text-muted: #94a3b8;
     
     --border: #334155;
-    --primary-light: #24585f;
+    --primary-light: #4A1212;
   }
 }
 
