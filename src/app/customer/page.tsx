@@ -6,15 +6,17 @@ import { useRouter } from "next/navigation";
 export default function CustomerStartPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [brand, setBrand] = useState("");
   const router = useRouter();
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) return;
+    if (!name || !phone || !brand) return;
     
     // Save customer info locally for this session
     localStorage.setItem("customerName", name);
     localStorage.setItem("customerPhone", phone);
+    localStorage.setItem("customerBrand", brand);
     
     // Move to scanning page
     router.push("/scan");
@@ -49,6 +51,18 @@ export default function CustomerStartPage() {
               placeholder="01xxxxxxxxx" 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              required 
+            />
+          </div>
+          
+          <div>
+            <label className="block mb-2 font-bold text-sm">اسم البراند / المحل</label>
+            <input 
+              type="text" 
+              className="input" 
+              placeholder="مثال: بيبي فاشون" 
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
               required 
             />
           </div>

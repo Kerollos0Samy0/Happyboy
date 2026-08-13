@@ -8,6 +8,7 @@ interface Order {
   id: string;
   customerName: string;
   customerPhone: string;
+  customerBrand?: string;
   total: number;
   status: string;
   items: any[];
@@ -58,7 +59,8 @@ export default function LiveOrdersPage() {
                   <div>
                     <h3 className="font-bold text-lg">طلب رقم: {order.id.slice(0, 8)}</h3>
                     <p className="text-sm">العميل: {order.customerName} | {order.customerPhone}</p>
-                    <p className="text-sm text-gray-500">
+                    {order.customerBrand && <p className="text-sm font-bold text-gray-700">البراند: {order.customerBrand}</p>}
+                    <p className="text-sm text-gray-500 mt-1">
                       {order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}
                     </p>
                   </div>
@@ -85,7 +87,8 @@ export default function LiveOrdersPage() {
                   <ul style={{ listStyleType: 'disc', paddingRight: '1.5rem' }}>
                     {order.items?.map((item: any) => (
                       <li key={item.cartItemId} className="text-sm">
-                        {item.name} - لون ({item.selectedColor}) - مقاس ({item.selectedSize})
+                        {item.name} (موديل {item.modelNumber}) - لون ({item.selectedColor})
+                        {item.isSeri ? ` - ثري (${item.sizes?.length} قطع)` : ` - قطعة`}
                       </li>
                     ))}
                   </ul>

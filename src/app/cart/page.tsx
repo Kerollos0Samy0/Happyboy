@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 
 interface CartItem {
   cartItemId: string;
@@ -22,8 +22,11 @@ export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerBrand, setCustomerBrand] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export default function CartPage() {
     setCart(savedCart);
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");
     setCustomerPhone(localStorage.getItem("customerPhone") || "");
+    setCustomerBrand(localStorage.getItem("customerBrand") || "");
   }, []);
 
   const calculateItemTotal = (item: CartItem) => {
@@ -48,35 +52,38 @@ export default function CartPage() {
     localStorage.setItem("happyboy_cart", JSON.stringify(newCart));
   };
 
-  const generatePDF = (orderNum: string) => {
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Stock HappyBoy - Invoice", 105, 20, { align: "center" });
+  const generatePDF = async (orderNum: string) => {
+    if (!invoiceRef.current) return;
     
-    doc.setFontSize(12);
-    doc.text(`Order ID: ${orderNum}`, 20, 40);
-    doc.text(`Customer Name: ${customerName}`, 20, 50);
-    doc.text(`Customer Phone: ${customerPhone}`, 20, 60);
+    // Temporarily make the invoice visible for capturing
+    const invoiceEl = invoiceRef.current;
+    invoiceEl.style.display = "block";
     
-    const tableData = cart.map(item => [
-      `${item.name} (${item.modelNumber})`, 
-      item.selectedColor, 
-      item.isSeri ? `Seri (${item.sizes.length} pcs)` : 'Piece',
-      `${calculateItemTotal(item)} EGP`
-    ]);
-    
-    autoTable(doc, {
-      startY: 70,
-      head: [['Product', 'Color', 'Type', 'Total Price']],
-      body: tableData,
-    });
-    
-    // @ts-ignore
-    const finalY = (doc as any).lastAutoTable.finalY || 100;
-    doc.setFontSize(14);
-    doc.text(`Total: ${total} EGP`, 20, finalY + 10);
-    
-    doc.save(`invoice_${orderNum}.pdf`);
+    try {
+      const canvas = await html2canvas(invoiceEl, {
+        scale: 2, // higher resolution
+        useCORS: true,
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`invoice_${orderNum}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF", err);
+      alert("حدث خطأ أثناء استخراج الفاتورة");
+    } finally {
+      // Hide the invoice again
+      invoiceEl.style.display = "none";
+    }
   };
 
   const handleCheckout = async () => {
@@ -87,6 +94,7 @@ export default function CartPage() {
       const docRef = await addDoc(collection(db, "orders"), {
         customerName,
         customerPhone,
+        customerBrand,
         items: cart,
         total,
         status: "pending",
@@ -127,6 +135,59 @@ export default function CartPage() {
             </button>
           </div>
         </div>
+
+        {/* Hidden Invoice Template for PDF Generation */}
+        <div 
+          ref={invoiceRef} 
+          style={{ 
+            display: "none", 
+            width: "800px", 
+            padding: "40px", 
+            background: "white", 
+            color: "black",
+            position: "absolute",
+            top: "-9999px",
+            left: "-9999px",
+            direction: "rtl"
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "30px" }}>
+            <h1 style={{ fontSize: "28px", color: "#A62E2E", marginBottom: "10px" }}>Happy Boy&Girl</h1>
+            <h2 style={{ fontSize: "20px" }}>فاتورة طلب</h2>
+          </div>
+          
+          <div style={{ marginBottom: "30px", padding: "20px", border: "1px solid #eee", borderRadius: "8px" }}>
+            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId.slice(0, 8)}</p>
+            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {customerName}</p>
+            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> {customerPhone}</p>
+            <p style={{ fontSize: "16px" }}><strong>البراند / المحل:</strong> {customerBrand}</p>
+          </div>
+
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "30px" }}>
+            <thead>
+              <tr style={{ background: "#f8fafc" }}>
+                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>المنتج</th>
+                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>اللون</th>
+                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>النوع</th>
+                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.map((item) => (
+                <tr key={item.cartItemId}>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.name} (موديل {item.modelNumber})</td>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.selectedColor}</td>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.isSeri ? `ثري (${item.sizes.length} قطع)` : 'قطعة'}</td>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{calculateItemTotal(item)} ج.م</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div style={{ textAlign: "left", fontSize: "20px", fontWeight: "bold" }}>
+            الإجمالي الكلي: {total} ج.م
+          </div>
+        </div>
       </div>
     );
   }
@@ -138,6 +199,7 @@ export default function CartPage() {
         
         <div className="mb-4">
           <p><strong>العميل:</strong> {customerName}</p>
+          <p><strong>البراند:</strong> {customerBrand}</p>
           <p><strong>رقم الهاتف:</strong> {customerPhone}</p>
         </div>
         
