@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
     return <div className="p-10 text-center">جاري التحميل...</div>;
   }
 
-  const isAccounting = userEmail?.includes('accounting');
+  const isAhmed = userEmail?.toLowerCase().includes('ahmed');
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">
@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
               <h3 className="text-2xl mt-1">0</h3>
             </div>
             
-            {!isAccounting && (
+            {isAhmed && (
               <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
                 <p className="text-sm">منتجات في المخزن</p>
                 <h3 className="text-2xl mt-1">0</h3>
@@ -75,7 +75,7 @@ export default function AdminDashboardPage() {
             )}
             
             <div className="flex gap-2 w-full mt-2">
-              {!isAccounting && (
+              {isAhmed && (
                 <a href="/admin/inventory" className="btn btn-primary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
                   إدارة المخزن
                 </a>
