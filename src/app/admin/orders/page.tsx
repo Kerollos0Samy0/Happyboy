@@ -140,7 +140,7 @@ export default function LiveOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="card text-center"><p>لا توجد طلبات حتى الآن.</p></div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-6 w-full" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
             {orders.map((order) => (
               <div key={order.id} className="card flex flex-col justify-between" style={{ padding: '1rem' }}>
                 {/* Header (Always Visible) */}
