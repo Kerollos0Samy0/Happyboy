@@ -49,13 +49,8 @@ export default function InventoryPage() {
       if (!user) {
         router.push("/admin/login");
       } else {
-        const email = user.email?.toLowerCase() || '';
-        if (!email.includes('ahmed') && !email.includes('hossam')) {
-          router.push("/admin/dashboard");
-        } else {
-          setLoading(false);
-          fetchProducts();
-        }
+        setLoading(false);
+        fetchProducts();
       }
     });
     return () => unsubscribe();
