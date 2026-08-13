@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
     return <div className="p-10 text-center">جاري التحميل...</div>;
   }
 
-  const isAhmed = userEmail?.toLowerCase().includes('ahmed');
+  const isAhmed = userEmail?.toLowerCase().includes('ahmed') || userEmail?.toLowerCase().includes('hossam');
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">

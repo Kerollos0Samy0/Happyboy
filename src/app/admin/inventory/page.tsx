@@ -48,11 +48,14 @@ export default function InventoryPage() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push("/admin/login");
-      } else if (!user.email?.toLowerCase().includes('ahmed')) {
-        router.push("/admin/dashboard");
       } else {
-        setLoading(false);
-        fetchProducts();
+        const email = user.email?.toLowerCase() || '';
+        if (!email.includes('ahmed') && !email.includes('hossam')) {
+          router.push("/admin/dashboard");
+        } else {
+          setLoading(false);
+          fetchProducts();
+        }
       }
     });
     return () => unsubscribe();
