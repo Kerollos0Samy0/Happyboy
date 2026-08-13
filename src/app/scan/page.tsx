@@ -32,6 +32,9 @@ export default function ScanPage() {
   const router = useRouter();
 
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [colorQuantities, setColorQuantities] = useState<{ [key: string]: number }>({});
+  
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const scannerElement = document.getElementById("reader");
@@ -82,7 +85,8 @@ export default function ScanPage() {
         
         setProduct(prodData);
         setMatchedColor(matched);
-        setSelectedColors([matched.name]); // Pre-select the scanned color
+        setSelectedColors([matched.name]);
+        setColorQuantities({ [matched.name]: 1 });
       }
     } catch (err) {
       console.error(err);
@@ -92,7 +96,7 @@ export default function ScanPage() {
     }
   };
 
-  const addColorToCart = (color: ColorEntry) => {
+  const addColorToCart = (color: ColorEntry, qty: number) => {
     if (!product) return;
     
     const cartItem = {
@@ -103,7 +107,8 @@ export default function ScanPage() {
       price: product.price,
       selectedColor: color.name,
       sizes: product.sizes,
-      isSeri: true
+      isSeri: true,
+      quantity: qty
     };
     
     const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
@@ -114,9 +119,22 @@ export default function ScanPage() {
   const toggleColor = (colorName: string) => {
     if (selectedColors.includes(colorName)) {
       setSelectedColors(selectedColors.filter(c => c !== colorName));
+      const newQ = { ...colorQuantities };
+      delete newQ[colorName];
+      setColorQuantities(newQ);
     } else {
       setSelectedColors([...selectedColors, colorName]);
+      setColorQuantities({ ...colorQuantities, [colorName]: 1 });
     }
+  };
+
+  const updateQuantity = (colorName: string, change: number) => {
+    setColorQuantities(prev => {
+      const current = prev[colorName] || 1;
+      const next = current + change;
+      if (next < 1) return prev;
+      return { ...prev, [colorName]: next };
+    });
   };
 
   const handleAddSelectedColors = () => {
@@ -124,16 +142,21 @@ export default function ScanPage() {
     
     product.colors.forEach(color => {
       if (selectedColors.includes(color.name)) {
-        addColorToCart(color);
+        addColorToCart(color, colorQuantities[color.name] || 1);
       }
     });
     
-    alert(`تمت إضافة ${selectedColors.length} لون للفاتورة بنجاح!`);
-    router.push("/cart");
+    alert(`تمت إضافة المنتجات للفاتورة بنجاح!`);
+    
+    // Reset to scan another
+    setScannedResult(null);
+    setProduct(null);
+    setMatchedColor(null);
+    window.location.reload();
   };
 
   return (
-    <div className="animate-fade-in flex flex-col items-center mt-6">
+    <div className="animate-fade-in flex flex-col items-center mt-6 relative">
       <div className="card w-full" style={{ maxWidth: "500px" }}>
         <h2 className="text-center mb-6" style={{ color: "var(--primary)" }}>
           📷 مسح باركود المنتج
@@ -143,6 +166,15 @@ export default function ScanPage() {
           <div>
             <p className="text-center mb-4">قم بتوجيه الكاميرا نحو باركود اللون ليتم التعرف عليه.</p>
             <div id="reader" style={{ width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}></div>
+            
+            <hr style={{ borderTop: "1px solid var(--border)", margin: "2rem 0 1rem 0" }} />
+            
+            <button 
+              className="btn btn-secondary w-full py-3"
+              onClick={() => setShowConfirm(true)}
+            >
+              تقفيل الفاتورة 🛒
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -159,39 +191,61 @@ export default function ScanPage() {
                       سعر القطعة: {product.price} ج.م
                     </p>
                     <p className="font-bold text-lg" style={{ color: "var(--success)" }}>
-                      إجمالي الثري: {product.price * product.sizes.length} ج.م
+                      ثمن الثري الواحد: {product.price * product.sizes.length} ج.م
                     </p>
                   </div>
-                  <p className="text-sm">المقاسات المتاحة ({product.sizes.length} قطع): {product.sizes.join(", ")}</p>
+                  <p className="text-sm">المقاسات ({product.sizes.length} قطع): {product.sizes.join(", ")}</p>
                 </div>
                 
                 <div className="p-4" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
-                  <h4 className="font-bold mb-3">الألوان المتاحة للموديل (اختر ما تود إضافته):</h4>
+                  <h4 className="font-bold mb-3">الألوان المتاحة للموديل (اختر وعدّل الكمية):</h4>
                   <div className="flex flex-col gap-2">
-                    {product.colors.map(color => (
-                      <label 
-                        key={color.name} 
-                        className="flex items-center gap-3 p-3 cursor-pointer" 
-                        style={{ 
-                          background: "var(--background)", 
-                          borderRadius: "var(--radius-sm)", 
-                          border: color.name === matchedColor.name ? "1px solid var(--primary)" : "1px solid transparent" 
-                        }}
-                      >
-                        <input 
-                          type="checkbox" 
-                          checked={selectedColors.includes(color.name)}
-                          onChange={() => toggleColor(color.name)}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                        <span className="text-lg">{color.name}</span>
-                        {color.name === matchedColor.name && (
-                          <span className="text-sm font-bold px-2 py-1 rounded" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
-                            اللون الممسوح
-                          </span>
-                        )}
-                      </label>
-                    ))}
+                    {product.colors.map(color => {
+                      const isSelected = selectedColors.includes(color.name);
+                      return (
+                        <div 
+                          key={color.name} 
+                          className="flex flex-col gap-2 p-3" 
+                          style={{ 
+                            background: "var(--background)", 
+                            borderRadius: "var(--radius-sm)", 
+                            border: color.name === matchedColor.name ? "1px solid var(--primary)" : "1px solid transparent" 
+                          }}
+                        >
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={isSelected}
+                              onChange={() => toggleColor(color.name)}
+                              style={{ width: '20px', height: '20px' }}
+                            />
+                            <span className="text-lg flex-1">{color.name}</span>
+                            {color.name === matchedColor.name && (
+                              <span className="text-sm font-bold px-2 py-1 rounded" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
+                                ممسوح
+                              </span>
+                            )}
+                          </label>
+                          
+                          {isSelected && (
+                            <div className="flex items-center gap-4 mt-2 mr-8">
+                              <span className="text-sm font-bold">الكمية (ثري):</span>
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
+                                  onClick={() => updateQuantity(color.name, 1)}
+                                >+</button>
+                                <span className="font-bold text-lg w-6 text-center">{colorQuantities[color.name] || 1}</span>
+                                <button 
+                                  className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
+                                  onClick={() => updateQuantity(color.name, -1)}
+                                >-</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
                 
@@ -201,7 +255,7 @@ export default function ScanPage() {
                   disabled={selectedColors.length === 0}
                   style={{ opacity: selectedColors.length === 0 ? 0.5 : 1 }}
                 >
-                  إضافة الألوان المحددة ({selectedColors.length}) للفاتورة
+                  إضافة للفاتورة وأكمل مسح 📷
                 </button>
               </div>
             ) : null}
@@ -209,7 +263,7 @@ export default function ScanPage() {
             <hr style={{ borderTop: "1px solid var(--border)", margin: "1rem 0" }} />
             
             <button 
-              className="btn btn-outline w-full"
+              className="btn btn-outline w-full py-3"
               onClick={() => {
                 setScannedResult(null);
                 setProduct(null);
@@ -221,15 +275,38 @@ export default function ScanPage() {
             </button>
             
             <button 
-              className="btn w-full mt-2"
-              style={{ background: 'var(--surface-hover)', color: 'var(--text-main)' }}
-              onClick={() => router.push("/cart")}
+              className="btn btn-secondary w-full py-3 mt-2"
+              onClick={() => setShowConfirm(true)}
             >
-              الانتقال للفاتورة
+              تقفيل الفاتورة 🛒
             </button>
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 animate-fade-in" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="card p-6 text-center" style={{ maxWidth: '400px', width: '90%' }}>
+            <h3 className="text-xl font-bold mb-4">هل أنت متأكد؟</h3>
+            <p className="mb-6">هل انتهيت من مسح جميع المنتجات وتريد الانتقال لصفحة الفاتورة لتأكيد الطلب؟</p>
+            <div className="flex gap-4">
+              <button 
+                className="btn btn-primary flex-1"
+                onClick={() => router.push("/cart")}
+              >
+                نعم، قفّل الفاتورة
+              </button>
+              <button 
+                className="btn btn-outline flex-1"
+                onClick={() => setShowConfirm(false)}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
