@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../../../lib/firebase";
+import { auth, db } from "../../../lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  
+  const [ordersToday, setOrdersToday] = useState(0);
+  const [inventoryCount, setInventoryCount] = useState(0);
+
   const router = useRouter();
 
   // In production, this would be your actual deployed Vercel domain.
@@ -22,10 +27,37 @@ export default function AdminDashboardPage() {
       } else {
         setUserEmail(user.email);
         setLoading(false);
+        fetchStats(user.email);
       }
     });
     return () => unsubscribe();
   }, [router]);
+
+  const fetchStats = async (email: string | null) => {
+    try {
+      // 1. Fetch Orders Today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const ordersQ = query(
+        collection(db, "orders"),
+        where("createdAt", ">=", today)
+      );
+      const ordersSnapshot = await getDocs(ordersQ);
+      setOrdersToday(ordersSnapshot.size);
+
+      // 2. Fetch Inventory Count (only if Ahmed)
+      if (email?.toLowerCase().includes('ahmed')) {
+        const prodSnapshot = await getDocs(collection(db, "products"));
+        let totalItems = 0;
+        prodSnapshot.forEach(doc => {
+          totalItems += Number(doc.data().quantity || 0);
+        });
+        setInventoryCount(totalItems);
+      }
+    } catch (err) {
+      console.error("Error fetching stats", err);
+    }
+  };
 
   if (loading) {
     return <div className="p-10 text-center">جاري التحميل...</div>;
@@ -64,13 +96,13 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-4">
             <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
               <p className="text-sm">طلبات اليوم</p>
-              <h3 className="text-2xl mt-1">0</h3>
+              <h3 className="text-2xl mt-1">{ordersToday}</h3>
             </div>
             
             {isAhmed && (
               <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
-                <p className="text-sm">منتجات في المخزن</p>
-                <h3 className="text-2xl mt-1">0</h3>
+                <p className="text-sm">إجمالي القطع في المخزن</p>
+                <h3 className="text-2xl mt-1">{inventoryCount}</h3>
               </div>
             )}
             
