@@ -10,6 +10,9 @@ interface Order {
   customerName: string;
   customerPhone: string;
   customerBrand?: string;
+  customerGovernorate?: string;
+  customerAddress?: string;
+  customerShipping?: string;
   total: number;
   status: string;
   items: any[];
@@ -60,7 +63,12 @@ export default function LiveOrdersPage() {
                   <div>
                     <h3 className="font-bold text-lg">طلب رقم: {order.orderNumber || order.id.slice(0, 8)}</h3>
                     <p className="text-sm">العميل: {order.customerName} | {order.customerPhone}</p>
-                    {order.customerBrand && <p className="text-sm font-bold text-gray-700">البراند: {order.customerBrand}</p>}
+                    {order.customerBrand && <p className="text-sm font-bold text-gray-700 mt-1">البراند: {order.customerBrand}</p>}
+                    {(order.customerGovernorate || order.customerAddress) && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        الشحن: {order.customerGovernorate} - {order.customerAddress} ({order.customerShipping})
+                      </p>
+                    )}
                     <p className="text-sm text-gray-500 mt-1">
                       {order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}
                     </p>

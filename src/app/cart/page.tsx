@@ -23,6 +23,9 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerBrand, setCustomerBrand] = useState("");
+  const [customerGovernorate, setCustomerGovernorate] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [customerShipping, setCustomerShipping] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
   
@@ -35,6 +38,9 @@ export default function CartPage() {
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");
     setCustomerPhone(localStorage.getItem("customerPhone") || "");
     setCustomerBrand(localStorage.getItem("customerBrand") || "");
+    setCustomerGovernorate(localStorage.getItem("customerGovernorate") || "");
+    setCustomerAddress(localStorage.getItem("customerAddress") || "");
+    setCustomerShipping(localStorage.getItem("customerShipping") || "");
   }, []);
 
   const calculateItemTotal = (item: CartItem) => {
@@ -112,6 +118,9 @@ export default function CartPage() {
         customerName,
         customerPhone,
         customerBrand,
+        customerGovernorate,
+        customerAddress,
+        customerShipping,
         items: cart,
         total,
         status: "pending",
@@ -174,10 +183,19 @@ export default function CartPage() {
           </div>
           
           <div style={{ marginBottom: "30px", padding: "20px", border: "1px solid #eee", borderRadius: "8px" }}>
-            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId}</p>
-            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {customerName}</p>
-            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> {customerPhone}</p>
-            <p style={{ fontSize: "16px" }}><strong>البراند / المحل:</strong> {customerBrand}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+              <div style={{ flex: "1 1 45%" }}>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId}</p>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {customerName}</p>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> {customerPhone}</p>
+                <p style={{ fontSize: "16px" }}><strong>البراند / المحل:</strong> {customerBrand}</p>
+              </div>
+              <div style={{ flex: "1 1 45%" }}>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>المحافظة:</strong> {customerGovernorate}</p>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>شركة الشحن:</strong> {customerShipping}</p>
+                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>العنوان التفصيلي:</strong> {customerAddress}</p>
+              </div>
+            </div>
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "30px" }}>
