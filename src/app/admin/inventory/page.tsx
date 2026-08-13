@@ -147,9 +147,12 @@ export default function InventoryPage() {
   const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
 
-  const filteredProducts = products.filter(p => 
-    p.name.includes(searchTerm) || p.modelNumber.includes(searchTerm)
-  );
+  const filteredProducts = products.filter(p => {
+    const nameStr = p.name ? String(p.name).toLowerCase() : "";
+    const modelStr = p.modelNumber ? String(p.modelNumber).toLowerCase() : "";
+    const term = searchTerm.toLowerCase();
+    return nameStr.includes(term) || modelStr.includes(term);
+  });
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">
