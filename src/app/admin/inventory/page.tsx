@@ -141,12 +141,40 @@ export default function InventoryPage() {
     }
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const totalModels = products.length;
+  const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+
+  const filteredProducts = products.filter(p => 
+    p.name.includes(searchTerm) || p.modelNumber.includes(searchTerm)
+  );
+
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">
       <div className="w-full" style={{ maxWidth: '1000px' }}>
         <div className="flex justify-between items-center mb-6">
-          <h2 style={{ color: 'var(--primary)' }}>📦 إدارة المخزن</h2>
+          <h2 style={{ color: 'var(--primary)' }}>📦 إدارة المخزن الشاملة</h2>
           <button onClick={() => router.push("/admin/dashboard")} className="btn btn-outline">عودة للوحة التحكم</button>
+        </div>
+
+        {/* Financial Summary */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="card text-center p-4">
+            <p className="text-sm text-gray-500">إجمالي الموديلات</p>
+            <h3 className="text-2xl font-bold mt-1">{totalModels}</h3>
+          </div>
+          <div className="card text-center p-4">
+            <p className="text-sm text-gray-500">إجمالي القطع بالمخزن</p>
+            <h3 className="text-2xl font-bold mt-1 text-blue-600">{totalPieces}</h3>
+          </div>
+          <div className="card text-center p-4">
+            <p className="text-sm text-gray-500">رأس المال (قيمة المخزن)</p>
+            <h3 className="text-2xl font-bold mt-1 text-green-600">
+              {new Intl.NumberFormat('ar-EG').format(totalCapital)} ج.م
+            </h3>
+          </div>
         </div>
 
         <div className="flex gap-4 mb-6">
@@ -166,7 +194,17 @@ export default function InventoryPage() {
 
         {activeTab === 'manage' && (
           <div className="card w-full overflow-x-auto">
-            {products.length === 0 ? (
+            <div className="mb-4">
+              <input 
+                type="text" 
+                className="input w-full md:w-1/2" 
+                placeholder="بحث برقم أو اسم الموديل..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            {filteredProducts.length === 0 ? (
               <p className="text-center py-4">المخزن فارغ حالياً.</p>
             ) : (
               <table className="w-full text-right border-collapse">
@@ -176,12 +214,13 @@ export default function InventoryPage() {
                     <th className="p-3">الاسم</th>
                     <th className="p-3">السعر</th>
                     <th className="p-3">الكمية</th>
+                    <th className="p-3">الإجمالي</th>
                     <th className="p-3">الألوان</th>
                     <th className="p-3">إجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map(product => (
+                  {filteredProducts.map(product => (
                     <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
                       <td className="p-3">{product.modelNumber}</td>
                       <td className="p-3">{product.name}</td>
@@ -201,6 +240,9 @@ export default function InventoryPage() {
                           </span>
                         )}
                       </td>
+                      <td className="p-3 font-bold text-gray-700">
+                        {new Intl.NumberFormat('ar-EG').format((Number(product.price) || 0) * (Number(product.quantity) || 0))} ج.م
+                      </td>
                       <td className="p-3 text-sm">
                         {product.colors?.map(c => c.name).join('، ')}
                       </td>
@@ -208,13 +250,13 @@ export default function InventoryPage() {
                         <div className="flex gap-2">
                           {editingId === product.id ? (
                             <>
-                              <button onClick={() => saveEdit(product.id)} className="text-green-600 p-1 hover:bg-green-50 rounded"><Check size={18} /></button>
-                              <button onClick={() => setEditingId(null)} className="text-gray-500 p-1 hover:bg-gray-100 rounded"><X size={18} /></button>
+                              <button onClick={() => saveEdit(product.id)} className="text-green-600 p-1 hover:bg-green-50 rounded" title="حفظ"><Check size={18} /></button>
+                              <button onClick={() => setEditingId(null)} className="text-gray-500 p-1 hover:bg-gray-100 rounded" title="إلغاء"><X size={18} /></button>
                             </>
                           ) : (
                             <>
-                              <button onClick={() => startEdit(product)} className="text-blue-600 p-1 hover:bg-blue-50 rounded"><Edit2 size={18} /></button>
-                              <button onClick={() => handleDelete(product.id)} className="text-red-600 p-1 hover:bg-red-50 rounded"><Trash2 size={18} /></button>
+                              <button onClick={() => startEdit(product)} className="text-blue-600 p-1 hover:bg-blue-50 rounded" title="تعديل"><Edit2 size={18} /></button>
+                              <button onClick={() => handleDelete(product.id)} className="text-red-600 p-1 hover:bg-red-50 rounded" title="حذف"><Trash2 size={18} /></button>
                             </>
                           )}
                         </div>
