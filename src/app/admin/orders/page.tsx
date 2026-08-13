@@ -6,6 +6,7 @@ import { collection, onSnapshot, query, orderBy, updateDoc, doc } from "firebase
 
 interface Order {
   id: string;
+  orderNumber?: string;
   customerName: string;
   customerPhone: string;
   customerBrand?: string;
@@ -57,7 +58,7 @@ export default function LiveOrdersPage() {
               <div key={order.id} className="card">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-bold text-lg">طلب رقم: {order.id.slice(0, 8)}</h3>
+                    <h3 className="font-bold text-lg">طلب رقم: {order.orderNumber || order.id.slice(0, 8)}</h3>
                     <p className="text-sm">العميل: {order.customerName} | {order.customerPhone}</p>
                     {order.customerBrand && <p className="text-sm font-bold text-gray-700">البراند: {order.customerBrand}</p>}
                     <p className="text-sm text-gray-500 mt-1">

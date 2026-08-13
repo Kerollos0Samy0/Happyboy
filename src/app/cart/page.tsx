@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, runTransaction } from "firebase/firestore";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -91,7 +91,24 @@ export default function CartPage() {
     setLoading(true);
     
     try {
-      const docRef = await addDoc(collection(db, "orders"), {
+      const counterRef = doc(db, "counters", "orders");
+      let newOrderNumber = 1;
+      
+      await runTransaction(db, async (transaction) => {
+        const counterDoc = await transaction.get(counterRef);
+        if (!counterDoc.exists()) {
+          transaction.set(counterRef, { current: 1 });
+          newOrderNumber = 1;
+        } else {
+          newOrderNumber = counterDoc.data().current + 1;
+          transaction.update(counterRef, { current: newOrderNumber });
+        }
+      });
+      
+      const formattedOrderNumber = String(newOrderNumber).padStart(5, '0');
+
+      await addDoc(collection(db, "orders"), {
+        orderNumber: formattedOrderNumber,
         customerName,
         customerPhone,
         customerBrand,
@@ -101,7 +118,7 @@ export default function CartPage() {
         createdAt: serverTimestamp()
       });
       
-      setOrderId(docRef.id);
+      setOrderId(formattedOrderNumber);
       localStorage.removeItem("happyboy_cart"); // Clear cart
       
     } catch (error) {
@@ -117,7 +134,7 @@ export default function CartPage() {
       <div className="animate-fade-in flex flex-col items-center mt-6">
         <div className="card w-full text-center" style={{ maxWidth: "500px" }}>
           <h2 className="mb-4" style={{ color: "var(--success)" }}>🎉 تم تأكيد طلبك بنجاح!</h2>
-          <p className="mb-6">رقم الطلب الخاص بك: <strong>{orderId.slice(0, 8)}</strong></p>
+          <p className="mb-6">رقم الطلب الخاص بك: <strong>{orderId}</strong></p>
           
           <div className="p-4 mb-6" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
             <h3 className="mb-2">طرق الدفع المتاحة:</h3>
@@ -127,7 +144,7 @@ export default function CartPage() {
           </div>
           
           <div className="flex flex-col gap-2">
-            <button onClick={() => generatePDF(orderId.slice(0, 8))} className="btn btn-primary w-full">
+            <button onClick={() => generatePDF(orderId)} className="btn btn-primary w-full">
               📥 تحميل الفاتورة (PDF)
             </button>
             <button onClick={() => router.push("/customer")} className="btn btn-outline w-full mt-2">
@@ -157,7 +174,7 @@ export default function CartPage() {
           </div>
           
           <div style={{ marginBottom: "30px", padding: "20px", border: "1px solid #eee", borderRadius: "8px" }}>
-            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId.slice(0, 8)}</p>
+            <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId}</p>
             <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {customerName}</p>
             <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> {customerPhone}</p>
             <p style={{ fontSize: "16px" }}><strong>البراند / المحل:</strong> {customerBrand}</p>

@@ -20,9 +20,7 @@ export default function RootLayout({
               <img src="/logo.png" alt="HappyBoy Face Logo" width={40} height={40} style={{ objectFit: 'contain' }} />
               <span>Happy Boy&Girl</span>
             </div>
-            <nav className="flex gap-4">
-              <a href="/" className="btn btn-outline">تسجيل الدخول</a>
-            </nav>
+
           </div>
         </header>
         <main className="container mt-6">{children}</main>
