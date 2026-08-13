@@ -11,9 +11,11 @@ interface CartItem {
   cartItemId: string;
   id: string;
   name: string;
+  modelNumber: string;
   price: number;
   selectedColor: string;
-  selectedSize: string;
+  sizes: string[];
+  isSeri: boolean;
 }
 
 export default function CartPage() {
@@ -31,7 +33,14 @@ export default function CartPage() {
     setCustomerPhone(localStorage.getItem("customerPhone") || "");
   }, []);
 
-  const total = cart.reduce((acc, item) => acc + item.price, 0);
+  const calculateItemTotal = (item: CartItem) => {
+    if (item.isSeri && item.sizes && item.sizes.length > 0) {
+      return item.price * item.sizes.length;
+    }
+    return item.price; // fallback if not a seri
+  };
+
+  const total = cart.reduce((acc, item) => acc + calculateItemTotal(item), 0);
 
   const removeItem = (id: string) => {
     const newCart = cart.filter(item => item.cartItemId !== id);
@@ -41,8 +50,6 @@ export default function CartPage() {
 
   const generatePDF = (orderNum: string) => {
     const doc = new jsPDF();
-    // Use standard fonts, Arabic might need custom font loading in jsPDF for production
-    // For now we use basic English/Latin fallback where possible or standard text
     doc.setFontSize(20);
     doc.text("Stock HappyBoy - Invoice", 105, 20, { align: "center" });
     
@@ -52,19 +59,19 @@ export default function CartPage() {
     doc.text(`Customer Phone: ${customerPhone}`, 20, 60);
     
     const tableData = cart.map(item => [
-      item.name, 
+      `${item.name} (${item.modelNumber})`, 
       item.selectedColor, 
-      item.selectedSize, 
-      `${item.price} EGP`
+      item.isSeri ? `Seri (${item.sizes.length} pcs)` : 'Piece',
+      `${calculateItemTotal(item)} EGP`
     ]);
     
     autoTable(doc, {
       startY: 70,
-      head: [['Product', 'Color', 'Size', 'Price']],
+      head: [['Product', 'Color', 'Type', 'Total Price']],
       body: tableData,
     });
     
-    // @ts-ignore (autoTable types might not include finalY out of the box)
+    // @ts-ignore
     const finalY = (doc as any).lastAutoTable.finalY || 100;
     doc.setFontSize(14);
     doc.text(`Total: ${total} EGP`, 20, finalY + 10);
@@ -142,10 +149,15 @@ export default function CartPage() {
           <div className="flex flex-col gap-4">
             {cart.map((item) => (
               <div key={item.cartItemId} className="flex justify-between items-center p-3" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-                <div>
-                  <h4 className="font-bold">{item.name}</h4>
-                  <p className="text-sm">لون: {item.selectedColor} | مقاس: {item.selectedSize}</p>
-                  <p className="text-sm font-bold mt-1 text-green-600">{item.price} ج.م</p>
+                <div className="flex-1">
+                  <h4 className="font-bold">{item.name} (موديل {item.modelNumber})</h4>
+                  <p className="text-sm mt-1">اللون: <span className="font-bold">{item.selectedColor}</span></p>
+                  {item.isSeri && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      (ثري {item.sizes.length} قطع: {item.sizes.join(", ")}) × {item.price} ج.م للقطعة
+                    </p>
+                  )}
+                  <p className="text-sm font-bold mt-1 text-green-600">الإجمالي: {calculateItemTotal(item)} ج.م</p>
                 </div>
                 <button 
                   onClick={() => removeItem(item.cartItemId)}
@@ -158,7 +170,7 @@ export default function CartPage() {
             ))}
             
             <div className="flex justify-between items-center mt-4 p-4" style={{ background: 'var(--primary-light)', borderRadius: 'var(--radius-md)' }}>
-              <h3 className="font-bold">الإجمالي:</h3>
+              <h3 className="font-bold">الإجمالي الكلي:</h3>
               <h3 className="font-bold text-xl">{total} ج.م</h3>
             </div>
             
