@@ -17,7 +17,7 @@ export default function RootLayout({
         <header className="app-header">
           <div className="container">
             <div className="logo">
-              <img src="/face-logo.png" alt="HappyBoy Face Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
+              <img src="/logo.png" alt="HappyBoy Face Logo" width={40} height={40} style={{ objectFit: 'contain' }} />
               <span>Happy Boy&Girl</span>
             </div>
             <nav className="flex gap-4">
