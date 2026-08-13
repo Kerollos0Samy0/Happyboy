@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { db } from "../../../lib/firebase";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface ColorEntry {
   name: string;
@@ -10,6 +12,7 @@ interface ColorEntry {
 }
 
 export default function InventoryPage() {
+  const router = useRouter();
   const [modelNumber, setModelNumber] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -18,8 +21,23 @@ export default function InventoryPage() {
   
   const [colors, setColors] = useState<ColorEntry[]>([{ name: "", barcode: "" }]);
   
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/admin/login");
+      } else if (user.email?.includes('accounting')) {
+        router.push("/admin/dashboard");
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading) return <div className="p-10 text-center">جاري التحقق من الصلاحيات...</div>;
 
   const handleColorChange = (index: number, field: "name" | "barcode", value: string) => {
     const newColors = [...colors];

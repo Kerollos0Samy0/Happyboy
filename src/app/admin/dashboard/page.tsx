@@ -8,6 +8,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const router = useRouter();
 
   // In production, this would be your actual deployed Vercel domain.
@@ -19,6 +20,7 @@ export default function AdminDashboardPage() {
       if (!user) {
         router.push("/admin/login");
       } else {
+        setUserEmail(user.email);
         setLoading(false);
       }
     });
@@ -28,6 +30,8 @@ export default function AdminDashboardPage() {
   if (loading) {
     return <div className="p-10 text-center">جاري التحميل...</div>;
   }
+
+  const isAccounting = userEmail?.includes('accounting');
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">
@@ -56,22 +60,27 @@ export default function AdminDashboardPage() {
 
         {/* Quick Stats Card */}
         <div className="card">
-          <h2 className="mb-4" style={{ color: 'var(--primary)' }}>إحصائيات سريعة</h2>
+          <h2 className="mb-4" style={{ color: 'var(--primary)' }}>مرحباً: {userEmail}</h2>
           <div className="flex flex-col gap-4">
             <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
               <p className="text-sm">طلبات اليوم</p>
               <h3 className="text-2xl mt-1">0</h3>
             </div>
-            <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
-              <p className="text-sm">منتجات في المخزن</p>
-              <h3 className="text-2xl mt-1">0</h3>
-            </div>
             
-            <div className="flex gap-2 w-full">
-              <a href="/admin/inventory" className="btn btn-primary mt-2 flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
-                إضافة منتج
-              </a>
-              <a href="/admin/orders" className="btn btn-secondary mt-2 flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+            {!isAccounting && (
+              <div className="p-4" style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
+                <p className="text-sm">منتجات في المخزن</p>
+                <h3 className="text-2xl mt-1">0</h3>
+              </div>
+            )}
+            
+            <div className="flex gap-2 w-full mt-2">
+              {!isAccounting && (
+                <a href="/admin/inventory" className="btn btn-primary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                  إدارة المخزن
+                </a>
+              )}
+              <a href="/admin/orders" className="btn btn-secondary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
                 الطلبات الحية
               </a>
             </div>
