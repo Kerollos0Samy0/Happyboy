@@ -155,7 +155,7 @@ export default function InventoryPage() {
   // Grouping Logic
   const categories = [
     {
-      title: "قسم الأولادي 👦",
+      title: "قسم الأولادي",
       sections: [
         { name: "بيبي (5 - 90)", filter: (num: number) => num >= 5 && num <= 90 },
         { name: "وسط (100 - 150)", filter: (num: number) => num >= 100 && num <= 150 },
@@ -163,7 +163,7 @@ export default function InventoryPage() {
       ]
     },
     {
-      title: "قسم البناتي 👧",
+      title: "قسم البناتي",
       sections: [
         { name: "بيبي (500 - 545)", filter: (num: number) => num >= 500 && num <= 545 },
         { name: "وسط (605 - 680)", filter: (num: number) => num >= 605 && num <= 680 },
@@ -215,13 +215,13 @@ export default function InventoryPage() {
                   <div className="flex gap-2">
                     {editingId === product.id ? (
                       <>
-                        <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
-                        <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
+                        <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold" title="حفظ">حفظ</button>
+                        <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold" title="إلغاء">إلغاء</button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
-                        <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
+                        <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold" title="تعديل">تعديل</button>
+                        <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold" title="حذف">حذف</button>
                       </>
                     )}
                   </div>
@@ -234,7 +234,7 @@ export default function InventoryPage() {
     );
   };
 
-  const [activeCategoryTab, setActiveCategoryTab] = useState("قسم الأولادي 👦");
+  const [activeCategoryTab, setActiveCategoryTab] = useState("قسم الأولادي");
 
   const renderCategorizedProducts = () => {
     let unassignedProducts = [...filteredProducts];
