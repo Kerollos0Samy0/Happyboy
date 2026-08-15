@@ -18,6 +18,7 @@ interface OrderItem {
   price: number;
   isSeri?: boolean;
   sizes?: string[];
+  quantity?: number;
 }
 
 interface Order {
@@ -56,8 +57,6 @@ export default function LiveOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [editDeposit, setEditDeposit] = useState("");
-  const [editDeliveryDate, setEditDeliveryDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
@@ -83,14 +82,12 @@ export default function LiveOrdersPage() {
   useEffect(() => {
     if (selectedOrder) {
       const updated = orders.find(o => o.id === selectedOrder.id);
-      if (updated) setSelectedOrder(updated);
+      if (updated && !saving) setSelectedOrder(updated);
     }
   }, [orders]);
 
   const openModal = (order: Order) => {
     setSelectedOrder({ ...order, items: [...order.items] });
-    setEditDeposit((order.deposit ?? 0).toString());
-    setEditDeliveryDate(order.deliveryDate ?? "");
     setFoundProduct(null);
     setAddModelSearch("");
     setAddSelectedColor("");
@@ -99,7 +96,20 @@ export default function LiveOrdersPage() {
 
   const closeModal = () => { setSelectedOrder(null); setFoundProduct(null); };
 
-  // Item editing functions
+  const handleOrderChange = (field: keyof Order, value: any) => {
+    if (selectedOrder) {
+      setSelectedOrder({ ...selectedOrder, [field]: value });
+    }
+  };
+
+  const handleItemChange = (index: number, field: keyof OrderItem, value: any) => {
+    if (selectedOrder) {
+      const newItems = [...selectedOrder.items];
+      newItems[index] = { ...newItems[index], [field]: value };
+      setSelectedOrder({ ...selectedOrder, items: newItems });
+    }
+  };
+
   const removeItemFromOrder = (index: number) => {
     if (!selectedOrder) return;
     const newItems = selectedOrder.items.filter((_, i) => i !== index);
@@ -135,6 +145,7 @@ export default function LiveOrdersPage() {
       selectedColor: addSelectedColor,
       sizes: foundProduct.sizes || [],
       isSeri: true,
+      quantity: 1
     };
     const newItems = [...selectedOrder.items, ...Array(addQty).fill(null).map(() => ({ ...newItem, cartItemId: Date.now().toString() + Math.random().toString() }))];
     setSelectedOrder({ ...selectedOrder, items: newItems });
@@ -148,20 +159,37 @@ export default function LiveOrdersPage() {
     await updateDoc(doc(db, "orders", orderId), { status: newStatus });
   };
 
+  const calculateTotal = (items: OrderItem[]) => {
+    return items.reduce((sum, it) => {
+      const qty = it.quantity || 1;
+      const sizes = it.sizes?.length || 1;
+      return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
+    }, 0);
+  };
+
   const saveOrderDetails = async () => {
     if (!selectedOrder) return;
     setSaving(true);
     try {
-      await updateDoc(doc(db, "orders", selectedOrder.id), {
-        deposit: Number(editDeposit),
-        deliveryDate: editDeliveryDate,
+      const newTotal = calculateTotal(selectedOrder.items);
+      const updateData = {
+        customerName: selectedOrder.customerName,
+        customerPhone: selectedOrder.customerPhone,
+        customerBrand: selectedOrder.customerBrand || "",
+        customerGovernorate: selectedOrder.customerGovernorate || "",
+        customerAddress: selectedOrder.customerAddress || "",
+        customerShipping: selectedOrder.customerShipping || "",
+        deliveryDate: selectedOrder.deliveryDate || "",
+        deposit: Number(selectedOrder.deposit) || 0,
         items: selectedOrder.items,
-        total: selectedOrder.items.reduce((sum, it) => {
-          const qty = (it as any).quantity || 1;
-          const sizes = it.sizes?.length || 1;
-          return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
-        }, 0),
-      });
+        total: newTotal
+      };
+      
+      await updateDoc(doc(db, "orders", selectedOrder.id), updateData);
+      setSelectedOrder({ ...selectedOrder, ...updateData });
+      alert("تم حفظ تعديلات الفاتورة بنجاح ✅");
+    } catch(e) {
+      alert("حدث خطأ أثناء حفظ الفاتورة");
     } finally {
       setSaving(false);
     }
@@ -175,7 +203,11 @@ export default function LiveOrdersPage() {
 
   // PDF
   useEffect(() => {
-    if (currentPdfOrder) generatePDF(currentPdfOrder);
+    if (currentPdfOrder) {
+      generatePDF(currentPdfOrder).then(() => {
+         setCurrentPdfOrder(null);
+      });
+    }
   }, [currentPdfOrder]);
 
   const generatePDF = async (order: Order) => {
@@ -189,8 +221,25 @@ export default function LiveOrdersPage() {
       pdf.save(`فاتورة_${order.customerName.replace(/\s+/g, '_')}.pdf`);
     } finally {
       invoiceRef.current.style.display = "none";
-      setCurrentPdfOrder(null);
     }
+  };
+
+  const handleWhatsAppShare = async () => {
+    if (!selectedOrder) return;
+    
+    // Save first just in case
+    await saveOrderDetails();
+    
+    // Trigger PDF Download
+    await generatePDF(selectedOrder);
+    
+    alert("تم تحميل الفاتورة כملف PDF بنجاح! \n\nسيتم الآن فتح واتساب، يرجى إرفاق الملف المحمل وإرساله للعميل.");
+    
+    const phone = selectedOrder.customerPhone.replace(/[^0-9]/g, '');
+    const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
+    const msg = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م`;
+    
+    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const filteredOrders = filterStatus === "all"
@@ -288,7 +337,6 @@ export default function LiveOrdersPage() {
                     (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
                   }}
                 >
-                  {/* Top row: name + time + delete */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.25rem" }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{
@@ -305,31 +353,13 @@ export default function LiveOrdersPage() {
                       <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
                         {timeAgo(date)}
                       </span>
-                      <button
-                        onClick={e => { e.stopPropagation(); deleteOrder(order.id); }}
-                        style={{
-                          background: "none", border: "none", cursor: "pointer",
-                          color: "#ef4444", padding: "2px", borderRadius: "4px",
-                          display: "flex", alignItems: "center",
-                          transition: "background 0.15s",
-                        }}
-                        title="حذف الطلب"
-                        onMouseEnter={e => (e.currentTarget.style.background = "#fee2e2")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                      >
-                        <Trash2 size={13} />
-                      </button>
                     </div>
                   </div>
 
-                  {/* Phone */}
                   <p style={{ fontSize: "0.72rem", color: "#475569", margin: 0, direction: "ltr", textAlign: "right" }}>
                     {order.customerPhone}
                   </p>
 
-
-
-                  {/* Items summary */}
                   {order.items?.length > 0 && (
                     <p style={{
                       fontSize: "0.68rem", color: "#475569", margin: 0,
@@ -341,14 +371,12 @@ export default function LiveOrdersPage() {
                     </p>
                   )}
 
-                  {/* Delivery date */}
                   {order.deliveryDate && (
                     <p style={{ fontSize: "0.68rem", color: "#3b82f6", margin: 0, fontWeight: 600 }}>
                       📅 {order.deliveryDate}
                     </p>
                   )}
 
-                  {/* Bottom: price + status */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.1rem" }}>
                     <div>
                       <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#A62E2E" }}>
@@ -374,11 +402,11 @@ export default function LiveOrdersPage() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* EDITABLE INVOICE MODAL */}
       {selectedOrder && (
         <div
           style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
             zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center",
             padding: "1rem",
           }}
@@ -387,281 +415,186 @@ export default function LiveOrdersPage() {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "#fff", borderRadius: "1rem", width: "100%", maxWidth: "520px",
-              maxHeight: "90vh", overflowY: "auto", padding: "1.5rem",
+              background: "#fff", width: "100%", maxWidth: "800px",
+              maxHeight: "95vh", overflowY: "auto", padding: "2rem",
               boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+              borderRadius: "0.5rem",
               animation: "fadeIn 0.2s ease",
+              position: "relative",
+              direction: "rtl"
             }}
           >
-            {/* Modal Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#0f172a" }}>
-                  {selectedOrder.customerBrand || selectedOrder.customerName}
-                </h3>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
-                  طلب رقم: {selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}
-                </p>
+            {/* Toolbar Top */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "2px solid #e2e8f0", paddingBottom: "1rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <select
+                  className="input"
+                  style={{ padding: "0.4rem 0.75rem", fontSize: "0.85rem", fontWeight: "bold", background: STATUS_CONFIG[selectedOrder.status]?.bg, color: STATUS_CONFIG[selectedOrder.status]?.color, border: "none" }}
+                  value={selectedOrder.status}
+                  onChange={e => updateStatus(selectedOrder.id, e.target.value)}
+                >
+                  <option value="pending">⏳ قيد الانتظار</option>
+                  <option value="paid">✅ تم الدفع والتأكيد</option>
+                  <option value="cancelled">❌ ملغي</option>
+                </select>
               </div>
-              <button onClick={closeModal} style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b" }}>
+              <button onClick={closeModal} style={{ background: "#f1f5f9", border: "none", cursor: "pointer", color: "#64748b", padding: "0.5rem", borderRadius: "50%" }}>
                 <X size={20} />
               </button>
             </div>
 
-            {/* Customer info */}
-            <div style={{ background: "#f8fafc", borderRadius: "0.6rem", padding: "0.85rem", marginBottom: "1rem", fontSize: "0.82rem" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
-                <div><span style={{ color: "#64748b" }}>الاسم: </span><strong>{selectedOrder.customerName}</strong></div>
-                <div dir="ltr" style={{ textAlign: "right" }}><span style={{ color: "#64748b" }}>📞 </span><strong>{selectedOrder.customerPhone}</strong></div>
-                {selectedOrder.customerBrand && <div><span style={{ color: "#64748b" }}>البراند: </span><strong>{selectedOrder.customerBrand}</strong></div>}
+            {/* INVOICE CONTENT (Matches PDF) */}
+            <div style={{ padding: "0 1rem" }}>
+              <div style={{ textAlign: "center", marginBottom: "30px", borderBottom: "2px solid #eee", paddingBottom: "20px" }}>
+                <h1 style={{ fontSize: "32px", color: "#A62E2E", marginBottom: "10px", fontWeight: "bold" }}>Happy Boy&Girl</h1>
+                <h2 style={{ fontSize: "22px", color: "#333" }}>فاتورة طلب رسمي</h2>
+              </div>
+              
+              <div style={{ marginBottom: "30px", padding: "20px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+                  <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span>
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>اسم العميل:</strong> 
+                      <input type="text" value={selectedOrder.customerName} onChange={e => handleOrderChange('customerName', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>رقم الهاتف:</strong> 
+                      <input type="text" value={selectedOrder.customerPhone} onChange={e => handleOrderChange('customerPhone', e.target.value)} dir="ltr" style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", textAlign: "right", color: "#000" }} />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>البراند:</strong> 
+                      <input type="text" value={selectedOrder.customerBrand || ''} onChange={e => handleOrderChange('customerBrand', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
+                    </p>
+                  </div>
+                  <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>المحافظة:</strong> 
+                      <input type="text" value={selectedOrder.customerGovernorate || ''} onChange={e => handleOrderChange('customerGovernorate', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>العنوان:</strong> 
+                      <input type="text" value={selectedOrder.customerAddress || ''} onChange={e => handleOrderChange('customerAddress', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>الشحن:</strong> 
+                      <input type="text" value={selectedOrder.customerShipping || ''} onChange={e => handleOrderChange('customerShipping', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#2563eb" }}>
+                      <strong>التسليم:</strong> 
+                      <input type="date" value={selectedOrder.deliveryDate || ''} onChange={e => handleOrderChange('deliveryDate', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#2563eb", fontWeight: "bold" }} />
+                    </p>
+                  </div>
+                </div>
+              </div>
 
+              {/* Items Table */}
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                <thead>
+                  <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1" }}>
+                    <th style={{ padding: "12px", textAlign: "right" }}>الصنف</th>
+                    <th style={{ padding: "12px", textAlign: "right" }}>اللون</th>
+                    <th style={{ padding: "12px", textAlign: "center" }}>النوع (ثري/قطعة)</th>
+                    <th style={{ padding: "12px", textAlign: "center" }}>الكمية</th>
+                    <th style={{ padding: "12px", textAlign: "center" }}>السعر (ج)</th>
+                    <th style={{ padding: "12px", textAlign: "center" }}>🗑️</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedOrder.items?.map((item, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                      <td style={{ padding: "12px" }}>{item.name} (موديل {item.modelNumber})</td>
+                      <td style={{ padding: "12px" }}>{item.selectedColor}</td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
+                        <select value={item.isSeri ? "seri" : "piece"} onChange={e => handleItemChange(i, 'isSeri', e.target.value === "seri")} style={{ padding: "4px", fontSize: "14px", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }}>
+                          <option value="seri">ثري ({item.sizes?.length || 1} مقاس)</option>
+                          <option value="piece">قطعة واحدة</option>
+                        </select>
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
+                        <input type="number" min="1" value={item.quantity || 1} onChange={e => handleItemChange(i, 'quantity', Number(e.target.value))} style={{ width: "60px", padding: "4px", textAlign: "center", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }} />
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
+                        <input type="number" value={item.price} onChange={e => handleItemChange(i, 'price', Number(e.target.value))} style={{ width: "80px", padding: "4px", textAlign: "center", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }} />
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
+                        <button onClick={() => removeItemFromOrder(i)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}><Trash2 size={16} /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Add New Item */}
+              <div style={{ padding: "12px", background: "#f0fdf4", borderRadius: "8px", border: "1px dashed #86efac", marginBottom: "30px", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                <strong style={{ color: "#166534", fontSize: "14px", whiteSpace: "nowrap" }}>إضافة منتج:</strong>
+                <input type="text" placeholder="رقم الموديل" value={addModelSearch} onChange={e => setAddModelSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && searchModel()} style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #bbf7d0", flex: 1, minWidth: "100px", color: "#000" }} />
+                <button onClick={searchModel} style={{ padding: "6px 12px", background: "#166534", color: "white", borderRadius: "4px", border: "none", cursor: "pointer", fontWeight: "bold" }}>بحث</button>
+                
+                {foundProduct && (
+                  <>
+                    <select value={addSelectedColor} onChange={e => setAddSelectedColor(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid #bbf7d0", color: "#000" }}>
+                      {foundProduct.colors?.map((c: any) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                    </select>
+                    <button onClick={addItemToOrder} style={{ padding: "6px 12px", background: "#10b981", color: "white", borderRadius: "4px", border: "none", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "5px" }}><Plus size={14} /> إضافة للصنف</button>
+                  </>
+                )}
+              </div>
+
+              {/* Totals Section */}
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px" }}>
+                    <span>الإجمالي الكلي:</span>
+                    <strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px", color: "#16a34a", alignItems: "center" }}>
+                    <span>العربون المدفوع:</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <input type="number" value={selectedOrder.deposit || ''} onChange={e => handleOrderChange('deposit', e.target.value)} style={{ width: "80px", padding: "4px", textAlign: "center", border: "1px solid #bbf7d0", borderRadius: "4px", fontWeight: "bold", color: "#16a34a" }} />
+                      <strong>ج.م</strong>
+                    </div>
+                  </div>
+                  <div style={{ borderTop: "2px solid #cbd5e1", margin: "15px 0" }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>
+                    <span>المبلغ المتبقي:</span>
+                    <span>{calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Status selector */}
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: "0.35rem" }}>
-                حالة الطلب
-              </label>
-              <select
-                className="input"
-                style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
-                value={selectedOrder.status}
-                onChange={e => updateStatus(selectedOrder.id, e.target.value)}
-              >
-                <option value="pending">⏳ قيد الانتظار</option>
-                <option value="paid">✅ تم الدفع والتأكيد</option>
-                <option value="cancelled">❌ ملغي</option>
-              </select>
-            </div>
-
-            {/* Deposit + delivery date */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: "0.35rem" }}>
-                  موعد التسليم
-                </label>
-                <input
-                  type="date"
-                  className="input"
-                  style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
-                  value={editDeliveryDate}
-                  onChange={e => setEditDeliveryDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: "0.35rem" }}>
-                  العربون (ج.م)
-                </label>
-                <input
-                  type="number"
-                  className="input"
-                  style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
-                  value={editDeposit}
-                  onChange={e => setEditDeposit(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            {/* Action Buttons */}
+            <div style={{ display: "flex", gap: "1rem", marginTop: "2rem", paddingTop: "1.5rem", borderTop: "2px solid #e2e8f0", flexWrap: "wrap" }}>
               <button
                 onClick={saveOrderDetails}
                 disabled={saving}
-                className="btn btn-primary"
-                style={{ flex: 1, padding: "0.6rem", fontSize: "0.85rem" }}
+                style={{ flex: "1 1 200px", padding: "0.8rem", background: "#0f172a", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
               >
-                <Save size={15} /> {saving ? "جاري الحفظ..." : "حفظ البيانات"}
+                <Save size={18} /> {saving ? "جاري الحفظ..." : "حفظ الفاتورة"}
               </button>
+              
+              <button
+                onClick={handleWhatsAppShare}
+                style={{ flex: "1 1 250px", padding: "0.8rem", background: "#25D366", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
+              >
+                <MessageCircle size={18} /> حفظ وإرسال PDF واتساب
+              </button>
+
               <button
                 onClick={() => setCurrentPdfOrder(selectedOrder)}
-                className="btn btn-secondary"
-                style={{ flex: 1, padding: "0.6rem", fontSize: "0.85rem" }}
+                style={{ flex: "1 1 150px", padding: "0.8rem", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
               >
-                <Printer size={15} /> طباعة الفاتورة
+                <Printer size={18} /> تحميل PDF
               </button>
-              <button
-                onClick={() => deleteOrder(selectedOrder.id)}
-                style={{
-                  padding: "0.6rem 0.85rem", borderRadius: "0.5rem", border: "none",
-                  background: "#fee2e2", color: "#991b1b", cursor: "pointer",
-                  display: "flex", alignItems: "center", gap: "0.25rem",
-                  fontFamily: "inherit", fontWeight: 600, fontSize: "0.85rem",
-                  transition: "background 0.15s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = "#fecaca")}
-                onMouseLeave={e => (e.currentTarget.style.background = "#fee2e2")}
-              >
-                <Trash2 size={15} />
-              </button>
-            </div>
-
-            {/* WhatsApp Button */}
-            <button
-              onClick={() => {
-                const o = selectedOrder;
-                const itemsText = o.items?.map((item, i) =>
-                  `${i + 1}. ${item.name} (موديل ${item.modelNumber}) - ${item.selectedColor}${item.isSeri ? ` - ثري (${item.sizes?.length} قطع)` : ''} → ${item.price} ج.م`
-                ).join('\n') || '';
-                const remaining = o.total - (o.deposit ?? 0);
-                const msg = `*فاتورة طلب - Happy Boy\&Girl* 🧾\n\n` +
-                  `*رقم الطلب:* ${o.orderNumber || o.id.slice(0, 8)}\n` +
-                  `*العميل:* ${o.customerName}\n` +
-                  (o.customerBrand ? `*البراند:* ${o.customerBrand}\n` : '') +
-                  `\n📦 *محتويات الطلب:*\n${itemsText}\n\n` +
-                  `💰 *الإجمالي:* ${o.total} ج.م\n` +
-                  `✅ *العربون:* ${o.deposit ?? 0} ج.م\n` +
-                  `🔴 *المتبقي:* ${remaining} ج.م\n` +
-                  (o.deliveryDate ? `\n📅 *موعد التسليم:* ${o.deliveryDate}` : '') +
-                  `\n\nشكراً لتعاملكم معنا 🤍`;
-                const phone = o.customerPhone.replace(/[^0-9]/g, '');
-                const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
-                window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-              }}
-              style={{
-                width: "100%", padding: "0.65rem", borderRadius: "0.5rem", border: "none",
-                background: "#25D366", color: "#fff", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
-                fontFamily: "inherit", fontWeight: 700, fontSize: "0.88rem",
-                transition: "background 0.15s", marginBottom: "1.25rem",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#1EBE57")}
-              onMouseLeave={e => (e.currentTarget.style.background = "#25D366")}
-            >
-              <MessageCircle size={17} /> إرسال الفاتورة عبر واتساب
-            </button>
-
-            {/* Items list */}
-            <div>
-              <p style={{ fontWeight: 700, fontSize: "0.82rem", color: "#A62E2E", marginBottom: "0.5rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.35rem" }}>
-                محتويات الطلب ({selectedOrder.items?.length} عناصر)
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                {selectedOrder.items?.map((item, i) => (
-                  <div key={item.cartItemId || i} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    background: "#f8fafc", borderRadius: "0.5rem", padding: "0.5rem 0.75rem",
-                    fontSize: "0.78rem",
-                  }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontWeight: 700, color: "#0f172a" }}>{item.name}</span>
-                      <span style={{ color: "#64748b" }}> (موديل {item.modelNumber}) — {item.selectedColor}</span>
-                      {item.isSeri && <span style={{ color: "#3b82f6", marginRight: "0.25rem" }}>ثري ({item.sizes?.length} قطع)</span>}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}>
-                      <span style={{ fontWeight: 700, color: "#A62E2E", whiteSpace: "nowrap" }}>{item.price} ج</span>
-                      <button
-                        onClick={() => removeItemFromOrder(i)}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: "2px", borderRadius: "4px", display: "flex" }}
-                        title="حذف الصنف"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add new item by model number */}
-              <div style={{ marginTop: "0.75rem", padding: "0.65rem", background: "#f0fdf4", borderRadius: "0.5rem", border: "1px dashed #86efac" }}>
-                <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#166534", marginBottom: "0.4rem" }}>
-                  <Plus size={13} style={{ display: "inline", verticalAlign: "middle" }} /> إضافة صنف جديد
-                </p>
-                <div style={{ display: "flex", gap: "0.35rem", marginBottom: foundProduct ? "0.5rem" : 0 }}>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="رقم الموديل"
-                    value={addModelSearch}
-                    onChange={e => setAddModelSearch(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && searchModel()}
-                    style={{ padding: "0.4rem 0.6rem", fontSize: "0.8rem", flex: 1 }}
-                  />
-                  <button
-                    onClick={searchModel}
-                    disabled={searchingModel}
-                    style={{
-                      padding: "0.4rem 0.7rem", borderRadius: "0.4rem", border: "none",
-                      background: "#0f172a", color: "#fff", cursor: "pointer",
-                      fontFamily: "inherit", fontWeight: 600, fontSize: "0.78rem",
-                      display: "flex", alignItems: "center", gap: "0.25rem",
-                    }}
-                  >
-                    <Search size={13} /> {searchingModel ? "..." : "بحث"}
-                  </button>
-                </div>
-
-                {foundProduct && (
-                  <div style={{ background: "#fff", borderRadius: "0.4rem", padding: "0.5rem", border: "1px solid #e2e8f0" }}>
-                    <p style={{ fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.3rem" }}>
-                      {foundProduct.name} — {foundProduct.price} ج.م
-                    </p>
-                    <div style={{ display: "flex", gap: "0.35rem", alignItems: "center", flexWrap: "wrap" }}>
-                      <select
-                        className="input"
-                        style={{ padding: "0.3rem 0.5rem", fontSize: "0.78rem", flex: 1, minWidth: "80px" }}
-                        value={addSelectedColor}
-                        onChange={e => setAddSelectedColor(e.target.value)}
-                      >
-                        {foundProduct.colors?.map((c: any) => (
-                          <option key={c.name} value={c.name}>{c.name}</option>
-                        ))}
-                      </select>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-                        <button onClick={() => setAddQty(Math.max(1, addQty - 1))} style={{ background: "#e2e8f0", border: "none", borderRadius: "4px", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Minus size={12} /></button>
-                        <span style={{ fontSize: "0.82rem", fontWeight: 700, width: "24px", textAlign: "center" }}>{addQty}</span>
-                        <button onClick={() => setAddQty(addQty + 1)} style={{ background: "#e2e8f0", border: "none", borderRadius: "4px", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus size={12} /></button>
-                      </div>
-                      <button
-                        onClick={addItemToOrder}
-                        style={{
-                          padding: "0.3rem 0.65rem", borderRadius: "0.35rem", border: "none",
-                          background: "#10b981", color: "#fff", cursor: "pointer",
-                          fontFamily: "inherit", fontWeight: 700, fontSize: "0.75rem",
-                          display: "flex", alignItems: "center", gap: "0.2rem",
-                        }}
-                      >
-                        <Plus size={12} /> إضافة
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Totals */}
-            <div style={{
-              marginTop: "1rem", background: "#f8fafc", borderRadius: "0.6rem",
-              padding: "0.85rem", fontSize: "0.85rem",
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
-                <span style={{ color: "#64748b" }}>الإجمالي</span>
-                <strong>{selectedOrder.items.reduce((sum, it) => {
-                  const qty = (it as any).quantity || 1;
-                  const sizes = it.sizes?.length || 1;
-                  return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
-                }, 0)} ج.م</strong>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
-                <span style={{ color: "#64748b" }}>العربون</span>
-                <strong style={{ color: "#10b981" }}>{selectedOrder.deposit ?? 0} ج.م</strong>
-              </div>
-              <div style={{ borderTop: "1px solid #e2e8f0", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: 700 }}>المتبقي</span>
-                <strong style={{ color: "#A62E2E", fontSize: "1rem" }}>
-                  {selectedOrder.items.reduce((sum, it) => {
-                    const qty = (it as any).quantity || 1;
-                    const sizes = it.sizes?.length || 1;
-                    return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
-                  }, 0) - (selectedOrder.deposit ?? 0)} ج.م
-                </strong>
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Hidden Invoice for PDF */}
+      {/* Hidden Invoice for PDF Generation (Clean Read-Only Version) */}
       <div
         ref={invoiceRef}
         style={{
@@ -704,21 +637,24 @@ export default function LiveOrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {currentPdfOrder.items?.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                    <td style={{ padding: "12px" }}>{item.name} (موديل {item.modelNumber})</td>
-                    <td style={{ padding: "12px" }}>{item.selectedColor}</td>
-                    <td style={{ padding: "12px" }}>{item.isSeri ? item.sizes?.join(' - ') : 'قطعة واحدة'}</td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>{item.isSeri ? `${item.sizes?.length} قطع (ثري)` : '1'}</td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>{item.price} ج.م</td>
-                  </tr>
-                ))}
+                {currentPdfOrder.items?.map((item, i) => {
+                  const qty = item.quantity || 1;
+                  return (
+                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                      <td style={{ padding: "12px" }}>{item.name} (موديل {item.modelNumber})</td>
+                      <td style={{ padding: "12px" }}>{item.selectedColor}</td>
+                      <td style={{ padding: "12px" }}>{item.isSeri ? item.sizes?.join(' - ') : 'قطعة واحدة'}</td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>{item.isSeri ? `${qty} ثري (${item.sizes?.length || 1} مقاس)` : `${qty} قطعة`}</td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>{item.price} ج.م</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "16px" }}>
-                  <span>الإجمالي:</span><strong>{currentPdfOrder.total} ج.م</strong>
+                  <span>الإجمالي:</span><strong>{calculateTotal(currentPdfOrder.items)} ج.م</strong>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "16px", color: "#16a34a" }}>
                   <span>العربون المدفوع:</span><strong>{currentPdfOrder.deposit || 0} ج.م</strong>
@@ -726,7 +662,7 @@ export default function LiveOrdersPage() {
                 <div style={{ borderTop: "2px solid #cbd5e1", margin: "10px 0" }} />
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>
                   <span>المبلغ المتبقي:</span>
-                  <span>{currentPdfOrder.total - (currentPdfOrder.deposit || 0)} ج.م</span>
+                  <span>{calculateTotal(currentPdfOrder.items) - (currentPdfOrder.deposit || 0)} ج.م</span>
                 </div>
               </div>
             </div>
