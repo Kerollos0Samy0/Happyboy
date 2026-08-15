@@ -166,7 +166,7 @@ export default function InventoryPage() {
       title: "قسم البناتي",
       sections: [
         { name: "بيبي (500 - 545)", filter: (num: number) => num >= 500 && num <= 545 },
-        { name: "وسط (605 - 680)", filter: (num: number) => num >= 605 && num <= 680 },
+        { name: "وسط (600 - 680)", filter: (num: number) => num >= 600 && num <= 680 },
         { name: "محير (800 - 880)", filter: (num: number) => num >= 800 && num <= 880 },
       ]
     }
