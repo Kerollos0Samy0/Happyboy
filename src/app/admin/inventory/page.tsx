@@ -259,12 +259,14 @@ export default function InventoryPage() {
                 if (subProds.length === 0) return null;
 
                 return (
-                  <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
-                      {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
-                    </h4>
-                    {getProductTable(subProds)}
-                  </div>
+                  <details key={sIdx} className="bg-white rounded-lg shadow-sm border border-gray-200 group" open={false}>
+                    <summary className="text-lg font-bold p-3 text-gray-700 bg-gray-100 rounded cursor-pointer select-none group-open:rounded-b-none transition-colors border-b border-transparent group-open:border-gray-200">
+                      {sub.name} <span className="text-sm font-normal text-gray-500">({subProds.length} موديلات)</span>
+                    </summary>
+                    <div className="p-3 animate-fade-in">
+                      {getProductTable(subProds)}
+                    </div>
+                  </details>
                 );
               })}
             </div>
