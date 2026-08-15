@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
     }
   });
 
-  const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   
   // Find zero sales (in stock but not in modelSalesMap)
@@ -196,12 +196,7 @@ export default function AdminDashboardPage() {
               <h3 className="text-lg font-bold text-blue-600">{salesMonth.toLocaleString()} ج.م</h3>
             </div>
           </div>
-          {isAhmed && (
-            <div className="mt-4 p-3 bg-red-50 rounded text-center border border-red-100">
-              <p className="text-xs text-gray-500">رأس المال المجمد في المخزن</p>
-              <h3 className="text-xl font-bold text-red-700">{totalCapital.toLocaleString()} ج.م</h3>
-            </div>
-          )}
+
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div className="p-3 bg-yellow-50 rounded text-center">
               <p className="text-xs text-gray-500">عربون تم تحصيله</p>
