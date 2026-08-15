@@ -140,7 +140,11 @@ export default function InventoryPage() {
     const nameStr = p.name ? String(p.name).toLowerCase() : "";
     const modelStr = p.modelNumber ? String(p.modelNumber).toLowerCase() : "";
     const term = searchTerm.toLowerCase();
-    return nameStr.includes(term) || modelStr.includes(term);
+    const colorMatch = Array.isArray(p.colors) && p.colors.some(c => 
+      (c.name && c.name.toLowerCase().includes(term)) || 
+      (c.barcode && String(c.barcode).toLowerCase().includes(term))
+    );
+    return nameStr.includes(term) || modelStr.includes(term) || colorMatch;
   });
 
   // Calculate totals
@@ -205,7 +209,7 @@ export default function InventoryPage() {
                   )}
                 </td>
                 <td className="p-3 text-sm">
-                  {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
+                  {Array.isArray(product.colors) ? product.colors.map(c => `${c.name} (${c.barcode})`).join('، ') : ''}
                 </td>
                 <td className="p-3">
                   <div className="flex gap-2">
