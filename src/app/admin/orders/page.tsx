@@ -604,72 +604,118 @@ export default function LiveOrdersPage() {
         }}
       >
         {currentPdfOrder && (
-          <>
-            <div style={{ textAlign: "center", marginBottom: "30px", borderBottom: "2px solid #eee", paddingBottom: "20px" }}>
-              <h1 style={{ fontSize: "32px", color: "#A62E2E", marginBottom: "10px", fontWeight: "bold" }}>Happy Boy&Girl</h1>
-              <h2 style={{ fontSize: "22px", color: "#333" }}>فاتورة طلب رسمي</h2>
-            </div>
-            <div style={{ marginBottom: "30px", padding: "20px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-                <div style={{ flex: "1 1 45%" }}>
-                  <p style={{ fontSize: "18px", marginBottom: "12px" }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}</span></p>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {currentPdfOrder.customerName}</p>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> <span dir="ltr">{currentPdfOrder.customerPhone}</span></p>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>البراند / المحل:</strong> {currentPdfOrder.customerBrand}</p>
-                  <p style={{ fontSize: "16px" }}><strong>تاريخ الطلب:</strong> {currentPdfOrder.createdAt?.toDate ? currentPdfOrder.createdAt.toDate().toLocaleDateString('ar-EG') : ''}</p>
-                </div>
-                <div style={{ flex: "1 1 45%" }}>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>المحافظة:</strong> {currentPdfOrder.customerGovernorate || 'غير مسجل'}</p>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>العنوان:</strong> {currentPdfOrder.customerAddress || 'غير مسجل'}</p>
-                  <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>شركة الشحن:</strong> {currentPdfOrder.customerShipping || 'غير مسجل'}</p>
-                  <p style={{ fontSize: "16px", color: "#2563eb", fontWeight: "bold" }}><strong>موعد التسليم:</strong> {currentPdfOrder.deliveryDate || 'لم يحدد بعد'}</p>
-                </div>
+          <div style={{ fontFamily: "Arial, sans-serif", color: "black" }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '60px', objectFit: 'contain' }} />
+              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
+                إذن صرف رقم : <span style={{ marginRight: '10px' }}>{currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}</span>
               </div>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "30px" }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold" }}>
+                القاهرة فى {currentPdfOrder.createdAt?.toDate ? currentPdfOrder.createdAt.toDate().toLocaleDateString('ar-EG') : ''}
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
+                عميل رقم : {currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
+                اسم العميل / {currentPdfOrder.customerName} {currentPdfOrder.customerBrand ? ` - ${currentPdfOrder.customerBrand}` : ''}
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
+                شركة الشحن : {currentPdfOrder.customerShipping || 'استلام مصنع'}
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'center' }}>
+                موبيل / <span dir="ltr">{currentPdfOrder.customerPhone}</span>
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
+                العنوان / {currentPdfOrder.customerAddress || currentPdfOrder.customerGovernorate || ''}
+              </div>
+            </div>
+
+            {/* Table */}
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black", marginBottom: "30px", textAlign: "center" }}>
               <thead>
-                <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1" }}>
-                  <th style={{ padding: "12px", textAlign: "right" }}>الصنف</th>
-                  <th style={{ padding: "12px", textAlign: "right" }}>اللون</th>
-                  <th style={{ padding: "12px", textAlign: "right" }}>المقاسات</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>الكمية</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>السعر</th>
+                <tr style={{ borderBottom: "1px solid black" }}>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الموديل</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اسم الصنف</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اللون</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>السعر</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>طقم</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الكمية</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الاجمالي</th>
                 </tr>
               </thead>
               <tbody>
                 {currentPdfOrder.items?.map((item, i) => {
                   const qty = item.quantity || 1;
+                  const piecesInSeri = item.isSeri ? (item.sizes?.length || 1) : 1;
+                  const totalPieces = item.isSeri ? piecesInSeri * qty : qty;
+                  const rowTotal = item.price * totalPieces;
                   return (
-                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                      <td style={{ padding: "12px" }}>{item.name} (موديل {item.modelNumber})</td>
-                      <td style={{ padding: "12px" }}>{item.selectedColor}</td>
-                      <td style={{ padding: "12px" }}>{item.isSeri ? item.sizes?.join(' - ') : 'قطعة واحدة'}</td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>{item.isSeri ? `${qty} ثري (${item.sizes?.length || 1} مقاس)` : `${qty} قطعة`}</td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>{item.price} ج.م</td>
+                    <tr key={i} style={{ borderBottom: "1px solid black" }}>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.modelNumber}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.selectedColor}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.price}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{piecesInSeri}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{qty}</td>
+                      <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{rowTotal}</td>
                     </tr>
-                  )
+                  );
                 })}
+                {/* Total Row */}
+                <tr>
+                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي الكلي</td>
+                  <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{calculateTotal(currentPdfOrder.items)}</td>
+                </tr>
+                {currentPdfOrder.deposit > 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{currentPdfOrder.deposit}</td>
+                  </tr>
+                )}
+                {currentPdfOrder.deposit > 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - currentPdfOrder.deposit}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "16px" }}>
-                  <span>الإجمالي:</span><strong>{calculateTotal(currentPdfOrder.items)} ج.م</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "16px", color: "#16a34a" }}>
-                  <span>العربون المدفوع:</span><strong>{currentPdfOrder.deposit || 0} ج.م</strong>
-                </div>
-                <div style={{ borderTop: "2px solid #cbd5e1", margin: "10px 0" }} />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>
-                  <span>المبلغ المتبقي:</span>
-                  <span>{calculateTotal(currentPdfOrder.items) - (currentPdfOrder.deposit || 0)} ج.م</span>
-                </div>
+
+            {/* Footer */}
+            <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>
+              توقيع العميل أو من ينوب عنه باستلام البضاعة يعتبر بمثابة إيصال بقيمتها و تعهد منه بسداد القيمة المذكورة عاليه وقت طلبها منه و يعتبر مسئولا مسئولية مدنية و جنائية عنها.
+            </div>
+            <div style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold", marginBottom: "30px" }}>
+              *** نرجو الاتصال بالمصنع في حالة عدم مطابقة الفاتورة  ت : 0224903939 - 01009516578 ***
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+              <div style={{ textAlign: 'center', width: '200px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>المستلم</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '15px', textAlign: 'right' }}>الاسم:</div>
+                <div style={{ fontWeight: 'bold', textAlign: 'right' }}>التوقيع:</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <div style={{ width: '80px', height: '30px', border: '1px solid black' }}></div>
+                <span style={{ fontWeight: 'bold', fontSize: "16px" }}>: عدد الاكياس</span>
               </div>
             </div>
-            <div style={{ marginTop: "40px", textAlign: "center", color: "#64748b", fontSize: "14px" }}>
-              <p>شكراً لتعاملكم مع Happy Boy&Girl</p>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px', fontSize: '14px', fontWeight: 'bold' }}>
+              <div>صفحة 1 من 1</div>
+              <div>إذن رقم : {currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}</div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
