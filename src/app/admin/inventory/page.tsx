@@ -148,6 +148,143 @@ export default function InventoryPage() {
   const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
 
+  // Grouping Logic
+  const categories = [
+    {
+      title: "قسم الأولادي 👦",
+      sections: [
+        { name: "بيبي (5 - 90)", filter: (num: number) => num >= 5 && num <= 90 },
+        { name: "وسط (100 - 150)", filter: (num: number) => num >= 100 && num <= 150 },
+        { name: "محير (300 - 350)", filter: (num: number) => num >= 300 && num <= 350 },
+      ]
+    },
+    {
+      title: "قسم البناتي 👧",
+      sections: [
+        { name: "بيبي (500 - 545)", filter: (num: number) => num >= 500 && num <= 545 },
+        { name: "وسط (605 - 680)", filter: (num: number) => num >= 605 && num <= 680 },
+        { name: "محير (800 - 880)", filter: (num: number) => num >= 800 && num <= 880 },
+      ]
+    }
+  ];
+
+  const getProductTable = (prods: Product[]) => {
+    if (prods.length === 0) return null;
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-right border-collapse mb-4">
+          <thead>
+            <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
+              <th className="p-3">الموديل</th>
+              <th className="p-3">الاسم</th>
+              <th className="p-3">السعر</th>
+              <th className="p-3">الكمية</th>
+              <th className="p-3">الإجمالي</th>
+              <th className="p-3">الألوان</th>
+              <th className="p-3">تعديل</th>
+            </tr>
+          </thead>
+          <tbody>
+            {prods.map(product => (
+              <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td className="p-3 font-bold">{product.modelNumber}</td>
+                <td className="p-3">{product.name}</td>
+                <td className="p-3">
+                  {editingId === product.id ? (
+                    <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                  ) : (
+                    `${product.price} ج.م`
+                  )}
+                </td>
+                <td className="p-3">
+                  {editingId === product.id ? (
+                    <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
+                  ) : (
+                    <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
+                      {product.quantity}
+                    </span>
+                  )}
+                </td>
+                <td className="p-3 font-bold text-gray-700">
+                  {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString()} ج.م
+                </td>
+                <td className="p-3 text-sm">
+                  {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
+                </td>
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    {editingId === product.id ? (
+                      <>
+                        <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
+                        <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
+                        <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderCategorizedProducts = () => {
+    let unassignedProducts = [...filteredProducts];
+
+    return (
+      <div className="flex flex-col gap-8">
+        {categories.map((mainCat, idx) => (
+          <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h3 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-gray-300" style={{ color: "var(--primary)" }}>
+              {mainCat.title}
+            </h3>
+            
+            <div className="flex flex-col gap-6">
+              {mainCat.sections.map((sub, sIdx) => {
+                const subProds = unassignedProducts.filter(p => {
+                  const num = parseInt(p.modelNumber, 10);
+                  if (isNaN(num)) return false;
+                  return sub.filter(num);
+                });
+                
+                // Remove found from unassigned
+                unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
+
+                if (subProds.length === 0) return null;
+
+                return (
+                  <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
+                      {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
+                    </h4>
+                    {getProductTable(subProds)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        
+        {unassignedProducts.length > 0 && (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h3 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-gray-300" style={{ color: "var(--primary)" }}>
+              قسم أخرى (أرقام غير مصنفة)
+            </h3>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              {getProductTable(unassignedProducts)}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6 mb-12">
       <div className="w-full" style={{ maxWidth: '1200px' }}>
@@ -184,10 +321,10 @@ export default function InventoryPage() {
         </div>
 
         {activeTab === 'manage' && (
-          <div className="card w-full overflow-x-auto">
+          <div className="card w-full">
             <input 
               type="text" 
-              className="input w-full md:w-1/2 mb-4" 
+              className="input w-full md:w-1/2 mb-6" 
               placeholder="بحث برقم الموديل أو الاسم..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -196,64 +333,7 @@ export default function InventoryPage() {
             {filteredProducts.length === 0 ? (
               <p className="text-center py-4">لا توجد منتجات.</p>
             ) : (
-              <table className="w-full text-right border-collapse">
-                <thead>
-                  <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
-                    <th className="p-3">الموديل</th>
-                    <th className="p-3">الاسم</th>
-                    <th className="p-3">السعر</th>
-                    <th className="p-3">الكمية</th>
-                    <th className="p-3">الإجمالي</th>
-                    <th className="p-3">الألوان</th>
-                    <th className="p-3">تعديل</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map(product => (
-                    <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                      <td className="p-3 font-bold">{product.modelNumber}</td>
-                      <td className="p-3">{product.name}</td>
-                      <td className="p-3">
-                        {editingId === product.id ? (
-                          <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
-                        ) : (
-                          `${product.price} ج.م`
-                        )}
-                      </td>
-                      <td className="p-3">
-                        {editingId === product.id ? (
-                          <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
-                        ) : (
-                          <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
-                            {product.quantity}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3 font-bold text-gray-700">
-                        {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString()} ج.م
-                      </td>
-                      <td className="p-3 text-sm">
-                        {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-2">
-                          {editingId === product.id ? (
-                            <>
-                              <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
-                              <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
-                              <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              renderCategorizedProducts()
             )}
           </div>
         )}
