@@ -8,7 +8,7 @@ import {
 } from "firebase/firestore";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import { Printer, Save, Trash2, X, ChevronDown } from "lucide-react";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle } from "lucide-react";
 
 interface OrderItem {
   cartItemId?: string;
@@ -402,7 +402,7 @@ export default function LiveOrdersPage() {
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
               <button
                 onClick={saveOrderDetails}
                 disabled={saving}
@@ -433,6 +433,41 @@ export default function LiveOrdersPage() {
                 <Trash2 size={15} />
               </button>
             </div>
+
+            {/* WhatsApp Button */}
+            <button
+              onClick={() => {
+                const o = selectedOrder;
+                const itemsText = o.items?.map((item, i) =>
+                  `${i + 1}. ${item.name} (موديل ${item.modelNumber}) - ${item.selectedColor}${item.isSeri ? ` - ثري (${item.sizes?.length} قطع)` : ''} → ${item.price} ج.م`
+                ).join('\n') || '';
+                const remaining = o.total - (o.deposit ?? 0);
+                const msg = `*فاتورة طلب - Happy Boy\&Girl* 🧾\n\n` +
+                  `*رقم الطلب:* ${o.orderNumber || o.id.slice(0, 8)}\n` +
+                  `*العميل:* ${o.customerName}\n` +
+                  (o.customerBrand ? `*البراند:* ${o.customerBrand}\n` : '') +
+                  `\n📦 *محتويات الطلب:*\n${itemsText}\n\n` +
+                  `💰 *الإجمالي:* ${o.total} ج.م\n` +
+                  `✅ *العربون:* ${o.deposit ?? 0} ج.م\n` +
+                  `🔴 *المتبقي:* ${remaining} ج.م\n` +
+                  (o.deliveryDate ? `\n📅 *موعد التسليم:* ${o.deliveryDate}` : '') +
+                  `\n\nشكراً لتعاملكم معنا 🤍`;
+                const phone = o.customerPhone.replace(/[^0-9]/g, '');
+                const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
+                window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+              }}
+              style={{
+                width: "100%", padding: "0.65rem", borderRadius: "0.5rem", border: "none",
+                background: "#25D366", color: "#fff", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                fontFamily: "inherit", fontWeight: 700, fontSize: "0.88rem",
+                transition: "background 0.15s", marginBottom: "1.25rem",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#1EBE57")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#25D366")}
+            >
+              <MessageCircle size={17} /> إرسال الفاتورة عبر واتساب
+            </button>
 
             {/* Items list */}
             <div>
