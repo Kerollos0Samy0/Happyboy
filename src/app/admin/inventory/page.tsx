@@ -198,7 +198,7 @@ export default function InventoryPage() {
           <div className="card text-center p-4">
             <p className="text-sm text-gray-500">رأس المال (قيمة المخزن)</p>
             <h3 className="text-2xl font-bold mt-1 text-green-600">
-              {new Intl.NumberFormat('ar-EG').format(totalCapital)} ج.م
+              {totalCapital.toLocaleString("en-US")} ج.م
             </h3>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function InventoryPage() {
                               )}
                             </td>
                             <td className="p-3 font-bold text-gray-700">
-                              {new Intl.NumberFormat('ar-EG').format((Number(product.price) || 0) * (Number(product.quantity) || 0))} ج.م
+                              {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString("en-US")} ج.م
                             </td>
                             <td className="p-3 text-sm">
                               {product.colors?.map(c => c.name).join('، ')}
