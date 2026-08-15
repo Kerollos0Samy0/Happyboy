@@ -186,15 +186,9 @@ export default function ScanPage() {
               <div className="flex flex-col gap-4">
                 <div className="p-4" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
                   <h3 className="text-xl">{product.name} (موديل: {product.modelNumber})</h3>
-                  <div className="flex gap-4 mt-2 mb-2">
-                    <p className="font-bold text-lg" style={{ color: "var(--primary)" }}>
-                      سعر القطعة: {product.price} ج.م
-                    </p>
-                    <p className="font-bold text-lg" style={{ color: "var(--success)" }}>
-                      ثمن الثري الواحد: {product.price * product.sizes.length} ج.م
-                    </p>
+                  <div className="mt-3 mb-2 p-3 bg-green-50 text-green-800 rounded text-center font-bold text-lg border border-green-200">
+                    ✅ الموديل متاح في المخزن
                   </div>
-                  <p className="text-sm">المقاسات ({product.sizes.length} قطع): {product.sizes.join(", ")}</p>
                 </div>
                 
                 <div className="p-4" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
