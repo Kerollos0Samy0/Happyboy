@@ -6,7 +6,6 @@ import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-
 interface ColorEntry {
   name: string;
   barcode: string;
@@ -24,7 +23,7 @@ interface Product {
 
 export default function InventoryPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"add" | "manage">("manage");
+  const [activeTab, setActiveTab] = useState<"manage" | "add">("manage");
   
   // Add Form State
   const [modelNumber, setModelNumber] = useState("");
@@ -43,6 +42,7 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -67,20 +67,19 @@ export default function InventoryPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا الموديل؟")) return;
+    if (!window.confirm("هل أنت متأكد من الحذف؟")) return;
     try {
       await deleteDoc(doc(db, "products", id));
       setProducts(products.filter(p => p.id !== id));
     } catch (err) {
-      console.error("Error deleting:", err);
-      alert("حدث خطأ أثناء الحذف");
+      alert("خطأ أثناء الحذف");
     }
   };
 
   const startEdit = (product: Product) => {
     setEditingId(product.id);
-    setEditPrice(product.price.toString());
-    setEditQuantity(product.quantity.toString());
+    setEditPrice(String(product.price || 0));
+    setEditQuantity(String(product.quantity || 0));
   };
 
   const saveEdit = async (id: string) => {
@@ -92,12 +91,9 @@ export default function InventoryPage() {
       setProducts(products.map(p => p.id === id ? { ...p, price: Number(editPrice), quantity: Number(editQuantity) } : p));
       setEditingId(null);
     } catch (err) {
-      console.error("Error updating:", err);
-      alert("حدث خطأ أثناء التحديث");
+      alert("خطأ أثناء التحديث");
     }
   };
-
-  if (loading) return <div className="p-10 text-center">جاري التحقق من الصلاحيات...</div>;
 
   const handleColorChange = (index: number, field: "name" | "barcode", value: string) => {
     const newColors = [...colors];
@@ -130,20 +126,15 @@ export default function InventoryPage() {
       setSuccess(true);
       setModelNumber(""); setName(""); setPrice(""); setSizes(""); setQuantity("");
       setColors([{ name: "", barcode: "" }]);
-      fetchProducts(); // Refresh list
+      fetchProducts();
     } catch (error) {
-      console.error("Error adding product: ", error);
-      alert("حدث خطأ أثناء إضافة الموديل");
+      alert("خطأ أثناء الإضافة");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const totalModels = products.length;
-  const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
-  const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  if (loading) return <div className="p-10 text-center">جاري التحميل...</div>;
 
   const filteredProducts = products.filter(p => {
     const nameStr = p.name ? String(p.name).toLowerCase() : "";
@@ -152,154 +143,117 @@ export default function InventoryPage() {
     return nameStr.includes(term) || modelStr.includes(term);
   });
 
-  const categoryOrder = [
-    "ولادي - بيبي (5 ➔ 90)",
-    "ولادي - وسط (100 ➔ 150)",
-    "ولادي - محير (300 ➔ 350)",
-    "بناتي - بيبي (500 ➔ 545)",
-    "بناتي - وسط (605 ➔ 680)",
-    "بناتي - محير (800 ➔ 880)",
-    "أخرى"
-  ];
-
-  const groupedProducts = categoryOrder.map(cat => ({
-    category: cat,
-    products: filteredProducts.filter(p => {
-      const num = parseInt(p.modelNumber, 10);
-      if (isNaN(num)) return cat === "أخرى";
-      if (num >= 5 && num <= 90) return cat === "ولادي - بيبي (5 ➔ 90)";
-      if (num >= 100 && num <= 150) return cat === "ولادي - وسط (100 ➔ 150)";
-      if (num >= 300 && num <= 350) return cat === "ولادي - محير (300 ➔ 350)";
-      if (num >= 500 && num <= 545) return cat === "بناتي - بيبي (500 ➔ 545)";
-      if (num >= 605 && num <= 680) return cat === "بناتي - وسط (605 ➔ 680)";
-      if (num >= 800 && num <= 880) return cat === "بناتي - محير (800 ➔ 880)";
-      return cat === "أخرى";
-    })
-  })).filter(g => g.products.length > 0);
+  // Calculate totals
+  const totalModels = products.length;
+  const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
 
   return (
-    <div className="animate-fade-in flex flex-col items-center mt-6">
-      <div className="w-full" style={{ maxWidth: '1000px' }}>
+    <div className="animate-fade-in flex flex-col items-center mt-6 mb-12">
+      <div className="w-full" style={{ maxWidth: '1200px' }}>
+        
         <div className="flex justify-between items-center mb-6">
-          <h2 style={{ color: 'var(--primary)' }}>📦 إدارة المخزن الشاملة</h2>
-          <button onClick={() => router.push("/admin/dashboard")} className="btn btn-outline">عودة للوحة التحكم</button>
+          <h2 style={{ color: 'var(--primary)' }}>المخزن</h2>
+          <button onClick={() => router.push("/admin/dashboard")} className="btn btn-outline">لوحة التحكم</button>
         </div>
 
-        {/* Financial Summary */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">إجمالي الموديلات</p>
+            <p className="text-sm text-gray-500">عدد الموديلات</p>
             <h3 className="text-2xl font-bold mt-1">{totalModels}</h3>
           </div>
           <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">إجمالي القطع بالمخزن</p>
+            <p className="text-sm text-gray-500">إجمالي القطع</p>
             <h3 className="text-2xl font-bold mt-1 text-blue-600">{totalPieces}</h3>
           </div>
           <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">رأس المال (قيمة المخزن)</p>
+            <p className="text-sm text-gray-500">إجمالي رأس المال</p>
             <h3 className="text-2xl font-bold mt-1 text-green-600">
-              {totalCapital} ج.م
+              {totalCapital.toLocaleString()} ج.م
             </h3>
           </div>
         </div>
 
         <div className="flex gap-4 mb-6">
-          <button 
-            className={`btn ${activeTab === 'manage' ? 'btn-primary' : 'btn-outline'} flex-1`}
-            onClick={() => setActiveTab('manage')}
-          >
-            الموديلات الحالية
+          <button className={`btn ${activeTab === 'manage' ? 'btn-primary' : 'btn-outline'} flex-1`} onClick={() => setActiveTab('manage')}>
+            عرض الموديلات
           </button>
-          <button 
-            className={`btn ${activeTab === 'add' ? 'btn-primary' : 'btn-outline'} flex-1`}
-            onClick={() => setActiveTab('add')}
-          >
-            إضافة موديل جديد
+          <button className={`btn ${activeTab === 'add' ? 'btn-primary' : 'btn-outline'} flex-1`} onClick={() => setActiveTab('add')}>
+            إضافة موديل
           </button>
         </div>
 
         {activeTab === 'manage' && (
           <div className="card w-full overflow-x-auto">
-            <div className="mb-4">
-              <input 
-                type="text" 
-                className="input w-full md:w-1/2" 
-                placeholder="بحث برقم أو اسم الموديل..." 
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-            </div>
+            <input 
+              type="text" 
+              className="input w-full md:w-1/2 mb-4" 
+              placeholder="بحث برقم الموديل أو الاسم..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
             
             {filteredProducts.length === 0 ? (
-              <p className="text-center py-4">المخزن فارغ حالياً.</p>
+              <p className="text-center py-4">لا توجد منتجات.</p>
             ) : (
-              <div className="flex flex-col gap-6">
-                {groupedProducts.map((group) => (
-                  <div key={group.category} className="mb-4">
-                    <h3 className="text-xl font-bold mb-3 p-2 bg-gray-100 rounded" style={{ color: "var(--primary)" }}>
-                      {group.category} <span className="text-sm font-normal text-gray-500">({group.products.length} موديلات)</span>
-                    </h3>
-                    <table className="w-full text-right border-collapse">
-                      <thead>
-                        <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
-                          <th className="p-3">الموديل</th>
-                          <th className="p-3">الاسم</th>
-                          <th className="p-3">السعر</th>
-                          <th className="p-3">الكمية</th>
-                          <th className="p-3">الإجمالي</th>
-                          <th className="p-3">الألوان</th>
-                          <th className="p-3">إجراءات</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {group.products.map(product => (
-                          <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                            <td className="p-3">{product.modelNumber}</td>
-                            <td className="p-3">{product.name}</td>
-                            <td className="p-3">
-                              {editingId === product.id ? (
-                                <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
-                              ) : (
-                                `${product.price} ج.م`
-                              )}
-                            </td>
-                            <td className="p-3">
-                              {editingId === product.id ? (
-                                <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
-                              ) : (
-                                <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
-                                  {product.quantity}
-                                </span>
-                              )}
-                            </td>
-                            <td className="p-3 font-bold text-gray-700">
-                              {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString()} ج.م
-                            </td>
-                            <td className="p-3 text-sm">
-                              {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
-                            </td>
-                            <td className="p-3">
-                              <div className="flex gap-2">
-                                {editingId === product.id ? (
-                                  <>
-                                    <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
-                                    <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
-                                    <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
+              <table className="w-full text-right border-collapse">
+                <thead>
+                  <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
+                    <th className="p-3">الموديل</th>
+                    <th className="p-3">الاسم</th>
+                    <th className="p-3">السعر</th>
+                    <th className="p-3">الكمية</th>
+                    <th className="p-3">الإجمالي</th>
+                    <th className="p-3">الألوان</th>
+                    <th className="p-3">تعديل</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map(product => (
+                    <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td className="p-3 font-bold">{product.modelNumber}</td>
+                      <td className="p-3">{product.name}</td>
+                      <td className="p-3">
+                        {editingId === product.id ? (
+                          <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                        ) : (
+                          `${product.price} ج.م`
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {editingId === product.id ? (
+                          <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
+                        ) : (
+                          <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
+                            {product.quantity}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3 font-bold text-gray-700">
+                        {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString()} ج.م
+                      </td>
+                      <td className="p-3 text-sm">
+                        {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-2">
+                          {editingId === product.id ? (
+                            <>
+                              <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
+                              <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
+                              <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         )}
@@ -311,63 +265,49 @@ export default function InventoryPage() {
                 تم إضافة الموديل بنجاح!
               </div>
             )}
-
             <form onSubmit={handleAddProduct} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block mb-2 font-bold text-sm">اسم الموديل (مثال: ترينج بيبي)</label>
+                  <label className="block mb-2 font-bold text-sm">الاسم</label>
                   <input type="text" className="input" value={name} onChange={(e) => setName(e.target.value)} required />
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-sm">رقم الموديل (مثال: 85)</label>
+                  <label className="block mb-2 font-bold text-sm">رقم الموديل</label>
                   <input type="text" className="input" value={modelNumber} onChange={(e) => setModelNumber(e.target.value)} required />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block mb-2 font-bold text-sm">سعر القطعة الواحدة</label>
+                  <label className="block mb-2 font-bold text-sm">السعر</label>
                   <input type="number" className="input" value={price} onChange={(e) => setPrice(e.target.value)} required />
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-sm">الكمية الإجمالية (ثري)</label>
+                  <label className="block mb-2 font-bold text-sm">الكمية</label>
                   <input type="number" className="input" value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
                 </div>
               </div>
-
               <div>
-                <label className="block mb-2 font-bold text-sm">المقاسات المتاحة (افصل بينها بفاصلة ,)</label>
-                <input type="text" className="input" placeholder="مثال: 2, 3, 4, 5" value={sizes} onChange={(e) => setSizes(e.target.value)} required />
+                <label className="block mb-2 font-bold text-sm">المقاسات (مثال: 2, 3, 4)</label>
+                <input type="text" className="input" value={sizes} onChange={(e) => setSizes(e.target.value)} required />
               </div>
-
-              <hr style={{ borderTop: "1px solid var(--border)", margin: "1rem 0" }} />
-              
-              <h3 className="font-bold text-lg">الألوان والباركودات</h3>
-              
+              <hr />
+              <h3 className="font-bold text-lg">الألوان والباركود</h3>
               {colors.map((color, index) => (
-                <div key={index} className="flex gap-2 items-end p-3" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
+                <div key={index} className="flex gap-2 items-end p-3 bg-gray-50 rounded">
                   <div className="flex-1">
                     <label className="block mb-1 text-sm font-bold">اللون</label>
-                    <input type="text" className="input" placeholder="أحمر" value={color.name} onChange={e => handleColorChange(index, "name", e.target.value)} required />
+                    <input type="text" className="input" value={color.name} onChange={e => handleColorChange(index, "name", e.target.value)} required />
                   </div>
                   <div className="flex-1">
-                    <label className="block mb-1 text-sm font-bold">باركود هذا اللون</label>
-                    <input type="text" className="input" placeholder="243" value={color.barcode} onChange={e => handleColorChange(index, "barcode", e.target.value)} required />
+                    <label className="block mb-1 text-sm font-bold">الباركود</label>
+                    <input type="text" className="input" value={color.barcode} onChange={e => handleColorChange(index, "barcode", e.target.value)} required />
                   </div>
                   {colors.length > 1 && (
-                    <button type="button" onClick={() => removeColor(index)} className="btn btn-outline" style={{ borderColor: "var(--danger)", color: "var(--danger)" }}>حذف</button>
+                    <button type="button" onClick={() => removeColor(index)} className="btn btn-outline text-red-500 border-red-200">حذف</button>
                   )}
                 </div>
               ))}
-              
-              <button type="button" onClick={addColor} className="btn btn-secondary w-fit">
-                + إضافة لون جديد للموديل
-              </button>
-
-              <hr style={{ borderTop: "1px solid var(--border)", margin: "1rem 0" }} />
-
-              <button type="submit" className="btn btn-primary w-full" disabled={actionLoading}>
-                {actionLoading ? "جاري الإضافة..." : "حفظ في المخزن"}
+              <button type="button" onClick={addColor} className="btn btn-secondary w-fit">+ إضافة لون</button>
+              <button type="submit" className="btn btn-primary w-full mt-4" disabled={actionLoading}>
+                {actionLoading ? "جاري الإضافة..." : "حفظ"}
               </button>
             </form>
           </div>
