@@ -276,7 +276,7 @@ export default function InventoryPage() {
                               {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString("en-US")} ج.م
                             </td>
                             <td className="p-3 text-sm">
-                              {product.colors?.map(c => c.name).join('، ')}
+                              {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
                             </td>
                             <td className="p-3">
                               <div className="flex gap-2">
