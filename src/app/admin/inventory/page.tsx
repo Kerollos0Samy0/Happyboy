@@ -179,7 +179,6 @@ export default function InventoryPage() {
               <th className="p-3">الاسم</th>
               <th className="p-3">السعر</th>
               <th className="p-3">الكمية</th>
-              <th className="p-3">الإجمالي</th>
               <th className="p-3">الألوان</th>
               <th className="p-3">تعديل</th>
             </tr>
@@ -204,9 +203,6 @@ export default function InventoryPage() {
                       {product.quantity}
                     </span>
                   )}
-                </td>
-                <td className="p-3 font-bold text-gray-700">
-                  {((Number(product.price) || 0) * (Number(product.quantity) || 0)).toLocaleString()} ج.م
                 </td>
                 <td className="p-3 text-sm">
                   {Array.isArray(product.colors) ? product.colors.map(c => c.name).join('، ') : ''}
@@ -294,7 +290,7 @@ export default function InventoryPage() {
           <button onClick={() => router.push("/admin/dashboard")} className="btn btn-outline">لوحة التحكم</button>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="card text-center p-4">
             <p className="text-sm text-gray-500">عدد الموديلات</p>
             <h3 className="text-2xl font-bold mt-1">{totalModels}</h3>
@@ -302,12 +298,6 @@ export default function InventoryPage() {
           <div className="card text-center p-4">
             <p className="text-sm text-gray-500">إجمالي القطع</p>
             <h3 className="text-2xl font-bold mt-1 text-blue-600">{totalPieces}</h3>
-          </div>
-          <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">إجمالي رأس المال</p>
-            <h3 className="text-2xl font-bold mt-1 text-green-600">
-              {totalCapital.toLocaleString()} ج.م
-            </h3>
           </div>
         </div>
 
