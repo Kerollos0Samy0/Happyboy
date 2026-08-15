@@ -230,53 +230,74 @@ export default function InventoryPage() {
     );
   };
 
+  const [activeCategoryTab, setActiveCategoryTab] = useState("قسم الأولادي 👦");
+
   const renderCategorizedProducts = () => {
     let unassignedProducts = [...filteredProducts];
+    
+    // Pre-calculate unassigned to keep tabs logic clean
+    categories.forEach(mainCat => {
+      mainCat.sections.forEach(sub => {
+        const subProds = unassignedProducts.filter(p => {
+          const num = parseInt(p.modelNumber, 10);
+          return !isNaN(num) && sub.filter(num);
+        });
+        unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
+      });
+    });
+
+    const hasOther = unassignedProducts.length > 0;
+    const allTabs = [...categories.map(c => c.title)];
+    if (hasOther) allTabs.push("قسم أخرى");
 
     return (
-      <div className="flex flex-col gap-8">
-        {categories.map((mainCat, idx) => (
-          <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <h3 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-gray-300" style={{ color: "var(--primary)" }}>
-              {mainCat.title}
-            </h3>
-            
-            <div className="flex flex-col gap-6">
-              {mainCat.sections.map((sub, sIdx) => {
-                const subProds = unassignedProducts.filter(p => {
-                  const num = parseInt(p.modelNumber, 10);
-                  if (isNaN(num)) return false;
-                  return sub.filter(num);
-                });
-                
-                // Remove found from unassigned
-                unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
+      <div className="flex flex-col gap-6">
+        {/* Category Tabs */}
+        <div className="flex flex-wrap gap-2 justify-center mb-4">
+          {allTabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveCategoryTab(tab)}
+              className={`px-6 py-2 rounded-full font-bold transition-colors ${
+                activeCategoryTab === tab 
+                  ? "bg-[var(--primary)] text-white shadow-md" 
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-                if (subProds.length === 0) return null;
-
-                return (
-                  <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
-                      {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
-                    </h4>
-                    {getProductTable(subProds)}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-        
-        {unassignedProducts.length > 0 && (
-          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <h3 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-gray-300" style={{ color: "var(--primary)" }}>
-              قسم أخرى (أرقام غير مصنفة)
-            </h3>
+        {/* Content */}
+        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm animate-fade-in">
+          {activeCategoryTab === "قسم أخرى" ? (
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <h4 className="text-xl font-bold mb-4 text-gray-700 bg-gray-100 p-3 rounded text-center">
+                موديلات غير مصنفة <span className="text-sm font-normal">({unassignedProducts.length} موديلات)</span>
+              </h4>
               {getProductTable(unassignedProducts)}
             </div>
-          </div>
-        )}
+          ) : (
+            categories.find(c => c.title === activeCategoryTab)?.sections.map((sub, sIdx) => {
+              const subProds = filteredProducts.filter(p => {
+                const num = parseInt(p.modelNumber, 10);
+                return !isNaN(num) && sub.filter(num);
+              });
+
+              if (subProds.length === 0) return null;
+
+              return (
+                <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 last:mb-0">
+                  <h4 className="text-xl font-bold mb-4 text-gray-700 bg-[var(--primary-light)] text-[var(--primary)] p-3 rounded text-center">
+                    {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
+                  </h4>
+                  {getProductTable(subProds)}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     );
   };
