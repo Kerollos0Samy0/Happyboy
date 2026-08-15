@@ -6,6 +6,9 @@ import {
   collection, onSnapshot, query, orderBy,
   updateDoc, doc, deleteDoc, where, getDocs
 } from "firebase/firestore";
+import { auth } from "../../../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { WAREHOUSE_EMAILS } from "../../../lib/location";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus } from "lucide-react";
@@ -34,6 +37,7 @@ interface Order {
   deposit?: number;
   deliveryDate?: string;
   status: string;
+  branch?: string;
   items: OrderItem[];
   createdAt: any;
 }
@@ -59,6 +63,17 @@ export default function LiveOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [branchFilter, setBranchFilter] = useState<string>("all");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setUserEmail(user?.email || null);
+    });
+    return () => unsub();
+  }, []);
+
+  const isWarehouseUser = userEmail ? WAREHOUSE_EMAILS.includes(userEmail.toLowerCase()) : false;
 
   // Item editing state
   const [addModelSearch, setAddModelSearch] = useState("");
@@ -204,21 +219,24 @@ export default function LiveOrdersPage() {
   // PDF
   useEffect(() => {
     if (currentPdfOrder) {
-      generatePDF(currentPdfOrder).then(() => {
+      generatePDF(currentPdfOrder).then((pdf) => {
+         if (pdf) {
+            pdf.save(`فاتورة_${currentPdfOrder.customerName.replace(/\s+/g, '_')}.pdf`);
+         }
          setCurrentPdfOrder(null);
       });
     }
   }, [currentPdfOrder]);
 
   const generatePDF = async (order: Order) => {
-    if (!invoiceRef.current) return;
+    if (!invoiceRef.current) return null;
     invoiceRef.current.style.display = "block";
     try {
       const canvas = await html2canvas(invoiceRef.current, { scale: 2, useCORS: true });
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const w = pdf.internal.pageSize.getWidth();
       pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, w, (canvas.height * w) / canvas.width);
-      pdf.save(`فاتورة_${order.customerName.replace(/\s+/g, '_')}.pdf`);
+      return pdf;
     } finally {
       invoiceRef.current.style.display = "none";
     }
@@ -230,27 +248,57 @@ export default function LiveOrdersPage() {
     // Save first just in case
     await saveOrderDetails();
     
-    // Trigger PDF Download
-    await generatePDF(selectedOrder);
-    
-    alert("تم تحميل الفاتورة כملف PDF بنجاح! \n\nسيتم الآن فتح واتساب، يرجى إرفاق الملف المحمل وإرساله للعميل.");
+    const pdf = await generatePDF(selectedOrder);
+    if (!pdf) return;
+
+    const pdfBlob = pdf.output("blob");
+    const fileName = `فاتورة_${selectedOrder.customerName.replace(/\s+/g, '_')}.pdf`;
+    const file = new File([pdfBlob], fileName, { type: "application/pdf" });
     
     const phone = selectedOrder.customerPhone.replace(/[^0-9]/g, '');
     const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
-    const msg = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م`;
+    const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م`;
+
+    // Try Web Share API first (Native sharing for Mobile/Supported Desktop)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'فاتورة الطلب',
+          text: msgText,
+        });
+        return; // Success!
+      } catch (err) {
+        console.log("Error sharing or user cancelled", err);
+      }
+    }
     
-    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    // Fallback for browsers that don't support sharing files natively (e.g. some Desktop browsers)
+    pdf.save(fileName);
+    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nمتصفحك لا يدعم الإرسال المباشر للملفات. سيتم فتح واتساب الآن، يرجى إرفاق الملف المحمل يدوياً.");
+    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
   };
 
+  const visibleOrders = orders.filter(o => {
+    const orderBranch = o.branch || "أخرى";
+    if (isWarehouseUser) {
+      return orderBranch === "المخزن";
+    } else {
+      if (orderBranch === "المخزن") return false;
+      if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
+      return true;
+    }
+  });
+
   const filteredOrders = filterStatus === "all"
-    ? orders
-    : orders.filter(o => o.status === filterStatus);
+    ? visibleOrders
+    : visibleOrders.filter(o => o.status === filterStatus);
 
   const stats = {
-    total: orders.length,
-    pending: orders.filter(o => o.status === "pending").length,
-    paid: orders.filter(o => o.status === "paid").length,
-    cancelled: orders.filter(o => o.status === "cancelled").length,
+    total: visibleOrders.length,
+    pending: visibleOrders.filter(o => o.status === "pending").length,
+    paid: visibleOrders.filter(o => o.status === "paid").length,
+    cancelled: visibleOrders.filter(o => o.status === "cancelled").length,
   };
 
   return (
@@ -290,6 +338,37 @@ export default function LiveOrdersPage() {
               </button>
             ))}
           </div>
+
+          {!isWarehouseUser && (
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
+              {[
+                { key: "all",       label: "كل الفروع" },
+                { key: "التجمع",    label: "التجمع" },
+                { key: "العبور",    label: "العبور" },
+                { key: "عين شمس",    label: "عين شمس" },
+                { key: "أخرى",      label: "أخرى" },
+              ].map(b => (
+                <button
+                  key={b.key}
+                  onClick={() => setBranchFilter(b.key)}
+                  style={{
+                    padding: "0.35rem 0.85rem",
+                    borderRadius: "9999px",
+                    border: branchFilter === b.key ? "2px solid #3b82f6" : "2px solid transparent",
+                    background: branchFilter === b.key ? "#dbeafe" : "#e2e8f0",
+                    color: branchFilter === b.key ? "#1d4ed8" : "#475569",
+                    fontFamily: "inherit",
+                    fontWeight: 700,
+                    fontSize: "0.78rem",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Grid */}
@@ -350,6 +429,9 @@ export default function LiveOrdersPage() {
                       </p>
                     </div>
                     <div style={{ display: "flex", gap: "0.25rem", alignItems: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
+                        {order.branch || "أخرى"}
+                      </span>
                       <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
                         {timeAgo(date)}
                       </span>
@@ -676,16 +758,16 @@ export default function LiveOrdersPage() {
                   <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي الكلي</td>
                   <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{calculateTotal(currentPdfOrder.items)}</td>
                 </tr>
-                {currentPdfOrder.deposit > 0 && (
+                {Number(currentPdfOrder.deposit || 0) > 0 && (
                   <tr>
                     <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
                     <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{currentPdfOrder.deposit}</td>
                   </tr>
                 )}
-                {currentPdfOrder.deposit > 0 && (
+                {Number(currentPdfOrder.deposit || 0) > 0 && (
                   <tr>
                     <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - currentPdfOrder.deposit}</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - Number(currentPdfOrder.deposit || 0)}</td>
                   </tr>
                 )}
               </tbody>

@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, runTransaction } from "firebase/firestore";
+import { auth } from "../../lib/firebase";
+import { detectBranch } from "../../lib/location";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -117,6 +119,8 @@ export default function CartPage() {
       });
       
       const formattedOrderNumber = String(newOrderNumber).padStart(5, '0');
+      
+      const branchName = await detectBranch(auth.currentUser?.email);
 
       await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
@@ -131,6 +135,7 @@ export default function CartPage() {
         items: cart,
         total,
         status: "pending",
+        branch: branchName,
         createdAt: serverTimestamp()
       });
       

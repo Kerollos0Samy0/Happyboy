@@ -12,6 +12,8 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { auth } from "../../../lib/firebase";
+import { detectBranch } from "../../../lib/location";
 import { Plus, Trash2, Search, ShoppingCart, Send } from "lucide-react";
 
 /* ───────── types ───────── */
@@ -186,6 +188,8 @@ export default function CreateOrderPage() {
 
       const formattedOrderNumber = String(newOrderNumber).padStart(5, "0");
 
+      const branchName = await detectBranch(auth.currentUser?.email);
+
       await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
         customerName: customerName.trim(),
@@ -196,6 +200,7 @@ export default function CreateOrderPage() {
         items: orderItems,
         total,
         status: "pending",
+        branch: branchName,
         createdAt: serverTimestamp(),
       });
 
