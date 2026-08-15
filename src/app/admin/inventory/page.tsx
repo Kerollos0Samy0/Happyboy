@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { Edit, Trash2, Check, X } from "lucide-react";
 
 interface ColorEntry {
   name: string;
@@ -166,8 +167,8 @@ export default function InventoryPage() {
       title: "قسم البناتي",
       sections: [
         { name: "بيبي (500 - 545)", filter: (num: number) => num >= 500 && num <= 545 },
-        { name: "وسط (600 - 680)", filter: (num: number) => num >= 600 && num <= 680 },
-        { name: "محير (800 - 880)", filter: (num: number) => num >= 800 && num <= 880 },
+        { name: "وسط (600 - 680)", filter: (num: number) => num >= 590 && num <= 690 },
+        { name: "محير (800 - 880)", filter: (num: number) => num >= 790 && num <= 890 },
       ]
     }
   ];
@@ -212,16 +213,16 @@ export default function InventoryPage() {
                   {Array.isArray(product.colors) ? product.colors.map(c => `${c.name} (${c.barcode})`).join('، ') : ''}
                 </td>
                 <td className="p-3">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 justify-center">
                     {editingId === product.id ? (
                       <>
-                        <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold" title="حفظ">حفظ</button>
-                        <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold" title="إلغاء">إلغاء</button>
+                        <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold transition-colors" title="حفظ"><Check size={18} /></button>
+                        <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold" title="تعديل">تعديل</button>
-                        <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold" title="حذف">حذف</button>
+                        <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold transition-colors" title="تعديل"><Edit size={18} /></button>
+                        <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition-colors" title="حذف"><Trash2 size={18} /></button>
                       </>
                     )}
                   </div>
@@ -240,12 +241,13 @@ export default function InventoryPage() {
     return (
       <div className="flex flex-col gap-4">
         {categories.map((mainCat, idx) => (
-          <details key={idx} className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group" open={idx === 0}>
-            <summary className="text-2xl font-bold p-4 cursor-pointer select-none border-b border-gray-200 group-open:bg-gray-100 transition-colors" style={{ color: "var(--primary)" }}>
-              {mainCat.title}
+          <details key={idx} className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group overflow-hidden" open={idx === 0}>
+            <summary className="text-2xl font-bold p-5 cursor-pointer select-none border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors flex justify-between items-center list-none" style={{ color: "var(--primary)" }}>
+              <span>{mainCat.title}</span>
+              <span className="transform transition-transform duration-300 group-open:-rotate-90 text-xl">◀</span>
             </summary>
             
-            <div className="p-4 flex flex-col gap-6 animate-fade-in">
+            <div className="p-4 flex flex-col gap-4 animate-fade-in bg-gray-50/50">
               {mainCat.sections.map((sub, sIdx) => {
                 const subProds = unassignedProducts.filter(p => {
                   const num = parseInt(p.modelNumber, 10);
@@ -259,11 +261,15 @@ export default function InventoryPage() {
                 if (subProds.length === 0) return null;
 
                 return (
-                  <details key={sIdx} className="bg-white rounded-lg shadow-sm border border-gray-200 group" open={false}>
-                    <summary className="text-lg font-bold p-3 text-gray-700 bg-gray-100 rounded cursor-pointer select-none group-open:rounded-b-none transition-colors border-b border-transparent group-open:border-gray-200">
-                      {sub.name} <span className="text-sm font-normal text-gray-500">({subProds.length} موديلات)</span>
+                  <details key={sIdx} className="bg-white rounded-lg shadow-sm border border-gray-200 group/sub overflow-hidden" open={false}>
+                    <summary className="text-lg font-bold p-4 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer select-none transition-colors border-b border-transparent group-open/sub:border-gray-200 flex justify-between items-center list-none">
+                      <div className="flex items-center gap-3">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        {sub.name} <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">({subProds.length} موديلات)</span>
+                      </div>
+                      <span className="transform transition-transform duration-300 group-open/sub:-rotate-90 text-gray-400 text-sm">◀</span>
                     </summary>
-                    <div className="p-3 animate-fade-in">
+                    <div className="p-4 animate-fade-in bg-gray-50/30">
                       {getProductTable(subProds)}
                     </div>
                   </details>
@@ -274,13 +280,15 @@ export default function InventoryPage() {
         ))}
         
         {unassignedProducts.length > 0 && (
-          <details className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group">
-            <summary className="text-2xl font-bold p-4 cursor-pointer select-none border-b border-gray-200 group-open:bg-gray-100 transition-colors" style={{ color: "var(--primary)" }}>
-              قسم أخرى (أرقام غير مصنفة)
+          <details className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group overflow-hidden">
+            <summary className="text-2xl font-bold p-5 cursor-pointer select-none border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors flex justify-between items-center list-none" style={{ color: "var(--primary)" }}>
+              <span>قسم أخرى (أرقام غير مصنفة)</span>
+              <span className="transform transition-transform duration-300 group-open:-rotate-90 text-xl">◀</span>
             </summary>
-            <div className="p-4 bg-white rounded-b-lg shadow-sm animate-fade-in">
-              <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
-                موديلات غير مصنفة <span className="text-sm font-normal">({unassignedProducts.length} موديلات)</span>
+            <div className="p-4 bg-white animate-fade-in">
+              <h4 className="text-lg font-bold mb-4 text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                موديلات غير مصنفة <span className="text-sm font-normal bg-gray-200 px-2 py-0.5 rounded-full">({unassignedProducts.length} موديلات)</span>
               </h4>
               {getProductTable(unassignedProducts)}
             </div>
