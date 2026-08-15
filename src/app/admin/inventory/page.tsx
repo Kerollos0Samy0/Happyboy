@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Trash2, Edit2, Check, X } from "lucide-react";
+
 
 interface ColorEntry {
   name: string;
@@ -282,13 +282,13 @@ export default function InventoryPage() {
                               <div className="flex gap-2">
                                 {editingId === product.id ? (
                                   <>
-                                    <button onClick={() => saveEdit(product.id)} className="text-green-600 p-1 hover:bg-green-50 rounded" title="حفظ"><Check size={18} /></button>
-                                    <button onClick={() => setEditingId(null)} className="text-gray-500 p-1 hover:bg-gray-100 rounded" title="إلغاء"><X size={18} /></button>
+                                    <button onClick={() => saveEdit(product.id)} className="p-1 hover:bg-green-50 rounded" title="حفظ">✅</button>
+                                    <button onClick={() => setEditingId(null)} className="p-1 hover:bg-gray-100 rounded" title="إلغاء">❌</button>
                                   </>
                                 ) : (
                                   <>
-                                    <button onClick={() => startEdit(product)} className="text-blue-600 p-1 hover:bg-blue-50 rounded" title="تعديل"><Edit2 size={18} /></button>
-                                    <button onClick={() => handleDelete(product.id)} className="text-red-600 p-1 hover:bg-red-50 rounded" title="حذف"><Trash2 size={18} /></button>
+                                    <button onClick={() => startEdit(product)} className="p-1 hover:bg-blue-50 rounded" title="تعديل">✏️</button>
+                                    <button onClick={() => handleDelete(product.id)} className="p-1 hover:bg-red-50 rounded" title="حذف">🗑️</button>
                                   </>
                                 )}
                               </div>
