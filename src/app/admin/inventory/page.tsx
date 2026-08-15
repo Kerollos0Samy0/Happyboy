@@ -152,6 +152,31 @@ export default function InventoryPage() {
     return nameStr.includes(term) || modelStr.includes(term);
   });
 
+  const categoryOrder = [
+    "ولادي - بيبي (5 ➔ 90)",
+    "ولادي - وسط (100 ➔ 150)",
+    "ولادي - محير (300 ➔ 350)",
+    "بناتي - بيبي (500 ➔ 545)",
+    "بناتي - وسط (605 ➔ 680)",
+    "بناتي - محير (800 ➔ 880)",
+    "أخرى"
+  ];
+
+  const groupedProducts = categoryOrder.map(cat => ({
+    category: cat,
+    products: filteredProducts.filter(p => {
+      const num = parseInt(p.modelNumber, 10);
+      if (isNaN(num)) return cat === "أخرى";
+      if (num >= 5 && num <= 90) return cat === "ولادي - بيبي (5 ➔ 90)";
+      if (num >= 100 && num <= 150) return cat === "ولادي - وسط (100 ➔ 150)";
+      if (num >= 300 && num <= 350) return cat === "ولادي - محير (300 ➔ 350)";
+      if (num >= 500 && num <= 545) return cat === "بناتي - بيبي (500 ➔ 545)";
+      if (num >= 605 && num <= 680) return cat === "بناتي - وسط (605 ➔ 680)";
+      if (num >= 800 && num <= 880) return cat === "بناتي - محير (800 ➔ 880)";
+      return cat === "أخرى";
+    })
+  })).filter(g => g.products.length > 0);
+
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6">
       <div className="w-full" style={{ maxWidth: '1000px' }}>
@@ -208,64 +233,73 @@ export default function InventoryPage() {
             {filteredProducts.length === 0 ? (
               <p className="text-center py-4">المخزن فارغ حالياً.</p>
             ) : (
-              <table className="w-full text-right border-collapse">
-                <thead>
-                  <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
-                    <th className="p-3">الموديل</th>
-                    <th className="p-3">الاسم</th>
-                    <th className="p-3">السعر</th>
-                    <th className="p-3">الكمية</th>
-                    <th className="p-3">الإجمالي</th>
-                    <th className="p-3">الألوان</th>
-                    <th className="p-3">إجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map(product => (
-                    <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                      <td className="p-3">{product.modelNumber}</td>
-                      <td className="p-3">{product.name}</td>
-                      <td className="p-3">
-                        {editingId === product.id ? (
-                          <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
-                        ) : (
-                          `${product.price} ج.م`
-                        )}
-                      </td>
-                      <td className="p-3">
-                        {editingId === product.id ? (
-                          <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
-                        ) : (
-                          <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
-                            {product.quantity}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3 font-bold text-gray-700">
-                        {new Intl.NumberFormat('ar-EG').format((Number(product.price) || 0) * (Number(product.quantity) || 0))} ج.م
-                      </td>
-                      <td className="p-3 text-sm">
-                        {product.colors?.map(c => c.name).join('، ')}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-2">
-                          {editingId === product.id ? (
-                            <>
-                              <button onClick={() => saveEdit(product.id)} className="text-green-600 p-1 hover:bg-green-50 rounded" title="حفظ"><Check size={18} /></button>
-                              <button onClick={() => setEditingId(null)} className="text-gray-500 p-1 hover:bg-gray-100 rounded" title="إلغاء"><X size={18} /></button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startEdit(product)} className="text-blue-600 p-1 hover:bg-blue-50 rounded" title="تعديل"><Edit2 size={18} /></button>
-                              <button onClick={() => handleDelete(product.id)} className="text-red-600 p-1 hover:bg-red-50 rounded" title="حذف"><Trash2 size={18} /></button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="flex flex-col gap-6">
+                {groupedProducts.map((group) => (
+                  <div key={group.category} className="mb-4">
+                    <h3 className="text-xl font-bold mb-3 p-2 bg-gray-100 rounded" style={{ color: "var(--primary)" }}>
+                      {group.category} <span className="text-sm font-normal text-gray-500">({group.products.length} موديلات)</span>
+                    </h3>
+                    <table className="w-full text-right border-collapse">
+                      <thead>
+                        <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
+                          <th className="p-3">الموديل</th>
+                          <th className="p-3">الاسم</th>
+                          <th className="p-3">السعر</th>
+                          <th className="p-3">الكمية</th>
+                          <th className="p-3">الإجمالي</th>
+                          <th className="p-3">الألوان</th>
+                          <th className="p-3">إجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.products.map(product => (
+                          <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                            <td className="p-3">{product.modelNumber}</td>
+                            <td className="p-3">{product.name}</td>
+                            <td className="p-3">
+                              {editingId === product.id ? (
+                                <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                              ) : (
+                                `${product.price} ج.م`
+                              )}
+                            </td>
+                            <td className="p-3">
+                              {editingId === product.id ? (
+                                <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
+                              ) : (
+                                <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
+                                  {product.quantity}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 font-bold text-gray-700">
+                              {new Intl.NumberFormat('ar-EG').format((Number(product.price) || 0) * (Number(product.quantity) || 0))} ج.م
+                            </td>
+                            <td className="p-3 text-sm">
+                              {product.colors?.map(c => c.name).join('، ')}
+                            </td>
+                            <td className="p-3">
+                              <div className="flex gap-2">
+                                {editingId === product.id ? (
+                                  <>
+                                    <button onClick={() => saveEdit(product.id)} className="text-green-600 p-1 hover:bg-green-50 rounded" title="حفظ"><Check size={18} /></button>
+                                    <button onClick={() => setEditingId(null)} className="text-gray-500 p-1 hover:bg-gray-100 rounded" title="إلغاء"><X size={18} /></button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button onClick={() => startEdit(product)} className="text-blue-600 p-1 hover:bg-blue-50 rounded" title="تعديل"><Edit2 size={18} /></button>
+                                    <button onClick={() => handleDelete(product.id)} className="text-red-600 p-1 hover:bg-red-50 rounded" title="حذف"><Trash2 size={18} /></button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
