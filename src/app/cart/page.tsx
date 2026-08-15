@@ -98,10 +98,6 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
-    if (!customerGovernorate || !customerAddress || !customerShipping) {
-      alert("يرجى ملء بيانات العنوان وشركة الشحن أولاً");
-      return;
-    }
     
     setLoading(true);
     
@@ -293,7 +289,7 @@ export default function CartPage() {
               <h3 className="font-bold text-xl">{total} ج.م</h3>
             </div>
             
-            <h3 className="font-bold mt-6 mb-3 border-b pb-2">تفاصيل الشحن والدفع (مطلوب):</h3>
+            <h3 className="font-bold mt-6 mb-3 border-b pb-2">تفاصيل الشحن والدفع (اختياري):</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div>

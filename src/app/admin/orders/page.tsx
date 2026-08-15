@@ -4,11 +4,11 @@ import { useEffect, useState, useRef } from "react";
 import { db } from "../../../lib/firebase";
 import {
   collection, onSnapshot, query, orderBy,
-  updateDoc, doc, deleteDoc
+  updateDoc, doc, deleteDoc, where, getDocs
 } from "firebase/firestore";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import { Printer, Save, Trash2, X, ChevronDown, MessageCircle } from "lucide-react";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus } from "lucide-react";
 
 interface OrderItem {
   cartItemId?: string;
@@ -61,6 +61,13 @@ export default function LiveOrdersPage() {
   const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
+  // Item editing state
+  const [addModelSearch, setAddModelSearch] = useState("");
+  const [foundProduct, setFoundProduct] = useState<any>(null);
+  const [searchingModel, setSearchingModel] = useState(false);
+  const [addSelectedColor, setAddSelectedColor] = useState("");
+  const [addQty, setAddQty] = useState(1);
+
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [currentPdfOrder, setCurrentPdfOrder] = useState<Order | null>(null);
 
@@ -81,12 +88,61 @@ export default function LiveOrdersPage() {
   }, [orders]);
 
   const openModal = (order: Order) => {
-    setSelectedOrder(order);
+    setSelectedOrder({ ...order, items: [...order.items] });
     setEditDeposit((order.deposit ?? 0).toString());
     setEditDeliveryDate(order.deliveryDate ?? "");
+    setFoundProduct(null);
+    setAddModelSearch("");
+    setAddSelectedColor("");
+    setAddQty(1);
   };
 
-  const closeModal = () => setSelectedOrder(null);
+  const closeModal = () => { setSelectedOrder(null); setFoundProduct(null); };
+
+  // Item editing functions
+  const removeItemFromOrder = (index: number) => {
+    if (!selectedOrder) return;
+    const newItems = selectedOrder.items.filter((_, i) => i !== index);
+    setSelectedOrder({ ...selectedOrder, items: newItems });
+  };
+
+  const searchModel = async () => {
+    if (!addModelSearch.trim()) return;
+    setSearchingModel(true);
+    setFoundProduct(null);
+    try {
+      const q = query(collection(db, "products"), where("modelNumber", "==", addModelSearch.trim()));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const data = snap.docs[0].data();
+        setFoundProduct({ id: snap.docs[0].id, ...data });
+        if (data.colors?.length > 0) setAddSelectedColor(data.colors[0].name);
+      } else {
+        alert("مش لاقي موديل بالرقم ده");
+      }
+    } finally {
+      setSearchingModel(false);
+    }
+  };
+
+  const addItemToOrder = () => {
+    if (!selectedOrder || !foundProduct || !addSelectedColor) return;
+    const newItem: OrderItem = {
+      cartItemId: Date.now().toString() + Math.random().toString(),
+      name: foundProduct.name,
+      modelNumber: foundProduct.modelNumber,
+      price: foundProduct.price,
+      selectedColor: addSelectedColor,
+      sizes: foundProduct.sizes || [],
+      isSeri: true,
+    };
+    const newItems = [...selectedOrder.items, ...Array(addQty).fill(null).map(() => ({ ...newItem, cartItemId: Date.now().toString() + Math.random().toString() }))];
+    setSelectedOrder({ ...selectedOrder, items: newItems });
+    setFoundProduct(null);
+    setAddModelSearch("");
+    setAddSelectedColor("");
+    setAddQty(1);
+  };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     await updateDoc(doc(db, "orders", orderId), { status: newStatus });
@@ -99,6 +155,12 @@ export default function LiveOrdersPage() {
       await updateDoc(doc(db, "orders", selectedOrder.id), {
         deposit: Number(editDeposit),
         deliveryDate: editDeliveryDate,
+        items: selectedOrder.items,
+        total: selectedOrder.items.reduce((sum, it) => {
+          const qty = (it as any).quantity || 1;
+          const sizes = it.sizes?.length || 1;
+          return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
+        }, 0),
       });
     } finally {
       setSaving(false);
@@ -481,14 +543,89 @@ export default function LiveOrdersPage() {
                     background: "#f8fafc", borderRadius: "0.5rem", padding: "0.5rem 0.75rem",
                     fontSize: "0.78rem",
                   }}>
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ fontWeight: 700, color: "#0f172a" }}>{item.name}</span>
                       <span style={{ color: "#64748b" }}> (موديل {item.modelNumber}) — {item.selectedColor}</span>
                       {item.isSeri && <span style={{ color: "#3b82f6", marginRight: "0.25rem" }}>ثري ({item.sizes?.length} قطع)</span>}
                     </div>
-                    <span style={{ fontWeight: 700, color: "#A62E2E", whiteSpace: "nowrap" }}>{item.price} ج</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}>
+                      <span style={{ fontWeight: 700, color: "#A62E2E", whiteSpace: "nowrap" }}>{item.price} ج</span>
+                      <button
+                        onClick={() => removeItemFromOrder(i)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: "2px", borderRadius: "4px", display: "flex" }}
+                        title="حذف الصنف"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Add new item by model number */}
+              <div style={{ marginTop: "0.75rem", padding: "0.65rem", background: "#f0fdf4", borderRadius: "0.5rem", border: "1px dashed #86efac" }}>
+                <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#166534", marginBottom: "0.4rem" }}>
+                  <Plus size={13} style={{ display: "inline", verticalAlign: "middle" }} /> إضافة صنف جديد
+                </p>
+                <div style={{ display: "flex", gap: "0.35rem", marginBottom: foundProduct ? "0.5rem" : 0 }}>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="رقم الموديل"
+                    value={addModelSearch}
+                    onChange={e => setAddModelSearch(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && searchModel()}
+                    style={{ padding: "0.4rem 0.6rem", fontSize: "0.8rem", flex: 1 }}
+                  />
+                  <button
+                    onClick={searchModel}
+                    disabled={searchingModel}
+                    style={{
+                      padding: "0.4rem 0.7rem", borderRadius: "0.4rem", border: "none",
+                      background: "#0f172a", color: "#fff", cursor: "pointer",
+                      fontFamily: "inherit", fontWeight: 600, fontSize: "0.78rem",
+                      display: "flex", alignItems: "center", gap: "0.25rem",
+                    }}
+                  >
+                    <Search size={13} /> {searchingModel ? "..." : "بحث"}
+                  </button>
+                </div>
+
+                {foundProduct && (
+                  <div style={{ background: "#fff", borderRadius: "0.4rem", padding: "0.5rem", border: "1px solid #e2e8f0" }}>
+                    <p style={{ fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.3rem" }}>
+                      {foundProduct.name} — {foundProduct.price} ج.م
+                    </p>
+                    <div style={{ display: "flex", gap: "0.35rem", alignItems: "center", flexWrap: "wrap" }}>
+                      <select
+                        className="input"
+                        style={{ padding: "0.3rem 0.5rem", fontSize: "0.78rem", flex: 1, minWidth: "80px" }}
+                        value={addSelectedColor}
+                        onChange={e => setAddSelectedColor(e.target.value)}
+                      >
+                        {foundProduct.colors?.map((c: any) => (
+                          <option key={c.name} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                        <button onClick={() => setAddQty(Math.max(1, addQty - 1))} style={{ background: "#e2e8f0", border: "none", borderRadius: "4px", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Minus size={12} /></button>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, width: "24px", textAlign: "center" }}>{addQty}</span>
+                        <button onClick={() => setAddQty(addQty + 1)} style={{ background: "#e2e8f0", border: "none", borderRadius: "4px", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus size={12} /></button>
+                      </div>
+                      <button
+                        onClick={addItemToOrder}
+                        style={{
+                          padding: "0.3rem 0.65rem", borderRadius: "0.35rem", border: "none",
+                          background: "#10b981", color: "#fff", cursor: "pointer",
+                          fontFamily: "inherit", fontWeight: 700, fontSize: "0.75rem",
+                          display: "flex", alignItems: "center", gap: "0.2rem",
+                        }}
+                      >
+                        <Plus size={12} /> إضافة
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -499,7 +636,11 @@ export default function LiveOrdersPage() {
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
                 <span style={{ color: "#64748b" }}>الإجمالي</span>
-                <strong>{selectedOrder.total} ج.م</strong>
+                <strong>{selectedOrder.items.reduce((sum, it) => {
+                  const qty = (it as any).quantity || 1;
+                  const sizes = it.sizes?.length || 1;
+                  return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
+                }, 0)} ج.م</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
                 <span style={{ color: "#64748b" }}>العربون</span>
@@ -508,7 +649,11 @@ export default function LiveOrdersPage() {
               <div style={{ borderTop: "1px solid #e2e8f0", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 700 }}>المتبقي</span>
                 <strong style={{ color: "#A62E2E", fontSize: "1rem" }}>
-                  {selectedOrder.total - (selectedOrder.deposit ?? 0)} ج.م
+                  {selectedOrder.items.reduce((sum, it) => {
+                    const qty = (it as any).quantity || 1;
+                    const sizes = it.sizes?.length || 1;
+                    return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
+                  }, 0) - (selectedOrder.deposit ?? 0)} ج.م
                 </strong>
               </div>
             </div>

@@ -106,14 +106,15 @@ export default function AdminDashboardPage() {
               </div>
             )}
             
-            <div className="flex gap-2 w-full mt-2">
-              {isAhmed && (
-                <a href="/admin/inventory" className="btn btn-primary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
-                  إدارة المخزن
-                </a>
-              )}
+            <div className="flex gap-2 w-full mt-2" style={{ flexWrap: "wrap" }}>
+              <a href="/admin/inventory" className="btn btn-primary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                إدارة المخزن
+              </a>
               <a href="/admin/orders" className="btn btn-secondary flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
                 الطلبات الحية
+              </a>
+              <a href="/admin/create-order" className="btn btn-outline flex-1" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center', borderColor: '#10b981', color: '#10b981' }}>
+                ➕ إنشاء طلب
               </a>
             </div>
           </div>
