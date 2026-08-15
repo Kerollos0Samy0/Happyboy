@@ -48,6 +48,7 @@ export default function ScanPage() {
         fps: 10,
         qrbox: { width: 250, height: 250 },
         supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+        showTorchButtonIfSupported: true,
       },
       false
     );
