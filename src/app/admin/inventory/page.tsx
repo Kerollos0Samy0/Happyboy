@@ -234,74 +234,56 @@ export default function InventoryPage() {
     );
   };
 
-  const [activeCategoryTab, setActiveCategoryTab] = useState("قسم الأولادي");
-
   const renderCategorizedProducts = () => {
     let unassignedProducts = [...filteredProducts];
     
-    // Pre-calculate unassigned to keep tabs logic clean
-    categories.forEach(mainCat => {
-      mainCat.sections.forEach(sub => {
-        const subProds = unassignedProducts.filter(p => {
-          const num = parseInt(p.modelNumber, 10);
-          return !isNaN(num) && sub.filter(num);
-        });
-        unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
-      });
-    });
-
-    const hasOther = unassignedProducts.length > 0;
-    const allTabs = [...categories.map(c => c.title)];
-    if (hasOther) allTabs.push("قسم أخرى");
-
     return (
-      <div className="flex flex-col gap-6">
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 justify-center mb-4">
-          {allTabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveCategoryTab(tab)}
-              className={`px-6 py-2 rounded-full font-bold transition-colors ${
-                activeCategoryTab === tab 
-                  ? "bg-[var(--primary)] text-white shadow-md" 
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-col gap-4">
+        {categories.map((mainCat, idx) => (
+          <details key={idx} className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group" open={idx === 0}>
+            <summary className="text-2xl font-bold p-4 cursor-pointer select-none border-b border-gray-200 group-open:bg-gray-100 transition-colors" style={{ color: "var(--primary)" }}>
+              {mainCat.title}
+            </summary>
+            
+            <div className="p-4 flex flex-col gap-6 animate-fade-in">
+              {mainCat.sections.map((sub, sIdx) => {
+                const subProds = unassignedProducts.filter(p => {
+                  const num = parseInt(p.modelNumber, 10);
+                  if (isNaN(num)) return false;
+                  return sub.filter(num);
+                });
+                
+                // Remove found from unassigned
+                unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
 
-        {/* Content */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm animate-fade-in">
-          {activeCategoryTab === "قسم أخرى" ? (
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-              <h4 className="text-xl font-bold mb-4 text-gray-700 bg-gray-100 p-3 rounded text-center">
+                if (subProds.length === 0) return null;
+
+                return (
+                  <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
+                      {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
+                    </h4>
+                    {getProductTable(subProds)}
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+        ))}
+        
+        {unassignedProducts.length > 0 && (
+          <details className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group">
+            <summary className="text-2xl font-bold p-4 cursor-pointer select-none border-b border-gray-200 group-open:bg-gray-100 transition-colors" style={{ color: "var(--primary)" }}>
+              قسم أخرى (أرقام غير مصنفة)
+            </summary>
+            <div className="p-4 bg-white rounded-b-lg shadow-sm animate-fade-in">
+              <h4 className="text-lg font-bold mb-3 text-gray-700 bg-gray-100 p-2 rounded">
                 موديلات غير مصنفة <span className="text-sm font-normal">({unassignedProducts.length} موديلات)</span>
               </h4>
               {getProductTable(unassignedProducts)}
             </div>
-          ) : (
-            categories.find(c => c.title === activeCategoryTab)?.sections.map((sub, sIdx) => {
-              const subProds = filteredProducts.filter(p => {
-                const num = parseInt(p.modelNumber, 10);
-                return !isNaN(num) && sub.filter(num);
-              });
-
-              if (subProds.length === 0) return null;
-
-              return (
-                <div key={sIdx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 last:mb-0">
-                  <h4 className="text-xl font-bold mb-4 text-gray-700 bg-[var(--primary-light)] text-[var(--primary)] p-3 rounded text-center">
-                    {sub.name} <span className="text-sm font-normal">({subProds.length} موديلات)</span>
-                  </h4>
-                  {getProductTable(subProds)}
-                </div>
-              );
-            })
-          )}
-        </div>
+          </details>
+        )}
       </div>
     );
   };
