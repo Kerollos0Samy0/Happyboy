@@ -76,9 +76,21 @@ export default function AdminCustomersPage() {
     );
   }
 
+  const mapCustomerType = (type: string) => {
+    if (!type) return "مجموعات محلات";
+    const t = type.trim();
+    if (t === 'مكاتب') return 'عملاء مكاتب';
+    if (t.includes('مقابل')) return 'محلات مقابل';
+    if (t === 'خارجي') return 'عملاء خارجي';
+    if (t === 'محلات حساب') return 'محلات حساب';
+    // Any other category like توحيدات, جعفر, etc will be under مجموعات محلات
+    return 'مجموعات محلات';
+  };
+
   const filteredCustomers = customers.filter(c => {
     const term = searchTerm.toLowerCase();
-    const matchType = c.customerType === activeTab;
+    const mappedType = mapCustomerType(c.customerType);
+    const matchType = mappedType === activeTab;
     const matchSearch = (c.name || "").toLowerCase().includes(term) || 
                         (c.phone || "").includes(term) ||
                         (c.brandName || "").toLowerCase().includes(term);
@@ -87,7 +99,7 @@ export default function AdminCustomersPage() {
 
   // Calculate counts for tabs
   const counts = CUSTOMER_TYPES.reduce((acc, type) => {
-    acc[type] = customers.filter(c => c.customerType === type).length;
+    acc[type] = customers.filter(c => mapCustomerType(c.customerType) === type).length;
     return acc;
   }, {} as Record<string, number>);
 
