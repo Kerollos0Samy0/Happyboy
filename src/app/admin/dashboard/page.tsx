@@ -237,7 +237,7 @@ export default function AdminDashboardPage() {
                   <div className={styles.linkContent}><PlusCircle size={20} style={{color: '#10b981'}}/> إنشاء طلب جديد</div>
                   <ChevronLeft size={18} style={{color: '#9ca3af'}} />
                 </a>
-                <a href="/scan" className={`${styles.linkItem} ${styles.green}`}>
+                <a href="/customer" className={`${styles.linkItem} ${styles.green}`}>
                   <div className={styles.linkContent}><QrCode size={20} /> مسح الموديلات</div>
                   <ChevronLeft size={18} style={{color: '#86efac'}} />
                 </a>

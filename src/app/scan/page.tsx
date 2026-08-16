@@ -41,6 +41,13 @@ export default function ScanPage() {
   const [searchModel, setSearchModel] = useState("");
 
   useEffect(() => {
+    // Check if customer is registered, if not redirect to /customer
+    const customerPhone = localStorage.getItem("customerPhone");
+    if (!customerPhone) {
+      router.push("/customer");
+      return;
+    }
+
     const scannerElement = document.getElementById("reader");
     if (!scannerElement) return;
     if (scannerElement.innerHTML !== "") return;

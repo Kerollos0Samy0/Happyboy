@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "../../../lib/firebase";
 import {
   collection,
@@ -52,11 +52,22 @@ interface ColorSelection {
   qty: number;
 }
 
+
+interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  brandName?: string;
+  governorate?: string;
+  address?: string;
+}
+
 /* ═══════════════════════════════════════════════════════════════ */
 export default function CreateOrderPage() {
   /* ── search state ── */
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [modelInput, setModelInput] = useState("");
-  const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [foundProduct, setFoundProduct] = useState<Product | null>(null);
   const [colorSelections, setColorSelections] = useState<ColorSelection[]>([]);
@@ -74,9 +85,43 @@ export default function CreateOrderPage() {
   const [deliveryDate, setDeliveryDate] = useState("");
   const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
 
+  
+  /* ── customer dropdown state ── */
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+
   /* ── submit state ── */
   const [submitting, setSubmitting] = useState(false);
   const [successOrderNumber, setSuccessOrderNumber] = useState<string | null>(null);
+
+  /* ─────────────────── on mount ─────────────────── */
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsSnap, customersSnap] = await Promise.all([
+          getDocs(collection(db, "products")),
+          getDocs(collection(db, "customers"))
+        ]);
+        const productsList = productsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Product, "id">)
+        }));
+        setAllProducts(productsList);
+
+        const customersList = customersSnap.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Customer, "id">)
+        }));
+        setAllCustomers(customersList);
+      } catch (err) {
+        console.error("Error fetching data", err);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   /* ─────────────────── helpers ─────────────────── */
   const calculateItemTotal = (item: OrderItem) => {
@@ -90,47 +135,30 @@ export default function CreateOrderPage() {
   const depositNum = Number(deposit) || 0;
   const remaining = total - depositNum;
 
-  /* ─────────────────── search ─────────────────── */
-  const handleSearch = async () => {
-    const trimmed = modelInput.trim();
-    if (!trimmed) return;
+  /* ─────────────────── search (Dropdown) ─────────────────── */
+  const handleProductSelect = (val: string) => {
+    setModelInput(val);
+    if (!val) {
+      setFoundProduct(null);
+      setColorSelections([]);
+      return;
+    }
 
-    setSearching(true);
-    setSearchError("");
-    setFoundProduct(null);
-    setColorSelections([]);
-
-    try {
-      const q = query(
-        collection(db, "products"),
-        where("modelNumber", "==", trimmed)
-      );
-      const snap = await getDocs(q);
-
-      if (snap.empty) {
-        setSearchError(`لم يتم العثور على منتج بموديل "${trimmed}"`);
-        return;
-      }
-
-      const docData = snap.docs[0];
-      const product: Product = {
-        id: docData.id,
-        ...(docData.data() as Omit<Product, "id">),
-      };
-
-      setFoundProduct(product);
+    const prod = allProducts.find(p => `${p.modelNumber} - ${p.name}` === val || p.modelNumber === val);
+    
+    if (prod) {
+      setFoundProduct(prod);
       setColorSelections(
-        product.colors.map((c) => ({
+        prod.colors.map((c) => ({
           colorName: c.name,
           checked: false,
           qty: 1,
         }))
       );
-    } catch (err) {
-      console.error(err);
-      setSearchError("حدث خطأ أثناء البحث، حاول مجدداً");
-    } finally {
-      setSearching(false);
+      setSearchError("");
+    } else {
+      setFoundProduct(null);
+      setColorSelections([]);
     }
   };
 
@@ -163,6 +191,25 @@ export default function CreateOrderPage() {
   const removeItem = (cartItemId: string) => {
     setOrderItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
   };
+
+
+  const handleCustomerNameChange = (val: string) => {
+    setCustomerName(val);
+    setShowCustomerDropdown(true);
+  };
+
+  const handleSelectCustomer = (cust: Customer) => {
+    setCustomerName(cust.name || "");
+    setCustomerPhone(cust.phone || "");
+    setCustomerBrand(cust.brandName || "");
+    setCustomerGovernorate(cust.governorate || "");
+    setCustomerAddress(cust.address || "");
+    setShowCustomerDropdown(false);
+  };
+
+  const filteredCustomers = customerName.trim() === "" 
+    ? [] 
+    : allCustomers.filter(c => c.name && c.name.toLowerCase().includes(customerName.toLowerCase()));
 
   /* ─────────────────── auto-fetch customer ─────────────────── */
   const handlePhoneBlur = async () => {
@@ -359,25 +406,19 @@ export default function CreateOrderPage() {
             </h3>
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <input
+                list="products-datalist"
                 className="input"
-                type="text"
-                placeholder="أدخل رقم الموديل مثل 85"
+                placeholder={productsLoading ? "جاري تحميل الموديلات..." : "اختر أو ابحث برقم الموديل..."}
                 value={modelInput}
-                onChange={(e) => setModelInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
+                onChange={(e) => handleProductSelect(e.target.value)}
+                disabled={productsLoading}
                 style={{ flex: 1 }}
               />
-              <button
-                className="btn btn-primary"
-                onClick={handleSearch}
-                disabled={searching || !modelInput.trim()}
-                style={{ whiteSpace: "nowrap" }}
-              >
-                {searching ? "جاري البحث..." : "بحث"}
-                {!searching && <Search size={16} />}
-              </button>
+              <datalist id="products-datalist">
+                {allProducts.map((p) => (
+                  <option key={p.id} value={`${p.modelNumber} - ${p.name}`} />
+                ))}
+              </datalist>
             </div>
 
             {searchError && (
@@ -608,7 +649,7 @@ export default function CreateOrderPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {/* name */}
-              <div>
+              <div style={{ position: "relative" }}>
                 <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
                   اسم العميل <span style={{ color: "var(--danger)" }}>*</span>
                 </label>
@@ -617,8 +658,40 @@ export default function CreateOrderPage() {
                   type="text"
                   placeholder="أدخل اسم العميل"
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={(e) => handleCustomerNameChange(e.target.value)}
+                  onFocus={() => setShowCustomerDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowCustomerDropdown(false), 200)}
                 />
+                {showCustomerDropdown && filteredCustomers.length > 0 && (
+                  <div style={{ 
+                    position: "absolute", 
+                    top: "100%", 
+                    left: 0, 
+                    right: 0, 
+                    background: "white", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "var(--radius-md)", 
+                    boxShadow: "var(--shadow-md)", 
+                    zIndex: 10,
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    marginTop: "4px"
+                  }}>
+                    {filteredCustomers.map(cust => (
+                      <div 
+                        key={cust.id} 
+                        style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #f1f5f9", background: "white", transition: "background 0.2s" }}
+                        onClick={() => handleSelectCustomer(cust)}
+                        onMouseDown={(e) => e.preventDefault()} 
+                        onMouseEnter={(e) => e.currentTarget.style.background = "#f8fafc"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                      >
+                        <div style={{ fontWeight: "bold" }}>{cust.name}</div>
+                        <div style={{ fontSize: "0.8rem", color: "gray" }}>{cust.phone} {cust.brandName ? `- ${cust.brandName}` : ''}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* phone */}

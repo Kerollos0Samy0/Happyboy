@@ -45,12 +45,15 @@ export default function CartPage() {
     setCart(savedCart);
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");
     setCustomerBrand(localStorage.getItem("customerBrand") || "");
+    setCustomerGovernorate(localStorage.getItem("customerGovernorate") || "");
+    setCustomerAddress(localStorage.getItem("customerAddress") || "");
+    setCustomerShipping(localStorage.getItem("customerShipping") || "");
     
     const phone = localStorage.getItem("customerPhone") || "";
     setCustomerPhone(phone);
     
-    if (phone) {
-      // Fetch latest shipping info for this phone
+    if (phone && !localStorage.getItem("customerGovernorate")) {
+      // Fetch latest shipping info for this phone if not in local storage
       import("firebase/firestore").then(({ query, where, getDocs }) => {
         const q = query(collection(db, "orders"), where("customerPhone", "==", phone));
         getDocs(q).then((snapshot) => {

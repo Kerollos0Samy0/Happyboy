@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Edit, Trash2, Check, X } from "lucide-react";
+import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag } from "lucide-react";
 
 interface ColorEntry {
   name: string;
@@ -194,30 +194,29 @@ export default function InventoryPage() {
     }
   ];
 
-  const getProductTable = (prods: Product[]) => {
+    const getProductTable = (prods: Product[]) => {
     if (prods.length === 0) return null;
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-right border-collapse mb-4">
+      <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200 mt-2">
+        <table className="w-full text-right border-collapse whitespace-nowrap">
           <thead>
-            <tr style={{ background: "var(--surface-hover)", borderBottom: "2px solid var(--border)" }}>
-              <th className="p-3">الموديل</th>
-              <th className="p-3">الاسم</th>
-              <th className="p-3">السعر</th>
-              <th className="p-3 border-l border-gray-200">الإجمالي</th>
-              <th className="p-3 bg-gray-50 text-blue-900">اللون</th>
-              <th className="p-3 bg-gray-50 text-blue-900">كمية اللون</th>
-              <th className="p-3 bg-gray-50 text-blue-900">الباركود</th>
-              <th className="p-3 border-r border-gray-200">إجراءات</th>
+            <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider">
+              <th className="p-4 font-bold">الموديل</th>
+              <th className="p-4 font-bold">الاسم</th>
+              <th className="p-4 font-bold">السعر</th>
+              <th className="p-4 font-bold border-l border-gray-100">الإجمالي</th>
+              <th className="p-4 font-bold bg-blue-50/30 text-blue-700">اللون</th>
+              <th className="p-4 font-bold bg-blue-50/30 text-blue-700">كمية اللون</th>
+              <th className="p-4 font-bold bg-blue-50/30 text-blue-700">الباركود</th>
+              <th className="p-4 font-bold text-center">إجراءات</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {prods.map((product, pIdx) => {
               const isEditing = editingId === product.id && editForm;
               const displayProduct = isEditing ? editForm : product;
               const hasColors = Array.isArray(displayProduct.colors) && displayProduct.colors.length > 0;
               const rowSpan = hasColors ? displayProduct.colors.length : 1;
-              const isLastProduct = pIdx === prods.length - 1;
 
               const handleEditField = (field: keyof Product, value: any) => {
                 if (editForm) setEditForm({ ...editForm, [field]: value });
@@ -230,76 +229,81 @@ export default function InventoryPage() {
                 }
               };
 
-              const topBorder = pIdx > 0 ? "3px solid #94a3b8" : "none";
+              const trClass = "hover:bg-gray-50/50 transition-colors group";
 
               return (
                 <React.Fragment key={product.id}>
-                  <tr>
-                    <td className="p-4 font-bold" style={{ verticalAlign: 'middle', borderTop: topBorder }} rowSpan={rowSpan}>
+                  <tr className={trClass}>
+                    <td className="p-4 font-black text-gray-900" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="text" className="input p-1 text-sm text-center" style={{ minWidth: '80px' }} value={displayProduct.modelNumber} onChange={e => handleEditField('modelNumber', e.target.value)} />
+                        <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" style={{ minWidth: '80px' }} value={displayProduct.modelNumber} onChange={e => handleEditField('modelNumber', e.target.value)} />
                       ) : (
-                        displayProduct.modelNumber
+                        <div className="flex items-center gap-2">
+                          <Tag size={14} className="text-gray-400" />
+                          {displayProduct.modelNumber}
+                        </div>
                       )}
                     </td>
-                    <td className="p-4 font-bold text-gray-700" style={{ verticalAlign: 'middle', minWidth: '150px', borderTop: topBorder }} rowSpan={rowSpan}>
+                    <td className="p-4 font-bold text-gray-800" style={{ verticalAlign: 'middle', minWidth: '150px' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="text" className="input p-1 text-sm" value={displayProduct.name} onChange={e => handleEditField('name', e.target.value)} />
+                        <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.name} onChange={e => handleEditField('name', e.target.value)} />
                       ) : (
                         displayProduct.name
                       )}
                     </td>
-                    <td className="p-4" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap', borderTop: topBorder }} rowSpan={rowSpan}>
+                    <td className="p-4" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="number" className="input w-24 p-1 text-sm text-center" value={displayProduct.price} onChange={e => handleEditField('price', e.target.value)} />
+                        <input type="number" className="w-24 bg-gray-50 border border-gray-200 rounded p-1.5 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.price} onChange={e => handleEditField('price', e.target.value)} />
                       ) : (
-                        <span style={{ padding: '0 0.5rem', background: '#f8fafc', borderRadius: '4px' }}>{displayProduct.price} ج.م</span>
+                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-sm font-bold bg-green-50 text-green-700 border border-green-100">
+                          {displayProduct.price} ج.م
+                        </span>
                       )}
                     </td>
-                    <td className="p-4" style={{ verticalAlign: 'middle', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', borderTop: topBorder }} rowSpan={rowSpan}>
+                    <td className="p-4 border-l border-gray-100" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="number" className="input w-24 p-1 text-sm text-center" value={displayProduct.quantity} onChange={e => handleEditField('quantity', e.target.value)} />
+                        <input type="number" className="w-24 bg-gray-50 border border-gray-200 rounded p-1.5 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.quantity} onChange={e => handleEditField('quantity', e.target.value)} />
                       ) : (
-                        <span className={displayProduct.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'} style={{ fontSize: '1.1rem', padding: '0 0.5rem' }}>
+                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-black ${displayProduct.quantity <= 0 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
                           {displayProduct.quantity}
                         </span>
                       )}
                     </td>
                     
                     {/* First Color */}
-                    <td className="p-3 text-sm font-bold" style={{ background: '#f0f9ff', borderTop: topBorder }}>
+                    <td className="p-3 text-sm font-bold bg-blue-50/10">
                       {isEditing && hasColors ? (
-                        <input type="text" className="input p-1 text-sm text-center" value={displayProduct.colors[0].name} onChange={e => handleEditColor(0, 'name', e.target.value)} />
+                        <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].name} onChange={e => handleEditColor(0, 'name', e.target.value)} />
                       ) : (
-                        hasColors ? displayProduct.colors[0].name : "بدون"
+                        hasColors ? displayProduct.colors[0].name : <span className="text-gray-400 font-normal">بدون</span>
                       )}
                     </td>
-                    <td className="p-3 font-black text-blue-800" style={{ background: '#f0f9ff', borderTop: topBorder }}>
+                    <td className="p-3 font-black text-gray-700 bg-blue-50/10">
                       {isEditing && hasColors ? (
-                        <input type="number" className="input p-1 text-sm text-center" style={{ width: '60px' }} value={displayProduct.colors[0].quantity ?? ""} onChange={e => handleEditColor(0, 'quantity', Number(e.target.value))} />
+                        <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].quantity ?? ""} onChange={e => handleEditColor(0, 'quantity', Number(e.target.value))} />
                       ) : (
                         hasColors ? (displayProduct.colors[0].quantity ?? "-") : "-"
                       )}
                     </td>
-                    <td className="p-3 text-xs text-gray-500" style={{ background: '#f0f9ff', borderTop: topBorder }}>
+                    <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                       {isEditing && hasColors ? (
-                        <input type="text" className="input p-1 text-xs text-center" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
+                        <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
                       ) : (
                         hasColors ? displayProduct.colors[0].barcode : "-"
                       )}
                     </td>
 
-                    <td className="p-4 border-r border-gray-200" style={{ verticalAlign: 'middle', borderTop: topBorder }} rowSpan={rowSpan}>
-                      <div className="flex gap-2 justify-center">
+                    <td className="p-4 text-center" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
+                      <div className="flex gap-1.5 justify-center opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                         {isEditing ? (
                           <>
-                            <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold transition-colors" title="حفظ"><Check size={18} /></button>
-                            <button onClick={cancelEdit} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
+                            <button onClick={() => saveEdit(product.id)} className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-lg transition-colors border border-emerald-100" title="حفظ"><Check size={16} strokeWidth={2.5} /></button>
+                            <button onClick={cancelEdit} className="p-2 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-lg transition-colors border border-gray-200" title="إلغاء"><X size={16} strokeWidth={2.5} /></button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold transition-colors" title="تعديل"><Edit size={18} /></button>
-                            <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition-colors" title="حذف"><Trash2 size={18} /></button>
+                            <button onClick={() => startEdit(product)} className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-colors border border-blue-100" title="تعديل"><Edit size={16} strokeWidth={2.5} /></button>
+                            <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 rounded-lg transition-colors border border-red-100" title="حذف"><Trash2 size={16} strokeWidth={2.5} /></button>
                           </>
                         )}
                       </div>
@@ -310,24 +314,24 @@ export default function InventoryPage() {
                   {hasColors && displayProduct.colors.slice(1).map((color, idxOffset) => {
                     const idx = idxOffset + 1;
                     return (
-                      <tr key={`${product.id}-c${idx}`}>
-                        <td className="p-3 text-sm font-bold border-t border-white" style={{ background: '#f0f9ff' }}>
+                      <tr key={`${product.id}-c${idx}`} className="hover:bg-gray-50/50 transition-colors border-t border-gray-50">
+                        <td className="p-3 text-sm font-bold bg-blue-50/10">
                           {isEditing ? (
-                            <input type="text" className="input p-1 text-sm text-center" value={color.name} onChange={e => handleEditColor(idx, 'name', e.target.value)} />
+                            <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.name} onChange={e => handleEditColor(idx, 'name', e.target.value)} />
                           ) : (
                             color.name
                           )}
                         </td>
-                        <td className="p-3 font-black text-blue-800 border-t border-white" style={{ background: '#f0f9ff' }}>
+                        <td className="p-3 font-black text-gray-700 bg-blue-50/10">
                           {isEditing ? (
-                            <input type="number" className="input p-1 text-sm text-center" style={{ width: '60px' }} value={color.quantity ?? ""} onChange={e => handleEditColor(idx, 'quantity', Number(e.target.value))} />
+                            <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.quantity ?? ""} onChange={e => handleEditColor(idx, 'quantity', Number(e.target.value))} />
                           ) : (
                             color.quantity ?? "-"
                           )}
                         </td>
-                        <td className="p-3 text-xs text-gray-500 border-t border-white" style={{ background: '#f0f9ff' }}>
+                        <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                           {isEditing ? (
-                            <input type="text" className="input p-1 text-xs text-center" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
+                            <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
                           ) : (
                             color.barcode
                           )}
@@ -348,15 +352,20 @@ export default function InventoryPage() {
     let unassignedProducts = [...filteredProducts];
     
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {categories.map((mainCat, idx) => (
-          <details key={idx} className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group overflow-hidden" open={idx === 0}>
-            <summary className="text-2xl font-bold p-5 cursor-pointer select-none border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors flex justify-between items-center list-none" style={{ color: "var(--primary)" }}>
-              <span>{mainCat.title}</span>
-              <span className="transform transition-transform duration-300 group-open:-rotate-90 text-xl">◀</span>
+          <details key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={idx === 0}>
+            <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-600 border border-gray-200">
+                  <Layers size={18} />
+                </div>
+                {mainCat.title}
+              </div>
+              <ChevronDown className="transform transition-transform duration-300 group-open:rotate-180 text-gray-400" size={20} />
             </summary>
             
-            <div className="p-4 flex flex-col gap-4 animate-fade-in bg-gray-50/50">
+            <div className="p-5 flex flex-col gap-5 animate-fade-in bg-white">
               {mainCat.sections.map((sub, sIdx) => {
                 const subProds = unassignedProducts.filter(p => {
                   const num = parseInt(p.modelNumber, 10);
@@ -364,21 +373,23 @@ export default function InventoryPage() {
                   return sub.filter(num);
                 });
                 
-                // Remove found from unassigned
                 unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));
 
                 if (subProds.length === 0) return null;
 
                 return (
-                  <details key={sIdx} className="bg-white rounded-lg shadow-sm border border-gray-200 group/sub overflow-hidden" open={false}>
-                    <summary className="text-lg font-bold p-4 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer select-none transition-colors border-b border-transparent group-open/sub:border-gray-200 flex justify-between items-center list-none">
+                  <details key={sIdx} className="bg-white rounded-xl shadow-sm border border-gray-100 group/sub overflow-hidden" open={true}>
+                    <summary className="text-base font-bold p-4 text-gray-700 bg-gray-50/50 hover:bg-gray-50 cursor-pointer select-none transition-colors border-b border-gray-100 flex justify-between items-center list-none">
                       <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                        {sub.name} <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">({subProds.length} موديلات)</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                        {sub.name} 
+                        <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 ml-2">
+                          {subProds.length} موديلات
+                        </span>
                       </div>
-                      <span className="transform transition-transform duration-300 group-open/sub:-rotate-90 text-gray-400 text-sm">◀</span>
+                      <ChevronDown className="transform transition-transform duration-300 group-open/sub:rotate-180 text-gray-400" size={16} />
                     </summary>
-                    <div className="p-4 animate-fade-in bg-gray-50/30">
+                    <div className="p-4 animate-fade-in bg-white">
                       {getProductTable(subProds)}
                     </div>
                   </details>
@@ -389,16 +400,22 @@ export default function InventoryPage() {
         ))}
         
         {unassignedProducts.length > 0 && (
-          <details className="border border-gray-200 rounded-lg bg-gray-50 shadow-sm group overflow-hidden">
-            <summary className="text-2xl font-bold p-5 cursor-pointer select-none border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors flex justify-between items-center list-none" style={{ color: "var(--primary)" }}>
-              <span>قسم أخرى (أرقام غير مصنفة)</span>
-              <span className="transform transition-transform duration-300 group-open:-rotate-90 text-xl">◀</span>
+          <details className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={true}>
+            <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-200">
+                  <Package size={18} />
+                </div>
+                أخرى (غير مصنفة)
+              </div>
+              <ChevronDown className="transform transition-transform duration-300 group-open:rotate-180 text-gray-400" size={20} />
             </summary>
-            <div className="p-4 bg-white animate-fade-in">
-              <h4 className="text-lg font-bold mb-4 text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 flex items-center gap-3">
+            <div className="p-5 animate-fade-in bg-white">
+              <div className="mb-4 inline-flex items-center gap-2 text-sm font-bold bg-gray-100 px-3 py-1.5 rounded-lg text-gray-600">
                 <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                موديلات غير مصنفة <span className="text-sm font-normal bg-gray-200 px-2 py-0.5 rounded-full">({unassignedProducts.length} موديلات)</span>
-              </h4>
+                موديلات غير مصنفة 
+                <span className="bg-white px-2 py-0.5 rounded-md shadow-sm ml-1">{unassignedProducts.length} موديلات</span>
+              </div>
               {getProductTable(unassignedProducts)}
             </div>
           </details>
@@ -408,46 +425,80 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col items-center mt-6 mb-12">
-      <div className="w-full" style={{ maxWidth: '1200px' }}>
+    <div className="animate-fade-in flex flex-col items-center mt-8 mb-16 px-4">
+      <div className="w-full max-w-[1200px]">
         
-        <div className="flex justify-between items-center mb-6">
-          <h2 style={{ color: 'var(--primary)' }}>المخزن</h2>
-          <button onClick={() => router.push("/admin/dashboard")} className="btn btn-outline">لوحة التحكم</button>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-gray-900 mb-1">إدارة المخزن</h1>
+            <p className="text-gray-500 text-sm">نظرة عامة على الموديلات والكميات</p>
+          </div>
+          <button onClick={() => router.push("/admin/dashboard")} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
+            لوحة التحكم
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">عدد الموديلات</p>
-            <h3 className="text-2xl font-bold mt-1">{totalModels}</h3>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
+            <div className="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <Layers size={28} strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-500 mb-1">عدد الموديلات</p>
+              <h3 className="text-3xl font-black text-gray-900">{totalModels}</h3>
+            </div>
           </div>
-          <div className="card text-center p-4">
-            <p className="text-sm text-gray-500">إجمالي القطع</p>
-            <h3 className="text-2xl font-bold mt-1 text-blue-600">{totalPieces}</h3>
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
+            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <Package size={28} strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-500 mb-1">إجمالي القطع</p>
+              <h3 className="text-3xl font-black text-gray-900">{totalPieces}</h3>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-4 mb-6">
-          <button className={`btn ${activeTab === 'manage' ? 'btn-primary' : 'btn-outline'} flex-1`} onClick={() => setActiveTab('manage')}>
+        {/* Tabs */}
+        <div className="flex bg-gray-100/80 p-1.5 rounded-xl w-fit mb-8 border border-gray-200/50">
+          <button 
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 ${activeTab === 'manage' ? 'bg-white text-blue-700 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`} 
+            onClick={() => setActiveTab('manage')}
+          >
+            <Layers size={18} strokeWidth={2.5} />
             عرض الموديلات
           </button>
-          <button className={`btn ${activeTab === 'add' ? 'btn-primary' : 'btn-outline'} flex-1`} onClick={() => setActiveTab('add')}>
+          <button 
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 ${activeTab === 'add' ? 'bg-white text-blue-700 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`} 
+            onClick={() => setActiveTab('add')}
+          >
+            <Plus size={18} strokeWidth={2.5} />
             إضافة موديل
           </button>
         </div>
 
         {activeTab === 'manage' && (
-          <div className="card w-full">
-            <input 
-              type="text" 
-              className="input w-full md:w-1/2 mb-6" 
-              placeholder="بحث برقم الموديل أو الاسم..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+          <div className="w-full">
+            <div className="relative w-full md:w-[400px] mb-8">
+              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input 
+                type="text" 
+                className="w-full bg-white border border-gray-200 text-gray-900 text-sm font-bold rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block pr-12 p-4 transition-all shadow-sm hover:border-gray-300 outline-none" 
+                placeholder="بحث برقم الموديل أو الاسم..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
             
             {filteredProducts.length === 0 ? (
-              <p className="text-center py-4">لا توجد منتجات.</p>
+              <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 border-dashed">
+                <Package size={48} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500 font-bold text-lg">لا توجد منتجات مطابقة للبحث.</p>
+              </div>
             ) : (
               renderCategorizedProducts()
             )}
@@ -455,55 +506,86 @@ export default function InventoryPage() {
         )}
 
         {activeTab === 'add' && (
-          <div className="card w-full mx-auto" style={{ maxWidth: '700px' }}>
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-[0_2px_20px_-3px_rgba(6,81,237,0.05)] w-full mx-auto max-w-[800px]">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-gray-900 mb-2">إضافة موديل جديد</h2>
+              <p className="text-gray-500 text-sm">قم بتعبئة بيانات الموديل والألوان المتاحة.</p>
+            </div>
+
             {success && (
-              <div className="p-3 mb-4 text-sm text-center" style={{ background: 'var(--success)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
+              <div className="p-4 mb-8 text-sm font-bold flex items-center gap-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <Check size={18} strokeWidth={3} />
+                </div>
                 تم إضافة الموديل بنجاح!
               </div>
             )}
-            <form onSubmit={handleAddProduct} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
+
+            <form onSubmit={handleAddProduct} className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block mb-2 font-bold text-sm">الاسم</label>
-                  <input type="text" className="input" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <label className="block mb-2 font-bold text-sm text-gray-700">الاسم</label>
+                  <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={name} onChange={(e) => setName(e.target.value)} required placeholder="مثال: سوت بيبي كابيشو" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-sm">رقم الموديل</label>
-                  <input type="text" className="input" value={modelNumber} onChange={(e) => setModelNumber(e.target.value)} required />
+                  <label className="block mb-2 font-bold text-sm text-gray-700">رقم الموديل</label>
+                  <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={modelNumber} onChange={(e) => setModelNumber(e.target.value)} required placeholder="مثال: 5" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-sm">السعر</label>
-                  <input type="number" className="input" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                  <label className="block mb-2 font-bold text-sm text-gray-700">السعر (ج.م)</label>
+                  <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="مثال: 150" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-sm">الكمية</label>
-                  <input type="number" className="input" value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
+                  <label className="block mb-2 font-bold text-sm text-gray-700">الكمية الإجمالية</label>
+                  <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={quantity} onChange={(e) => setQuantity(e.target.value)} required placeholder="مثال: 595" />
                 </div>
               </div>
+              
               <div>
-                <label className="block mb-2 font-bold text-sm">المقاسات (مثال: 2, 3, 4)</label>
-                <input type="text" className="input" value={sizes} onChange={(e) => setSizes(e.target.value)} required />
+                <label className="block mb-2 font-bold text-sm text-gray-700">المقاسات</label>
+                <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={sizes} onChange={(e) => setSizes(e.target.value)} required placeholder="مثال: 2, 3, 4, 5" />
               </div>
-              <hr />
-              <h3 className="font-bold text-lg">الألوان والباركود</h3>
-              {colors.map((color, index) => (
-                <div key={index} className="flex gap-2 items-end p-3 bg-gray-50 rounded">
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-bold">اللون</label>
-                    <input type="text" className="input" value={color.name} onChange={e => handleColorChange(index, "name", e.target.value)} required />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-bold">الباركود</label>
-                    <input type="text" className="input" value={color.barcode} onChange={e => handleColorChange(index, "barcode", e.target.value)} required />
-                  </div>
-                  {colors.length > 1 && (
-                    <button type="button" onClick={() => removeColor(index)} className="btn btn-outline text-red-500 border-red-200">حذف</button>
-                  )}
+              
+              <div className="h-px bg-gray-100 my-2"></div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-lg text-gray-900">الألوان والباركود</h3>
+                  <button type="button" onClick={addColor} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors">
+                    <Plus size={16} strokeWidth={2.5} /> إضافة لون
+                  </button>
                 </div>
-              ))}
-              <button type="button" onClick={addColor} className="btn btn-secondary w-fit">+ إضافة لون</button>
-              <button type="submit" className="btn btn-primary w-full mt-4" disabled={actionLoading}>
-                {actionLoading ? "جاري الإضافة..." : "حفظ"}
+                
+                <div className="flex flex-col gap-3">
+                  {colors.map((color, index) => (
+                    <div key={index} className="flex gap-3 items-end p-4 bg-gray-50 border border-gray-100 rounded-xl relative group/color transition-all hover:border-gray-200">
+                      <div className="flex-1">
+                        <label className="block mb-1.5 text-xs font-bold text-gray-500">اللون</label>
+                        <input type="text" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={color.name} onChange={e => handleColorChange(index, "name", e.target.value)} required placeholder="مثال: أسود" />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block mb-1.5 text-xs font-bold text-gray-500">الباركود</label>
+                        <input type="text" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono" value={color.barcode} onChange={e => handleColorChange(index, "barcode", e.target.value)} required placeholder="مثال: 123456789" />
+                      </div>
+                      {colors.length > 1 && (
+                        <button type="button" onClick={() => removeColor(index)} className="p-2.5 bg-white border border-gray-200 text-red-500 rounded-lg hover:bg-red-50 hover:border-red-100 transition-colors" title="حذف اللون">
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" className="w-full mt-6 bg-blue-600 text-white font-bold py-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 text-lg disabled:opacity-70 disabled:cursor-not-allowed" disabled={actionLoading}>
+                {actionLoading ? (
+                  <>جاري الإضافة...</>
+                ) : (
+                  <>
+                    <Check size={20} strokeWidth={2.5} />
+                    حفظ الموديل
+                  </>
+                )}
               </button>
             </form>
           </div>
