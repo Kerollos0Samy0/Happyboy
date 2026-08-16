@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
@@ -10,6 +10,7 @@ import { Edit, Trash2, Check, X } from "lucide-react";
 interface ColorEntry {
   name: string;
   barcode: string;
+  quantity?: number;
 }
 
 interface Product {
@@ -183,52 +184,76 @@ export default function InventoryPage() {
               <th className="p-3">الموديل</th>
               <th className="p-3">الاسم</th>
               <th className="p-3">السعر</th>
-              <th className="p-3">الكمية</th>
-              <th className="p-3">الألوان</th>
-              <th className="p-3">تعديل</th>
+              <th className="p-3 border-l border-gray-200">الإجمالي</th>
+              <th className="p-3 bg-gray-50 text-blue-900">اللون</th>
+              <th className="p-3 bg-gray-50 text-blue-900">كمية اللون</th>
+              <th className="p-3 bg-gray-50 text-blue-900">الباركود</th>
+              <th className="p-3 border-r border-gray-200">إجراءات</th>
             </tr>
           </thead>
           <tbody>
-            {prods.map(product => (
-              <tr key={product.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td className="p-3 font-bold">{product.modelNumber}</td>
-                <td className="p-3">{product.name}</td>
-                <td className="p-3">
-                  {editingId === product.id ? (
-                    <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
-                  ) : (
-                    `${product.price} ج.م`
-                  )}
-                </td>
-                <td className="p-3">
-                  {editingId === product.id ? (
-                    <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
-                  ) : (
-                    <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : ''}>
-                      {product.quantity}
-                    </span>
-                  )}
-                </td>
-                <td className="p-3 text-sm">
-                  {Array.isArray(product.colors) ? product.colors.map(c => `${c.name} (${c.barcode})`).join('، ') : ''}
-                </td>
-                <td className="p-3">
-                  <div className="flex gap-2 justify-center">
-                    {editingId === product.id ? (
-                      <>
-                        <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold transition-colors" title="حفظ"><Check size={18} /></button>
-                        <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold transition-colors" title="تعديل"><Edit size={18} /></button>
-                        <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition-colors" title="حذف"><Trash2 size={18} /></button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {prods.map(product => {
+              const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
+              const rowSpan = hasColors ? product.colors.length : 1;
+
+              return (
+                <React.Fragment key={product.id}>
+                  <tr style={{ borderBottom: hasColors && product.colors.length > 1 ? "none" : "1px solid var(--border)" }}>
+                    <td className="p-3 font-bold" rowSpan={rowSpan}>{product.modelNumber}</td>
+                    <td className="p-3 font-bold text-gray-700" rowSpan={rowSpan}>{product.name}</td>
+                    <td className="p-3" rowSpan={rowSpan}>
+                      {editingId === product.id ? (
+                        <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                      ) : (
+                        `${product.price} ج.م`
+                      )}
+                    </td>
+                    <td className="p-3 border-l border-gray-200" rowSpan={rowSpan}>
+                      {editingId === product.id ? (
+                        <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
+                      ) : (
+                        <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'}>
+                          {product.quantity}
+                        </span>
+                      )}
+                    </td>
+                    
+                    {/* First Color */}
+                    <td className="p-3 bg-blue-50/30 text-sm font-bold border-t border-gray-100">{hasColors ? product.colors[0].name : "بدون"}</td>
+                    <td className="p-3 bg-blue-50/30 font-black text-blue-800 border-t border-gray-100">{hasColors ? (product.colors[0].quantity ?? "-") : "-"}</td>
+                    <td className="p-3 bg-blue-50/30 text-xs text-gray-500 border-t border-gray-100">{hasColors ? product.colors[0].barcode : "-"}</td>
+
+                    <td className="p-3 border-r border-gray-200" rowSpan={rowSpan}>
+                      <div className="flex gap-2 justify-center">
+                        {editingId === product.id ? (
+                          <>
+                            <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold transition-colors" title="حفظ"><Check size={18} /></button>
+                            <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startEdit(product)} className="p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-bold transition-colors" title="تعديل"><Edit size={18} /></button>
+                            <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-100 text-red-700 hover:bg-red-200 rounded font-bold transition-colors" title="حذف"><Trash2 size={18} /></button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Additional Colors */}
+                  {hasColors && product.colors.slice(1).map((color, idx) => {
+                    const isLast = idx === product.colors.length - 2;
+                    return (
+                      <tr key={`${product.id}-c${idx}`} style={{ borderBottom: isLast ? "1px solid var(--border)" : "none" }}>
+                        <td className="p-3 bg-blue-50/30 text-sm font-bold border-t border-white">{color.name}</td>
+                        <td className="p-3 bg-blue-50/30 font-black text-blue-800 border-t border-white">{color.quantity ?? "-"}</td>
+                        <td className="p-3 bg-blue-50/30 text-xs text-gray-500 border-t border-white">{color.barcode}</td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
