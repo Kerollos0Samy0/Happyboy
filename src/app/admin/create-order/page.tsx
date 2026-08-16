@@ -68,8 +68,11 @@ export default function CreateOrderPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerBrand, setCustomerBrand] = useState("");
+  const [customerGovernorate, setCustomerGovernorate] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [deposit, setDeposit] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
+  const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
 
   /* ── submit state ── */
   const [submitting, setSubmitting] = useState(false);
@@ -161,6 +164,29 @@ export default function CreateOrderPage() {
     setOrderItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
   };
 
+  /* ─────────────────── auto-fetch customer ─────────────────── */
+  const handlePhoneBlur = async () => {
+    const trimmedPhone = customerPhone.trim();
+    if (!trimmedPhone || trimmedPhone.length < 8) return;
+
+    setIsSearchingCustomer(true);
+    try {
+      const q = query(collection(db, "customers"), where("phone", "==", trimmedPhone));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const custData = snap.docs[0].data();
+        if (custData.name && !customerName) setCustomerName(custData.name);
+        if (custData.brandName && !customerBrand) setCustomerBrand(custData.brandName);
+        if (custData.governorate && !customerGovernorate) setCustomerGovernorate(custData.governorate);
+        if (custData.address && !customerAddress) setCustomerAddress(custData.address);
+      }
+    } catch (err) {
+      console.error("Error fetching customer", err);
+    } finally {
+      setIsSearchingCustomer(false);
+    }
+  };
+
   /* ─────────────────── submit order ─────────────────── */
   const handleSubmit = async () => {
     if (orderItems.length === 0) return;
@@ -195,6 +221,8 @@ export default function CreateOrderPage() {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerBrand: customerBrand.trim(),
+        customerGovernorate: customerGovernorate.trim(),
+        customerAddress: customerAddress.trim(),
         deliveryDate,
         deposit: depositNum,
         items: orderItems,
@@ -209,6 +237,8 @@ export default function CreateOrderPage() {
       setCustomerName("");
       setCustomerPhone("");
       setCustomerBrand("");
+      setCustomerGovernorate("");
+      setCustomerAddress("");
       setDeposit("");
       setDeliveryDate("");
     } catch (error) {
@@ -602,7 +632,13 @@ export default function CreateOrderPage() {
                   placeholder="أدخل رقم الهاتف"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
+                  onBlur={handlePhoneBlur}
                 />
+                {isSearchingCustomer && (
+                  <span style={{ fontSize: "0.8rem", color: "var(--primary)", marginTop: "0.25rem", display: "block" }}>
+                    جاري البحث عن العميل...
+                  </span>
+                )}
               </div>
 
               {/* brand */}
@@ -617,6 +653,34 @@ export default function CreateOrderPage() {
                   value={customerBrand}
                   onChange={(e) => setCustomerBrand(e.target.value)}
                 />
+              </div>
+
+              {/* governorate & address */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
+                    المحافظة
+                  </label>
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="اختياري"
+                    value={customerGovernorate}
+                    onChange={(e) => setCustomerGovernorate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
+                    العنوان التفصيلي
+                  </label>
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="اختياري"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                  />
+                </div>
               </div>
 
               {/* deposit + delivery date side by side */}

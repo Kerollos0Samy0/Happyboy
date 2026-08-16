@@ -31,7 +31,7 @@ export default function CustomerStartPage() {
           <p>أدخل بياناتك السريعة للبدء في مسح الموديلات وتجهيز فاتورتك.</p>
         </div>
         
-        <form onSubmit={handleStart} className="flex flex-col gap-4">
+        <form onSubmit={handleStart} className="flex flex-col gap-4" autoComplete="off">
           <div>
             <label className="block mb-2 font-bold text-sm">الاسم بالكامل</label>
             <input 
@@ -41,6 +41,7 @@ export default function CustomerStartPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required 
+              autoComplete="off"
             />
           </div>
 
@@ -54,6 +55,7 @@ export default function CustomerStartPage() {
               onChange={(e) => setPhone(e.target.value)}
               required 
               dir="ltr"
+              autoComplete="off"
             />
           </div>
           
@@ -65,6 +67,7 @@ export default function CustomerStartPage() {
               placeholder="مثال: بيبي فاشون" 
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
+              autoComplete="off"
             />
           </div>
           

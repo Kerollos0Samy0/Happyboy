@@ -44,8 +44,31 @@ export default function CartPage() {
     const savedCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
     setCart(savedCart);
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");
-    setCustomerPhone(localStorage.getItem("customerPhone") || "");
     setCustomerBrand(localStorage.getItem("customerBrand") || "");
+    
+    const phone = localStorage.getItem("customerPhone") || "";
+    setCustomerPhone(phone);
+    
+    if (phone) {
+      // Fetch latest shipping info for this phone
+      import("firebase/firestore").then(({ query, where, getDocs }) => {
+        const q = query(collection(db, "orders"), where("customerPhone", "==", phone));
+        getDocs(q).then((snapshot) => {
+          if (!snapshot.empty) {
+            const docs = snapshot.docs.map(d => d.data());
+            docs.sort((a, b) => {
+               const timeA = a.createdAt?.toMillis?.() || 0;
+               const timeB = b.createdAt?.toMillis?.() || 0;
+               return timeB - timeA;
+            });
+            const lastOrder = docs[0];
+            if (lastOrder.customerGovernorate) setCustomerGovernorate(lastOrder.customerGovernorate);
+            if (lastOrder.customerAddress) setCustomerAddress(lastOrder.customerAddress);
+            if (lastOrder.customerShipping) setCustomerShipping(lastOrder.customerShipping);
+          }
+        }).catch(err => console.error("Error fetching shipping info:", err));
+      });
+    }
   }, []);
 
   const calculateItemTotal = (item: CartItem) => {

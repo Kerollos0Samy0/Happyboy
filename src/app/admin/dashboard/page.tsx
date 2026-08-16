@@ -218,10 +218,16 @@ export default function AdminDashboardPage() {
               </h2>
               <div className={styles.linkList}>
                 {isOwner && (
-                  <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
-                    <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
-                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                  </a>
+                  <>
+                    <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
+                      <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                    </a>
+                    <a href="/admin/customers" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><Users size={20} style={{color: '#f59e0b'}}/> قاعدة العملاء</div>
+                      <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                    </a>
+                  </>
                 )}
                 <a href="/admin/orders" className={`${styles.linkItem} ${styles.gray}`}>
                   <div className={styles.linkContent}><ShoppingCart size={20} style={{color: '#3b82f6'}}/> إدارة الطلبات</div>

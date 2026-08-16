@@ -5,6 +5,7 @@ import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import Tesseract from "tesseract.js";
 
 interface ColorEntry {
   name: string;
@@ -36,6 +37,8 @@ export default function ScanPage() {
   const [colorQuantities, setColorQuantities] = useState<{ [key: string]: number }>({});
   
   const [showConfirm, setShowConfirm] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [searchModel, setSearchModel] = useState("");
 
   useEffect(() => {
     const scannerElement = document.getElementById("reader");
@@ -45,7 +48,7 @@ export default function ScanPage() {
     const scanner = new Html5QrcodeScanner(
       "reader",
       {
-        fps: 10,
+        fps: 30,
         qrbox: { width: 250, height: 250 },
         supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
         showTorchButtonIfSupported: true,
@@ -157,6 +160,85 @@ export default function ScanPage() {
     window.location.reload();
   };
 
+  const handleOCR = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setOcrLoading(true);
+    setError("");
+    
+    try {
+      const result = await Tesseract.recognize(file, 'ara+eng', {
+        logger: m => console.log(m)
+      });
+      
+      const text = result.data.text;
+      console.log("OCR Text:", text);
+      
+      const numbers = text.match(/\d+/g) || [];
+      if (numbers.length === 0) {
+        setError("لم يتمكن الذكاء الاصطناعي من العثور على أرقام في الصورة.");
+        setOcrLoading(false);
+        return;
+      }
+      
+      const uniqueNumbers = Array.from(new Set(numbers)).slice(0, 30);
+      
+      const q = query(collection(db, "products"), where("modelNumber", "in", uniqueNumbers));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+         setError(`الذكاء الاصطناعي وجد الأرقام: ${uniqueNumbers.join(", ")} ولكنها غير مسجلة في المخزن كأرقام موديلات.`);
+      } else {
+        const prodData = querySnapshot.docs[0].data() as Product;
+        prodData.id = querySnapshot.docs[0].id;
+        
+        setScannedResult(prodData.modelNumber);
+        setProduct(prodData);
+        const defaultColor = prodData.colors[0];
+        setMatchedColor(defaultColor);
+        setSelectedColors([defaultColor.name]);
+        setColorQuantities({ [defaultColor.name]: 1 });
+      }
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ أثناء معالجة الصورة.");
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  const handleManualSearch = async () => {
+    if (!searchModel.trim()) return;
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      const q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        setError("لم يتم العثور على أي منتج برقم الموديل هذا");
+      } else {
+        const prodData = querySnapshot.docs[0].data() as Product;
+        prodData.id = querySnapshot.docs[0].id;
+        
+        setScannedResult(searchModel);
+        setProduct(prodData);
+        const defaultColor = prodData.colors[0];
+        setMatchedColor(defaultColor);
+        setSelectedColors([defaultColor.name]);
+        setColorQuantities({ [defaultColor.name]: 1 });
+      }
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ في الاتصال بقاعدة البيانات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6 relative">
       <div className="card w-full" style={{ maxWidth: "500px" }}>
@@ -169,6 +251,34 @@ export default function ScanPage() {
             <p className="text-center mb-4">قم بتوجيه الكاميرا نحو باركود اللون ليتم التعرف عليه.</p>
             <div id="reader" style={{ width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}></div>
             
+            <div className="mt-6 flex flex-col gap-4">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={handleOCR}
+                />
+                <button className="btn w-full py-3 flex items-center justify-center gap-2" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary)" }}>
+                  {ocrLoading ? "جاري المعالجة بالذكاء الاصطناعي... ⏳" : "الباركود غير واضح؟ صوّر الموديل بالـ AI 📷"}
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  placeholder="أو ابحث برقم الموديل يدوياً" 
+                  className="input flex-1"
+                  value={searchModel}
+                  onChange={(e) => setSearchModel(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
+                  style={{ padding: "0.75rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}
+                />
+                <button className="btn btn-primary px-6" onClick={handleManualSearch}>بحث</button>
+              </div>
+            </div>
+
             <hr style={{ borderTop: "1px solid var(--border)", margin: "2rem 0 1rem 0" }} />
             
             <button 
