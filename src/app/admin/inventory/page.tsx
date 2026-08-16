@@ -61,6 +61,17 @@ export default function InventoryPage() {
     try {
       const snapshot = await getDocs(collection(db, "products"));
       const prods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+      
+      // Sort products by modelNumber ascending
+      prods.sort((a, b) => Number(a.modelNumber) - Number(b.modelNumber));
+
+      // Sort colors inside each product
+      prods.forEach(p => {
+        if (Array.isArray(p.colors)) {
+          p.colors.sort((c1, c2) => c1.name.localeCompare(c2.name, 'ar'));
+        }
+      });
+
       setProducts(prods);
     } catch (err) {
       console.error("Error fetching products:", err);
