@@ -26,9 +26,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.5.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "postcss": "^8.5.26",
     "puppeteer": "^25.7.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5"
   }
 }
