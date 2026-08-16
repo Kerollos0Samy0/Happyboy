@@ -192,38 +192,39 @@ export default function InventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {prods.map(product => {
+            {prods.map((product, pIdx) => {
               const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
               const rowSpan = hasColors ? product.colors.length : 1;
+              const isLastProduct = pIdx === prods.length - 1;
 
               return (
                 <React.Fragment key={product.id}>
-                  <tr style={{ borderBottom: hasColors && product.colors.length > 1 ? "none" : "1px solid var(--border)" }}>
-                    <td className="p-3 font-bold" rowSpan={rowSpan}>{product.modelNumber}</td>
-                    <td className="p-3 font-bold text-gray-700" rowSpan={rowSpan}>{product.name}</td>
-                    <td className="p-3" rowSpan={rowSpan}>
+                  <tr style={{ borderBottom: hasColors && product.colors.length > 1 ? "none" : (isLastProduct ? "none" : "3px solid #cbd5e1") }}>
+                    <td className="p-4 font-bold" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>{product.modelNumber}</td>
+                    <td className="p-4 font-bold text-gray-700" style={{ verticalAlign: 'middle', minWidth: '150px' }} rowSpan={rowSpan}>{product.name}</td>
+                    <td className="p-4" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }} rowSpan={rowSpan}>
                       {editingId === product.id ? (
                         <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
                       ) : (
-                        `${product.price} ج.م`
+                        <span style={{ padding: '0 0.5rem', background: '#f8fafc', borderRadius: '4px' }}>{product.price} ج.م</span>
                       )}
                     </td>
-                    <td className="p-3 border-l border-gray-200" rowSpan={rowSpan}>
+                    <td className="p-4" style={{ verticalAlign: 'middle', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }} rowSpan={rowSpan}>
                       {editingId === product.id ? (
                         <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
                       ) : (
-                        <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'}>
+                        <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'} style={{ fontSize: '1.1rem', padding: '0 0.5rem' }}>
                           {product.quantity}
                         </span>
                       )}
                     </td>
                     
                     {/* First Color */}
-                    <td className="p-3 bg-blue-50/30 text-sm font-bold border-t border-gray-100">{hasColors ? product.colors[0].name : "بدون"}</td>
-                    <td className="p-3 bg-blue-50/30 font-black text-blue-800 border-t border-gray-100">{hasColors ? (product.colors[0].quantity ?? "-") : "-"}</td>
-                    <td className="p-3 bg-blue-50/30 text-xs text-gray-500 border-t border-gray-100">{hasColors ? product.colors[0].barcode : "-"}</td>
+                    <td className="p-3 text-sm font-bold border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? product.colors[0].name : "بدون"}</td>
+                    <td className="p-3 font-black text-blue-800 border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? (product.colors[0].quantity ?? "-") : "-"}</td>
+                    <td className="p-3 text-xs text-gray-500 border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? product.colors[0].barcode : "-"}</td>
 
-                    <td className="p-3 border-r border-gray-200" rowSpan={rowSpan}>
+                    <td className="p-4 border-r border-gray-200" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       <div className="flex gap-2 justify-center">
                         {editingId === product.id ? (
                           <>
@@ -244,10 +245,10 @@ export default function InventoryPage() {
                   {hasColors && product.colors.slice(1).map((color, idx) => {
                     const isLast = idx === product.colors.length - 2;
                     return (
-                      <tr key={`${product.id}-c${idx}`} style={{ borderBottom: isLast ? "1px solid var(--border)" : "none" }}>
-                        <td className="p-3 bg-blue-50/30 text-sm font-bold border-t border-white">{color.name}</td>
-                        <td className="p-3 bg-blue-50/30 font-black text-blue-800 border-t border-white">{color.quantity ?? "-"}</td>
-                        <td className="p-3 bg-blue-50/30 text-xs text-gray-500 border-t border-white">{color.barcode}</td>
+                      <tr key={`${product.id}-c${idx}`} style={{ borderBottom: isLast ? (isLastProduct ? "none" : "3px solid #cbd5e1") : "none" }}>
+                        <td className="p-3 text-sm font-bold border-t border-white" style={{ background: '#f0f9ff' }}>{color.name}</td>
+                        <td className="p-3 font-black text-blue-800 border-t border-white" style={{ background: '#f0f9ff' }}>{color.quantity ?? "-"}</td>
+                        <td className="p-3 text-xs text-gray-500 border-t border-white" style={{ background: '#f0f9ff' }}>{color.barcode}</td>
                       </tr>
                     );
                   })}
