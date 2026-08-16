@@ -65,10 +65,10 @@ export default function InventoryPage() {
       // Sort products by modelNumber ascending
       prods.sort((a, b) => Number(a.modelNumber) - Number(b.modelNumber));
 
-      // Sort colors inside each product
+      // Sort colors inside each product by barcode ascending
       prods.forEach(p => {
         if (Array.isArray(p.colors)) {
-          p.colors.sort((c1, c2) => c1.name.localeCompare(c2.name, 'ar'));
+          p.colors.sort((c1, c2) => Number(c1.barcode) - Number(c2.barcode));
         }
       });
 
