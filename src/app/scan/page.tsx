@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -39,6 +39,71 @@ export default function ScanPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [searchModel, setSearchModel] = useState("");
+
+  const ocrRunningRef = useRef(false);
+  const scannedResultRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    scannedResultRef.current = scannedResult;
+  }, [scannedResult]);
+
+  useEffect(() => {
+    const aiInterval = setInterval(async () => {
+      if (ocrRunningRef.current || scannedResultRef.current) return;
+      
+      const video = document.querySelector('#reader video') as HTMLVideoElement;
+      if (!video || video.readyState !== 4) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+      ocrRunningRef.current = true;
+      setOcrLoading(true);
+      
+      try {
+        const result = await Tesseract.recognize(dataUrl, 'ara+eng');
+        const text = result.data.text;
+        const numbers = text.match(/\d+/g) || [];
+        
+        if (numbers.length > 0 && !scannedResultRef.current) {
+          const uniqueNumbers = Array.from(new Set(numbers)).slice(0, 30);
+          const q = query(collection(db, "products"), where("modelNumber", "in", uniqueNumbers));
+          const querySnapshot = await getDocs(q);
+          
+          if (!querySnapshot.empty && !scannedResultRef.current) {
+            const prodData = querySnapshot.docs[0].data() as Product;
+            prodData.id = querySnapshot.docs[0].id;
+            
+            setScannedResult(prodData.modelNumber);
+            setProduct(prodData);
+            const defaultColor = prodData.colors[0];
+            setMatchedColor(defaultColor);
+            setSelectedColors([defaultColor.name]);
+            setColorQuantities({ [defaultColor.name]: 1 });
+            
+            try {
+              const stopBtn = document.getElementById("html5-qrcode-button-camera-stop");
+              if (stopBtn) stopBtn.click();
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.error("Auto OCR Error:", err);
+      } finally {
+        ocrRunningRef.current = false;
+        if (!scannedResultRef.current) {
+          setOcrLoading(false);
+        }
+      }
+    }, 2500);
+
+    return () => clearInterval(aiInterval);
+  }, []);
 
   useEffect(() => {
     // Check if customer is registered, if not redirect to /customer
@@ -167,54 +232,6 @@ export default function ScanPage() {
     window.location.reload();
   };
 
-  const handleOCR = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setOcrLoading(true);
-    setError("");
-    
-    try {
-      const result = await Tesseract.recognize(file, 'ara+eng', {
-        logger: m => console.log(m)
-      });
-      
-      const text = result.data.text;
-      console.log("OCR Text:", text);
-      
-      const numbers = text.match(/\d+/g) || [];
-      if (numbers.length === 0) {
-        setError("لم يتمكن الذكاء الاصطناعي من العثور على أرقام في الصورة.");
-        setOcrLoading(false);
-        return;
-      }
-      
-      const uniqueNumbers = Array.from(new Set(numbers)).slice(0, 30);
-      
-      const q = query(collection(db, "products"), where("modelNumber", "in", uniqueNumbers));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-         setError(`الذكاء الاصطناعي وجد الأرقام: ${uniqueNumbers.join(", ")} ولكنها غير مسجلة في المخزن كأرقام موديلات.`);
-      } else {
-        const prodData = querySnapshot.docs[0].data() as Product;
-        prodData.id = querySnapshot.docs[0].id;
-        
-        setScannedResult(prodData.modelNumber);
-        setProduct(prodData);
-        const defaultColor = prodData.colors[0];
-        setMatchedColor(defaultColor);
-        setSelectedColors([defaultColor.name]);
-        setColorQuantities({ [defaultColor.name]: 1 });
-      }
-    } catch (err) {
-      console.error(err);
-      setError("حدث خطأ أثناء معالجة الصورة.");
-    } finally {
-      setOcrLoading(false);
-    }
-  };
-
   const handleManualSearch = async () => {
     if (!searchModel.trim()) return;
     
@@ -259,17 +276,12 @@ export default function ScanPage() {
             <div id="reader" style={{ width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}></div>
             
             <div className="mt-6 flex flex-col gap-4">
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  onChange={handleOCR}
-                />
-                <button className="btn w-full py-3 flex items-center justify-center gap-2" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary)" }}>
-                  {ocrLoading ? "جاري المعالجة بالذكاء الاصطناعي... ⏳" : "الباركود غير واضح؟ صوّر الموديل بالـ AI 📷"}
-                </button>
+              <div className="flex items-center justify-center gap-2 text-sm p-3 rounded font-bold" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary)" }}>
+                {ocrLoading ? (
+                  <><span>الذكاء الاصطناعي يحاول قراءة الرقم من الكاميرا... ⏳</span></>
+                ) : (
+                  <><span>الذكاء الاصطناعي يعمل في الخلفية للمساعدة 🤖</span></>
+                )}
               </div>
               
               <div className="flex items-center gap-2">
