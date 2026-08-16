@@ -38,8 +38,7 @@ export default function InventoryPage() {
   // Manage State
   const [products, setProducts] = useState<Product[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editPrice, setEditPrice] = useState("");
-  const [editQuantity, setEditQuantity] = useState("");
+  const [editForm, setEditForm] = useState<Product | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -80,21 +79,31 @@ export default function InventoryPage() {
 
   const startEdit = (product: Product) => {
     setEditingId(product.id);
-    setEditPrice(String(product.price || 0));
-    setEditQuantity(String(product.quantity || 0));
+    setEditForm(JSON.parse(JSON.stringify(product)));
   };
 
   const saveEdit = async (id: string) => {
+    if (!editForm) return;
     try {
-      await updateDoc(doc(db, "products", id), {
-        price: Number(editPrice),
-        quantity: Number(editQuantity)
-      });
-      setProducts(products.map(p => p.id === id ? { ...p, price: Number(editPrice), quantity: Number(editQuantity) } : p));
+      const updatedData = {
+        modelNumber: editForm.modelNumber,
+        name: editForm.name,
+        price: Number(editForm.price),
+        quantity: Number(editForm.quantity),
+        colors: editForm.colors,
+      };
+      await updateDoc(doc(db, "products", id), updatedData);
+      setProducts(products.map(p => p.id === id ? { ...p, ...updatedData } : p));
       setEditingId(null);
+      setEditForm(null);
     } catch (err) {
       alert("خطأ أثناء التحديث");
     }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm(null);
   };
 
   const handleColorChange = (index: number, field: "name" | "barcode", value: string) => {
@@ -193,43 +202,86 @@ export default function InventoryPage() {
           </thead>
           <tbody>
             {prods.map((product, pIdx) => {
-              const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
-              const rowSpan = hasColors ? product.colors.length : 1;
+              const isEditing = editingId === product.id && editForm;
+              const displayProduct = isEditing ? editForm : product;
+              const hasColors = Array.isArray(displayProduct.colors) && displayProduct.colors.length > 0;
+              const rowSpan = hasColors ? displayProduct.colors.length : 1;
               const isLastProduct = pIdx === prods.length - 1;
+
+              const handleEditField = (field: keyof Product, value: any) => {
+                if (editForm) setEditForm({ ...editForm, [field]: value });
+              };
+              const handleEditColor = (index: number, field: keyof ColorEntry, value: any) => {
+                if (editForm) {
+                  const newColors = [...editForm.colors];
+                  newColors[index] = { ...newColors[index], [field]: value };
+                  setEditForm({ ...editForm, colors: newColors });
+                }
+              };
 
               return (
                 <React.Fragment key={product.id}>
-                  <tr style={{ borderBottom: hasColors && product.colors.length > 1 ? "none" : (isLastProduct ? "none" : "3px solid #cbd5e1") }}>
-                    <td className="p-4 font-bold" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>{product.modelNumber}</td>
-                    <td className="p-4 font-bold text-gray-700" style={{ verticalAlign: 'middle', minWidth: '150px' }} rowSpan={rowSpan}>{product.name}</td>
-                    <td className="p-4" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }} rowSpan={rowSpan}>
-                      {editingId === product.id ? (
-                        <input type="number" className="input w-24 p-1 text-sm" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                  <tr style={{ borderBottom: hasColors && displayProduct.colors.length > 1 ? "none" : (isLastProduct ? "none" : "3px solid #cbd5e1") }}>
+                    <td className="p-4 font-bold" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
+                      {isEditing ? (
+                        <input type="text" className="input p-1 text-sm text-center" style={{ minWidth: '80px' }} value={displayProduct.modelNumber} onChange={e => handleEditField('modelNumber', e.target.value)} />
                       ) : (
-                        <span style={{ padding: '0 0.5rem', background: '#f8fafc', borderRadius: '4px' }}>{product.price} ج.م</span>
+                        displayProduct.modelNumber
+                      )}
+                    </td>
+                    <td className="p-4 font-bold text-gray-700" style={{ verticalAlign: 'middle', minWidth: '150px' }} rowSpan={rowSpan}>
+                      {isEditing ? (
+                        <input type="text" className="input p-1 text-sm" value={displayProduct.name} onChange={e => handleEditField('name', e.target.value)} />
+                      ) : (
+                        displayProduct.name
+                      )}
+                    </td>
+                    <td className="p-4" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap' }} rowSpan={rowSpan}>
+                      {isEditing ? (
+                        <input type="number" className="input w-24 p-1 text-sm text-center" value={displayProduct.price} onChange={e => handleEditField('price', e.target.value)} />
+                      ) : (
+                        <span style={{ padding: '0 0.5rem', background: '#f8fafc', borderRadius: '4px' }}>{displayProduct.price} ج.م</span>
                       )}
                     </td>
                     <td className="p-4" style={{ verticalAlign: 'middle', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }} rowSpan={rowSpan}>
-                      {editingId === product.id ? (
-                        <input type="number" className="input w-24 p-1 text-sm" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} />
+                      {isEditing ? (
+                        <input type="number" className="input w-24 p-1 text-sm text-center" value={displayProduct.quantity} onChange={e => handleEditField('quantity', e.target.value)} />
                       ) : (
-                        <span className={product.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'} style={{ fontSize: '1.1rem', padding: '0 0.5rem' }}>
-                          {product.quantity}
+                        <span className={displayProduct.quantity <= 0 ? 'text-red-500 font-bold' : 'text-blue-600 font-bold'} style={{ fontSize: '1.1rem', padding: '0 0.5rem' }}>
+                          {displayProduct.quantity}
                         </span>
                       )}
                     </td>
                     
                     {/* First Color */}
-                    <td className="p-3 text-sm font-bold border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? product.colors[0].name : "بدون"}</td>
-                    <td className="p-3 font-black text-blue-800 border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? (product.colors[0].quantity ?? "-") : "-"}</td>
-                    <td className="p-3 text-xs text-gray-500 border-t border-gray-100" style={{ background: '#f0f9ff' }}>{hasColors ? product.colors[0].barcode : "-"}</td>
+                    <td className="p-3 text-sm font-bold border-t border-gray-100" style={{ background: '#f0f9ff' }}>
+                      {isEditing && hasColors ? (
+                        <input type="text" className="input p-1 text-sm text-center" value={displayProduct.colors[0].name} onChange={e => handleEditColor(0, 'name', e.target.value)} />
+                      ) : (
+                        hasColors ? displayProduct.colors[0].name : "بدون"
+                      )}
+                    </td>
+                    <td className="p-3 font-black text-blue-800 border-t border-gray-100" style={{ background: '#f0f9ff' }}>
+                      {isEditing && hasColors ? (
+                        <input type="number" className="input p-1 text-sm text-center" style={{ width: '60px' }} value={displayProduct.colors[0].quantity ?? ""} onChange={e => handleEditColor(0, 'quantity', Number(e.target.value))} />
+                      ) : (
+                        hasColors ? (displayProduct.colors[0].quantity ?? "-") : "-"
+                      )}
+                    </td>
+                    <td className="p-3 text-xs text-gray-500 border-t border-gray-100" style={{ background: '#f0f9ff' }}>
+                      {isEditing && hasColors ? (
+                        <input type="text" className="input p-1 text-xs text-center" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
+                      ) : (
+                        hasColors ? displayProduct.colors[0].barcode : "-"
+                      )}
+                    </td>
 
                     <td className="p-4 border-r border-gray-200" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       <div className="flex gap-2 justify-center">
-                        {editingId === product.id ? (
+                        {isEditing ? (
                           <>
                             <button onClick={() => saveEdit(product.id)} className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded font-bold transition-colors" title="حفظ"><Check size={18} /></button>
-                            <button onClick={() => setEditingId(null)} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
+                            <button onClick={cancelEdit} className="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded font-bold transition-colors" title="إلغاء"><X size={18} /></button>
                           </>
                         ) : (
                           <>
@@ -242,13 +294,32 @@ export default function InventoryPage() {
                   </tr>
 
                   {/* Additional Colors */}
-                  {hasColors && product.colors.slice(1).map((color, idx) => {
-                    const isLast = idx === product.colors.length - 2;
+                  {hasColors && displayProduct.colors.slice(1).map((color, idxOffset) => {
+                    const idx = idxOffset + 1;
+                    const isLast = idx === displayProduct.colors.length - 1;
                     return (
                       <tr key={`${product.id}-c${idx}`} style={{ borderBottom: isLast ? (isLastProduct ? "none" : "3px solid #cbd5e1") : "none" }}>
-                        <td className="p-3 text-sm font-bold border-t border-white" style={{ background: '#f0f9ff' }}>{color.name}</td>
-                        <td className="p-3 font-black text-blue-800 border-t border-white" style={{ background: '#f0f9ff' }}>{color.quantity ?? "-"}</td>
-                        <td className="p-3 text-xs text-gray-500 border-t border-white" style={{ background: '#f0f9ff' }}>{color.barcode}</td>
+                        <td className="p-3 text-sm font-bold border-t border-white" style={{ background: '#f0f9ff' }}>
+                          {isEditing ? (
+                            <input type="text" className="input p-1 text-sm text-center" value={color.name} onChange={e => handleEditColor(idx, 'name', e.target.value)} />
+                          ) : (
+                            color.name
+                          )}
+                        </td>
+                        <td className="p-3 font-black text-blue-800 border-t border-white" style={{ background: '#f0f9ff' }}>
+                          {isEditing ? (
+                            <input type="number" className="input p-1 text-sm text-center" style={{ width: '60px' }} value={color.quantity ?? ""} onChange={e => handleEditColor(idx, 'quantity', Number(e.target.value))} />
+                          ) : (
+                            color.quantity ?? "-"
+                          )}
+                        </td>
+                        <td className="p-3 text-xs text-gray-500 border-t border-white" style={{ background: '#f0f9ff' }}>
+                          {isEditing ? (
+                            <input type="text" className="input p-1 text-xs text-center" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
+                          ) : (
+                            color.barcode
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
