@@ -9,7 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   TrendingUp, Users, Package, ShoppingCart, QrCode, 
   DollarSign, MapPin, AlertTriangle, Archive, CheckCircle, 
-  Clock, Truck, ChevronLeft, Wallet
+  Clock, Truck, ChevronLeft, Wallet, PlusCircle
 } from "lucide-react";
 import styles from "./dashboard.module.css";
 
@@ -148,6 +148,8 @@ export default function AdminDashboardPage() {
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const topGovs = Object.entries(govMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
+  const isOwner = userEmail && (userEmail.toLowerCase().includes('ahmed001') || userEmail.toLowerCase().includes('hossam001'));
+
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.contentWrapper}>
@@ -171,54 +173,62 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Top Summary Cards */}
-        <div className={styles.summaryGrid}>
-          <div className={styles.summaryCard}>
-            <div className={`${styles.iconWrap} ${styles.green}`}><DollarSign size={28} /></div>
-            <div>
-              <p className={styles.summaryLabel}>مبيعات اليوم</p>
-              <h3 className={styles.summaryValue}>{salesToday.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+        {isOwner && (
+          <div className={styles.summaryGrid}>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.green}`}><DollarSign size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>مبيعات اليوم</p>
+                <h3 className={styles.summaryValue}>{salesToday.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.blue}`}><TrendingUp size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>مبيعات الشهر</p>
+                <h3 className={styles.summaryValue}>{salesMonth.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.yellow}`}><Wallet size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>العربون المحصل</p>
+                <h3 className={styles.summaryValue}>{totalDeposits.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.purple}`}><Archive size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>رأس مال المخزن</p>
+                <h3 className={styles.summaryValue}>{totalCapital.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
             </div>
           </div>
-          <div className={styles.summaryCard}>
-            <div className={`${styles.iconWrap} ${styles.blue}`}><TrendingUp size={28} /></div>
-            <div>
-              <p className={styles.summaryLabel}>مبيعات الشهر</p>
-              <h3 className={styles.summaryValue}>{salesMonth.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
-            </div>
-          </div>
-          <div className={styles.summaryCard}>
-            <div className={`${styles.iconWrap} ${styles.yellow}`}><Wallet size={28} /></div>
-            <div>
-              <p className={styles.summaryLabel}>العربون المحصل</p>
-              <h3 className={styles.summaryValue}>{totalDeposits.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
-            </div>
-          </div>
-          <div className={styles.summaryCard}>
-            <div className={`${styles.iconWrap} ${styles.purple}`}><Archive size={28} /></div>
-            <div>
-              <p className={styles.summaryLabel}>رأس مال المخزن</p>
-              <h3 className={styles.summaryValue}>{totalCapital.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Main Grid */}
-        <div className={styles.mainGrid}>
+        <div className={styles.mainGrid} style={{ gridTemplateColumns: isOwner ? undefined : '1fr' }}>
           
           {/* Left Column */}
           <div className={styles.column}>
             {/* Quick Access */}
             <div className={styles.sectionCard}>
               <h2 className={styles.sectionTitle}>
-                <QrCode size={24} style={{color: '#3b82f6'}} /> الوصول السريع
+                <QrCode size={24} style={{color: '#3b82f6'}} /> {isOwner ? 'الوصول السريع' : 'بوابة الموظفين'}
               </h2>
               <div className={styles.linkList}>
-                <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
-                  <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
-                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                </a>
+                {isOwner && (
+                  <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
+                    <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
+                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                  </a>
+                )}
                 <a href="/admin/orders" className={`${styles.linkItem} ${styles.gray}`}>
                   <div className={styles.linkContent}><ShoppingCart size={20} style={{color: '#3b82f6'}}/> إدارة الطلبات</div>
+                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                </a>
+                <a href="/admin/create-order" className={`${styles.linkItem} ${styles.gray}`}>
+                  <div className={styles.linkContent}><PlusCircle size={20} style={{color: '#10b981'}}/> إنشاء طلب جديد</div>
                   <ChevronLeft size={18} style={{color: '#9ca3af'}} />
                 </a>
                 <a href="/scan" className={`${styles.linkItem} ${styles.green}`}>
@@ -236,29 +246,32 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Orders Status */}
-            <div className={styles.sectionCard}>
-              <h2 className={styles.sectionTitle}>
-                <Truck size={24} style={{color: '#f97316'}} /> حركة الطلبات
-              </h2>
-              <div className={styles.statusList}>
-                <div className={`${styles.statusCard} ${styles.orange}`}>
-                  <div className={styles.statusLabel}><Clock size={20}/> قيد التجهيز</div>
-                  <span className={styles.statusValue}>{pendingOrders}</span>
-                </div>
-                <div className={`${styles.statusCard} ${styles.blue}`}>
-                  <div className={styles.statusLabel}><Truck size={20}/> مع شركة الشحن</div>
-                  <span className={styles.statusValue}>{shippedOrders}</span>
-                </div>
-                <div className={`${styles.statusCard} ${styles.green}`}>
-                  <div className={styles.statusLabel}><CheckCircle size={20}/> تم التسليم</div>
-                  <span className={styles.statusValue}>{deliveredOrders}</span>
+            {isOwner && (
+              <div className={styles.sectionCard}>
+                <h2 className={styles.sectionTitle}>
+                  <Truck size={24} style={{color: '#f97316'}} /> حركة الطلبات
+                </h2>
+                <div className={styles.statusList}>
+                  <div className={`${styles.statusCard} ${styles.orange}`}>
+                    <div className={styles.statusLabel}><Clock size={20}/> قيد التجهيز</div>
+                    <span className={styles.statusValue}>{pendingOrders}</span>
+                  </div>
+                  <div className={`${styles.statusCard} ${styles.blue}`}>
+                    <div className={styles.statusLabel}><Truck size={20}/> مع شركة الشحن</div>
+                    <span className={styles.statusValue}>{shippedOrders}</span>
+                  </div>
+                  <div className={`${styles.statusCard} ${styles.green}`}>
+                    <div className={styles.statusLabel}><CheckCircle size={20}/> تم التسليم</div>
+                    <span className={styles.statusValue}>{deliveredOrders}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Middle & Right Column */}
-          <div className={styles.column}>
+          {isOwner && (
+            <div className={styles.column}>
             {/* Inventory Health */}
             <div className={styles.sectionCard}>
               <h2 className={styles.sectionTitle}>
@@ -345,7 +358,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-          </div>
+          )}
         </div>
       </div>
     </div>
