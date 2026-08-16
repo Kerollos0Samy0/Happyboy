@@ -142,7 +142,8 @@ export default function ScanPage() {
     };
   }, []);
 
-  const handleScanSuccess = async (barcode: string, scanner: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function handleScanSuccess(barcode: string, scanner: any) {
     scanner.pause(true);
     setScannedResult(barcode);
     setLoading(true);
