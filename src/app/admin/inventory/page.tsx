@@ -294,7 +294,7 @@ export default function InventoryPage() {
                     </td>
 
                     <td className="p-4 text-center" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
-                      <div className="flex gap-1.5 justify-center opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-1.5 justify-center transition-opacity">
                         {isEditing ? (
                           <>
                             <button onClick={() => saveEdit(product.id)} className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-lg transition-colors border border-emerald-100" title="حفظ"><Check size={16} strokeWidth={2.5} /></button>
