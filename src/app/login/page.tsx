@@ -54,15 +54,24 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
             <label className="block mb-2 font-bold text-sm text-gray-700">الإيميل</label>
-            <input
-              type="email"
+            <select
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              placeholder="example@happyboy.com"
+              className="input w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
               required
               style={{ direction: 'ltr' }}
-            />
+            >
+              <option value="" disabled>Select an email / اختر حسابك</option>
+              <option value="accounting@happyboy.com">accounting@happyboy.com (Admin)</option>
+              <option value="ref3at@happyboy.com">ref3at@happyboy.com</option>
+              <option value="omnia@happyboy.com">omnia@happyboy.com</option>
+              <option value="radwa@happyboy.com">radwa@happyboy.com</option>
+              <option value="eslam@happyboy.com">eslam@happyboy.com</option>
+              <option value="marina@happyboy.com">marina@happyboy.com</option>
+              <option value="ayat@happyboy.com">ayat@happyboy.com</option>
+              <option value="kerollos@happyboy.com">kerollos@happyboy.com</option>
+              <option value="youssef@happyboy.com">youssef@happyboy.com</option>
+            </select>
           </div>
 
           <div>

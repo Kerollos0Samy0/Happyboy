@@ -288,10 +288,15 @@ export default function CartPage() {
         <h2 className="mb-6 text-center" style={{ color: "var(--primary)" }}>🛒 مراجعة وتقفيل الفاتورة</h2>
         
         <div className="mb-4 p-4" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
-          <h3 className="font-bold mb-2">بيانات العميل:</h3>
-          <p><strong>الاسم:</strong> {customerName}</p>
-          <p><strong>البراند:</strong> {customerBrand}</p>
-          <p><strong>الهاتف:</strong> {customerPhone}</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold">بيانات العميل:</h3>
+            <button onClick={() => router.push("/customer")} className="btn btn-outline text-sm px-3 py-1">
+              تغيير / اختيار عميل
+            </button>
+          </div>
+          <p><strong>الاسم:</strong> {customerName || "غير محدد"}</p>
+          <p><strong>البراند:</strong> {customerBrand || "غير محدد"}</p>
+          <p><strong>الهاتف:</strong> {customerPhone || "غير محدد"}</p>
         </div>
         
         <h3 className="font-bold mt-6 mb-3 border-b pb-2">المنتجات المختارة:</h3>

@@ -72,12 +72,8 @@ export default function ScanPage() {
 
   useEffect(() => {
     updateCartStats();
-    // Check if customer is registered, if not redirect to /customer
+    // We no longer force redirect to /customer if they just want to scan
     const customerPhone = localStorage.getItem("customerPhone");
-    if (!customerPhone) {
-      router.push("/customer");
-      return;
-    }
 
     const scannerElement = document.getElementById("reader");
     if (!scannerElement) return;

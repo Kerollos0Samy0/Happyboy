@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { auth } from "../../lib/firebase";
+import { auth } from "../lib/firebase";
 import { onAuthStateChanged, User, signOut } from "firebase/auth";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
