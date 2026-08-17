@@ -40,7 +40,7 @@ export default function CustomerStartPage() {
     const fetchCustomers = async () => {
       try {
         const snap = await getDocs(collection(db, "customers"));
-        const custs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const custs = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
         // Sort alphabetically by name
         custs.sort((a, b) => (a.name || "").localeCompare(b.name || "", 'ar'));
         setCustomersList(custs);
