@@ -320,6 +320,7 @@ export default function CreateOrderPage() {
         total,
         status: "pending",
         branch: branchName,
+        employeeName: auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
         createdAt: serverTimestamp(),
       });
 
