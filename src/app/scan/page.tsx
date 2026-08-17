@@ -5,8 +5,6 @@ import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import Tesseract from "tesseract.js";
-
 interface ColorEntry {
   name: string;
   barcode: string;
@@ -23,6 +21,18 @@ interface Product {
   barcodes: string[];
 }
 
+const getCategoryName = (modelNumber: string) => {
+  const num = parseInt(modelNumber, 10);
+  if (isNaN(num)) return "أخرى";
+  if (num >= 5 && num <= 90) return "بيبي ولادي";
+  if (num >= 100 && num <= 150) return "وسط ولادي";
+  if (num >= 300 && num <= 350) return "محير ولادي";
+  if (num >= 500 && num <= 545) return "بيبي بناتي";
+  if (num >= 590 && num <= 690) return "وسط بناتي";
+  if (num >= 790 && num <= 890) return "محير بناتي";
+  return "أخرى";
+};
+
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -37,75 +47,31 @@ export default function ScanPage() {
   const [colorQuantities, setColorQuantities] = useState<{ [key: string]: number }>({});
   
   const [showConfirm, setShowConfirm] = useState(false);
-  const [ocrLoading, setOcrLoading] = useState(false);
   const [searchModel, setSearchModel] = useState("");
 
-  const ocrRunningRef = useRef(false);
   const scannedResultRef = useRef<string | null>(null);
+  const [cartStats, setCartStats] = useState<Record<string, number>>({});
+
+  const updateCartStats = () => {
+    try {
+      const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
+      const stats: Record<string, number> = {};
+      existingCart.forEach((item: any) => {
+        if (item.isSeri) {
+          const cat = getCategoryName(item.modelNumber);
+          stats[cat] = (stats[cat] || 0) + (item.quantity || 1);
+        }
+      });
+      setCartStats(stats);
+    } catch(e) {}
+  };
 
   useEffect(() => {
     scannedResultRef.current = scannedResult;
   }, [scannedResult]);
 
   useEffect(() => {
-    const aiInterval = setInterval(async () => {
-      if (ocrRunningRef.current || scannedResultRef.current) return;
-      
-      const video = document.querySelector('#reader video') as HTMLVideoElement;
-      if (!video || video.readyState !== 4) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-      ocrRunningRef.current = true;
-      setOcrLoading(true);
-      
-      try {
-        const result = await Tesseract.recognize(dataUrl, 'ara+eng');
-        const text = result.data.text;
-        const numbers = text.match(/\d+/g) || [];
-        
-        if (numbers.length > 0 && !scannedResultRef.current) {
-          const uniqueNumbers = Array.from(new Set(numbers)).slice(0, 30);
-          const q = query(collection(db, "products"), where("modelNumber", "in", uniqueNumbers));
-          const querySnapshot = await getDocs(q);
-          
-          if (!querySnapshot.empty && !scannedResultRef.current) {
-            const prodData = querySnapshot.docs[0].data() as Product;
-            prodData.id = querySnapshot.docs[0].id;
-            
-            setScannedResult(prodData.modelNumber);
-            setProduct(prodData);
-            const defaultColor = prodData.colors[0];
-            setMatchedColor(defaultColor);
-            setSelectedColors([defaultColor.name]);
-            setColorQuantities({ [defaultColor.name]: 1 });
-            
-            try {
-              const stopBtn = document.getElementById("html5-qrcode-button-camera-stop");
-              if (stopBtn) stopBtn.click();
-            } catch (e) {}
-          }
-        }
-      } catch (err) {
-        console.error("Auto OCR Error:", err);
-      } finally {
-        ocrRunningRef.current = false;
-        if (!scannedResultRef.current) {
-          setOcrLoading(false);
-        }
-      }
-    }, 2500);
-
-    return () => clearInterval(aiInterval);
-  }, []);
-
-  useEffect(() => {
+    updateCartStats();
     // Check if customer is registered, if not redirect to /customer
     const customerPhone = localStorage.getItem("customerPhone");
     if (!customerPhone) {
@@ -266,6 +232,21 @@ export default function ScanPage() {
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6 relative">
+      <div className="card w-full" style={{ maxWidth: "500px", marginBottom: "1rem" }}>
+        <h3 className="text-center font-bold mb-3" style={{ color: "var(--primary)" }}>📊 ملخص الفاتورة الحالية</h3>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
+          {Object.keys(cartStats).length === 0 ? (
+            <p className="text-sm text-gray-500">لا يوجد ثريهات مضافة بعد</p>
+          ) : (
+            Object.entries(cartStats).map(([cat, count]) => (
+              <span key={cat} style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "0.3rem 0.6rem", borderRadius: "9999px", fontSize: "0.85rem", fontWeight: "bold" }}>
+                {cat}: {count} ثري
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+
       <div className="card w-full" style={{ maxWidth: "500px" }}>
         <h2 className="text-center mb-6" style={{ color: "var(--primary)" }}>
           📷 مسح باركود المنتج
@@ -277,14 +258,6 @@ export default function ScanPage() {
             <div id="reader" style={{ width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}></div>
             
             <div className="mt-6 flex flex-col gap-4">
-              <div className="flex items-center justify-center gap-2 text-sm p-3 rounded font-bold" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary)" }}>
-                {ocrLoading ? (
-                  <><span>الذكاء الاصطناعي يحاول قراءة الرقم من الكاميرا... ⏳</span></>
-                ) : (
-                  <><span>الذكاء الاصطناعي يعمل في الخلفية للمساعدة 🤖</span></>
-                )}
-              </div>
-              
               <div className="flex items-center gap-2">
                 <input 
                   type="text" 

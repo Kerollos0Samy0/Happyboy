@@ -16,8 +16,26 @@ export default function CustomerStartPage() {
   
   const [isSearching, setIsSearching] = useState(false);
   const [customerFound, setCustomerFound] = useState<boolean | null>(null);
+  const [customersList, setCustomersList] = useState<any[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
   
   const router = useRouter();
+
+  // Fetch all customers on mount
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const snap = await getDocs(collection(db, "customers"));
+        const custs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Sort alphabetically by name
+        custs.sort((a, b) => (a.name || "").localeCompare(b.name || "", 'ar'));
+        setCustomersList(custs);
+      } catch (err) {
+        console.error("Error fetching customers:", err);
+      }
+    };
+    fetchCustomers();
+  }, []);
 
   // Auto search when phone number is 11 digits
   useEffect(() => {
@@ -115,6 +133,49 @@ export default function CustomerStartPage() {
         
         <form onSubmit={handleStart} className="flex flex-col gap-4" autoComplete="off">
           
+          {/* Customer Dropdown */}
+          <div className="relative">
+            <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
+            <select 
+              className="input w-full p-3 font-bold bg-blue-50"
+              value={selectedCustomerId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedCustomerId(id);
+                if (id) {
+                  const customer = customersList.find(c => c.id === id);
+                  if (customer) {
+                    setPhone(customer.phone || "");
+                    setName(customer.name || "");
+                    setBrand(customer.brandName || customer.brand || "");
+                    setGovernorate(customer.governorate || "");
+                    setAddress(customer.address || "");
+                    setShipping(customer.shipping || "");
+                    setCustomerFound(true);
+                  }
+                } else {
+                  // Reset fields if 'New Customer' is selected
+                  setPhone("");
+                  setName("");
+                  setBrand("");
+                  setGovernorate("");
+                  setAddress("");
+                  setShipping("");
+                  setCustomerFound(null);
+                }
+              }}
+            >
+              <option value="">➕ عميل جديد (أدخل البيانات يدوياً)</option>
+              {customersList.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''} - {c.phone}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="border-t border-gray-200 my-2"></div>
+
           {/* Phone Field - Always first */}
           <div className="relative">
             <label className="block mb-2 font-bold text-sm text-gray-700">رقم الموبايل <span className="text-red-500">*</span></label>

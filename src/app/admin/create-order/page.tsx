@@ -82,6 +82,7 @@ export default function CreateOrderPage() {
   const [customerGovernorate, setCustomerGovernorate] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [deposit, setDeposit] = useState("");
+  const [discountPercentage, setDiscountPercentage] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
 
@@ -133,7 +134,10 @@ export default function CreateOrderPage() {
 
   const total = orderItems.reduce((acc, item) => acc + calculateItemTotal(item), 0);
   const depositNum = Number(deposit) || 0;
-  const remaining = total - depositNum;
+  const discountNum = Number(discountPercentage) || 0;
+  const discountValue = (total * discountNum) / 100;
+  const finalTotal = total - discountValue;
+  const remaining = finalTotal - depositNum;
 
   /* ─────────────────── search (Dropdown) ─────────────────── */
   const handleProductSelect = (val: string) => {
@@ -272,6 +276,7 @@ export default function CreateOrderPage() {
         customerAddress: customerAddress.trim(),
         deliveryDate,
         deposit: depositNum,
+        discountPercentage: discountNum,
         items: orderItems,
         total,
         status: "pending",
@@ -287,6 +292,7 @@ export default function CreateOrderPage() {
       setCustomerGovernorate("");
       setCustomerAddress("");
       setDeposit("");
+      setDiscountPercentage("");
       setDeliveryDate("");
     } catch (error) {
       console.error("Error creating order:", error);
@@ -760,18 +766,6 @@ export default function CreateOrderPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                 <div>
                   <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
-                    العربون (ج.م)
-                  </label>
-                  <input
-                    className="input"
-                    type="number"
-                    placeholder="0"
-                    value={deposit}
-                    onChange={(e) => setDeposit(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
                     ميعاد التسليم
                   </label>
                   <input
@@ -780,6 +774,34 @@ export default function CreateOrderPage() {
                     value={deliveryDate}
                     onChange={(e) => setDeliveryDate(e.target.value)}
                   />
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
+                      العربون (ج.م)
+                    </label>
+                    <input
+                      className="input"
+                      type="number"
+                      placeholder="0"
+                      value={deposit}
+                      onChange={(e) => setDeposit(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "0.35rem", fontWeight: 600, fontSize: "0.9rem" }}>
+                      خصم (%)
+                    </label>
+                    <input
+                      className="input"
+                      type="number"
+                      placeholder="0"
+                      min="0"
+                      max="100"
+                      value={discountPercentage}
+                      onChange={(e) => setDiscountPercentage(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -797,6 +819,23 @@ export default function CreateOrderPage() {
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "var(--text-muted)" }}>الإجمالي</span>
                 <span style={{ fontWeight: 600 }}>{total} ج.م</span>
+              </div>
+              {discountNum > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "var(--text-muted)" }}>الخصم ({discountNum}%)</span>
+                  <span style={{ fontWeight: 600, color: "var(--success)" }}>- {discountValue} ج.م</span>
+                </div>
+              )}
+              {depositNum > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "var(--text-muted)" }}>العربون المدفوع</span>
+                  <span style={{ fontWeight: 600, color: "var(--warning)" }}>- {depositNum} ج.م</span>
+                </div>
+              )}
+              <div style={{ borderTop: "1px solid var(--border)", margin: "0.5rem 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem", fontWeight: 700, color: "var(--primary)" }}>
+                <span>المتبقي</span>
+                <span>{remaining} ج.م</span>
               </div>
               {depositNum > 0 && (
                 <>

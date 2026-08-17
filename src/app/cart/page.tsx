@@ -33,6 +33,7 @@ export default function CartPage() {
   const [customerShipping, setCustomerShipping] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deposit, setDeposit] = useState("");
+  const [discountPercentage, setDiscountPercentage] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -84,7 +85,10 @@ export default function CartPage() {
 
   const total = cart.reduce((acc, item) => acc + calculateItemTotal(item), 0);
   const depositNum = Number(deposit) || 0;
-  const remaining = total - depositNum;
+  const discountNum = Number(discountPercentage) || 0;
+  const discountValue = (total * discountNum) / 100;
+  const finalTotal = total - discountValue;
+  const remaining = finalTotal - depositNum;
 
   const removeItem = (id: string) => {
     const newCart = cart.filter(item => item.cartItemId !== id);
@@ -158,10 +162,12 @@ export default function CartPage() {
         customerShipping,
         deliveryDate,
         deposit: depositNum,
+        discountPercentage: discountNum,
         items: cart,
-        total,
+        total: total,
         status: "pending",
         branch: branchName,
+        employeeName: auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
         createdAt: serverTimestamp()
       });
       
@@ -264,6 +270,9 @@ export default function CartPage() {
 
           <div style={{ textAlign: "left", fontSize: "18px", background: "#f8fafc", padding: "15px", borderRadius: "8px" }}>
             <p style={{ marginBottom: "5px" }}>الإجمالي الكلي: <strong>{total} ج.م</strong></p>
+            {discountNum > 0 && (
+              <p style={{ marginBottom: "5px", color: "#16a34a" }}>خصم ({discountNum}%): <strong>- {discountValue} ج.م</strong></p>
+            )}
             <p style={{ marginBottom: "5px", color: "#F59E0B" }}>العربون المدفوع: <strong>{depositNum} ج.م</strong></p>
             <hr style={{ borderTop: "1px solid #e2e8f0", margin: "10px 0" }} />
             <p style={{ fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>المتبقي: {remaining} ج.م</p>
@@ -316,8 +325,14 @@ export default function CartPage() {
             })}
             
             <div className="flex justify-between items-center mt-4 p-4" style={{ background: 'var(--primary-light)', borderRadius: 'var(--radius-md)' }}>
-              <h3 className="font-bold">الإجمالي الكلي:</h3>
-              <h3 className="font-bold text-xl">{total} ج.م</h3>
+              <div>
+                <h3 className="font-bold">الإجمالي الكلي:</h3>
+                {discountNum > 0 && <p className="text-sm text-green-700 mt-1">يوجد خصم {discountNum}% (-{discountValue} ج.م)</p>}
+              </div>
+              <div className="text-left">
+                {discountNum > 0 && <h3 className="font-bold text-sm line-through text-gray-500">{total} ج.م</h3>}
+                <h3 className="font-bold text-xl text-primary">{finalTotal} ج.م</h3>
+              </div>
             </div>
             
             <h3 className="font-bold mt-6 mb-3 border-b pb-2">تفاصيل الشحن والدفع (اختياري):</h3>
@@ -366,15 +381,29 @@ export default function CartPage() {
                   onChange={(e) => setDeliveryDate(e.target.value)}
                 />
               </div>
-              <div>
-                <label className="block mb-2 font-bold text-sm">العربون (ج.م)</label>
-                <input 
-                  type="number" 
-                  className="input" 
-                  value={deposit}
-                  onChange={(e) => setDeposit(e.target.value)}
-                  placeholder="0"
-                />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block mb-2 font-bold text-sm">العربون (ج.م)</label>
+                  <input 
+                    type="number" 
+                    className="input" 
+                    value={deposit}
+                    onChange={(e) => setDeposit(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block mb-2 font-bold text-sm">خصم (%)</label>
+                  <input 
+                    type="number" 
+                    className="input" 
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                  />
+                </div>
               </div>
             </div>
             

@@ -35,9 +35,11 @@ interface Order {
   customerShipping?: string;
   total: number;
   deposit?: number;
+  discountPercentage?: number;
   deliveryDate?: string;
   status: string;
   branch?: string;
+  employeeName?: string;
   items: OrderItem[];
   createdAt: any;
 }
@@ -182,6 +184,18 @@ export default function LiveOrdersPage() {
     }, 0);
   };
 
+  const calculateTotalPieces = (items: OrderItem[]) => {
+    return items.reduce((sum, it) => {
+      const qty = it.quantity || 1;
+      const sizes = it.sizes?.length || 1;
+      return sum + (it.isSeri ? sizes * qty : qty);
+    }, 0);
+  };
+
+  const calculateTotalSeries = (items: OrderItem[]) => {
+    return items.reduce((sum, it) => sum + (it.isSeri ? (it.quantity || 1) : 0), 0);
+  };
+
   const saveOrderDetails = async () => {
     if (!selectedOrder) return;
     setSaving(true);
@@ -196,6 +210,7 @@ export default function LiveOrdersPage() {
         customerShipping: selectedOrder.customerShipping || "",
         deliveryDate: selectedOrder.deliveryDate || "",
         deposit: Number(selectedOrder.deposit) || 0,
+        discountPercentage: Number(selectedOrder.discountPercentage) || 0,
         items: selectedOrder.items,
         total: newTotal
       };
@@ -257,7 +272,10 @@ export default function LiveOrdersPage() {
     
     const phone = selectedOrder.customerPhone.replace(/[^0-9]/g, '');
     const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
-    const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م`;
+    const subtotal = calculateTotal(selectedOrder.items);
+    const discountValue = (subtotal * (selectedOrder.discountPercentage || 0)) / 100;
+    const remaining = subtotal - discountValue - (selectedOrder.deposit || 0);
+    const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${remaining} ج.م`;
 
     // Try Web Share API first (Native sharing for Mobile/Supported Desktop)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -385,7 +403,8 @@ export default function LiveOrdersPage() {
             {filteredOrders.map((order) => {
               const st = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending;
               const date = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
-              const remaining = order.total - (order.deposit ?? 0);
+              const discountValue = (order.total * (order.discountPercentage || 0)) / 100;
+              const finalTotal = order.total - discountValue;
               const itemsSummary = order.items?.slice(0, 2).map(i =>
                 `${i.name} (${i.modelNumber}) - ${i.selectedColor}`
               ).join(" / ") + (order.items?.length > 2 ? ` +${order.items.length - 2}` : "");
@@ -442,6 +461,12 @@ export default function LiveOrdersPage() {
                     {order.customerPhone}
                   </p>
 
+                  {order.employeeName && (
+                    <p style={{ fontSize: "0.72rem", color: "#A62E2E", margin: 0, fontWeight: "bold" }}>
+                      بواسطة: {order.employeeName}
+                    </p>
+                  )}
+
                   {order.items?.length > 0 && (
                     <p style={{
                       fontSize: "0.68rem", color: "#475569", margin: 0,
@@ -462,7 +487,7 @@ export default function LiveOrdersPage() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.1rem" }}>
                     <div>
                       <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#A62E2E" }}>
-                        {order.total} ج
+                        {finalTotal} ج
                       </span>
                       {(order.deposit ?? 0) > 0 && (
                         <span style={{ fontSize: "0.65rem", color: "#10b981", marginRight: "0.3rem" }}>
@@ -550,6 +575,11 @@ export default function LiveOrdersPage() {
                       <strong>البراند:</strong> 
                       <input type="text" value={selectedOrder.customerBrand || ''} onChange={e => handleOrderChange('customerBrand', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
                     </p>
+                    {selectedOrder.employeeName && (
+                      <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#A62E2E" }}>
+                        <strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}
+                      </p>
+                    )}
                   </div>
                   <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>
                     <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
@@ -629,9 +659,23 @@ export default function LiveOrdersPage() {
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px" }}>
+                    <span>إجمالي القطع:</span>
+                    <strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px" }}>
+                    <span>إجمالي الثريهات:</span>
+                    <strong>{calculateTotalSeries(selectedOrder.items)} ثري</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px" }}>
                     <span>الإجمالي الكلي:</span>
                     <strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
                   </div>
+                  {Number(selectedOrder.discountPercentage) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px", color: "#16a34a" }}>
+                      <span>قيمة الخصم ({selectedOrder.discountPercentage}%):</span>
+                      <strong>- {(calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage)) / 100} ج.م</strong>
+                    </div>
+                  )}
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px", color: "#16a34a", alignItems: "center" }}>
                     <span>العربون المدفوع:</span>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
@@ -639,10 +683,17 @@ export default function LiveOrdersPage() {
                       <strong>ج.م</strong>
                     </div>
                   </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "16px", color: "#2563eb", alignItems: "center" }}>
+                    <span>نسبة الخصم (%):</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <input type="number" min="0" max="100" value={selectedOrder.discountPercentage || ''} onChange={e => handleOrderChange('discountPercentage', e.target.value)} style={{ width: "80px", padding: "4px", textAlign: "center", border: "1px solid #bfdbfe", borderRadius: "4px", fontWeight: "bold", color: "#2563eb" }} />
+                      <strong>%</strong>
+                    </div>
+                  </div>
                   <div style={{ borderTop: "2px solid #cbd5e1", margin: "15px 0" }} />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>
                     <span>المبلغ المتبقي:</span>
-                    <span>{calculateTotal(selectedOrder.items) - (selectedOrder.deposit || 0)} ج.م</span>
+                    <span>{calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - (selectedOrder.deposit || 0)} ج.م</span>
                   </div>
                 </div>
               </div>
@@ -755,19 +806,25 @@ export default function LiveOrdersPage() {
                 })}
                 {/* Total Row */}
                 <tr>
-                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي الكلي</td>
+                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي ( {calculateTotalPieces(currentPdfOrder.items)} قطعة / {calculateTotalSeries(currentPdfOrder.items)} ثري )</td>
                   <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{calculateTotal(currentPdfOrder.items)}</td>
                 </tr>
+                {Number(currentPdfOrder.discountPercentage || 0) > 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>خصم ({currentPdfOrder.discountPercentage}%)</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>- {(calculateTotal(currentPdfOrder.items) * Number(currentPdfOrder.discountPercentage)) / 100}</td>
+                  </tr>
+                )}
                 {Number(currentPdfOrder.deposit || 0) > 0 && (
                   <tr>
                     <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
                     <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{currentPdfOrder.deposit}</td>
                   </tr>
                 )}
-                {Number(currentPdfOrder.deposit || 0) > 0 && (
+                {(Number(currentPdfOrder.deposit || 0) > 0 || Number(currentPdfOrder.discountPercentage || 0) > 0) && (
                   <tr>
                     <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - Number(currentPdfOrder.deposit || 0)}</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - ((calculateTotal(currentPdfOrder.items) * Number(currentPdfOrder.discountPercentage || 0)) / 100) - Number(currentPdfOrder.deposit || 0)}</td>
                   </tr>
                 )}
               </tbody>
