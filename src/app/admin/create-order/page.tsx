@@ -13,6 +13,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { auth } from "../../../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { detectBranch } from "../../../lib/location";
 import { Plus, Trash2, Search, ShoppingCart, Send } from "lucide-react";
 
@@ -62,6 +63,18 @@ interface Customer {
   address?: string;
 }
 
+const getCategoryName = (modelNumber: string) => {
+  const num = parseInt(modelNumber, 10);
+  if (isNaN(num)) return "أخرى";
+  if (num >= 5 && num <= 90) return "بيبي ولادي";
+  if (num >= 100 && num <= 150) return "وسط ولادي";
+  if (num >= 300 && num <= 350) return "محير ولادي";
+  if (num >= 500 && num <= 545) return "بيبي بناتي";
+  if (num >= 590 && num <= 690) return "وسط بناتي";
+  if (num >= 790 && num <= 890) return "محير بناتي";
+  return "أخرى";
+};
+
 /* ═══════════════════════════════════════════════════════════════ */
 export default function CreateOrderPage() {
   /* ── search state ── */
@@ -95,6 +108,9 @@ export default function CreateOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [successOrderNumber, setSuccessOrderNumber] = useState<string | null>(null);
 
+  /* ── employee stats ── */
+  const [employeeStats, setEmployeeStats] = useState({ pending: 0, paid: 0, cancelled: 0, total: 0 });
+
   /* ─────────────────── on mount ─────────────────── */
   
   useEffect(() => {
@@ -122,6 +138,29 @@ export default function CreateOrderPage() {
       }
     };
     fetchData();
+
+    // Fetch employee stats
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const empName = user.displayName || user.email || "Unknown";
+          const q = query(collection(db, "orders"), where("employeeName", "==", empName));
+          const snap = await getDocs(q);
+          let pending = 0, paid = 0, cancelled = 0;
+          snap.forEach(doc => {
+            const data = doc.data();
+            if (data.status === "pending") pending++;
+            else if (data.status === "paid") paid++;
+            else if (data.status === "cancelled") cancelled++;
+          });
+          setEmployeeStats({ pending, paid, cancelled, total: snap.size });
+        } catch(err) {
+          console.error("Error fetching employee stats", err);
+        }
+      }
+    });
+
+    return () => unsub();
   }, []);
 
   /* ─────────────────── helpers ─────────────────── */
@@ -382,12 +421,34 @@ export default function CreateOrderPage() {
           maxWidth: 1400,
           margin: "0 auto 1.5rem",
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: "0.75rem",
+          flexWrap: "wrap",
+          gap: "1rem",
         }}
       >
-        <ShoppingCart size={28} color="var(--primary)" />
-        <h1 style={{ margin: 0, fontSize: "1.5rem" }}>إنشاء طلب جديد</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <ShoppingCart size={28} color="var(--primary)" />
+          <h1 style={{ margin: 0, fontSize: "1.5rem" }}>إنشاء طلب جديد</h1>
+        </div>
+
+        {/* Employee Stats */}
+        {employeeStats.total > 0 && (
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span style={{ padding: "0.4rem 0.8rem", borderRadius: "9999px", background: "#0f172a", color: "#fff", fontWeight: "bold", fontSize: "0.85rem" }}>
+              إجمالي طلباتي: {employeeStats.total}
+            </span>
+            <span style={{ padding: "0.4rem 0.8rem", borderRadius: "9999px", background: "#fef3c7", color: "#b45309", fontWeight: "bold", fontSize: "0.85rem" }}>
+              قيد الانتظار: {employeeStats.pending}
+            </span>
+            <span style={{ padding: "0.4rem 0.8rem", borderRadius: "9999px", background: "#d1fae5", color: "#065f46", fontWeight: "bold", fontSize: "0.85rem" }}>
+              تم الدفع: {employeeStats.paid}
+            </span>
+            <span style={{ padding: "0.4rem 0.8rem", borderRadius: "9999px", background: "#fee2e2", color: "#991b1b", fontWeight: "bold", fontSize: "0.85rem" }}>
+              ملغي: {employeeStats.cancelled}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── two-column layout ── */}
@@ -560,6 +621,22 @@ export default function CreateOrderPage() {
                 </span>
               )}
             </h3>
+
+            {orderItems.length > 0 && (
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                {Object.entries(
+                  orderItems.reduce((acc, item) => {
+                    const cat = getCategoryName(item.modelNumber);
+                    acc[cat] = (acc[cat] || 0) + item.quantity;
+                    return acc;
+                  }, {} as Record<string, number>)
+                ).map(([catName, count]) => (
+                  <span key={catName} style={{ background: "var(--surface-hover)", padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.8rem", fontWeight: "bold", border: "1px solid var(--border)" }}>
+                    {catName}: {count}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {orderItems.length === 0 ? (
               <div

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../lib/firebase";
+import { db, auth } from "../../lib/firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { Search, UserCheck, UserPlus, Phone } from "lucide-react";
 
 export default function CustomerStartPage() {
@@ -18,8 +19,21 @@ export default function CustomerStartPage() {
   const [customerFound, setCustomerFound] = useState<boolean | null>(null);
   const [customersList, setCustomersList] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   
   const router = useRouter();
+
+  // Check user role
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.email?.toLowerCase() === "accounting@happyboy.com") {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Fetch all customers on mount
   useEffect(() => {
@@ -134,47 +148,49 @@ export default function CustomerStartPage() {
         <form onSubmit={handleStart} className="flex flex-col gap-4" autoComplete="off">
           
           {/* Customer Dropdown */}
-          <div className="relative">
-            <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
-            <select 
-              className="input w-full p-3 font-bold bg-blue-50"
-              value={selectedCustomerId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedCustomerId(id);
-                if (id) {
-                  const customer = customersList.find(c => c.id === id);
-                  if (customer) {
-                    setPhone(customer.phone || "");
-                    setName(customer.name || "");
-                    setBrand(customer.brandName || customer.brand || "");
-                    setGovernorate(customer.governorate || "");
-                    setAddress(customer.address || "");
-                    setShipping(customer.shipping || "");
-                    setCustomerFound(true);
+          <>
+            <div className="relative">
+              <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
+              <select 
+                className="input w-full p-3 font-bold bg-blue-50"
+                value={selectedCustomerId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedCustomerId(id);
+                  if (id) {
+                    const customer = customersList.find(c => c.id === id);
+                    if (customer) {
+                      setPhone(customer.phone || "");
+                      setName(customer.name || "");
+                      setBrand(customer.brandName || customer.brand || "");
+                      setGovernorate(customer.governorate || "");
+                      setAddress(customer.address || "");
+                      setShipping(customer.shipping || "");
+                      setCustomerFound(true);
+                    }
+                  } else {
+                    // Reset fields if 'New Customer' is selected
+                    setPhone("");
+                    setName("");
+                    setBrand("");
+                    setGovernorate("");
+                    setAddress("");
+                    setShipping("");
+                    setCustomerFound(null);
                   }
-                } else {
-                  // Reset fields if 'New Customer' is selected
-                  setPhone("");
-                  setName("");
-                  setBrand("");
-                  setGovernorate("");
-                  setAddress("");
-                  setShipping("");
-                  setCustomerFound(null);
-                }
-              }}
-            >
-              <option value="">➕ عميل جديد (أدخل البيانات يدوياً)</option>
-              {customersList.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name} {c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''} - {c.phone}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="border-t border-gray-200 my-2"></div>
+                }}
+              >
+                <option value="">➕ عميل جديد (أدخل البيانات يدوياً)</option>
+                {customersList.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} {c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''} - {c.phone}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="border-t border-gray-200 my-2"></div>
+          </>
 
           {/* Phone Field - Always first */}
           <div className="relative">

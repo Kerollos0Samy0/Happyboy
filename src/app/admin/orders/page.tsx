@@ -66,6 +66,7 @@ export default function LiveOrdersPage() {
   const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [branchFilter, setBranchFilter] = useState<string>("all");
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -297,8 +298,13 @@ export default function LiveOrdersPage() {
     window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
   };
 
+  const uniqueEmployees = Array.from(new Set(orders.map(o => o.employeeName).filter(Boolean))) as string[];
+
   const visibleOrders = orders.filter(o => {
     const orderBranch = o.branch || "أخرى";
+    
+    if (employeeFilter !== "all" && o.employeeName !== employeeFilter) return false;
+
     if (isWarehouseUser) {
       return orderBranch === "المخزن";
     } else {
@@ -387,6 +393,48 @@ export default function LiveOrdersPage() {
               ))}
             </div>
           )}
+          
+          {!isWarehouseUser && uniqueEmployees.length > 0 && (
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
+              <button
+                onClick={() => setEmployeeFilter("all")}
+                style={{
+                  padding: "0.35rem 0.85rem",
+                  borderRadius: "9999px",
+                  border: employeeFilter === "all" ? "2px solid #8b5cf6" : "2px solid transparent",
+                  background: employeeFilter === "all" ? "#ede9fe" : "#f1f5f9",
+                  color: employeeFilter === "all" ? "#6d28d9" : "#475569",
+                  fontFamily: "inherit",
+                  fontWeight: 700,
+                  fontSize: "0.78rem",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                كل الموظفين
+              </button>
+              {uniqueEmployees.map(emp => (
+                <button
+                  key={emp}
+                  onClick={() => setEmployeeFilter(emp)}
+                  style={{
+                    padding: "0.35rem 0.85rem",
+                    borderRadius: "9999px",
+                    border: employeeFilter === emp ? "2px solid #8b5cf6" : "2px solid transparent",
+                    background: employeeFilter === emp ? "#ede9fe" : "#f1f5f9",
+                    color: employeeFilter === emp ? "#6d28d9" : "#475569",
+                    fontFamily: "inherit",
+                    fontWeight: 700,
+                    fontSize: "0.78rem",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {emp.includes('@') ? emp.split('@')[0] : emp}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Grid */}
@@ -447,13 +495,20 @@ export default function LiveOrdersPage() {
                         {order.customerName}
                       </p>
                     </div>
-                    <div style={{ display: "flex", gap: "0.25rem", alignItems: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
-                        {order.branch || "أخرى"}
-                      </span>
-                      <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
-                        {timeAgo(date)}
-                      </span>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
+                      <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
+                          {order.branch || "أخرى"}
+                        </span>
+                        <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
+                          {timeAgo(date)}
+                        </span>
+                      </div>
+                      {order.employeeName && (
+                        <span style={{ fontSize: "0.65rem", color: "#8b5cf6", fontWeight: "bold", background: "#ede9fe", padding: "0.1rem 0.3rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
+                          👤 {order.employeeName.includes('@') ? order.employeeName.split('@')[0] : order.employeeName}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -461,11 +516,7 @@ export default function LiveOrdersPage() {
                     {order.customerPhone}
                   </p>
 
-                  {order.employeeName && (
-                    <p style={{ fontSize: "0.72rem", color: "#A62E2E", margin: 0, fontWeight: "bold" }}>
-                      بواسطة: {order.employeeName}
-                    </p>
-                  )}
+                  {/* We moved employeeName to the top left badge, so it's hidden from here */}
 
                   {order.items?.length > 0 && (
                     <p style={{
