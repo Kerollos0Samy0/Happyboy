@@ -20,12 +20,8 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Determine where to redirect based on role (could add custom claims, but for now redirect to home/scan)
-      if (email.toLowerCase() === "accounting@happyboy.com") {
-        router.push("/admin");
-      } else {
-        router.push("/scan"); // Main flow for employees
-      }
+      // Everyone goes to the dashboard. The dashboard automatically shows employee tools for employees.
+      router.push("/admin/dashboard");
     } catch (err: any) {
       console.error(err);
       setError("الإيميل أو كلمة السر غير صحيحة");
