@@ -59,6 +59,20 @@ function timeAgo(date: Date): string {
   return `${Math.floor(diff / 86400)} يوم`;
 }
 
+const getSizesCount = (name: string, sizes: string[] | undefined) => {
+  if (name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  return sizes?.length || 1;
+};
+
+const getSizesText = (name: string, sizes: string[] | undefined) => {
+  if (name.includes('بيبي')) return '(2-3-4-5)';
+  if (name.includes('وسط')) return '(6-8-10-12)';
+  if (name.includes('محير')) return '(14-16-18-20)';
+  if (sizes && sizes.length > 0) return `(${sizes.join("-")})`;
+  return '';
+};
+
+
 export default function LiveOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,16 +194,16 @@ export default function LiveOrdersPage() {
   const calculateTotal = (items: OrderItem[]) => {
     return items.reduce((sum, it) => {
       const qty = it.quantity || 1;
-      const sizes = it.sizes?.length || 1;
-      return sum + (it.isSeri ? it.price * sizes * qty : it.price * qty);
+      const sizesCount = getSizesCount(it.name, it.sizes);
+      return sum + (it.isSeri ? it.price * sizesCount * qty : it.price * qty);
     }, 0);
   };
 
   const calculateTotalPieces = (items: OrderItem[]) => {
     return items.reduce((sum, it) => {
       const qty = it.quantity || 1;
-      const sizes = it.sizes?.length || 1;
-      return sum + (it.isSeri ? sizes * qty : qty);
+      const sizesCount = getSizesCount(it.name, it.sizes);
+      return sum + (it.isSeri ? sizesCount * qty : qty);
     }, 0);
   };
 
@@ -672,7 +686,7 @@ export default function LiveOrdersPage() {
                       <td style={{ padding: "12px" }}>{item.selectedColor}</td>
                       <td style={{ padding: "12px", textAlign: "center" }}>
                         <select value={item.isSeri ? "seri" : "piece"} onChange={e => handleItemChange(i, 'isSeri', e.target.value === "seri")} style={{ padding: "4px", fontSize: "14px", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }}>
-                          <option value="seri">ثري ({item.sizes?.length || 1} مقاس)</option>
+                          <option value="seri">ثري ({getSizesCount(item.name, item.sizes)} مقاس) {getSizesText(item.name, item.sizes)}</option>
                           <option value="piece">قطعة واحدة</option>
                         </select>
                       </td>
@@ -840,13 +854,13 @@ export default function LiveOrdersPage() {
               <tbody>
                 {currentPdfOrder.items?.map((item, i) => {
                   const qty = item.quantity || 1;
-                  const piecesInSeri = item.isSeri ? (item.sizes?.length || 1) : 1;
+                  const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
                   const totalPieces = item.isSeri ? piecesInSeri * qty : qty;
                   const rowTotal = item.price * totalPieces;
                   return (
                     <tr key={i} style={{ borderBottom: "1px solid black" }}>
                       <td style={{ border: "1px solid black", padding: "8px" }}>{item.modelNumber}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name} {item.isSeri ? getSizesText(item.name, item.sizes) : ''}</td>
                       <td style={{ border: "1px solid black", padding: "8px" }}>{item.selectedColor}</td>
                       <td style={{ border: "1px solid black", padding: "8px" }}>{item.price}</td>
                       <td style={{ border: "1px solid black", padding: "8px" }}>{piecesInSeri}</td>

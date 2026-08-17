@@ -21,6 +21,20 @@ interface CartItem {
   quantity?: number;
 }
 
+const getSizesCount = (name: string, sizes: string[] | undefined) => {
+  if (name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  return sizes?.length || 1;
+};
+
+const getSizesText = (name: string, sizes: string[] | undefined) => {
+  if (name.includes('بيبي')) return '(2-3-4-5)';
+  if (name.includes('وسط')) return '(6-8-10-12)';
+  if (name.includes('محير')) return '(14-16-18-20)';
+  if (sizes && sizes.length > 0) return `(${sizes.join("-")})`;
+  return '';
+};
+
+
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerName, setCustomerName] = useState("");
@@ -77,8 +91,9 @@ export default function CartPage() {
 
   const calculateItemTotal = (item: CartItem) => {
     const qty = item.quantity || 1;
-    if (item.isSeri && item.sizes && item.sizes.length > 0) {
-      return item.price * item.sizes.length * qty;
+    const sizesCount = getSizesCount(item.name, item.sizes);
+    if (item.isSeri) {
+      return item.price * sizesCount * qty;
     }
     return item.price * qty;
   };
@@ -89,6 +104,10 @@ export default function CartPage() {
   const discountValue = (total * discountNum) / 100;
   const finalTotal = total - discountValue;
   const remaining = finalTotal - depositNum;
+
+  const totalPieces = cart.reduce((sum, item) => sum + (item.isSeri ? getSizesCount(item.name, item.sizes) * (item.quantity || 1) : (item.quantity || 1)), 0);
+  const totalSeries = cart.reduce((sum, item) => sum + (item.isSeri ? (item.quantity || 1) : 0), 0);
+
 
   const removeItem = (id: string) => {
     const newCart = cart.filter(item => item.cartItemId !== id);
@@ -259,7 +278,7 @@ export default function CartPage() {
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.name} (موديل {item.modelNumber})</td>
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.selectedColor}</td>
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>
-                      {item.isSeri ? `${qty} ثري (${item.sizes.length} مقاسات)` : `${qty} قطعة`}
+                      {item.isSeri ? `${qty} ثري (${getSizesCount(item.name, item.sizes)} مقاسات) ${getSizesText(item.name, item.sizes)}` : `${qty} قطعة`}
                     </td>
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{calculateItemTotal(item)} ج.م</td>
                   </tr>
@@ -269,6 +288,9 @@ export default function CartPage() {
           </table>
 
           <div style={{ textAlign: "left", fontSize: "18px", background: "#f8fafc", padding: "15px", borderRadius: "8px" }}>
+            <p style={{ marginBottom: "5px" }}>إجمالي عدد القطع: <strong>{totalPieces} قطعة</strong></p>
+            <p style={{ marginBottom: "5px" }}>إجمالي عدد الثريهات: <strong>{totalSeries} ثري</strong></p>
+            <hr style={{ borderTop: "1px solid #e2e8f0", margin: "10px 0" }} />
             <p style={{ marginBottom: "5px" }}>الإجمالي الكلي: <strong>{total} ج.م</strong></p>
             {discountNum > 0 && (
               <p style={{ marginBottom: "5px", color: "#16a34a" }}>خصم ({discountNum}%): <strong>- {discountValue} ج.م</strong></p>
@@ -313,7 +335,7 @@ export default function CartPage() {
                     <p className="text-sm mt-1">اللون: <span className="font-bold">{item.selectedColor}</span></p>
                     {item.isSeri && (
                       <p className="text-sm mt-1">
-                        الكمية: <span className="font-bold">{qty} ثري</span> (مقاسات: {item.sizes.join(", ")})
+                        الكمية: <span className="font-bold">{qty} ثري</span> (مقاسات: {getSizesText(item.name, item.sizes)})
                       </p>
                     )}
                     <p className="text-sm font-bold mt-2 text-green-600">الإجمالي: {calculateItemTotal(item)} ج.م</p>
@@ -332,6 +354,9 @@ export default function CartPage() {
             <div className="flex justify-between items-center mt-4 p-4" style={{ background: 'var(--primary-light)', borderRadius: 'var(--radius-md)' }}>
               <div>
                 <h3 className="font-bold">الإجمالي الكلي:</h3>
+                <p className="text-sm mt-1">
+                  اجمالي عدد القطع: <strong>{totalPieces}</strong> | اجمالي عدد الثريهات: <strong>{totalSeries}</strong>
+                </p>
                 {discountNum > 0 && <p className="text-sm text-green-700 mt-1">يوجد خصم {discountNum}% (-{discountValue} ج.م)</p>}
               </div>
               <div className="text-left">

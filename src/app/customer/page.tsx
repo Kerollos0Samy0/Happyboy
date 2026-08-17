@@ -21,6 +21,15 @@ export default function CustomerStartPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const filteredCustomers = customersList.filter(c => 
+    (c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.brandName || c.brand || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.phone || "").includes(searchTerm)
+  );
+  
   const router = useRouter();
 
   // Check user role
@@ -151,42 +160,71 @@ export default function CustomerStartPage() {
           <>
             <div className="relative">
               <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
-              <select 
-                className="input w-full p-3 font-bold bg-blue-50"
-                value={selectedCustomerId}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  setSelectedCustomerId(id);
-                  if (id) {
-                    const customer = customersList.find(c => c.id === id);
-                    if (customer) {
-                      setPhone(customer.phone || "");
-                      setName(customer.name || "");
-                      setBrand(customer.brandName || customer.brand || "");
-                      setGovernorate(customer.governorate || "");
-                      setAddress(customer.address || "");
-                      setShipping(customer.shipping || "");
-                      setCustomerFound(true);
-                    }
-                  } else {
-                    // Reset fields if 'New Customer' is selected
-                    setPhone("");
-                    setName("");
-                    setBrand("");
-                    setGovernorate("");
-                    setAddress("");
-                    setShipping("");
-                    setCustomerFound(null);
-                  }
-                }}
-              >
-                <option value="">➕ عميل جديد (أدخل البيانات يدوياً)</option>
-                {customersList.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''} - {c.phone}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="input w-full p-3 font-bold bg-blue-50"
+                  placeholder="ابحث بالاسم، المحل، أو رقم الهاتف..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  onBlur={() => {
+                    setTimeout(() => setIsDropdownOpen(false), 200);
+                  }}
+                  dir="rtl"
+                />
+                {isDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div 
+                      className="p-3 hover:bg-blue-100 cursor-pointer font-bold border-b text-blue-700"
+                      onClick={() => {
+                        setSelectedCustomerId("");
+                        setSearchTerm("");
+                        setIsDropdownOpen(false);
+                        
+                        setPhone("");
+                        setName("");
+                        setBrand("");
+                        setGovernorate("");
+                        setAddress("");
+                        setShipping("");
+                        setCustomerFound(null);
+                      }}
+                    >
+                      ➕ عميل جديد (أدخل البيانات يدوياً)
+                    </div>
+                    {filteredCustomers.length > 0 ? (
+                      filteredCustomers.map(c => (
+                        <div 
+                          key={c.id} 
+                          className="p-3 hover:bg-gray-100 cursor-pointer text-sm"
+                          onClick={() => {
+                            setSelectedCustomerId(c.id);
+                            setSearchTerm(`${c.name} ${c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''} - ${c.phone}`);
+                            setIsDropdownOpen(false);
+                            
+                            setPhone(c.phone || "");
+                            setName(c.name || "");
+                            setBrand(c.brandName || c.brand || "");
+                            setGovernorate(c.governorate || "");
+                            setAddress(c.address || "");
+                            setShipping(c.shipping || "");
+                            setCustomerFound(true);
+                          }}
+                        >
+                          <div className="font-bold">{c.name} {c.brandName || c.brand ? `(${c.brandName || c.brand})` : ''}</div>
+                          <div className="text-gray-500">{c.phone}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-3 text-gray-500 text-center text-sm">لا يوجد عملاء مطابقين</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="border-t border-gray-200 my-2"></div>
