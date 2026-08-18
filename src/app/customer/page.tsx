@@ -129,10 +129,10 @@ export default function CustomerStartPage() {
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) return;
+    if (!phone) return;
     
     // Save to local storage
-    localStorage.setItem("customerName", name);
+    localStorage.setItem("customerName", name || "عميل غير مسجل الاسم");
     localStorage.setItem("customerPhone", phone);
     localStorage.setItem("customerBrand", brand);
     localStorage.setItem("customerGovernorate", governorate);
@@ -272,14 +272,13 @@ export default function CustomerStartPage() {
           <div className={`transition-all duration-300 overflow-hidden ${phone.length >= 8 ? 'opacity-100 max-h-96' : 'opacity-50 max-h-96'}`}>
             <div className="flex flex-col gap-4 mt-2">
               <div>
-                <label className="block mb-2 font-bold text-sm text-gray-700">الاسم بالكامل <span className="text-red-500">*</span></label>
+                <label className="block mb-2 font-bold text-sm text-gray-700">الاسم بالكامل</label>
                 <input 
                   type="text" 
                   className="input w-full" 
                   placeholder="مثال: أحمد محمد" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required 
                   autoComplete="off"
                   disabled={!phone}
                 />
@@ -340,10 +339,10 @@ export default function CustomerStartPage() {
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6 py-4 text-lg"
-            disabled={!name || !phone || isSearching}
+            disabled={!phone || isSearching}
             style={{ 
-              opacity: (!name || !phone || isSearching) ? 0.6 : 1,
-              cursor: (!name || !phone || isSearching) ? 'not-allowed' : 'pointer'
+              opacity: (!phone || isSearching) ? 0.6 : 1,
+              cursor: (!phone || isSearching) ? 'not-allowed' : 'pointer'
             }}
           >
             استمرار للمسح والطلبات 🚀
