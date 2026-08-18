@@ -22,6 +22,7 @@ interface Order {
   customerGovernorate: string;
   createdAt: any;
   items: any[];
+  isDeleted?: boolean;
 }
 
 interface Product {
@@ -30,6 +31,7 @@ interface Product {
   modelNumber: string;
   price: number;
   quantity: number;
+  isDeleted?: boolean;
 }
 
 export default function AdminDashboardPage() {
@@ -60,14 +62,18 @@ export default function AdminDashboardPage() {
     // Real-time listener for Orders
     const ordersQ = query(collection(db, "orders"));
     const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
-      const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+      const fetchedOrders = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }) as Order)
+        .filter(o => !o.isDeleted);
       setOrders(fetchedOrders);
     });
 
     // Real-time listener for Products
     const productsQ = query(collection(db, "products"));
     const unsubscribeProducts = onSnapshot(productsQ, (snapshot) => {
-      const fetchedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+      const fetchedProducts = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }) as Product)
+        .filter(p => !p.isDeleted);
       setProducts(fetchedProducts);
     });
 

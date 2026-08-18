@@ -32,6 +32,7 @@ interface Product {
   colors: ProductColor[];
   barcodes: string[];
   quantity: number;
+  isDeleted?: boolean;
 }
 
 interface OrderItem {
@@ -61,6 +62,7 @@ interface Customer {
   brandName?: string;
   governorate?: string;
   address?: string;
+  isDeleted?: boolean;
 }
 
 const getCategoryName = (modelNumber: string) => {
@@ -120,16 +122,20 @@ export default function CreateOrderPage() {
           getDocs(collection(db, "products")),
           getDocs(collection(db, "customers"))
         ]);
-        const productsList = productsSnap.docs.map(doc => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Product, "id">)
-        }));
+        const productsList = productsSnap.docs
+          .map(doc => ({
+            id: doc.id,
+            ...(doc.data() as Omit<Product, "id">)
+          }))
+          .filter(p => !p.isDeleted);
         setAllProducts(productsList);
 
-        const customersList = customersSnap.docs.map(doc => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Customer, "id">)
-        }));
+        const customersList = customersSnap.docs
+          .map(doc => ({
+            id: doc.id,
+            ...(doc.data() as Omit<Customer, "id">)
+          }))
+          .filter(c => !c.isDeleted);
         setAllCustomers(customersList);
       } catch (err) {
         console.error("Error fetching data", err);
@@ -244,7 +250,8 @@ export default function CreateOrderPage() {
   const handleSelectCustomer = (cust: Customer) => {
     setCustomerName(cust.name || "");
     setCustomerPhone(cust.phone || "");
-    setCustomerBrand(cust.brandName || "");
+    const isOffice = cust.name?.includes("مكتب") || cust.brandName?.includes("مكتب");
+    setCustomerBrand(isOffice ? "" : (cust.brandName || ""));
     setCustomerGovernorate(cust.governorate || "");
     setCustomerAddress(cust.address || "");
     setShowCustomerDropdown(false);
@@ -266,7 +273,8 @@ export default function CreateOrderPage() {
       if (!snap.empty) {
         const custData = snap.docs[0].data();
         if (custData.name && !customerName) setCustomerName(custData.name);
-        if (custData.brandName && !customerBrand) setCustomerBrand(custData.brandName);
+        const isOffice = custData.name?.includes("مكتب") || custData.brandName?.includes("مكتب");
+        if (custData.brandName && !customerBrand && !isOffice) setCustomerBrand(custData.brandName);
         if (custData.governorate && !customerGovernorate) setCustomerGovernorate(custData.governorate);
         if (custData.address && !customerAddress) setCustomerAddress(custData.address);
       }

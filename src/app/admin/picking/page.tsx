@@ -515,7 +515,7 @@ export default function OrderPickingPage() {
                               opacity: updating ? 0.7 : 1, transition: "background 0.2s"
                             }}
                           >
-                            <CheckCircle2 size={16} /> تجهيز كل الأوردر
+                            <CheckCircle2 size={16} /> تأكيد التجهيز
                           </button>
                         )}
                         {isAllPicked && totalItems > 0 && (

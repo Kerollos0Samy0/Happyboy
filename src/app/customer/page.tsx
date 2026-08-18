@@ -46,6 +46,7 @@ export default function CustomerStartPage() {
 
   // Fetch all customers on mount
   useEffect(() => {
+    if (!isAdmin) return;
     const fetchCustomers = async () => {
       try {
         const snap = await getDocs(collection(db, "customers"));
@@ -58,7 +59,7 @@ export default function CustomerStartPage() {
       }
     };
     fetchCustomers();
-  }, []);
+  }, [isAdmin]);
 
   // Auto search when phone number is 11 digits
   useEffect(() => {
@@ -77,7 +78,8 @@ export default function CustomerStartPage() {
         if (!customersSnap.empty) {
           const data = customersSnap.docs[0].data();
           setName(data.name || "");
-          setBrand(data.brandName || data.brand || "");
+          const isOffice = data.name?.includes("مكتب") || data.brandName?.includes("مكتب") || data.brand?.includes("مكتب");
+          setBrand(isOffice ? "" : (data.brandName || data.brand || ""));
           setGovernorate(data.governorate || "");
           setAddress(data.address || "");
           setShipping(data.shipping || "");
@@ -104,7 +106,8 @@ export default function CustomerStartPage() {
           const lastOrder = docs[0];
           
           setName(lastOrder.customerName || "");
-          setBrand(lastOrder.customerBrand || "");
+          const isOffice = lastOrder.customerName?.includes("مكتب") || lastOrder.customerBrand?.includes("مكتب");
+          setBrand(isOffice ? "" : (lastOrder.customerBrand || ""));
           setGovernorate(lastOrder.customerGovernorate || "");
           setAddress(lastOrder.customerAddress || "");
           setShipping(lastOrder.customerShipping || "");
@@ -157,7 +160,8 @@ export default function CustomerStartPage() {
         <form onSubmit={handleStart} className="flex flex-col gap-4" autoComplete="off">
           
           {/* Customer Dropdown */}
-          <>
+          {isAdmin && (
+            <>
             <div className="relative">
               <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
               <div className="relative">
@@ -208,7 +212,8 @@ export default function CustomerStartPage() {
                             
                             setPhone(c.phone || "");
                             setName(c.name || "");
-                            setBrand(c.brandName || c.brand || "");
+                            const isOffice = c.name?.includes("مكتب") || c.brandName?.includes("مكتب") || c.brand?.includes("مكتب");
+                            setBrand(isOffice ? "" : (c.brandName || c.brand || ""));
                             setGovernorate(c.governorate || "");
                             setAddress(c.address || "");
                             setShipping(c.shipping || "");
@@ -228,7 +233,8 @@ export default function CustomerStartPage() {
             </div>
             
             <div className="border-t border-gray-200 my-2"></div>
-          </>
+            </>
+          )}
 
           {/* Phone Field - Always first */}
           <div className="relative">

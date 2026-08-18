@@ -42,11 +42,14 @@ interface Order {
   employeeName?: string;
   items: OrderItem[];
   createdAt: any;
+  isDeleted?: boolean;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pending:   { label: "قيد الانتظار", color: "#b45309", bg: "#fef3c7" },
   paid:      { label: "تم الدفع",    color: "#065f46", bg: "#d1fae5" },
+  shipped:   { label: "مع شركة الشحن", color: "#1d4ed8", bg: "#dbeafe" },
+  delivered: { label: "تم التسليم", color: "#15803d", bg: "#dcfce7" },
   cancelled: { label: "ملغي",        color: "#991b1b", bg: "#fee2e2" },
 };
 
@@ -91,6 +94,8 @@ export default function LiveOrdersPage() {
   }, []);
 
   const isWarehouseUser = userEmail ? WAREHOUSE_EMAILS.includes(userEmail.toLowerCase()) : false;
+  const isOwner = userEmail ? (userEmail.toLowerCase().includes('ahmed001') || userEmail.toLowerCase().includes('hossam001')) : false;
+  const isRestrictedWarehouseUser = isWarehouseUser && !isOwner;
 
   // Item editing state
   const [addModelSearch, setAddModelSearch] = useState("");
@@ -105,7 +110,11 @@ export default function LiveOrdersPage() {
   useEffect(() => {
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
-      setOrders(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Order)));
+      setOrders(
+        snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() } as Order))
+          .filter(o => !o.isDeleted)
+      );
       setLoading(false);
     });
   }, []);
@@ -242,7 +251,7 @@ export default function LiveOrdersPage() {
 
   const deleteOrder = async (orderId: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا الطلب؟")) return;
-    await deleteDoc(doc(db, "orders", orderId));
+    await updateDoc(doc(db, "orders", orderId), { isDeleted: true });
     if (selectedOrder?.id === orderId) closeModal();
   };
 
@@ -319,7 +328,10 @@ export default function LiveOrdersPage() {
     
     if (employeeFilter !== "all" && o.employeeName !== employeeFilter) return false;
 
-    if (isWarehouseUser) {
+    if (isOwner) {
+      if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
+      return true;
+    } else if (isRestrictedWarehouseUser) {
       return orderBranch === "المخزن";
     } else {
       if (orderBranch === "المخزن") return false;
@@ -377,10 +389,11 @@ export default function LiveOrdersPage() {
             ))}
           </div>
 
-          {!isWarehouseUser && (
+          {!isRestrictedWarehouseUser && (
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
               {[
                 { key: "all",       label: "كل الفروع" },
+                ...(isOwner ? [{ key: "المخزن", label: "المخزن" }] : []),
                 { key: "التجمع",    label: "التجمع" },
                 { key: "العبور",    label: "العبور" },
                 { key: "عين شمس",    label: "عين شمس" },
@@ -408,7 +421,7 @@ export default function LiveOrdersPage() {
             </div>
           )}
           
-          {!isWarehouseUser && uniqueEmployees.length > 0 && (
+          {!isRestrictedWarehouseUser && uniqueEmployees.length > 0 && (
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
               <button
                 onClick={() => setEmployeeFilter("all")}
@@ -607,6 +620,8 @@ export default function LiveOrdersPage() {
                 >
                   <option value="pending">⏳ قيد الانتظار</option>
                   <option value="paid">✅ تم الدفع والتأكيد</option>
+                  <option value="shipped">🚚 مع شركة الشحن</option>
+                  <option value="delivered">📦 تم التسليم</option>
                   <option value="cancelled">❌ ملغي</option>
                 </select>
               </div>

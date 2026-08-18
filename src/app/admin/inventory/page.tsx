@@ -21,6 +21,7 @@ interface Product {
   quantity: number;
   sizes: string[];
   colors: ColorEntry[];
+  isDeleted?: boolean;
 }
 
 export default function InventoryPage() {
@@ -71,7 +72,9 @@ export default function InventoryPage() {
   const fetchProducts = async () => {
     try {
       const snapshot = await getDocs(collection(db, "products"));
-      const prods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+      const prods = snapshot.docs
+        .filter(doc => !doc.data().isDeleted)
+        .map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
       
       // Sort products by modelNumber ascending
       prods.sort((a, b) => Number(a.modelNumber) - Number(b.modelNumber));
@@ -92,7 +95,7 @@ export default function InventoryPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("هل أنت متأكد من الحذف؟")) return;
     try {
-      await deleteDoc(doc(db, "products", id));
+      await updateDoc(doc(db, "products", id), { isDeleted: true });
       setProducts(products.filter(p => p.id !== id));
     } catch (err) {
       alert("خطأ أثناء الحذف");
@@ -222,7 +225,7 @@ export default function InventoryPage() {
               <th className="p-4 font-bold text-center">إجراءات</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {prods.map((product, pIdx) => {
               const isEditing = editingId === product.id && editForm;
               const displayProduct = isEditing ? editForm : product;
@@ -240,7 +243,7 @@ export default function InventoryPage() {
                 }
               };
 
-              const trClass = "hover:bg-gray-50/50 transition-colors group";
+              const trClass = "hover:bg-gray-50/50 transition-colors group border-t-[3px] border-gray-200";
 
               return (
                 <React.Fragment key={product.id}>
@@ -325,7 +328,7 @@ export default function InventoryPage() {
                   {hasColors && displayProduct.colors.slice(1).map((color, idxOffset) => {
                     const idx = idxOffset + 1;
                     return (
-                      <tr key={`${product.id}-c${idx}`} className="hover:bg-gray-50/50 transition-colors border-t border-gray-50">
+                      <tr key={`${product.id}-c${idx}`} className="hover:bg-gray-50/50 transition-colors border-t border-gray-100">
                         <td className="p-3 text-sm font-bold bg-blue-50/10">
                           {isEditing ? (
                             <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.name} onChange={e => handleEditColor(idx, 'name', e.target.value)} />
