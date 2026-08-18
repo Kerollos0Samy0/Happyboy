@@ -19,7 +19,7 @@ export default function CustomerStartPage() {
   const [customerFound, setCustomerFound] = useState<boolean | null>(null);
   const [customersList, setCustomersList] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isEmployee, setIsEmployee] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -35,10 +35,10 @@ export default function CustomerStartPage() {
   // Check user role
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email?.toLowerCase() === "accounting@happyboy.com") {
-        setIsAdmin(true);
+      if (user) {
+        setIsEmployee(true);
       } else {
-        setIsAdmin(false);
+        setIsEmployee(false);
       }
     });
     return () => unsubscribe();
@@ -46,7 +46,7 @@ export default function CustomerStartPage() {
 
   // Fetch all customers on mount
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isEmployee) return;
     const fetchCustomers = async () => {
       try {
         const snap = await getDocs(collection(db, "customers"));
@@ -59,7 +59,7 @@ export default function CustomerStartPage() {
       }
     };
     fetchCustomers();
-  }, [isAdmin]);
+  }, [isEmployee]);
 
   // Auto search when phone number is 11 digits
   useEffect(() => {
@@ -132,7 +132,6 @@ export default function CustomerStartPage() {
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) return;
     
     // Save to local storage
     localStorage.setItem("customerName", name || "عميل غير مسجل الاسم");
@@ -160,7 +159,7 @@ export default function CustomerStartPage() {
         <form onSubmit={handleStart} className="flex flex-col gap-4" autoComplete="off">
           
           {/* Customer Dropdown */}
-          {isAdmin && (
+          {isEmployee && (
             <>
             <div className="relative">
               <label className="block mb-2 font-bold text-sm text-gray-700">اختر العميل (مسجل مسبقاً)</label>
@@ -243,10 +242,9 @@ export default function CustomerStartPage() {
               <input 
                 type="tel" 
                 className="input tracking-widest font-bold w-full pl-10" 
-                placeholder="01xxxxxxxxx" 
+                placeholder="01xxxxxxxxx (اختياري)" 
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                required 
                 dir="ltr"
                 autoComplete="off"
                 style={{
@@ -275,7 +273,7 @@ export default function CustomerStartPage() {
             )}
           </div>
 
-          <div className={`transition-all duration-300 overflow-hidden ${phone.length >= 8 ? 'opacity-100 max-h-96' : 'opacity-50 max-h-96'}`}>
+          <div className="transition-all duration-300 overflow-hidden opacity-100 max-h-96">
             <div className="flex flex-col gap-4 mt-2">
               <div>
                 <label className="block mb-2 font-bold text-sm text-gray-700">الاسم بالكامل</label>
@@ -286,7 +284,6 @@ export default function CustomerStartPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   autoComplete="off"
-                  disabled={!phone}
                 />
               </div>
               
@@ -299,7 +296,6 @@ export default function CustomerStartPage() {
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
                   autoComplete="off"
-                  disabled={!phone}
                 />
               </div>
               
@@ -312,7 +308,6 @@ export default function CustomerStartPage() {
                     placeholder="مثال: القاهرة" 
                     value={governorate}
                     onChange={(e) => setGovernorate(e.target.value)}
-                    disabled={!phone}
                   />
                 </div>
                 <div>
@@ -323,7 +318,6 @@ export default function CustomerStartPage() {
                     placeholder="مثال: بوسطة" 
                     value={shipping}
                     onChange={(e) => setShipping(e.target.value)}
-                    disabled={!phone}
                   />
                 </div>
               </div>
@@ -336,7 +330,6 @@ export default function CustomerStartPage() {
                   placeholder="اسم الشارع، رقم العمارة، الخ..." 
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  disabled={!phone}
                 />
               </div>
             </div>
@@ -345,10 +338,10 @@ export default function CustomerStartPage() {
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6 py-4 text-lg"
-            disabled={!phone || isSearching}
+            disabled={isSearching}
             style={{ 
-              opacity: (!phone || isSearching) ? 0.6 : 1,
-              cursor: (!phone || isSearching) ? 'not-allowed' : 'pointer'
+              opacity: isSearching ? 0.6 : 1,
+              cursor: isSearching ? 'not-allowed' : 'pointer'
             }}
           >
             استمرار للمسح والطلبات 🚀

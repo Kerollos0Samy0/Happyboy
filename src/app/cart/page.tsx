@@ -115,19 +115,35 @@ export default function CartPage() {
     localStorage.setItem("happyboy_cart", JSON.stringify(newCart));
   };
 
-  const generatePDF = async (orderNum: string) => {
-    if (!invoiceRef.current) return;
+  const updateQuantity = (id: string, change: number) => {
+    const newCart = cart.map(item => {
+      if (item.cartItemId === id) {
+        const currentQty = item.quantity || 1;
+        const newQty = currentQty + change;
+        if (newQty < 1) return item; // minimum is 1
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    });
+    setCart(newCart);
+    localStorage.setItem("happyboy_cart", JSON.stringify(newCart));
+  };
+
+  const sortedCart = [...cart].sort((a, b) => a.modelNumber.localeCompare(b.modelNumber, undefined, { numeric: true }));
+
+  const generatePDF = async (orderNum: string, shouldSave = true) => {
+    if (!invoiceRef.current) return null;
     
     const invoiceEl = invoiceRef.current;
     invoiceEl.style.display = "block";
     
     try {
       const canvas = await html2canvas(invoiceEl, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
       });
       
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/jpeg", 0.6);
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -135,16 +151,49 @@ export default function CartPage() {
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
       
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
+      if (shouldSave) {
+        pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
+      }
+      return pdf;
     } catch (err) {
       console.error("Failed to generate PDF", err);
       alert("حدث خطأ أثناء استخراج الفاتورة");
+      return null;
     } finally {
       invoiceEl.style.display = "none";
     }
+  };
+
+  const handleWhatsAppShare = async (orderNum: string) => {
+    const pdf = await generatePDF(orderNum, false);
+    if (!pdf) return;
+
+    const pdfBlob = pdf.output("blob");
+    const fileName = `Happy_Boy_Girl_Order_${orderNum}.pdf`;
+    
+    const phone = customerPhone.replace(/[^0-9]/g, '');
+    const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
+    const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${remaining} ج.م`;
+
+    pdf.save(fileName);
+    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
+    
+    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
   };
 
   const handleCheckout = async () => {
@@ -182,7 +231,7 @@ export default function CartPage() {
         deliveryDate,
         deposit: depositNum,
         discountPercentage: discountNum,
-        items: cart,
+        items: sortedCart,
         total: total,
         status: "pending",
         branch: branchName,
@@ -211,13 +260,22 @@ export default function CartPage() {
           <div className="p-4 mb-6" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
             <h3 className="mb-2">طرق الدفع المتاحة:</h3>
             <p><strong>فودافون كاش:</strong> 01012345678</p>
-            <p><strong>انستاباي:</strong> happyboy@instapay</p>
+            <p className="flex items-center justify-center gap-2">
+              <strong>انستاباي:</strong> ahmed.1010.2020@instapay
+            </p>
             <p className="mt-2 text-sm font-bold" style={{ color: "var(--primary)" }}>المتبقي دفعه: {remaining} ج.م</p>
+            <a href="instapay://" className="btn btn-outline w-full mt-4 flex items-center justify-center gap-2" style={{ borderColor: "#6f42c1", color: "#6f42c1" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              فتح تطبيق انستاباي لتحويل العربون
+            </a>
           </div>
           
           <div className="flex flex-col gap-2">
-            <button onClick={() => generatePDF(orderId)} className="btn btn-primary w-full py-4 text-lg">
+            <button onClick={() => generatePDF(orderId, true)} className="btn w-full py-4 text-lg" style={{ background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1" }}>
               📥 تحميل الفاتورة PDF
+            </button>
+            <button onClick={() => handleWhatsAppShare(orderId)} className="btn w-full py-4 text-lg" style={{ background: "#25D366", color: "white" }}>
+              💬 حفظ وإرسال PDF واتساب
             </button>
             <button onClick={() => router.push("/customer")} className="btn btn-outline w-full mt-2">
               فاتورة جديدة
@@ -240,64 +298,123 @@ export default function CartPage() {
             direction: "rtl"
           }}
         >
-          <div style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h1 style={{ fontSize: "28px", color: "#A62E2E", marginBottom: "10px" }}>Happy Boy&Girl</h1>
-            <h2 style={{ fontSize: "20px" }}>فاتورة طلب</h2>
-          </div>
-          
-          <div style={{ marginBottom: "30px", padding: "20px", border: "1px solid #eee", borderRadius: "8px" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-              <div style={{ flex: "1 1 45%" }}>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الطلب:</strong> {orderId}</p>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>اسم العميل:</strong> {customerName}</p>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>رقم الهاتف:</strong> {customerPhone}</p>
-                <p style={{ fontSize: "16px" }}><strong>البراند / المحل:</strong> {customerBrand}</p>
-              </div>
-              <div style={{ flex: "1 1 45%" }}>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>العنوان:</strong> {customerGovernorate} - {customerAddress}</p>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>شركة الشحن:</strong> {customerShipping}</p>
-                <p style={{ fontSize: "16px", marginBottom: "8px" }}><strong>موعد التسليم المتوقع:</strong> {deliveryDate || 'غير محدد'}</p>
+          <div style={{ fontFamily: "Arial, sans-serif", color: "black" }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '60px', objectFit: 'contain' }} />
+              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
+                إذن صرف رقم : <span style={{ marginRight: '10px' }}>{orderId}</span>
               </div>
             </div>
-          </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold" }}>
+                القاهرة فى {new Date().toLocaleDateString('ar-EG')}
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
+                عميل رقم : {orderId}
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
+                اسم العميل / {customerName} {customerBrand ? ` - ${customerBrand}` : ''}
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
+                شركة الشحن : {customerShipping || 'استلام مصنع'}
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'center' }}>
+                موبيل / <span dir="ltr">{customerPhone}</span>
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
+                العنوان / {customerAddress || customerGovernorate || ''}
+              </div>
+            </div>
 
-          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "30px" }}>
-            <thead>
-              <tr style={{ background: "#f8fafc" }}>
-                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>المنتج</th>
-                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>اللون</th>
-                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>الكمية</th>
-                <th style={{ padding: "12px", borderBottom: "2px solid #e2e8f0", textAlign: "right" }}>الإجمالي</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cart.map((item) => {
-                const qty = item.quantity || 1;
-                return (
-                  <tr key={item.cartItemId}>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.name} (موديل {item.modelNumber})</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{item.selectedColor}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>
-                      {item.isSeri ? `${qty} ثري (${getSizesCount(item.name, item.sizes)} مقاسات) ${getSizesText(item.name, item.sizes)}` : `${qty} قطعة`}
-                    </td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{calculateItemTotal(item)} ج.م</td>
+            {/* Table */}
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black", marginBottom: "30px", textAlign: "center" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid black" }}>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الموديل</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اسم الصنف</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اللون</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>السعر</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>طقم</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الكمية</th>
+                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الاجمالي</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedCart.map((item, i) => {
+                  const qty = item.quantity || 1;
+                  const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
+                  const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
+                  const rowTotal = item.price * itemTotalPieces;
+                  return (
+                    <tr key={i} style={{ borderBottom: "1px solid black" }}>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.modelNumber}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name} {item.isSeri ? getSizesText(item.name, item.sizes) : ''}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.selectedColor}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.price}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{piecesInSeri}</td>
+                      <td style={{ border: "1px solid black", padding: "8px" }}>{qty}</td>
+                      <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{rowTotal}</td>
+                    </tr>
+                  );
+                })}
+                {/* Total Row */}
+                <tr>
+                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي ( {totalPieces} قطعة / {totalSeries} ثري )</td>
+                  <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{total}</td>
+                </tr>
+                {discountNum > 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>خصم ({discountNum}%)</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>- {discountValue}</td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                )}
+                {depositNum > 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{depositNum}</td>
+                  </tr>
+                )}
+                {(depositNum > 0 || discountNum > 0) && (
+                  <tr>
+                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
+                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{remaining}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
-          <div style={{ textAlign: "left", fontSize: "18px", background: "#f8fafc", padding: "15px", borderRadius: "8px" }}>
-            <p style={{ marginBottom: "5px" }}>إجمالي عدد القطع: <strong>{totalPieces} قطعة</strong></p>
-            <p style={{ marginBottom: "5px" }}>إجمالي عدد الثريهات: <strong>{totalSeries} ثري</strong></p>
-            <hr style={{ borderTop: "1px solid #e2e8f0", margin: "10px 0" }} />
-            <p style={{ marginBottom: "5px" }}>الإجمالي الكلي: <strong>{total} ج.م</strong></p>
-            {discountNum > 0 && (
-              <p style={{ marginBottom: "5px", color: "#16a34a" }}>خصم ({discountNum}%): <strong>- {discountValue} ج.م</strong></p>
-            )}
-            <p style={{ marginBottom: "5px", color: "#F59E0B" }}>العربون المدفوع: <strong>{depositNum} ج.م</strong></p>
-            <hr style={{ borderTop: "1px solid #e2e8f0", margin: "10px 0" }} />
-            <p style={{ fontSize: "20px", color: "#A62E2E", fontWeight: "bold" }}>المتبقي: {remaining} ج.م</p>
+            {/* Footer */}
+            <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>
+              توقيع العميل أو من ينوب عنه باستلام البضاعة يعتبر بمثابة إيصال بقيمتها و تعهد منه بسداد القيمة المذكورة عاليه وقت طلبها منه و يعتبر مسئولا مسئولية مدنية و جنائية عنها.
+            </div>
+            <div style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold", marginBottom: "30px" }}>
+              *** نرجو الاتصال بالمصنع في حالة عدم مطابقة الفاتورة  ت : 0224903939 - 01009516578 ***
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+              <div style={{ textAlign: 'center', width: '200px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>المستلم</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '15px', textAlign: 'right' }}>الاسم:</div>
+                <div style={{ fontWeight: 'bold', textAlign: 'right' }}>التوقيع:</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <div style={{ width: '80px', height: '30px', border: '1px solid black' }}></div>
+                <span style={{ fontWeight: 'bold', fontSize: "16px" }}>: عدد الاكياس</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px', fontSize: '14px', fontWeight: 'bold' }}>
+              <div>صفحة 1 من 1</div>
+              <div>إذن رقم : {orderId}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -322,28 +439,55 @@ export default function CartPage() {
         </div>
         
         <h3 className="font-bold mt-6 mb-3 border-b pb-2">المنتجات المختارة:</h3>
-        {cart.length === 0 ? (
+        {sortedCart.length === 0 ? (
           <p className="text-center my-6">الفاتورة فارغة.</p>
         ) : (
           <div className="flex flex-col gap-4">
-            {cart.map((item) => {
+            {sortedCart.map((item) => {
               const qty = item.quantity || 1;
               return (
                 <div key={item.cartItemId} className="flex justify-between items-center p-3" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                   <div className="flex-1">
                     <h4 className="font-bold text-lg">{item.name} (موديل {item.modelNumber})</h4>
                     <p className="text-sm mt-1">اللون: <span className="font-bold">{item.selectedColor}</span></p>
-                    {item.isSeri && (
-                      <p className="text-sm mt-1">
-                        الكمية: <span className="font-bold">{qty} ثري</span> (مقاسات: {getSizesText(item.name, item.sizes)})
-                      </p>
+                    {item.isSeri ? (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-sm">الكمية (ثري):</span>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                            onClick={() => updateQuantity(item.cartItemId, 1)}
+                          >+</button>
+                          <span className="font-bold w-6 text-center">{qty}</span>
+                          <button 
+                            className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                            onClick={() => updateQuantity(item.cartItemId, -1)}
+                          >-</button>
+                        </div>
+                        <span className="text-xs text-gray-500 mr-2">(مقاسات: {getSizesText(item.name, item.sizes)})</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-sm">الكمية (قطعة):</span>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                            onClick={() => updateQuantity(item.cartItemId, 1)}
+                          >+</button>
+                          <span className="font-bold w-6 text-center">{qty}</span>
+                          <button 
+                            className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                            onClick={() => updateQuantity(item.cartItemId, -1)}
+                          >-</button>
+                        </div>
+                      </div>
                     )}
-                    <p className="text-sm font-bold mt-2 text-green-600">الإجمالي: {calculateItemTotal(item)} ج.م</p>
+                    <p className="text-sm font-bold mt-3 text-green-600">الإجمالي: {calculateItemTotal(item)} ج.م</p>
                   </div>
                   <button 
                     onClick={() => removeItem(item.cartItemId)}
-                    className="btn" 
-                    style={{ background: 'var(--danger)', color: 'white', padding: '0.25rem 0.75rem' }}
+                    className="btn self-start mt-2" 
+                    style={{ background: 'var(--danger)', color: 'white', padding: '0.4rem 1rem' }}
                   >
                     حذف
                   </button>

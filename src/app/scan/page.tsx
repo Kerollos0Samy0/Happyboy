@@ -48,9 +48,24 @@ export default function ScanPage() {
   
   const [showConfirm, setShowConfirm] = useState(false);
   const [searchModel, setSearchModel] = useState("");
+  const [duplicateScanPrompt, setDuplicateScanPrompt] = useState<{product: Product, matchedColor: ColorEntry, existingIndex: number} | null>(null);
 
   const scannedResultRef = useRef<string | null>(null);
   const [cartStats, setCartStats] = useState<Record<string, number>>({});
+
+  const checkDuplicateAndProceed = (prodData: Product, matched: ColorEntry) => {
+    const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
+    const existingIndex = existingCart.findIndex((item: any) => item.id === prodData.id && item.selectedColor === matched.name);
+    
+    if (existingIndex !== -1) {
+      setDuplicateScanPrompt({ product: prodData, matchedColor: matched, existingIndex });
+    } else {
+      setProduct(prodData);
+      setMatchedColor(matched);
+      setSelectedColors([matched.name]);
+      setColorQuantities({ [matched.name]: 1 });
+    }
+  };
 
   const updateCartStats = () => {
     try {
@@ -123,10 +138,7 @@ export default function ScanPage() {
         
         const matched = prodData.colors.find(c => c.barcode === barcode) || prodData.colors[0];
         
-        setProduct(prodData);
-        setMatchedColor(matched);
-        setSelectedColors([matched.name]);
-        setColorQuantities({ [matched.name]: 1 });
+        checkDuplicateAndProceed(prodData, matched);
       }
     } catch (err) {
       console.error(err);
@@ -139,20 +151,25 @@ export default function ScanPage() {
   const addColorToCart = (color: ColorEntry, qty: number) => {
     if (!product) return;
     
-    const cartItem = {
-      cartItemId: Date.now().toString() + Math.random().toString(),
-      id: product.id,
-      name: product.name,
-      modelNumber: product.modelNumber,
-      price: product.price,
-      selectedColor: color.name,
-      sizes: product.sizes,
-      isSeri: true,
-      quantity: qty
-    };
-    
     const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
-    existingCart.push(cartItem);
+    const existingItemIndex = existingCart.findIndex((item: any) => item.id === product.id && item.selectedColor === color.name);
+
+    if (existingItemIndex !== -1) {
+      existingCart[existingItemIndex].quantity += qty;
+    } else {
+      const cartItem = {
+        cartItemId: Date.now().toString() + Math.random().toString(),
+        id: product.id,
+        name: product.name,
+        modelNumber: product.modelNumber,
+        price: product.price,
+        selectedColor: color.name,
+        sizes: product.sizes,
+        isSeri: true,
+        quantity: qty
+      };
+      existingCart.push(cartItem);
+    }
     localStorage.setItem("happyboy_cart", JSON.stringify(existingCart));
   };
 
@@ -212,11 +229,8 @@ export default function ScanPage() {
         prodData.id = querySnapshot.docs[0].id;
         
         setScannedResult(searchModel);
-        setProduct(prodData);
         const defaultColor = prodData.colors[0];
-        setMatchedColor(defaultColor);
-        setSelectedColors([defaultColor.name]);
-        setColorQuantities({ [defaultColor.name]: 1 });
+        checkDuplicateAndProceed(prodData, defaultColor);
       }
     } catch (err) {
       console.error(err);
@@ -388,6 +402,60 @@ export default function ScanPage() {
           </div>
         )}
       </div>
+
+      {/* Duplicate Scan Modal */}
+      {duplicateScanPrompt && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 animate-fade-in" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="card p-6 text-center" style={{ maxWidth: '400px', width: '90%' }}>
+            <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--primary)' }}>تم مسح هذا المنتج مسبقاً!</h3>
+            <p className="mb-6">
+              الموديل: <span className="font-bold">{duplicateScanPrompt.product.modelNumber}</span><br/>
+              اللون: <span className="font-bold">{duplicateScanPrompt.matchedColor.name}</span><br/><br/>
+              موجود بالفعل في الفاتورة. هل تريد زيادة الكمية بمقدار 1؟
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                className="btn btn-primary w-full py-3"
+                onClick={() => {
+                  const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
+                  existingCart[duplicateScanPrompt.existingIndex].quantity += 1;
+                  localStorage.setItem("happyboy_cart", JSON.stringify(existingCart));
+                  alert("تمت زيادة الكمية بنجاح!");
+                  setDuplicateScanPrompt(null);
+                  setScannedResult(null);
+                  window.location.reload();
+                }}
+              >
+                نعم، زوّد الكمية ➕
+              </button>
+              <div className="flex gap-3">
+                <button 
+                  className="btn btn-outline flex-1"
+                  onClick={() => {
+                    setProduct(duplicateScanPrompt.product);
+                    setMatchedColor(duplicateScanPrompt.matchedColor);
+                    setSelectedColors([duplicateScanPrompt.matchedColor.name]);
+                    setColorQuantities({ [duplicateScanPrompt.matchedColor.name]: 1 });
+                    setDuplicateScanPrompt(null);
+                  }}
+                >
+                  تعديل يدوي
+                </button>
+                <button 
+                  className="btn btn-outline flex-1"
+                  onClick={() => {
+                    setDuplicateScanPrompt(null);
+                    setScannedResult(null);
+                    window.location.reload();
+                  }}
+                >
+                  إلغاء المسح
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showConfirm && (

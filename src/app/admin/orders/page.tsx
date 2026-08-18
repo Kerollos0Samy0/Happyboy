@@ -128,7 +128,8 @@ export default function LiveOrdersPage() {
   }, [orders]);
 
   const openModal = (order: Order) => {
-    setSelectedOrder({ ...order, items: [...order.items] });
+    const sortedItems = [...order.items].sort((a, b) => a.modelNumber.localeCompare(b.modelNumber, undefined, { numeric: true }));
+    setSelectedOrder({ ...order, items: sortedItems });
     setFoundProduct(null);
     setAddModelSearch("");
     setAddSelectedColor("");
@@ -189,6 +190,7 @@ export default function LiveOrdersPage() {
       quantity: 1
     };
     const newItems = [...selectedOrder.items, ...Array(addQty).fill(null).map(() => ({ ...newItem, cartItemId: Date.now().toString() + Math.random().toString() }))];
+    newItems.sort((a, b) => a.modelNumber.localeCompare(b.modelNumber, undefined, { numeric: true }));
     setSelectedOrder({ ...selectedOrder, items: newItems });
     setFoundProduct(null);
     setAddModelSearch("");
@@ -271,10 +273,24 @@ export default function LiveOrdersPage() {
     if (!invoiceRef.current) return null;
     invoiceRef.current.style.display = "block";
     try {
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2, useCORS: true });
+      const canvas = await html2canvas(invoiceRef.current, { scale: 1.5, useCORS: true });
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const w = pdf.internal.pageSize.getWidth();
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, w, (canvas.height * w) / canvas.width);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      const imgData = canvas.toDataURL("image/jpeg", 0.6);
+
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
       return pdf;
     } finally {
       invoiceRef.current.style.display = "none";
@@ -301,23 +317,11 @@ export default function LiveOrdersPage() {
     const remaining = subtotal - discountValue - (selectedOrder.deposit || 0);
     const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${remaining} ج.م`;
 
-    // Try Web Share API first (Native sharing for Mobile/Supported Desktop)
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: 'فاتورة الطلب',
-          text: msgText,
-        });
-        return; // Success!
-      } catch (err) {
-        console.log("Error sharing or user cancelled", err);
-      }
-    }
-    
-    // Fallback for browsers that don't support sharing files natively (e.g. some Desktop browsers)
+    // Download the PDF first
     pdf.save(fileName);
-    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nمتصفحك لا يدعم الإرسال المباشر للملفات. سيتم فتح واتساب الآن، يرجى إرفاق الملف المحمل يدوياً.");
+    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
+    
+    // Open WhatsApp chat directly with the customer
     window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
   };
 
