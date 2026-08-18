@@ -50,8 +50,19 @@ export default function InventoryPage() {
       if (!user) {
         router.push("/admin/login");
       } else {
-        setLoading(false);
-        fetchProducts();
+        const isPrivileged = user.email && (
+          user.email.toLowerCase().includes('ahmed001') || 
+          user.email.toLowerCase().includes('hossam001') || 
+          user.email.toLowerCase().includes('ayat') || 
+          user.email.toLowerCase().includes('accounting') || 
+          user.email.toLowerCase().includes('kerollos')
+        );
+        if (!isPrivileged) {
+          router.push("/admin/dashboard");
+        } else {
+          setLoading(false);
+          fetchProducts();
+        }
       }
     });
     return () => unsubscribe();

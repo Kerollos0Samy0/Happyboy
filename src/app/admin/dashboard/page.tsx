@@ -149,6 +149,12 @@ export default function AdminDashboardPage() {
   const topGovs = Object.entries(govMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   const isOwner = userEmail && (userEmail.toLowerCase().includes('ahmed001') || userEmail.toLowerCase().includes('hossam001'));
+  const isPrivileged = userEmail && (
+    isOwner || 
+    userEmail.toLowerCase().includes('ayat') || 
+    userEmail.toLowerCase().includes('accounting') || 
+    userEmail.toLowerCase().includes('kerollos')
+  );
 
   return (
     <div className={styles.dashboardContainer}>
@@ -217,30 +223,34 @@ export default function AdminDashboardPage() {
                 <QrCode size={24} style={{color: '#3b82f6'}} /> {isOwner ? 'الوصول السريع' : 'بوابة الموظفين'}
               </h2>
               <div className={styles.linkList}>
+                {isPrivileged && (
+                  <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
+                    <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
+                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                  </a>
+                )}
                 {isOwner && (
+                  <a href="/admin/customers" className={`${styles.linkItem} ${styles.gray}`}>
+                    <div className={styles.linkContent}><Users size={20} style={{color: '#f59e0b'}}/> قاعدة العملاء</div>
+                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                  </a>
+                )}
+                {isPrivileged && (
                   <>
-                    <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
-                      <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
+                    <a href="/admin/picking" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><ClipboardList size={20} style={{color: '#a855f7'}}/> تجهيز الأوردرات</div>
                       <ChevronLeft size={18} style={{color: '#9ca3af'}} />
                     </a>
-                    <a href="/admin/customers" className={`${styles.linkItem} ${styles.gray}`}>
-                      <div className={styles.linkContent}><Users size={20} style={{color: '#f59e0b'}}/> قاعدة العملاء</div>
+                    <a href="/admin/orders" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><ShoppingCart size={20} style={{color: '#3b82f6'}}/> إدارة الطلبات</div>
+                      <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                    </a>
+                    <a href="/admin/create-order" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><PlusCircle size={20} style={{color: '#10b981'}}/> إنشاء طلب جديد</div>
                       <ChevronLeft size={18} style={{color: '#9ca3af'}} />
                     </a>
                   </>
                 )}
-                <a href="/admin/picking" className={`${styles.linkItem} ${styles.gray}`}>
-                  <div className={styles.linkContent}><ClipboardList size={20} style={{color: '#a855f7'}}/> تجهيز الأوردرات</div>
-                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                </a>
-                <a href="/admin/orders" className={`${styles.linkItem} ${styles.gray}`}>
-                  <div className={styles.linkContent}><ShoppingCart size={20} style={{color: '#3b82f6'}}/> إدارة الطلبات</div>
-                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                </a>
-                <a href="/admin/create-order" className={`${styles.linkItem} ${styles.gray}`}>
-                  <div className={styles.linkContent}><PlusCircle size={20} style={{color: '#10b981'}}/> إنشاء طلب جديد</div>
-                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                </a>
                 <a href="/customer" className={`${styles.linkItem} ${styles.green}`}>
                   <div className={styles.linkContent}><QrCode size={20} /> مسح الموديلات</div>
                   <ChevronLeft size={18} style={{color: '#86efac'}} />
