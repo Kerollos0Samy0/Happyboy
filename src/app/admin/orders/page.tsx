@@ -281,23 +281,10 @@ export default function LiveOrdersPage() {
       const { jsPDF } = await import("jspdf");
       
       const canvas = await html2canvas(invoiceRef.current, { scale: 1.5, useCORS: true });
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [canvas.width, canvas.height] });
       const imgData = canvas.toDataURL("image/jpeg", 0.6);
 
-      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+      pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
       return pdf;
     } finally {
       invoiceRef.current.style.display = "none";
