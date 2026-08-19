@@ -310,81 +310,73 @@ export default function ScanPage() {
               <div className="flex flex-col gap-4">
                 <div className="p-4" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
                   <h3 className="text-xl">{product.name} (موديل: {product.modelNumber})</h3>
-                  {product.quantity > 0 ? (
-                    <div className="mt-3 mb-2 p-3 bg-green-50 text-green-800 rounded text-center font-bold text-lg border border-green-200">
-                      ✅ الموديل متاح في المخزن
-                    </div>
-                  ) : (
-                    <div className="mt-3 mb-2 p-3 bg-red-50 text-red-800 rounded text-center font-bold text-lg border border-red-200">
-                      ❌ الموديل غير متاح (خلصان)
-                    </div>
-                  )}
+                  <div className="mt-3 mb-2 p-3 bg-green-50 text-green-800 rounded text-center font-bold text-lg border border-green-200">
+                    ✅ الموديل متاح في المخزن
+                  </div>
                 </div>
                 
-                {product.quantity > 0 && (
-                  <>
-                    <div className="p-4" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
-                      <h4 className="font-bold mb-3">الألوان المتاحة للموديل (اختر وعدّل الكمية):</h4>
-                      <div className="flex flex-col gap-2">
-                        {product.colors.map(color => {
-                          const isSelected = selectedColors.includes(color.name);
-                          return (
-                            <div 
-                              key={color.name} 
-                              className="flex flex-col gap-2 p-3" 
-                              style={{ 
-                                background: "var(--background)", 
-                                borderRadius: "var(--radius-sm)", 
-                                border: color.name === matchedColor.name ? "1px solid var(--primary)" : "1px solid transparent" 
-                              }}
-                            >
-                              <label className="flex items-center gap-3 cursor-pointer">
-                                <input 
-                                  type="checkbox" 
-                                  checked={isSelected}
-                                  onChange={() => toggleColor(color.name)}
-                                  style={{ width: '20px', height: '20px' }}
-                                />
-                                <span className="text-lg flex-1">{color.name}</span>
-                                {color.name === matchedColor.name && (
-                                  <span className="text-sm font-bold px-2 py-1 rounded" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
-                                    ممسوح
-                                  </span>
-                                )}
-                              </label>
-                              
-                              {isSelected && (
-                                <div className="flex items-center gap-4 mt-2 mr-8">
-                                  <span className="text-sm font-bold">الكمية (ثري):</span>
-                                  <div className="flex items-center gap-2">
-                                    <button 
-                                      className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
-                                      onClick={() => updateQuantity(color.name, 1)}
-                                    >+</button>
-                                    <span className="font-bold text-lg w-6 text-center">{colorQuantities[color.name] || 1}</span>
-                                    <button 
-                                      className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
-                                      onClick={() => updateQuantity(color.name, -1)}
-                                    >-</button>
-                                  </div>
-                                </div>
+                <>
+                  <div className="p-4" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
+                    <h4 className="font-bold mb-3">الألوان المتاحة للموديل (اختر وعدّل الكمية):</h4>
+                    <div className="flex flex-col gap-2">
+                      {product.colors.map(color => {
+                        const isSelected = selectedColors.includes(color.name);
+                        return (
+                          <div 
+                            key={color.name} 
+                            className="flex flex-col gap-2 p-3" 
+                            style={{ 
+                              background: "var(--background)", 
+                              borderRadius: "var(--radius-sm)", 
+                              border: color.name === matchedColor.name ? "1px solid var(--primary)" : "1px solid transparent" 
+                            }}
+                          >
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                checked={isSelected}
+                                onChange={() => toggleColor(color.name)}
+                                style={{ width: '20px', height: '20px' }}
+                              />
+                              <span className="text-lg flex-1">{color.name}</span>
+                              {color.name === matchedColor.name && (
+                                <span className="text-sm font-bold px-2 py-1 rounded" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
+                                  ممسوح
+                                </span>
                               )}
-                            </div>
-                          )
-                        })}
-                      </div>
+                            </label>
+                            
+                            {isSelected && (
+                              <div className="flex items-center gap-4 mt-2 mr-8">
+                                <span className="text-sm font-bold">الكمية (ثري):</span>
+                                <div className="flex items-center gap-2">
+                                  <button 
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
+                                    onClick={() => updateQuantity(color.name, 1)}
+                                  >+</button>
+                                  <span className="font-bold text-lg w-6 text-center">{colorQuantities[color.name] || 1}</span>
+                                  <button 
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 hover:bg-gray-300 font-bold text-lg"
+                                    onClick={() => updateQuantity(color.name, -1)}
+                                  >-</button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
-                    
-                    <button 
-                      onClick={handleAddSelectedColors} 
-                      className="btn btn-primary w-full py-4 text-lg mt-2"
-                      disabled={selectedColors.length === 0}
-                      style={{ opacity: selectedColors.length === 0 ? 0.5 : 1 }}
-                    >
-                      إضافة للفاتورة وأكمل مسح 📷
-                    </button>
-                  </>
-                )}
+                  </div>
+                  
+                  <button 
+                    onClick={handleAddSelectedColors} 
+                    className="btn btn-primary w-full py-4 text-lg mt-2"
+                    disabled={selectedColors.length === 0}
+                    style={{ opacity: selectedColors.length === 0 ? 0.5 : 1 }}
+                  >
+                    إضافة للفاتورة وأكمل مسح 📷
+                  </button>
+                </>
               </div>
             ) : null}
             
