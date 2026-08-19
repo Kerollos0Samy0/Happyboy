@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { Users, Search, Phone, ChevronLeft, MapPin, Building, Briefcase } from "lucide-react";
+import { Users, Search, Phone, ChevronLeft, MapPin, Building, Briefcase, Eye } from "lucide-react";
 
 interface Customer {
   id: string;
@@ -201,6 +201,7 @@ export default function AdminCustomersPage() {
                     <th style={{ padding: '1rem', fontWeight: 600 }}>اسم العميل</th>
                     <th style={{ padding: '1rem', fontWeight: 600 }}>رقم الهاتف</th>
                     <th style={{ padding: '1rem', fontWeight: 600 }}>تاريخ الإضافة</th>
+                    <th style={{ padding: '1rem', fontWeight: 600 }}>الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -221,6 +222,27 @@ export default function AdminCustomersPage() {
                       </td>
                       <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.9rem' }}>
                         {customer.createdAt ? new Date(customer.createdAt.toDate()).toLocaleDateString('ar-EG') : "غير معروف"}
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <button
+                          onClick={() => router.push(`/admin/customers/${customer.id}`)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem 1rem',
+                            background: '#eff6ff',
+                            color: '#3b82f6',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Eye size={16} /> عرض الحساب
+                        </button>
                       </td>
                     </tr>
                   ))}

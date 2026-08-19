@@ -7,7 +7,6 @@ import * as xlsxImport from 'xlsx';
 
 const xlsx = xlsxImport.default || xlsxImport;
 
-// Load env from .env.local
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = join(__dirname, ".env.local");
 const envContent = readFileSync(envPath, "utf-8");
@@ -29,14 +28,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Read excel
 console.log("Reading المخزن.xlsx...");
 const workbook = xlsx.readFile('المخزن.xlsx');
 const sheetName = workbook.SheetNames[0];
 const worksheet = workbook.Sheets[sheetName];
-const excelData = xlsx.utils.sheet_to_json(worksheet);
+const excelData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-// Extract color from string like "ترنج اولادى (انديجو)" or "ترنج اولادى(اسود)"
 function extractColor(itemStr) {
   if (!itemStr) return null;
   const match = itemStr.match(/\(([^)]+)\)/);
@@ -46,14 +43,15 @@ function extractColor(itemStr) {
   return null;
 }
 
-// Group data: { modelNumber: { totalQty: X, colors: { "انديجو": Y, "اسود": Z } } }
 const modelsData = {};
 
 for (const row of excelData) {
-  if (row.Code !== undefined && row['عدد القطع'] !== undefined) {
-    const modelNumber = String(row.Code).trim();
-    const colorName = extractColor(row.items);
-    const qty = parseInt(row['عدد القطع'], 10);
+  if (row.length >= 5 && row[0] !== undefined && row[4] !== undefined) {
+    const modelNumber = String(row[0]).trim();
+    if (modelNumber.toLowerCase() === 'code' || isNaN(parseInt(modelNumber))) continue;
+
+    const colorName = extractColor(row[1]);
+    const qty = parseInt(row[4], 10);
 
     if (!modelsData[modelNumber]) {
       modelsData[modelNumber] = { totalQty: 0, colors: {} };
@@ -75,7 +73,7 @@ async function updateQuantities() {
   console.log("Fetching products from Firebase...");
   const snapshot = await getDocs(collection(db, "products"));
   let updated = 0;
-  let notFound = 0;
+  let zeroed = 0;
 
   for (const productDoc of snapshot.docs) {
     const product = productDoc.data();
@@ -85,13 +83,8 @@ async function updateQuantities() {
       const excelModelData = modelsData[modelNumber];
       const newTotalQty = excelModelData.totalQty;
       
-      // Update color quantities in the colors array
       const updatedColors = (product.colors || []).map(colorObj => {
-        // Find matching color name in excel data
-        // Sometimes names might have slight differences like "رمادى" vs "رمادي", "انديجو" vs "أنديجو", so we could normalize but let's try direct match first
-        // Simple normalization: replace "ى" with "ي", "أ" with "ا", "إ" with "ا"
         const normalize = (str) => str.replace(/ى/g, "ي").replace(/[أإآ]/g, "ا").trim();
-        
         let matchingQty = 0;
         const normDbColor = normalize(colorObj.name);
         for (const [exColor, exQty] of Object.entries(excelModelData.colors)) {
@@ -100,11 +93,7 @@ async function updateQuantities() {
             break;
           }
         }
-        
-        return {
-          ...colorObj,
-          quantity: matchingQty
-        };
+        return { ...colorObj, quantity: matchingQty };
       });
 
       await updateDoc(doc(db, "products", productDoc.id), {
@@ -112,14 +101,24 @@ async function updateQuantities() {
         colors: updatedColors
       });
       
-      console.log(`Updated model ${modelNumber}: totalQty = ${newTotalQty}, colors = ${updatedColors.map(c => c.name + ':' + c.quantity).join(', ')}`);
       updated++;
     } else {
-      notFound++;
+      // Zero out products not in Excel
+      const zeroedColors = (product.colors || []).map(colorObj => {
+        return { ...colorObj, quantity: 0 };
+      });
+      
+      await updateDoc(doc(db, "products", productDoc.id), {
+        quantity: 0,
+        colors: zeroedColors
+      });
+      console.log(`Zeroed out model ${modelNumber} (not found in Excel)`);
+      zeroed++;
     }
   }
 
-  console.log(`\nSuccessfully updated ${updated} products. ${notFound} products were not found in Excel.`);
+  console.log(`\nSuccessfully updated ${updated} products with new quantities.`);
+  console.log(`Zeroed out ${zeroed} products that were missing from Excel.`);
   process.exit(0);
 }
 

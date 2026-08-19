@@ -70,7 +70,7 @@ async function run() {
     if (num >= 5 && num <= 90) boysBaby++;
     else if (num >= 100 && num <= 150) boysMiddle++;
     else if (num >= 300 && num <= 350) boysJunior++;
-    else if (num >= 500 && num <= 545) girlsBaby++;
+    else if (num >= 500 && num <= 565) girlsBaby++;
     else if (num >= 590 && num <= 690) girlsMiddle++;
     else if (num >= 790 && num <= 890) girlsJunior++;
     else others++;
@@ -83,7 +83,7 @@ async function run() {
   console.log(`- محير (300 - 350): ${boysJunior} موديل`);
   
   console.log(`\nقسم البناتي:`);
-  console.log(`- بيبي (500 - 545): ${girlsBaby} موديل`);
+  console.log(`- بيبي (500 - 565): ${girlsBaby} موديل`);
   console.log(`- وسط (590 - 690): ${girlsMiddle} موديل`);
   console.log(`- محير (790 - 890): ${girlsJunior} موديل`);
   
