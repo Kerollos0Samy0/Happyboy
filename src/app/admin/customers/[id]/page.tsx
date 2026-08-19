@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { auth, db } from "../../../../../lib/firebase";
+import { auth, db } from "../../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, doc, getDoc, onSnapshot, query, where, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { ChevronRight, User, Building, Phone, DollarSign, Plus, Receipt, CreditCard, History, Banknote } from "lucide-react";
