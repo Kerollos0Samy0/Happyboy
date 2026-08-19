@@ -9,6 +9,18 @@ import { detectBranch } from "../../lib/location";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
+const getCategoryName = (modelNumber: string) => {
+  const num = parseInt(modelNumber, 10);
+  if (isNaN(num)) return "أخرى";
+  if (num >= 5 && num <= 90) return "بيبي ولادي";
+  if (num >= 100 && num <= 150) return "وسط ولادي";
+  if (num >= 300 && num <= 350) return "محير ولادي";
+  if (num >= 500 && num <= 589) return "بيبي بناتي";
+  if (num >= 590 && num <= 690) return "وسط بناتي";
+  if (num >= 790 && num <= 890) return "محير بناتي";
+  return "أخرى";
+};
+
 interface CartItem {
   cartItemId: string;
   id: string;
@@ -135,7 +147,9 @@ export default function CartPage() {
     if (!invoiceRef.current) return null;
     
     const invoiceEl = invoiceRef.current;
+    const origWidth = invoiceEl.style.width;
     invoiceEl.style.display = "block";
+    invoiceEl.style.width = "794px";
     
     try {
       const canvas = await html2canvas(invoiceEl, {
@@ -144,7 +158,7 @@ export default function CartPage() {
         backgroundColor: "#ffffff",
       });
       
-      const imgData = canvas.toDataURL("image/jpeg", 0.85);
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -154,18 +168,26 @@ export default function CartPage() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
-      const margin = 5;
-      const maxImgWidth = pdfWidth - (margin * 2);
-      const maxImgHeight = pageHeight - (margin * 2);
+      const margin = 10;
+      const printWidth = pdfWidth - (margin * 2);
+      const printHeight = pageHeight - (margin * 2);
       
-      const ratio = Math.min(maxImgWidth / canvas.width, maxImgHeight / canvas.height);
-      const imgWidth = canvas.width * ratio;
+      const ratio = printWidth / canvas.width;
+      const imgWidth = printWidth;
       const imgHeight = canvas.height * ratio;
       
-      const marginX = (pdfWidth - imgWidth) / 2;
-      const marginY = margin;
+      let heightLeft = imgHeight;
+      let position = margin;
       
-      pdf.addImage(imgData, "JPEG", marginX, marginY, imgWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+      heightLeft -= printHeight;
+      
+      while (heightLeft > 0) {
+        position -= printHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+        heightLeft -= printHeight;
+      }
       
       if (shouldSave) {
         pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
@@ -177,6 +199,7 @@ export default function CartPage() {
       return null;
     } finally {
       invoiceEl.style.display = "none";
+      invoiceEl.style.width = origWidth;
     }
   };
 
@@ -363,6 +386,22 @@ export default function CartPage() {
             {/* Totals Section */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '50px' }}>
               <div style={{ width: '350px' }}>
+                {/* Model Summary */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '15px 0', borderBottom: '2px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', marginBottom: '4px' }}>ملخص الموديلات:</span>
+                  {Object.entries(
+                    sortedCart.reduce((acc, item) => {
+                      const cat = getCategoryName(item.modelNumber);
+                      acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).filter(([_, count]) => count > 0).map(([cat, count]) => (
+                    <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px' }}>
+                      <span>{cat}</span>
+                      <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
+                    </div>
+                  ))}
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
                   <span>إجمالي عدد القطع</span>
                   <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة</span>
