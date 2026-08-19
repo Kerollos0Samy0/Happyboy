@@ -147,11 +147,25 @@ export default function CartPage() {
       const imgData = canvas.toDataURL("image/jpeg", 0.85);
       const pdf = new jsPDF({
         orientation: "portrait",
-        unit: "px",
-        format: [canvas.width, canvas.height],
+        unit: "mm",
+        format: "a4",
       });
       
-      pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const margin = 10;
+      const maxImgWidth = pdfWidth - (margin * 2);
+      const maxImgHeight = pageHeight - (margin * 2);
+      
+      const ratio = Math.min(maxImgWidth / canvas.width, maxImgHeight / canvas.height);
+      const imgWidth = canvas.width * ratio;
+      const imgHeight = canvas.height * ratio;
+      
+      const marginX = (pdfWidth - imgWidth) / 2;
+      const marginY = margin;
+      
+      pdf.addImage(imgData, "JPEG", marginX, marginY, imgWidth, imgHeight);
       
       if (shouldSave) {
         pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
