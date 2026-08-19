@@ -396,30 +396,19 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Clean Footer / Signatures */}
-            <div style={{ borderTop: '1px solid #cbd5e1', paddingTop: '30px', display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ width: '45%', color: '#64748b', fontSize: '13px', lineHeight: '1.6' }}>
-                <div style={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '8px', fontSize: '14px' }}>شروط وأحكام الاستلام:</div>
-                • توقيع العميل على الفاتورة يعد إقراراً باستلام البضاعة وتعهداً بالسداد.<br/>
-                • العميل مسئول بالكامل (مدنياً وجنائياً) عن البضاعة منذ لحظة الاستلام.<br/>
-                <br/>
-                <span style={{ fontWeight: 'bold', color: '#A62E2E' }}>أرقام التواصل وإدارة المصنع:</span><br/>
-                <span dir="ltr" style={{ fontWeight: 'bold', color: '#1e293b' }}>01009516578 - 0224903939</span>
+            {/* Bottom Contact Info */}
+            <div style={{ display: 'flex', flexDirection: "column", gap: "10px", marginTop: "auto", paddingTop: "40px", zIndex: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>📞</span> 
+                <span dir="ltr">01009516578 - 0224903939</span>
               </div>
-              
-              <div style={{ width: '45%', display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>عدد الأكياس</div>
-                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '60px', margin: '0 auto' }}></div>
-                </div>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>توقيع المستلم</div>
-                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '100%', margin: '0 auto' }}></div>
-                </div>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>ختم الشركة</div>
-                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '100%', margin: '0 auto' }}></div>
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>✉️</span> 
+                <span>hello@happyboy-eg.com</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>📍</span> 
+                <span>المصنع: المنطقة الصناعية - العبور</span>
               </div>
             </div>
             
