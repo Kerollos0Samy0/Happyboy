@@ -302,38 +302,22 @@ export default function CartPage() {
             {/* Header */}
           <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b", background: "#fff", padding: "20px" }}>
             {/* Header Section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '30px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '70px', objectFit: 'contain' }} />
-                <div>
-                  <h1 style={{ margin: 0, color: '#A62E2E', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>Happy Boy & Girl</h1>
-                  <p style={{ margin: '5px 0 0 0', color: '#64748b', fontSize: '14px', fontWeight: 'bold' }}>لصناعة الملابس الجاهزة</p>
-                </div>
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: "28px", fontWeight: "900", color: '#1e293b', marginBottom: '8px' }}>
-                  فاتورة مبيعات
-                </div>
-                <div style={{ fontSize: "16px", color: '#475569', fontWeight: 'bold', marginBottom: '4px' }}>
-                  رقم الفاتورة: <span style={{ color: '#0f172a', fontSize: '18px' }}>{orderId}</span>
-                </div>
-                <div style={{ fontSize: "14px", color: '#64748b' }}>
-                  التاريخ: {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '20px' }}>
+                <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
+                <h1 style={{ margin: '10px 0 0 0', color: '#1e293b', fontSize: '32px', fontWeight: '900' }}>طلبية</h1>
             </div>
             
-            {/* Customer Info Box (Minimal) */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginBottom: '40px' }}>
-              <div style={{ flex: '1 1 45%' }}>
-                <div style={{ color: '#64748b', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>فاتورة إلى</div>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', marginBottom: '5px' }}>{customerName} {customerBrand ? `(${customerBrand})` : ''}</div>
-                <div style={{ fontSize: '14px', color: '#475569', marginBottom: '5px' }}>{customerAddress || customerGovernorate || 'العنوان غير متوفر'}</div>
-                <div style={{ fontSize: '14px', color: '#475569' }} dir="ltr">{customerPhone}</div>
+            {/* Customer Info Box */}
+            <div style={{ border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', marginBottom: '30px', background: '#fff', display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+              <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName} {customerBrand ? `(${customerBrand})` : ''}</span></div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || customerGovernorate || 'غير متوفر'}</span></div>
               </div>
-              <div style={{ flex: '1 1 45%', textAlign: 'left' }}>
-                <div style={{ color: '#64748b', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>معلومات الشحن</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '5px' }}>{customerShipping || 'استلام من المصنع'}</div>
+              <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>التاريخ: <span style={{ color: '#A62E2E' }}>{new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>معلومات الشحن: <span style={{ color: '#A62E2E' }}>{customerShipping || 'استلام من المصنع'}</span></div>
               </div>
             </div>
 
@@ -379,24 +363,28 @@ export default function CartPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '50px' }}>
               <div style={{ width: '350px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
-                  <span>إجمالي القطع</span>
-                  <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة / {totalSeries} ثري</span>
+                  <span>إجمالي عدد القطع</span>
+                  <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
-                  <span>الإجمالي الفرعي</span>
+                  <span>إجمالي عدد الثريهات</span>
+                  <span style={{ fontWeight: 'bold' }}>{totalSeries} ثري</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
+                  <span>إجمالي الفلوس</span>
                   <span style={{ fontWeight: 'bold' }}>{total} ج.م</span>
                 </div>
                 
                 {discountNum > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontSize: '15px' }}>
-                    <span>الخصم ({discountNum}%)</span>
-                    <span style={{ fontWeight: 'bold' }}>- {discountValue} ج.م</span>
+                    <span>نسبة الخصم</span>
+                    <span style={{ fontWeight: 'bold' }}>{discountNum}% (-{discountValue} ج.م)</span>
                   </div>
                 )}
                 
                 {depositNum > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontSize: '15px' }}>
-                    <span>المدفوع مقدماً (عربون)</span>
+                    <span>العربون</span>
                     <span style={{ fontWeight: 'bold' }}>{depositNum} ج.م</span>
                   </div>
                 )}
