@@ -303,7 +303,7 @@ export default function CartPage() {
           <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b", background: "#fff", padding: "20px" }}>
             {/* Header Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '20px' }}>
-                <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
+                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
                 <h1 style={{ margin: '10px 0 0 0', color: '#1e293b', fontSize: '32px', fontWeight: '900' }}>طلبية</h1>
             </div>
             

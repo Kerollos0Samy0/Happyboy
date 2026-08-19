@@ -857,7 +857,7 @@ export default function LiveOrdersPage() {
 
             {/* Header Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', position: "relative", zIndex: 10 }}>
-              <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
+              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
               <div style={{ fontSize: "32px", fontWeight: "900", color: '#0f172a', marginTop: '10px' }}>طلبية</div>
             </div>
 
