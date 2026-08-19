@@ -280,9 +280,9 @@ export default function LiveOrdersPage() {
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
       
-      const canvas = await html2canvas(invoiceRef.current, { scale: 1.5, useCORS: true });
+      const canvas = await html2canvas(invoiceRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
       const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [canvas.width, canvas.height] });
-      const imgData = canvas.toDataURL("image/jpeg", 0.6);
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
 
       pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
       return pdf;

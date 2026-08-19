@@ -139,11 +139,12 @@ export default function CartPage() {
     
     try {
       const canvas = await html2canvas(invoiceEl, {
-        scale: 1.5,
+        scale: 2,
         useCORS: true,
+        backgroundColor: "#ffffff",
       });
       
-      const imgData = canvas.toDataURL("image/jpeg", 0.6);
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "px",
@@ -284,9 +285,9 @@ export default function CartPage() {
             direction: "rtl"
           }}
         >
-          <div style={{ fontFamily: "Arial, sans-serif", color: "black" }}>
+          <div style={{ fontFamily: "'Cairo', sans-serif", color: "black", background: "#ffffff" }}>
             {/* Header */}
-          <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b", background: "#fff", padding: "20px" }}>
+          <div style={{ fontFamily: "'Cairo', sans-serif", color: "#1e293b", background: "#fff", padding: "20px" }}>
             {/* Header Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '20px' }}>
                 <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
