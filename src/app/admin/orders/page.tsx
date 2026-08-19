@@ -287,7 +287,7 @@ export default function LiveOrdersPage() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
-      const margin = 10;
+      const margin = 5;
       const maxImgWidth = pdfWidth - (margin * 2);
       const maxImgHeight = pageHeight - (margin * 2);
       
@@ -830,7 +830,7 @@ export default function LiveOrdersPage() {
       <div
         ref={invoiceRef}
         style={{
-          display: "none", width: "800px", minHeight: "1131px", padding: "40px",
+          display: "none", width: "700px", padding: "20px",
           background: "white", color: "black",
           position: "absolute", top: "-9999px", left: "-9999px", direction: "rtl",
           fontFamily: "'Cairo', sans-serif"
@@ -840,9 +840,8 @@ export default function LiveOrdersPage() {
           <div style={{
             border: "2px solid #e2e8f0",
             borderRadius: "20px",
-            padding: "40px",
+            padding: "20px",
             position: "relative",
-            minHeight: "1050px",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden"
@@ -858,7 +857,7 @@ export default function LiveOrdersPage() {
 
             {/* Header Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', position: "relative", zIndex: 10 }}>
-              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '90px', objectFit: 'contain' }} />
+              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '140px', objectFit: 'contain' }} />
               <div style={{ fontSize: "32px", fontWeight: "900", color: '#0f172a', marginTop: '10px' }}>طلبية</div>
             </div>
 
@@ -982,14 +981,6 @@ export default function LiveOrdersPage() {
               <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
                 <span>📞</span> 
                 <span dir="ltr">01009516578 - 0224903939</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
-                <span>✉️</span> 
-                <span>hello@happyboy-eg.com</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
-                <span>📍</span> 
-                <span>المصنع: المنطقة الصناعية - العبور</span>
               </div>
             </div>
 
