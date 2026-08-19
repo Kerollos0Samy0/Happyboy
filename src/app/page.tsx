@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/admin/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
     }
   };

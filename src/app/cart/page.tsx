@@ -300,120 +300,143 @@ export default function CartPage() {
         >
           <div style={{ fontFamily: "Arial, sans-serif", color: "black" }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '60px', objectFit: 'contain' }} />
-              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-                إذن صرف رقم : <span style={{ marginRight: '10px' }}>{orderId}</span>
+          <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b", background: "#fff", padding: "20px" }}>
+            {/* Header Section */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '30px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '70px', objectFit: 'contain' }} />
+                <div>
+                  <h1 style={{ margin: 0, color: '#A62E2E', fontSize: '26px', fontWeight: '900', letterSpacing: '1px' }}>Happy Boy & Girl</h1>
+                  <p style={{ margin: '5px 0 0 0', color: '#64748b', fontSize: '14px', fontWeight: 'bold' }}>لصناعة الملابس الجاهزة</p>
+                </div>
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: "28px", fontWeight: "900", color: '#1e293b', marginBottom: '8px' }}>
+                  فاتورة مبيعات
+                </div>
+                <div style={{ fontSize: "16px", color: '#475569', fontWeight: 'bold', marginBottom: '4px' }}>
+                  رقم الفاتورة: <span style={{ color: '#0f172a', fontSize: '18px' }}>{orderId}</span>
+                </div>
+                <div style={{ fontSize: "14px", color: '#64748b' }}>
+                  التاريخ: {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
               </div>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-                القاهرة فى {new Date().toLocaleDateString('ar-EG')}
+            {/* Customer Info Box (Minimal) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginBottom: '40px' }}>
+              <div style={{ flex: '1 1 45%' }}>
+                <div style={{ color: '#64748b', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>فاتورة إلى</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', marginBottom: '5px' }}>{customerName} {customerBrand ? `(${customerBrand})` : ''}</div>
+                <div style={{ fontSize: '14px', color: '#475569', marginBottom: '5px' }}>{customerAddress || customerGovernorate || 'العنوان غير متوفر'}</div>
+                <div style={{ fontSize: '14px', color: '#475569' }} dir="ltr">{customerPhone}</div>
               </div>
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
-                عميل رقم : {orderId}
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
-                اسم العميل / {customerName} {customerBrand ? ` - ${customerBrand}` : ''}
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
-                شركة الشحن : {customerShipping || 'استلام مصنع'}
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'center' }}>
-                موبيل / <span dir="ltr">{customerPhone}</span>
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
-                العنوان / {customerAddress || customerGovernorate || ''}
+              <div style={{ flex: '1 1 45%', textAlign: 'left' }}>
+                <div style={{ color: '#64748b', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>معلومات الشحن</div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '5px' }}>{customerShipping || 'استلام من المصنع'}</div>
               </div>
             </div>
 
-            {/* Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black", marginBottom: "30px", textAlign: "center" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid black" }}>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الموديل</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اسم الصنف</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اللون</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>السعر</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>طقم</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الكمية</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الاجمالي</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCart.map((item, i) => {
-                  const qty = item.quantity || 1;
-                  const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
-                  const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
-                  const rowTotal = item.price * itemTotalPieces;
-                  return (
-                    <tr key={i} style={{ borderBottom: "1px solid black" }}>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.modelNumber}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name} {item.isSeri ? getSizesText(item.name, item.sizes) : ''}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.selectedColor}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.price}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{piecesInSeri}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{qty}</td>
-                      <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{rowTotal}</td>
-                    </tr>
-                  );
-                })}
-                {/* Total Row */}
-                <tr>
-                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي ( {totalPieces} قطعة / {totalSeries} ثري )</td>
-                  <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{total}</td>
-                </tr>
+            {/* Elegant List Layout (Borderless Table) */}
+            <div style={{ marginBottom: "40px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #cbd5e1" }}>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الصنف</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>الموديل / اللون</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>السعر</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>الكمية</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#1e293b", fontSize: "14px", textAlign: "left" }}>الإجمالي</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedCart.map((item, i) => {
+                    const qty = item.quantity || 1;
+                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
+                    const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
+                    const rowTotal = item.price * itemTotalPieces;
+                    return (
+                      <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
+                        <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
+                          {item.name}
+                          {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
+                        </td>
+                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "14px" }}>
+                          <span style={{ fontWeight: 'bold' }}>{item.modelNumber}</span> <br/>
+                          <span style={{ color: '#64748b' }}>{item.selectedColor}</span>
+                        </td>
+                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
+                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
+                        <td style={{ padding: "16px 8px", fontWeight: "900", color: "#1e293b", textAlign: "left", fontSize: "16px" }}>{rowTotal} ج.م</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals Section */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '50px' }}>
+              <div style={{ width: '350px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
+                  <span>إجمالي القطع</span>
+                  <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة / {totalSeries} ثري</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
+                  <span>الإجمالي الفرعي</span>
+                  <span style={{ fontWeight: 'bold' }}>{total} ج.م</span>
+                </div>
+                
                 {discountNum > 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>خصم ({discountNum}%)</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>- {discountValue}</td>
-                  </tr>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontSize: '15px' }}>
+                    <span>الخصم ({discountNum}%)</span>
+                    <span style={{ fontWeight: 'bold' }}>- {discountValue} ج.م</span>
+                  </div>
                 )}
+                
                 {depositNum > 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{depositNum}</td>
-                  </tr>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontSize: '15px' }}>
+                    <span>المدفوع مقدماً (عربون)</span>
+                    <span style={{ fontWeight: 'bold' }}>{depositNum} ج.م</span>
+                  </div>
                 )}
-                {(depositNum > 0 || discountNum > 0) && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{remaining}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-
-            {/* Footer */}
-            <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>
-              توقيع العميل أو من ينوب عنه باستلام البضاعة يعتبر بمثابة إيصال بقيمتها و تعهد منه بسداد القيمة المذكورة عاليه وقت طلبها منه و يعتبر مسئولا مسئولية مدنية و جنائية عنها.
-            </div>
-            <div style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold", marginBottom: "30px" }}>
-              *** نرجو الاتصال بالمصنع في حالة عدم مطابقة الفاتورة  ت : 0224903939 - 01009516578 ***
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
-              <div style={{ textAlign: 'center', width: '200px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>المستلم</div>
-                <div style={{ fontWeight: 'bold', marginBottom: '15px', textAlign: 'right' }}>الاسم:</div>
-                <div style={{ fontWeight: 'bold', textAlign: 'right' }}>التوقيع:</div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ width: '80px', height: '30px', border: '1px solid black' }}></div>
-                <span style={{ fontWeight: 'bold', fontSize: "16px" }}>: عدد الاكياس</span>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', marginTop: '8px', borderTop: '2px solid #1e293b', color: '#A62E2E' }}>
+                  <span style={{ fontWeight: '900', fontSize: '20px' }}>الصافي المستحق</span>
+                  <span style={{ fontWeight: '900', fontSize: '22px' }}>{remaining} ج.م</span>
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px', fontSize: '14px', fontWeight: 'bold' }}>
-              <div>صفحة 1 من 1</div>
-              <div>إذن رقم : {orderId}</div>
+            {/* Clean Footer / Signatures */}
+            <div style={{ borderTop: '1px solid #cbd5e1', paddingTop: '30px', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ width: '45%', color: '#64748b', fontSize: '13px', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '8px', fontSize: '14px' }}>شروط وأحكام الاستلام:</div>
+                • توقيع العميل على الفاتورة يعد إقراراً باستلام البضاعة وتعهداً بالسداد.<br/>
+                • العميل مسئول بالكامل (مدنياً وجنائياً) عن البضاعة منذ لحظة الاستلام.<br/>
+                <br/>
+                <span style={{ fontWeight: 'bold', color: '#A62E2E' }}>أرقام التواصل وإدارة المصنع:</span><br/>
+                <span dir="ltr" style={{ fontWeight: 'bold', color: '#1e293b' }}>01009516578 - 0224903939</span>
+              </div>
+              
+              <div style={{ width: '45%', display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>عدد الأكياس</div>
+                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '60px', margin: '0 auto' }}></div>
+                </div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>توقيع المستلم</div>
+                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '100%', margin: '0 auto' }}></div>
+                </div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ color: '#475569', fontWeight: 'bold', marginBottom: '40px' }}>ختم الشركة</div>
+                  <div style={{ borderBottom: '2px dotted #94a3b8', width: '100%', margin: '0 auto' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '50px', fontSize: '12px', color: '#cbd5e1' }}>
+              نظام إدارة المصنع • تم الإصدار آلياً
             </div>
           </div>
         </div>

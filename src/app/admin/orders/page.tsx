@@ -9,9 +9,7 @@ import {
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { WAREHOUSE_EMAILS } from "../../../lib/location";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus } from "lucide-react";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download } from "lucide-react";
 
 interface OrderItem {
   cartItemId?: string;
@@ -105,7 +103,7 @@ export default function LiveOrdersPage() {
   const [addQty, setAddQty] = useState(1);
 
   const invoiceRef = useRef<HTMLDivElement>(null);
-  const [currentPdfOrder, setCurrentPdfOrder] = useState<Order | null>(null);
+
 
   useEffect(() => {
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
@@ -258,21 +256,30 @@ export default function LiveOrdersPage() {
   };
 
   // PDF
-  useEffect(() => {
-    if (currentPdfOrder) {
-      generatePDF(currentPdfOrder).then((pdf) => {
-         if (pdf) {
-            pdf.save(`فاتورة_${currentPdfOrder.customerName.replace(/\s+/g, '_')}.pdf`);
-         }
-         setCurrentPdfOrder(null);
-      });
+  const handleDownloadPDF = async () => {
+    if (!selectedOrder) return;
+    const pdf = await generatePDF(selectedOrder);
+    if (pdf) {
+      pdf.save(`فاتورة_${selectedOrder.customerName.replace(/\s+/g, '_')}.pdf`);
     }
-  }, [currentPdfOrder]);
+  };
+
+  const handlePrintPDF = async () => {
+    if (!selectedOrder) return;
+    const pdf = await generatePDF(selectedOrder);
+    if (!pdf) return;
+    
+    pdf.autoPrint();
+    window.open(pdf.output('bloburl'), '_blank');
+  };
 
   const generatePDF = async (order: Order) => {
     if (!invoiceRef.current) return null;
     invoiceRef.current.style.display = "block";
     try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      
       const canvas = await html2canvas(invoiceRef.current, { scale: 1.5, useCORS: true });
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -801,143 +808,163 @@ export default function LiveOrdersPage() {
               </button>
 
               <button
-                onClick={() => setCurrentPdfOrder(selectedOrder)}
+                onClick={handlePrintPDF}
                 style={{ flex: "1 1 150px", padding: "0.8rem", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
               >
-                <Printer size={18} /> تحميل PDF
+                <Printer size={18} /> طباعة
+              </button>
+
+              <button
+                onClick={handleDownloadPDF}
+                style={{ flex: "1 1 150px", padding: "0.8rem", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
+              >
+                <Download size={18} /> تحميل PDF
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Hidden Invoice for PDF Generation (Clean Read-Only Version) */}
+      {/* Hidden Invoice for PDF Generation (Matching Image Style with Brand Colors) */}
       <div
         ref={invoiceRef}
         style={{
-          display: "none", width: "800px", padding: "40px",
+          display: "none", width: "800px", minHeight: "1131px", padding: "40px",
           background: "white", color: "black",
-          position: "absolute", top: "-9999px", left: "-9999px", direction: "rtl"
+          position: "absolute", top: "-9999px", left: "-9999px", direction: "rtl",
+          fontFamily: "'Cairo', sans-serif"
         }}
       >
-        {currentPdfOrder && (
-          <div style={{ fontFamily: "Arial, sans-serif", color: "black" }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <img src="/Logo.png" alt="Happy Boy Logo" style={{ height: '60px', objectFit: 'contain' }} />
-              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-                إذن صرف رقم : <span style={{ marginRight: '10px' }}>{currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}</span>
-              </div>
-            </div>
+        {selectedOrder && (
+          <div style={{
+            border: "2px solid #e2e8f0",
+            borderRadius: "20px",
+            padding: "40px",
+            position: "relative",
+            minHeight: "1050px",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-                القاهرة فى {currentPdfOrder.createdAt?.toDate ? currentPdfOrder.createdAt.toDate().toLocaleDateString('ar-EG') : ''}
+            {/* Geometric Shapes (Top Right) */}
+            <div style={{ position: "absolute", top: 0, right: 0, width: "150px", height: "150px", background: "#A62E2E", clipPath: "polygon(100% 0, 100% 100%, 0 0)", opacity: 0.1, borderTopRightRadius: "20px" }}></div>
+            <div style={{ position: "absolute", top: 0, right: "40px", width: "100px", height: "100px", background: "#0f172a", clipPath: "polygon(100% 0, 100% 100%, 0 0)", opacity: 0.1 }}></div>
+
+            {/* Geometric Shapes (Bottom Left) */}
+            <div style={{ position: "absolute", bottom: 0, left: 0, width: "150px", height: "150px", background: "#A62E2E", clipPath: "polygon(0 0, 0% 100%, 100% 100%)", opacity: 0.1, borderBottomLeftRadius: "20px" }}></div>
+            <div style={{ position: "absolute", bottom: 0, left: "40px", width: "100px", height: "100px", background: "#0f172a", clipPath: "polygon(0 0, 0% 100%, 100% 100%)", opacity: 0.1 }}></div>
+
+            {/* Header Section */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', position: "relative", zIndex: 10 }}>
+              
+              {/* Logo - Top Left */}
+              <div style={{ width: "250px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <img src="/Logo.png" alt="Happy Boy Logo" style={{ width: '100%', objectFit: 'contain' }} />
+                {/* <div style={{ fontSize: "16px", color: "#A62E2E", fontWeight: "bold", marginTop: "10px", letterSpacing: "2px" }}>HAPPY BOY</div> */}
               </div>
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
-                عميل رقم : {currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
-                اسم العميل / {currentPdfOrder.customerName} {currentPdfOrder.customerBrand ? ` - ${currentPdfOrder.customerBrand}` : ''}
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1 }}>
-                شركة الشحن : {currentPdfOrder.customerShipping || 'استلام مصنع'}
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'center' }}>
-                موبيل / <span dir="ltr">{currentPdfOrder.customerPhone}</span>
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: "bold", flex: 1, textAlign: 'left', direction: 'rtl' }}>
-                العنوان / {currentPdfOrder.customerAddress || currentPdfOrder.customerGovernorate || ''}
+
+              {/* Title & Info - Top Right */}
+              <div style={{ textAlign: 'left', width: "350px", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                <div style={{ fontSize: "32px", fontWeight: "900", color: '#0f172a', marginBottom: '0px' }}>فاتورة مبيعات</div>
+                <div style={{ fontSize: "16px", color: '#A62E2E', fontWeight: 'bold', letterSpacing: "8px", marginBottom: '30px', marginRight: "-8px" }}>INVOICE</div>
+                
+                <div style={{ width: "100%", fontSize: "16px", fontWeight: "bold", color: "#0f172a", display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
+                    <span style={{ color: "#A62E2E" }}>{selectedOrder.customerName} {selectedOrder.customerBrand ? `(${selectedOrder.customerBrand})` : ''}</span>
+                    <span>: اسم العميل</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
+                    <span style={{ color: "#A62E2E" }}>{selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
+                    <span>: التـاريـــــــخ</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
+                    <span style={{ color: "#A62E2E" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span>
+                    <span>: رقم الفاتورة</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black", marginBottom: "30px", textAlign: "center" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid black" }}>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الموديل</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اسم الصنف</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>اللون</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>السعر</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>طقم</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الكمية</th>
-                  <th style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>الاجمالي</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPdfOrder.items?.map((item, i) => {
-                  const qty = item.quantity || 1;
-                  const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
-                  const totalPieces = item.isSeri ? piecesInSeri * qty : qty;
-                  const rowTotal = item.price * totalPieces;
-                  return (
-                    <tr key={i} style={{ borderBottom: "1px solid black" }}>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.modelNumber}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.name} {item.isSeri ? getSizesText(item.name, item.sizes) : ''}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.selectedColor}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{item.price}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{piecesInSeri}</td>
-                      <td style={{ border: "1px solid black", padding: "8px" }}>{qty}</td>
-                      <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{rowTotal}</td>
-                    </tr>
-                  );
-                })}
-                {/* Total Row */}
-                <tr>
-                  <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold" }}>الإجمالي ( {calculateTotalPieces(currentPdfOrder.items)} قطعة / {calculateTotalSeries(currentPdfOrder.items)} ثري )</td>
-                  <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold" }}>{calculateTotal(currentPdfOrder.items)}</td>
-                </tr>
-                {Number(currentPdfOrder.discountPercentage || 0) > 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>خصم ({currentPdfOrder.discountPercentage}%)</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>- {(calculateTotal(currentPdfOrder.items) * Number(currentPdfOrder.discountPercentage)) / 100}</td>
+            <div style={{ marginBottom: "20px", flex: 1, zIndex: 10 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center", border: "1px solid #94a3b8" }}>
+                <thead>
+                  <tr style={{ background: "#e2e8f0", borderBottom: "1px solid #94a3b8" }}>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "50px" }}>رقم</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "80px" }}>الكمية</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "120px" }}>السعر</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8" }}>وصف المنتج</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "150px" }}>الإجمالي</th>
                   </tr>
-                )}
-                {Number(currentPdfOrder.deposit || 0) > 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#16a34a" }}>المدفوع (عربون)</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#16a34a" }}>{currentPdfOrder.deposit}</td>
-                  </tr>
-                )}
-                {(Number(currentPdfOrder.deposit || 0) > 0 || Number(currentPdfOrder.discountPercentage || 0) > 0) && (
-                  <tr>
-                    <td colSpan={6} style={{ border: "1px solid black", padding: "8px", textAlign: "left", fontWeight: "bold", color: "#A62E2E" }}>المبلغ المتبقي</td>
-                    <td style={{ border: "1px solid black", padding: "8px", fontWeight: "bold", color: "#A62E2E" }}>{calculateTotal(currentPdfOrder.items) - ((calculateTotal(currentPdfOrder.items) * Number(currentPdfOrder.discountPercentage || 0)) / 100) - Number(currentPdfOrder.deposit || 0)}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-
-            {/* Footer */}
-            <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>
-              توقيع العميل أو من ينوب عنه باستلام البضاعة يعتبر بمثابة إيصال بقيمتها و تعهد منه بسداد القيمة المذكورة عاليه وقت طلبها منه و يعتبر مسئولا مسئولية مدنية و جنائية عنها.
-            </div>
-            <div style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold", marginBottom: "30px" }}>
-              *** نرجو الاتصال بالمصنع في حالة عدم مطابقة الفاتورة  ت : 0224903939 - 01009516578 ***
+                </thead>
+                <tbody>
+                  {selectedOrder.items?.map((item, i) => {
+                    const qty = item.quantity || 1;
+                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
+                    const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
+                    const rowTotal = item.price * itemTotalPieces;
+                    return (
+                      <tr key={i} style={{ borderBottom: "1px solid #cbd5e1" }}>
+                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{i + 1}</td>
+                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
+                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{item.price} ج.م</td>
+                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1", textAlign: "right" }}>
+                           {item.name} <span style={{ color: "#A62E2E" }}>{item.modelNumber}</span> - {item.selectedColor}
+                        </td>
+                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{rowTotal} ج.م</td>
+                      </tr>
+                    );
+                  })}
+                  {/* Fill empty rows if items are few */}
+                  {Array.from({ length: Math.max(0, 10 - (selectedOrder.items?.length || 0)) }).map((_, i) => (
+                     <tr key={`empty-${i}`} style={{ borderBottom: "1px solid #cbd5e1", height: "45px" }}>
+                        <td style={{ border: "1px solid #cbd5e1", color: "#0f172a", fontWeight: "bold" }}>{(selectedOrder.items?.length || 0) + i + 1}</td>
+                        <td style={{ border: "1px solid #cbd5e1" }}></td>
+                        <td style={{ border: "1px solid #cbd5e1" }}></td>
+                        <td style={{ border: "1px solid #cbd5e1" }}></td>
+                        <td style={{ border: "1px solid #cbd5e1" }}></td>
+                     </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
-              <div style={{ textAlign: 'center', width: '200px' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>المستلم</div>
-                <div style={{ fontWeight: 'bold', marginBottom: '15px', textAlign: 'right' }}>الاسم:</div>
-                <div style={{ fontWeight: 'bold', textAlign: 'right' }}>التوقيع:</div>
+            {/* Footer Summary */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '20px', zIndex: 10 }}>
+              {/* Notes */}
+              <div style={{ width: "40%", textAlign: "right" }}>
+                <div style={{ fontSize: "16px", fontWeight: "bold", color: "#0f172a", marginBottom: "15px" }}>: ملاحظات</div>
+                <div style={{ borderBottom: "1px solid #cbd5e1", marginBottom: "15px", height: "20px" }}></div>
+                <div style={{ borderBottom: "1px solid #cbd5e1", marginBottom: "15px", height: "20px" }}></div>
+                <div style={{ borderBottom: "1px solid #cbd5e1", height: "20px" }}></div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ width: '80px', height: '30px', border: '1px solid black' }}></div>
-                <span style={{ fontWeight: 'bold', fontSize: "16px" }}>: عدد الاكياس</span>
+
+              {/* Total Block */}
+              <div style={{ background: "#e2e8f0", padding: "15px 25px", border: "1px solid #94a3b8", display: "flex", gap: "10px", alignItems: "center" }}>
+                <span style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a" }}>الإجمالي المطلوب سداده :</span>
+                <span style={{ fontSize: "20px", fontWeight: "900", color: "#A62E2E" }}>
+                  {calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م
+                </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px', fontSize: '14px', fontWeight: 'bold' }}>
-              <div>صفحة 1 من 1</div>
-              <div>إذن رقم : {currentPdfOrder.orderNumber || currentPdfOrder.id.slice(0, 8)}</div>
+            {/* Bottom Contact Info */}
+            <div style={{ display: 'flex', flexDirection: "column", gap: "10px", marginTop: "auto", paddingTop: "40px", zIndex: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>📞</span> 
+                <span dir="ltr">01009516578 - 0224903939</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>✉️</span> 
+                <span>hello@happyboy-eg.com</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
+                <span>📍</span> 
+                <span>المصنع: المنطقة الصناعية - العبور</span>
+              </div>
             </div>
+
           </div>
         )}
       </div>

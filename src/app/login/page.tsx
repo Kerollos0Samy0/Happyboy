@@ -22,9 +22,9 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       // Everyone goes to the dashboard. The dashboard automatically shows employee tools for employees.
       router.push("/admin/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError("الإيميل أو كلمة السر غير صحيحة");
+      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
     } finally {
       setLoading(false);
     }

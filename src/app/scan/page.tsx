@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 5 && num <= 90) return "بيبي ولادي";
   if (num >= 100 && num <= 150) return "وسط ولادي";
   if (num >= 300 && num <= 350) return "محير ولادي";
-  if (num >= 500 && num <= 545) return "بيبي بناتي";
+  if (num >= 500 && num <= 589) return "بيبي بناتي";
   if (num >= 590 && num <= 690) return "وسط بناتي";
   if (num >= 790 && num <= 890) return "محير بناتي";
   return "أخرى";
@@ -94,28 +94,37 @@ export default function ScanPage() {
     if (!scannerElement) return;
     if (scannerElement.innerHTML !== "") return;
 
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 30,
-        qrbox: { width: 250, height: 250 },
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-        showTorchButtonIfSupported: true,
-      },
-      false
-    );
+    let scanner: any = null;
 
-    scanner.render(
-      (decodedText) => {
-        handleScanSuccess(decodedText, scanner);
-      },
-      (error) => {
-        // Handle scan errors silently
-      }
-    );
+    const initScanner = async () => {
+      const { Html5QrcodeScanner, Html5QrcodeScanType } = await import("html5-qrcode");
+      scanner = new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 30,
+          qrbox: { width: 250, height: 250 },
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+          showTorchButtonIfSupported: true,
+        },
+        false
+      );
+
+      scanner.render(
+        (decodedText: string) => {
+          handleScanSuccess(decodedText, scanner);
+        },
+        (error: any) => {
+          // Handle scan errors silently
+        }
+      );
+    };
+
+    initScanner();
 
     return () => {
-      scanner.clear().catch(console.error);
+      if (scanner) {
+        scanner.clear().catch(console.error);
+      }
     };
   }, []);
 

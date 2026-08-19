@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag } from "lucide-react";
+import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle } from "lucide-react";
 
 interface ColorEntry {
   name: string;
@@ -201,7 +201,7 @@ export default function InventoryPage() {
     {
       title: "قسم البناتي",
       sections: [
-        { name: "بيبي مقاس 2-3-4-5 (500 - 545)", filter: (num: number) => num >= 500 && num <= 545 },
+        { name: "بيبي مقاس 2-3-4-5 (500 - 565)", filter: (num: number) => num >= 500 && num <= 565 },
         { name: "وسط مقاس 6-8-10-12 (600 - 680)", filter: (num: number) => num >= 590 && num <= 690 },
         { name: "محير مقاس 14-16-18-20 (800 - 880)", filter: (num: number) => num >= 790 && num <= 890 },
       ]
@@ -454,14 +454,28 @@ export default function InventoryPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
             <div className="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
               <Layers size={28} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-500 mb-1">عدد الموديلات</p>
-              <h3 className="text-3xl font-black text-gray-900">{totalModels}</h3>
+              <p className="text-sm font-bold text-gray-500 mb-1">الموديلات المتاحة</p>
+              <h3 className="text-3xl font-black text-gray-900">
+                {products.filter(p => (Number(p.quantity) || 0) > 0).length} 
+                <span className="text-lg text-gray-400 font-normal ml-2">/ {totalModels}</span>
+              </h3>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl border border-red-100 p-6 shadow-[0_2px_10px_-3px_rgba(239,68,68,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
+            <div className="w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <AlertTriangle size={28} strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-500 mb-1">نواقص (كمية 0)</p>
+              <h3 className="text-3xl font-black text-red-600">
+                {products.filter(p => (Number(p.quantity) || 0) <= 0).length}
+              </h3>
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">

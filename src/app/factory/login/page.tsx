@@ -17,7 +17,7 @@ export default function FactoryLoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/factory/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
     }
   };
