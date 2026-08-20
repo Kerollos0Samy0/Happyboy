@@ -388,9 +388,10 @@ export default function CartPage() {
                           {item.name}
                           {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
                         </td>
-                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "14px" }}>
-                          <span style={{ fontWeight: 'bold' }}>{item.modelNumber}</span> {item.colorBarcode && <span style={{ color: '#3b82f6', fontSize: '12px' }}>({item.colorBarcode})</span>} <br/>
-                          <span style={{ color: '#64748b' }}>{item.selectedColor}</span>
+                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "14px", lineHeight: "1.8" }}>
+                          <span style={{ color: '#94a3b8', fontSize: '12px' }}>كود الموديل:</span> <span style={{ fontWeight: 'bold', color: '#1e293b' }}>{item.modelNumber}</span><br/>
+                          <span style={{ color: '#94a3b8', fontSize: '12px' }}>لون الموديل:</span> <span style={{ fontWeight: 'bold', color: '#1e293b' }}>{item.selectedColor}</span><br/>
+                          <span style={{ color: '#94a3b8', fontSize: '12px' }}>كود اللون:</span> <span style={{ fontWeight: 'bold', color: '#1e293b' }}>{item.colorBarcode || '---'}</span>
                         </td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
