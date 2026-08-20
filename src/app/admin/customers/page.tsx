@@ -56,10 +56,9 @@ export default function AdminCustomersPage() {
     const customersQ = query(collection(db, "customers"));
     const unsubscribe = onSnapshot(customersQ, (snapshot) => {
       const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Customer[];
-      // Sort by newest
       fetched.sort((a, b) => {
-        const dateA = a.createdAt?.toDate?.() || new Date(0);
-        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        const dateA = a.createdAt?.toDate?.() || (a.createdAt ? new Date(a.createdAt) : new Date(0));
+        const dateB = b.createdAt?.toDate?.() || (b.createdAt ? new Date(b.createdAt) : new Date(0));
         return dateB.getTime() - dateA.getTime();
       });
       setCustomers(fetched);
@@ -79,10 +78,10 @@ export default function AdminCustomersPage() {
   const mapCustomerType = (type: string) => {
     if (!type) return "مجموعات محلات";
     const t = type.trim();
-    if (t === 'مكاتب') return 'عملاء مكاتب';
+    if (t.includes('مكاتب')) return 'عملاء مكاتب';
     if (t.includes('مقابل')) return 'محلات مقابل';
-    if (t === 'خارجي') return 'عملاء خارجي';
-    if (t === 'محلات حساب') return 'محلات حساب';
+    if (t.includes('خارجي')) return 'عملاء خارجي';
+    if (t.includes('حساب')) return 'محلات حساب';
     // Any other category like توحيدات, جعفر, etc will be under مجموعات محلات
     return 'مجموعات محلات';
   };
@@ -221,7 +220,11 @@ export default function AdminCustomersPage() {
                         </div>
                       </td>
                       <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.9rem' }}>
-                        {customer.createdAt ? new Date(customer.createdAt.toDate()).toLocaleDateString('ar-EG') : "غير معروف"}
+                        {customer.createdAt?.toDate 
+                          ? new Date(customer.createdAt.toDate()).toLocaleDateString('ar-EG') 
+                          : customer.createdAt 
+                            ? new Date(customer.createdAt).toLocaleDateString('ar-EG') 
+                            : "غير معروف"}
                       </td>
                       <td style={{ padding: '1rem' }}>
                         <button
