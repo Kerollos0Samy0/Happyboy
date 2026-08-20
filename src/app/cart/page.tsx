@@ -376,7 +376,7 @@ export default function CartPage() {
                           {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center" }}>
-                          {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}
+                          {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}
                         </td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
