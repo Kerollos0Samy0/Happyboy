@@ -741,7 +741,7 @@ export default function LiveOrdersPage() {
                   {selectedOrder.items?.map((item, i) => (
                     <tr key={i} style={{ borderBottom: "1px solid #e2e8f0" }}>
                       <td style={{ padding: "12px" }}>{item.name} (موديل {item.modelNumber})</td>
-                      <td style={{ padding: "12px" }}>{item.selectedColor}</td>
+                      <td style={{ padding: "12px" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}</td>
                       <td style={{ padding: "12px", textAlign: "center" }}>
                         <select value={item.isSeri ? "seri" : "piece"} onChange={e => handleItemChange(i, 'isSeri', e.target.value === "seri")} style={{ padding: "4px", fontSize: "14px", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }}>
                           <option value="seri">ثري ({getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) {getSizesText(item.name, item.modelNumber, item.sizes)}</option>
@@ -909,7 +909,7 @@ export default function LiveOrdersPage() {
                 {selectedOrder.items?.map((item, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
                     <td style={{ padding: "8px", width: "35%" }}>{item.name} (موديل {item.modelNumber})</td>
-                    <td style={{ padding: "8px", width: "10%" }}>{item.selectedColor}</td>
+                    <td style={{ padding: "8px", width: "10%" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
                       {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
                     </td>
