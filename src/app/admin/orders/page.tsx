@@ -18,8 +18,8 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 100 && num <= 150) return "وسط ولادي";
   if (num >= 300 && num <= 350) return "محير ولادي";
   if (num >= 500 && num <= 589) return "بيبي بناتي";
-  if (num >= 590 && num <= 690) return "وسط بناتي";
-  if (num >= 790 && num <= 890) return "محير بناتي";
+  if (num >= 590 && num <= 699) return "وسط بناتي";
+  if (num >= 790 && num <= 899) return "محير بناتي";
   return "أخرى";
 };
 
@@ -72,15 +72,17 @@ function timeAgo(date: Date): string {
   return `${Math.floor(diff / 86400)} يوم`;
 }
 
-const getSizesCount = (name: string, sizes: string[] | undefined) => {
-  if (name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
-  return sizes?.length || 1;
+const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
-const getSizesText = (name: string, sizes: string[] | undefined) => {
-  if (name.includes('بيبي')) return '(2-3-4-5)';
-  if (name.includes('وسط')) return '(6-8-10-12)';
-  if (name.includes('محير')) return '(14-16-18-20)';
+const getSizesText = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || name.includes('بيبي')) return '(2-3-4-5)';
+  if (category.includes('وسط') || name.includes('وسط')) return '(6-8-10-12)';
+  if (category.includes('محير') || name.includes('محير')) return '(14-16-18-20)';
   if (sizes && sizes.length > 0) return `(${sizes.join("-")})`;
   return '';
 };
@@ -215,7 +217,7 @@ export default function LiveOrdersPage() {
   const calculateTotal = (items: OrderItem[]) => {
     return items.reduce((sum, it) => {
       const qty = it.quantity || 1;
-      const sizesCount = getSizesCount(it.name, it.sizes);
+      const sizesCount = getSizesCount(it.name, it.modelNumber, it.sizes);
       return sum + (it.isSeri ? it.price * sizesCount * qty : it.price * qty);
     }, 0);
   };
@@ -223,7 +225,7 @@ export default function LiveOrdersPage() {
   const calculateTotalPieces = (items: OrderItem[]) => {
     return items.reduce((sum, it) => {
       const qty = it.quantity || 1;
-      const sizesCount = getSizesCount(it.name, it.sizes);
+      const sizesCount = getSizesCount(it.name, it.modelNumber, it.sizes);
       return sum + (it.isSeri ? sizesCount * qty : qty);
     }, 0);
   };
@@ -737,7 +739,7 @@ export default function LiveOrdersPage() {
                       <td style={{ padding: "12px" }}>{item.selectedColor}</td>
                       <td style={{ padding: "12px", textAlign: "center" }}>
                         <select value={item.isSeri ? "seri" : "piece"} onChange={e => handleItemChange(i, 'isSeri', e.target.value === "seri")} style={{ padding: "4px", fontSize: "14px", border: "1px solid #cbd5e1", borderRadius: "4px", color: "#000" }}>
-                          <option value="seri">ثري ({getSizesCount(item.name, item.sizes)} مقاس) {getSizesText(item.name, item.sizes)}</option>
+                          <option value="seri">ثري ({getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) {getSizesText(item.name, item.modelNumber, item.sizes)}</option>
                           <option value="piece">قطعة واحدة</option>
                         </select>
                       </td>
@@ -926,7 +928,7 @@ export default function LiveOrdersPage() {
                 <tbody>
                   {selectedOrder.items?.map((item, i) => {
                     const qty = item.quantity || 1;
-                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
+                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) : 1;
                     const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
                     const rowTotal = item.price * itemTotalPieces;
                     return (

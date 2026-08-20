@@ -30,12 +30,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const workbook = xlsx.readFile('بيانات_العملاء_Winter2027.xlsx');
-const sheet = workbook.Sheets['جميع العملاء'];
-const data = xlsx.utils.sheet_to_json(sheet);
+const workbook = xlsx.readFile('بيانات_العملاء_.xlsx');
+const customersData = [];
 
-// Skip the first row which is headers
-const customersData = data.slice(1);
+for (const sheetName of workbook.SheetNames) {
+  const sheet = workbook.Sheets[sheetName];
+  const data = xlsx.utils.sheet_to_json(sheet);
+  // Skip the first row which is headers
+  const sheetData = data.slice(1);
+  customersData.push(...sheetData);
+}
 
 console.log(`Found ${customersData.length} customers in the Excel file.`);
 

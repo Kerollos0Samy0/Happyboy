@@ -28,8 +28,8 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 100 && num <= 150) return "وسط ولادي";
   if (num >= 300 && num <= 350) return "محير ولادي";
   if (num >= 500 && num <= 589) return "بيبي بناتي";
-  if (num >= 590 && num <= 690) return "وسط بناتي";
-  if (num >= 790 && num <= 890) return "محير بناتي";
+  if (num >= 590 && num <= 699) return "وسط بناتي";
+  if (num >= 790 && num <= 899) return "محير بناتي";
   return "أخرى";
 };
 

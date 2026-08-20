@@ -9,6 +9,24 @@ import {
   Package, Search, CheckCircle, ChevronDown, ChevronUp, ChevronLeft, ShoppingCart, CheckCircle2
 } from "lucide-react";
 
+const getCategoryName = (modelNumber: string) => {
+  const num = parseInt(modelNumber, 10);
+  if (isNaN(num)) return "أخرى";
+  if (num >= 5 && num <= 90) return "بيبي ولادي";
+  if (num >= 100 && num <= 150) return "وسط ولادي";
+  if (num >= 300 && num <= 350) return "محير ولادي";
+  if (num >= 500 && num <= 589) return "بيبي بناتي";
+  if (num >= 590 && num <= 699) return "وسط بناتي";
+  if (num >= 790 && num <= 899) return "محير بناتي";
+  return "أخرى";
+};
+
+const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  return sizes && sizes.length > 0 ? sizes.length : 1;
+};
+
 interface OrderItem {
   cartItemId?: string;
   name: string;
@@ -169,7 +187,7 @@ export default function OrderPickingPage() {
         }
 
         const qty = item.quantity || 1;
-        const sizesCount = item.sizes?.length || 1;
+        const sizesCount = getSizesCount(item.name, item.modelNumber, item.sizes);
         const pieces = item.isSeri ? sizesCount * qty : qty;
         const series = item.isSeri ? qty : 0;
 

@@ -45,6 +45,7 @@ export default function InventoryPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterOutofStock, setFilterOutofStock] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -173,6 +174,7 @@ export default function InventoryPage() {
   if (loading) return <div className="p-10 text-center">جاري التحميل...</div>;
 
   const filteredProducts = products.filter(p => {
+    if (filterOutofStock && (Number(p.quantity) || 0) > 0) return false;
     const nameStr = p.name ? String(p.name).toLowerCase() : "";
     const modelStr = p.modelNumber ? String(p.modelNumber).toLowerCase() : "";
     const term = searchTerm.toLowerCase();
@@ -202,8 +204,8 @@ export default function InventoryPage() {
       title: "قسم البناتي",
       sections: [
         { name: "بيبي مقاس 2-3-4-5 (500 - 565)", filter: (num: number) => num >= 500 && num <= 565 },
-        { name: "وسط مقاس 6-8-10-12 (600 - 680)", filter: (num: number) => num >= 590 && num <= 690 },
-        { name: "محير مقاس 14-16-18-20 (800 - 880)", filter: (num: number) => num >= 790 && num <= 890 },
+        { name: "وسط مقاس 6-8-10-12 (600 - 699)", filter: (num: number) => num >= 590 && num <= 699 },
+        { name: "محير مقاس 14-16-18-20 (800 - 899)", filter: (num: number) => num >= 790 && num <= 899 },
       ]
     }
   ];
@@ -467,12 +469,18 @@ export default function InventoryPage() {
               </h3>
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-red-100 p-6 shadow-[0_2px_10px_-3px_rgba(239,68,68,0.08)] flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
-            <div className="w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+          <div 
+            className={`bg-white rounded-2xl border p-6 flex items-center gap-6 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group cursor-pointer select-none ${filterOutofStock ? 'border-red-500 shadow-[0_2px_15px_-3px_rgba(239,68,68,0.3)] bg-red-50/30' : 'border-red-100 shadow-[0_2px_10px_-3px_rgba(239,68,68,0.08)]'}`}
+            onClick={() => {
+              setFilterOutofStock(!filterOutofStock);
+              setActiveTab('manage');
+            }}
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 ${filterOutofStock ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600'}`}>
               <AlertTriangle size={28} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-500 mb-1">نواقص (كمية 0)</p>
+              <p className={`text-sm font-bold mb-1 ${filterOutofStock ? 'text-red-700' : 'text-gray-500'}`}>نواقص (كمية 0) {filterOutofStock && '(نشط)'}</p>
               <h3 className="text-3xl font-black text-red-600">
                 {products.filter(p => (Number(p.quantity) || 0) <= 0).length}
               </h3>

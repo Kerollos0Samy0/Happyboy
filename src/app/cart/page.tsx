@@ -16,8 +16,8 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 100 && num <= 150) return "وسط ولادي";
   if (num >= 300 && num <= 350) return "محير ولادي";
   if (num >= 500 && num <= 589) return "بيبي بناتي";
-  if (num >= 590 && num <= 690) return "وسط بناتي";
-  if (num >= 790 && num <= 890) return "محير بناتي";
+  if (num >= 590 && num <= 699) return "وسط بناتي";
+  if (num >= 790 && num <= 899) return "محير بناتي";
   return "أخرى";
 };
 
@@ -33,15 +33,17 @@ interface CartItem {
   quantity?: number;
 }
 
-const getSizesCount = (name: string, sizes: string[] | undefined) => {
-  if (name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
-  return sizes?.length || 1;
+const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
-const getSizesText = (name: string, sizes: string[] | undefined) => {
-  if (name.includes('بيبي')) return '(2-3-4-5)';
-  if (name.includes('وسط')) return '(6-8-10-12)';
-  if (name.includes('محير')) return '(14-16-18-20)';
+const getSizesText = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || name.includes('بيبي')) return '(2-3-4-5)';
+  if (category.includes('وسط') || name.includes('وسط')) return '(6-8-10-12)';
+  if (category.includes('محير') || name.includes('محير')) return '(14-16-18-20)';
   if (sizes && sizes.length > 0) return `(${sizes.join("-")})`;
   return '';
 };
@@ -103,7 +105,7 @@ export default function CartPage() {
 
   const calculateItemTotal = (item: CartItem) => {
     const qty = item.quantity || 1;
-    const sizesCount = getSizesCount(item.name, item.sizes);
+    const sizesCount = getSizesCount(item.name, item.modelNumber, item.sizes);
     if (item.isSeri) {
       return item.price * sizesCount * qty;
     }
@@ -117,7 +119,7 @@ export default function CartPage() {
   const finalTotal = total - discountValue;
   const remaining = finalTotal - depositNum;
 
-  const totalPieces = cart.reduce((sum, item) => sum + (item.isSeri ? getSizesCount(item.name, item.sizes) * (item.quantity || 1) : (item.quantity || 1)), 0);
+  const totalPieces = cart.reduce((sum, item) => sum + (item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) * (item.quantity || 1) : (item.quantity || 1)), 0);
   const totalSeries = cart.reduce((sum, item) => sum + (item.isSeri ? (item.quantity || 1) : 0), 0);
 
 
@@ -360,14 +362,14 @@ export default function CartPage() {
                 <tbody>
                   {sortedCart.map((item, i) => {
                     const qty = item.quantity || 1;
-                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.sizes) : 1;
+                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) : 1;
                     const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
                     const rowTotal = item.price * itemTotalPieces;
                     return (
                       <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
                         <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
                           {item.name}
-                          {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
+                          {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "14px" }}>
                           <span style={{ fontWeight: 'bold' }}>{item.modelNumber}</span> <br/>
@@ -497,7 +499,7 @@ export default function CartPage() {
                             onClick={() => updateQuantity(item.cartItemId, -1)}
                           >-</button>
                         </div>
-                        <span className="text-xs text-gray-500 mr-2">(مقاسات: {getSizesText(item.name, item.sizes)})</span>
+                        <span className="text-xs text-gray-500 mr-2">(مقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)})</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 mt-2">
