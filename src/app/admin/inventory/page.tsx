@@ -370,7 +370,7 @@ export default function InventoryPage() {
     return (
       <div className="flex flex-col gap-6">
         {categories.map((mainCat, idx) => (
-          <details key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={idx === 0}>
+          <details key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden">
             <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-600 border border-gray-200">
@@ -394,7 +394,7 @@ export default function InventoryPage() {
                 if (subProds.length === 0) return null;
 
                 return (
-                  <details key={sIdx} className="bg-white rounded-xl shadow-sm border border-gray-100 group/sub overflow-hidden" open={true}>
+                  <details key={sIdx} className="bg-white rounded-xl shadow-sm border border-gray-100 group/sub overflow-hidden">
                     <summary className="text-base font-bold p-4 text-gray-700 bg-gray-50/50 hover:bg-gray-50 cursor-pointer select-none transition-colors border-b border-gray-100 flex justify-between items-center list-none">
                       <div className="flex items-center gap-3">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
@@ -416,7 +416,7 @@ export default function InventoryPage() {
         ))}
         
         {unassignedProducts.length > 0 && (
-          <details className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={true}>
+          <details className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden">
             <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-200">
