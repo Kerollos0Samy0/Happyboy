@@ -79,6 +79,7 @@ export default function OrderPickingPage() {
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all_active");
   const [expandedModels, setExpandedModels] = useState<Record<string, boolean>>({});
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
   const [updating, setUpdating] = useState(false);
@@ -109,8 +110,15 @@ export default function OrderPickingPage() {
   }, [router]);
 
   useEffect(() => {
-    // Only fetch pending and paid orders (we don't need to pick cancelled ones)
-    const ordersQ = query(collection(db, "orders"), where("status", "in", ["pending", "paid"]));
+    let ordersQ;
+    if (statusFilter === "all_active") {
+      ordersQ = query(collection(db, "orders"), where("status", "in", ["pending", "paid"]));
+    } else if (statusFilter === "all") {
+      ordersQ = query(collection(db, "orders"));
+    } else {
+      ordersQ = query(collection(db, "orders"), where("status", "==", statusFilter));
+    }
+    
     const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
       setOrders(fetchedOrders);
@@ -118,7 +126,7 @@ export default function OrderPickingPage() {
     });
 
     return () => unsubscribeOrders();
-  }, []);
+  }, [statusFilter]);
 
   const toggleExpandModel = (modelNumber: string) => {
     setExpandedModels(prev => ({ ...prev, [modelNumber]: !prev[modelNumber] }));
@@ -283,15 +291,30 @@ export default function OrderPickingPage() {
             </h1>
           </div>
           
-          <div style={{ position: "relative", width: "100%", maxWidth: "300px" }}>
-            <Search size={18} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-            <input 
-              type="text" 
-              placeholder="ابحث بالموديل أو رقم الأوردر أو العميل..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: "100%", padding: "0.75rem 2.5rem 0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem" }}
-            />
+          <div style={{ display: "flex", gap: "1rem", width: "100%", maxWidth: "500px" }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <Search size={18} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+              <input 
+                type="text" 
+                placeholder="ابحث بالموديل أو رقم الأوردر أو العميل..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: "100%", padding: "0.75rem 2.5rem 0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem" }}
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem", background: "white", cursor: "pointer", minWidth: "150px" }}
+            >
+              <option value="all_active">قيد الانتظار والدفع (افتراضي)</option>
+              <option value="pending">⏳ قيد الانتظار</option>
+              <option value="paid">✅ تم الدفع والتأكيد</option>
+              <option value="shipped">🚚 مع شركة الشحن</option>
+              <option value="delivered">📦 تم التسليم</option>
+              <option value="cancelled">❌ ملغي</option>
+              <option value="all">🌐 جميع الأوردرات</option>
+            </select>
           </div>
         </div>
 
