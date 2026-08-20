@@ -391,6 +391,8 @@ export default function LiveOrdersPage() {
     total: visibleOrders.length,
     pending: visibleOrders.filter(o => o.status === "pending").length,
     paid: visibleOrders.filter(o => o.status === "paid").length,
+    shipped: visibleOrders.filter(o => o.status === "shipped").length,
+    delivered: visibleOrders.filter(o => o.status === "delivered").length,
     cancelled: visibleOrders.filter(o => o.status === "cancelled").length,
   };
 
@@ -406,9 +408,11 @@ export default function LiveOrdersPage() {
           {/* Stats pills */}
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {[
-              { key: "all",       label: `الكل (${stats.total})`,          bg: "#0f172a", color: "#fff" },
+              { key: "all",       label: `الكل (${stats.total})`,           bg: "#1e293b", color: "#fff" },
               { key: "pending",   label: `انتظار (${stats.pending})`,       bg: "#fef3c7", color: "#b45309" },
               { key: "paid",      label: `مدفوع (${stats.paid})`,           bg: "#d1fae5", color: "#065f46" },
+              { key: "shipped",   label: `شحن (${stats.shipped})`,          bg: "#dbeafe", color: "#1d4ed8" },
+              { key: "delivered", label: `تسليم (${stats.delivered})`,      bg: "#dcfce7", color: "#15803d" },
               { key: "cancelled", label: `ملغي (${stats.cancelled})`,       bg: "#fee2e2", color: "#991b1b" },
             ].map(s => (
               <button
