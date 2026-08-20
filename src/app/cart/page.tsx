@@ -28,6 +28,7 @@ interface CartItem {
   modelNumber: string;
   price: number;
   selectedColor: string;
+  colorBarcode?: string;
   sizes: string[];
   isSeri: boolean;
   quantity?: number;
@@ -149,15 +150,27 @@ export default function CartPage() {
     if (!invoiceRef.current) return null;
     
     const invoiceEl = invoiceRef.current;
+    const origDisplay = invoiceEl.style.display;
     const origWidth = invoiceEl.style.width;
+    const origPosition = invoiceEl.style.position;
+    const origLeft = invoiceEl.style.left;
+    const origTop = invoiceEl.style.top;
+    const origZIndex = invoiceEl.style.zIndex;
+    
     invoiceEl.style.display = "block";
     invoiceEl.style.width = "794px";
+    invoiceEl.style.position = "fixed";
+    invoiceEl.style.left = "0px";
+    invoiceEl.style.top = "0px";
+    invoiceEl.style.zIndex = "-9999";
     
     try {
       const canvas = await html2canvas(invoiceEl, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
+        windowWidth: invoiceEl.scrollWidth,
+        windowHeight: invoiceEl.scrollHeight
       });
       
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
@@ -200,8 +213,12 @@ export default function CartPage() {
       alert("حدث خطأ أثناء استخراج الفاتورة");
       return null;
     } finally {
-      invoiceEl.style.display = "none";
+      invoiceEl.style.display = origDisplay;
       invoiceEl.style.width = origWidth;
+      invoiceEl.style.position = origPosition;
+      invoiceEl.style.left = origLeft;
+      invoiceEl.style.top = origTop;
+      invoiceEl.style.zIndex = origZIndex;
     }
   };
 
@@ -372,7 +389,7 @@ export default function CartPage() {
                           {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "14px" }}>
-                          <span style={{ fontWeight: 'bold' }}>{item.modelNumber}</span> <br/>
+                          <span style={{ fontWeight: 'bold' }}>{item.modelNumber}</span> {item.colorBarcode && <span style={{ color: '#3b82f6', fontSize: '12px' }}>({item.colorBarcode})</span>} <br/>
                           <span style={{ color: '#64748b' }}>{item.selectedColor}</span>
                         </td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
