@@ -254,10 +254,16 @@ export default function AdminDashboardPage() {
                   </a>
                 )}
                 {isOwner && (
-                  <a href="/admin/customers" className={`${styles.linkItem} ${styles.gray}`}>
-                    <div className={styles.linkContent}><Users size={20} style={{color: '#f59e0b'}}/> قاعدة العملاء</div>
-                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
-                  </a>
+                  <>
+                    <a href="/admin/customers" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><Users size={20} style={{color: '#f59e0b'}}/> قاعدة العملاء</div>
+                      <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                    </a>
+                    <a href="/admin/accounts" className={`${styles.linkItem} ${styles.gray}`}>
+                      <div className={styles.linkContent}><DollarSign size={20} style={{color: '#10b981'}}/> حسابات العملاء (مدين ودائن)</div>
+                      <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                    </a>
+                  </>
                 )}
                 {isPrivileged && (
                   <>
