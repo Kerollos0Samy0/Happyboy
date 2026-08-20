@@ -28,6 +28,7 @@ interface OrderItem {
   name: string;
   modelNumber: string;
   selectedColor: string;
+  colorBarcode?: string;
   price: number;
   isSeri?: boolean;
   sizes?: string[];
@@ -191,12 +192,16 @@ export default function LiveOrdersPage() {
 
   const addItemToOrder = () => {
     if (!selectedOrder || !foundProduct || !addSelectedColor) return;
+    
+    const colorEntry = foundProduct.colors?.find((c: any) => c.name === addSelectedColor);
+    
     const newItem: OrderItem = {
       cartItemId: Date.now().toString() + Math.random().toString(),
       name: foundProduct.name,
       modelNumber: foundProduct.modelNumber,
       price: foundProduct.price,
       selectedColor: addSelectedColor,
+      colorBarcode: colorEntry?.barcode || "",
       sizes: foundProduct.sizes || [],
       isSeri: true,
       quantity: 1
@@ -670,9 +675,8 @@ export default function LiveOrdersPage() {
 
             {/* INVOICE CONTENT (Matches PDF) */}
             <div style={{ padding: "0 1rem" }}>
-              <div style={{ textAlign: "center", marginBottom: "30px", borderBottom: "2px solid #eee", paddingBottom: "20px" }}>
-                <h1 style={{ fontSize: "32px", color: "#A62E2E", marginBottom: "10px", fontWeight: "bold" }}>Happy Boy&Girl</h1>
-                <h2 style={{ fontSize: "22px", color: "#333" }}>فاتورة طلب رسمي</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '120px', objectFit: 'contain' }} />
               </div>
               
               <div style={{ marginBottom: "30px", padding: "20px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
@@ -721,7 +725,8 @@ export default function LiveOrdersPage() {
               </div>
 
               {/* Items Table */}
-              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+              <div style={{ overflowX: "auto", width: "100%", paddingBottom: "10px" }}>
+                <table style={{ width: "100%", minWidth: "650px", borderCollapse: "collapse", marginBottom: "20px" }}>
                 <thead>
                   <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1" }}>
                     <th style={{ padding: "12px", textAlign: "right" }}>الصنف</th>
@@ -756,6 +761,7 @@ export default function LiveOrdersPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
 
               {/* Add New Item */}
               <div style={{ padding: "12px", background: "#f0fdf4", borderRadius: "8px", border: "1px dashed #86efac", marginBottom: "30px", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
@@ -852,180 +858,94 @@ export default function LiveOrdersPage() {
         </div>
       )}
 
-      {/* Hidden Invoice for PDF Generation (Matching Image Style with Brand Colors) */}
+      {/* Hidden Invoice for PDF Generation (Replaced with Modern Clean Design) */}
       <div
         ref={invoiceRef}
         style={{
-          display: "none", width: "700px", padding: "20px",
+          display: "none", width: "794px", padding: "20px",
           background: "white", color: "black",
           position: "absolute", top: "-9999px", left: "-9999px", direction: "rtl",
-          fontFamily: "'Cairo', sans-serif"
+          fontFamily: "'Cairo', sans-serif",
+          boxSizing: "border-box"
         }}
       >
         {selectedOrder && (
-          <div style={{
-            border: "2px solid #e2e8f0",
-            borderRadius: "20px",
-            padding: "20px",
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden"
-          }}>
+          <div style={{ width: "100%" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '120px', objectFit: 'contain', margin: '0 auto' }} />
+            </div>
             
-            {/* Geometric Shapes (Top Right) */}
-            <div style={{ position: "absolute", top: 0, right: 0, width: "150px", height: "150px", background: "#A62E2E", clipPath: "polygon(100% 0, 100% 100%, 0 0)", opacity: 0.1, borderTopRightRadius: "20px" }}></div>
-            <div style={{ position: "absolute", top: 0, right: "40px", width: "100px", height: "100px", background: "#0f172a", clipPath: "polygon(100% 0, 100% 100%, 0 0)", opacity: 0.1 }}></div>
-
-            {/* Geometric Shapes (Bottom Left) */}
-            <div style={{ position: "absolute", bottom: 0, left: 0, width: "150px", height: "150px", background: "#A62E2E", clipPath: "polygon(0 0, 0% 100%, 100% 100%)", opacity: 0.1, borderBottomLeftRadius: "20px" }}></div>
-            <div style={{ position: "absolute", bottom: 0, left: "40px", width: "100px", height: "100px", background: "#0f172a", clipPath: "polygon(0 0, 0% 100%, 100% 100%)", opacity: 0.1 }}></div>
-
-            {/* Header Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', position: "relative", zIndex: 10 }}>
-              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '140px', objectFit: 'contain' }} />
-              <div style={{ fontSize: "32px", fontWeight: "900", color: '#0f172a', marginTop: '10px' }}>طلبية</div>
-            </div>
-
-            {/* Title & Info - Top Right */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", width: "100%", marginBottom: '20px', zIndex: 10, position: "relative" }}>
-              <div style={{ width: "100%", fontSize: "16px", fontWeight: "bold", color: "#0f172a", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span style={{ color: "#A62E2E" }}>{selectedOrder.customerName} {selectedOrder.customerBrand ? `(${selectedOrder.customerBrand})` : ''}</span>
-                  <span>: اسم العميل</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span style={{ color: "#A62E2E" }}>{selectedOrder.customerGovernorate || ''}</span>
-                  <span>: المحافظة</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span style={{ color: "#A62E2E" }} dir="ltr">{selectedOrder.customerPhone}</span>
-                  <span>: رقم الهاتف</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span style={{ color: "#A62E2E" }}>{selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
-                  <span>: التـاريـــــــخ</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span style={{ color: "#A62E2E" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span>
-                  <span>: رقم الطلبية</span>
-                </div>
+            <div style={{ marginBottom: "30px", padding: "20px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", display: "flex", gap: "20px" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
+                {selectedOrder.employeeName && (
+                  <p style={{ fontSize: "15px", margin: 0, color: "#A62E2E" }}><strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}</p>
+                )}
+              </div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
+                <p style={{ fontSize: "15px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
+                <p style={{ fontSize: "15px", margin: 0, color: "#2563eb" }}>
+                  <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
+                </p>
               </div>
             </div>
 
-            {/* Table */}
-            <div style={{ marginBottom: "20px", flex: 1, zIndex: 10 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center", border: "1px solid #94a3b8" }}>
-                <thead>
-                  <tr style={{ background: "#e2e8f0", borderBottom: "1px solid #94a3b8" }}>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "50px" }}>رقم</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "80px" }}>الكمية</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "120px" }}>السعر</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8" }}>وصف المنتج</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "16px", border: "1px solid #94a3b8", width: "150px" }}>الإجمالي</th>
+            <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
+              <thead>
+                <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
+                  <th style={{ padding: "8px", textAlign: "right", width: "35%" }}>الصنف</th>
+                  <th style={{ padding: "8px", textAlign: "right", width: "10%" }}>اللون</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "30%" }}>النوع (ثري/قطعة)</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>السعر (ج)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrder.items?.map((item, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
+                    <td style={{ padding: "8px", width: "35%" }}>{item.name} (موديل {item.modelNumber})</td>
+                    <td style={{ padding: "8px", width: "10%" }}>{item.selectedColor}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
+                      {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
+                    </td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "10%" }}>{item.quantity || 1}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "15%" }}>{item.price}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.items?.map((item, i) => {
-                    const qty = item.quantity || 1;
-                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) : 1;
-                    const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
-                    const rowTotal = item.price * itemTotalPieces;
-                    return (
-                      <tr key={i} style={{ borderBottom: "1px solid #cbd5e1" }}>
-                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{i + 1}</td>
-                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
-                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{item.price} ج.م</td>
-                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1", textAlign: "right" }}>
-                           {item.name} <span style={{ color: "#A62E2E" }}>{item.modelNumber}</span> - {item.selectedColor}
-                        </td>
-                        <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#0f172a", fontSize: "15px", border: "1px solid #cbd5e1" }}>{rowTotal} ج.م</td>
-                      </tr>
-                    );
-                  })}
-                  {/* Fill empty rows if items are few */}
-                  {Array.from({ length: Math.max(0, 10 - (selectedOrder.items?.length || 0)) }).map((_, i) => (
-                     <tr key={`empty-${i}`} style={{ borderBottom: "1px solid #cbd5e1", height: "45px" }}>
-                        <td style={{ border: "1px solid #cbd5e1", color: "#0f172a", fontWeight: "bold" }}>{(selectedOrder.items?.length || 0) + i + 1}</td>
-                        <td style={{ border: "1px solid #cbd5e1" }}></td>
-                        <td style={{ border: "1px solid #cbd5e1" }}></td>
-                        <td style={{ border: "1px solid #cbd5e1" }}></td>
-                        <td style={{ border: "1px solid #cbd5e1" }}></td>
-                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
 
-            {/* Footer Summary */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '20px', zIndex: 10 }}>
-              {/* Notes */}
-              <div style={{ width: "40%", textAlign: "right" }}>
-                <div style={{ fontSize: "16px", fontWeight: "bold", color: "#0f172a", marginBottom: "15px" }}>: ملاحظات</div>
-                <div style={{ borderBottom: "1px solid #cbd5e1", marginBottom: "15px", height: "20px" }}></div>
-                <div style={{ borderBottom: "1px solid #cbd5e1", marginBottom: "15px", height: "20px" }}></div>
-                <div style={{ borderBottom: "1px solid #cbd5e1", height: "20px" }}></div>
-              </div>
-
-              {/* Total Block */}
-              <div style={{ display: "flex", flexDirection: "column", width: "50%", gap: "10px" }}>
-                {/* Model Summary */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '10px', borderBottom: '2px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', marginBottom: '4px', textAlign: 'right' }}>: ملخص الموديلات</span>
-                  {Object.entries(
-                    selectedOrder.items.reduce((acc, item) => {
-                      const cat = getCategoryName(item.modelNumber);
-                      acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
-                      return acc;
-                    }, {} as Record<string, number>)
-                  ).filter(([_, count]) => count > 0).map(([cat, count]) => (
-                    <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px' }}>
-                      <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
-                      <span>{cat}</span>
-                    </div>
-                  ))}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px", marginRight: "auto" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                  <span>إجمالي القطع:</span><strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "bold", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span>{calculateTotalPieces(selectedOrder.items)} قطعة</span>
-                  <span>: إجمالي عدد القطع</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                  <span>إجمالي الثريهات:</span><strong>{calculateTotalSeries(selectedOrder.items)} ثري</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "bold", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span>{calculateTotalSeries(selectedOrder.items)} ثري</span>
-                  <span>: إجمالي عدد الثريهات</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "bold", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                  <span>{calculateTotal(selectedOrder.items)} ج.م</span>
-                  <span>: إجمالي الفلوس</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                  <span>الإجمالي الكلي:</span><strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
                 </div>
                 {Number(selectedOrder.discountPercentage || 0) > 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "bold", color: "#16a34a", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                    <span>{selectedOrder.discountPercentage}% (-{(calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage)) / 100} ج.م)</span>
-                    <span>: نسبة الخصم</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a" }}>
+                    <span>الخصم ({selectedOrder.discountPercentage}%):</span>
+                    <strong>- {(calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage)) / 100} ج.م</strong>
                   </div>
                 )}
-                {Number(selectedOrder.deposit || 0) > 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "bold", color: "#16a34a", borderBottom: "1px dashed #cbd5e1", paddingBottom: "5px" }}>
-                    <span>{selectedOrder.deposit} ج.م</span>
-                    <span>: العربون</span>
-                  </div>
-                )}
-                <div style={{ background: "#e2e8f0", padding: "10px", border: "1px solid #94a3b8", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "5px" }}>
-                  <span style={{ fontSize: "20px", fontWeight: "900", color: "#A62E2E" }}>
-                    {calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م
-                  </span>
-                  <span style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a" }}>: الصافي المستحق</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a", alignItems: "center" }}>
+                  <span>العربون المدفوع:</span><strong>{selectedOrder.deposit || 0}</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "bold", borderTop: "1px solid #cbd5e1", paddingTop: "15px", color: "#A62E2E" }}>
+                  <span>الإجمالي المستحق:</span>
+                  <span>{calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م</span>
                 </div>
               </div>
             </div>
-
-            {/* Bottom Contact Info */}
-            <div style={{ display: 'flex', flexDirection: "column", gap: "10px", marginTop: "auto", paddingTop: "40px", zIndex: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
-                <span>📞</span> 
-                <span dir="ltr">01009516578 - 0224903939</span>
-              </div>
-            </div>
-
           </div>
         )}
       </div>
