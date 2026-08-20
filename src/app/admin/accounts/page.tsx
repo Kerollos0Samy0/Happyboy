@@ -87,7 +87,15 @@ export default function AccountsDashboard() {
     };
   }, []);
 
-  const accountsData = useMemo(() => {
+interface AccountData extends Customer {
+  totalOrders: number;
+  totalPaid: number;
+  balance: number;
+  lastOrderDate: Date | null;
+  lastPaymentDate: Date | null;
+}
+
+  const accountsData: AccountData[] = useMemo(() => {
     return customers.map(c => {
       const custOrders = orders.filter(o => o.customerPhone === c.phone);
       const custPayments = payments.filter(p => p.customerId === c.id);
