@@ -294,45 +294,58 @@ export default function LiveOrdersPage() {
 
   const generatePDF = async (order: Order) => {
     if (!invoiceRef.current) return null;
-    const origWidth = invoiceRef.current.style.width;
-    invoiceRef.current.style.display = "block";
-    invoiceRef.current.style.width = "794px";
+    
+    const invoiceEl = invoiceRef.current;
+    const origDisplay = invoiceEl.style.display;
+    const origWidth = invoiceEl.style.width;
+    const origPosition = invoiceEl.style.position;
+    const origLeft = invoiceEl.style.left;
+    const origTop = invoiceEl.style.top;
+    const origZIndex = invoiceEl.style.zIndex;
+    
+    invoiceEl.style.display = "block";
+    invoiceEl.style.width = "794px";
+    invoiceEl.style.position = "fixed";
+    invoiceEl.style.left = "0px";
+    invoiceEl.style.top = "0px";
+    invoiceEl.style.zIndex = "-9999";
+    
     try {
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
       
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const canvas = await html2canvas(invoiceEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: invoiceEl.scrollWidth,
+        windowHeight: invoiceEl.scrollHeight
+      });
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
+      const pdfWidth = 210; // A4 width in mm
       const margin = 10;
       const printWidth = pdfWidth - (margin * 2);
-      const printHeight = pageHeight - (margin * 2);
-      
       const ratio = printWidth / canvas.width;
-      const imgWidth = printWidth;
       const imgHeight = canvas.height * ratio;
+      const pdfHeight = Math.max(297, imgHeight + (margin * 2));
       
-      let heightLeft = imgHeight;
-      let position = margin;
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight]
+      });
       
-      pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-      heightLeft -= printHeight;
-      
-      while (heightLeft > 0) {
-        position -= printHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-        heightLeft -= printHeight;
-      }
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
       
       return pdf;
     } finally {
-      invoiceRef.current.style.display = "none";
-      invoiceRef.current.style.width = origWidth;
+      invoiceEl.style.display = origDisplay;
+      invoiceEl.style.width = origWidth;
+      invoiceEl.style.position = origPosition;
+      invoiceEl.style.left = origLeft;
+      invoiceEl.style.top = origTop;
+      invoiceEl.style.zIndex = origZIndex;
     }
   };
 

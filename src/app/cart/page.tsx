@@ -174,35 +174,22 @@ export default function CartPage() {
       });
       
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      
+      // Calculate dynamic height to fit everything in one continuous page
+      const pdfWidth = 210; // A4 width in mm
+      const margin = 10;
+      const printWidth = pdfWidth - (margin * 2);
+      const ratio = printWidth / canvas.width;
+      const imgHeight = canvas.height * ratio;
+      const pdfHeight = Math.max(297, imgHeight + (margin * 2)); // At least A4 height
+      
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4",
+        format: [pdfWidth, pdfHeight]
       });
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      const margin = 10;
-      const printWidth = pdfWidth - (margin * 2);
-      const printHeight = pageHeight - (margin * 2);
-      
-      const ratio = printWidth / canvas.width;
-      const imgWidth = printWidth;
-      const imgHeight = canvas.height * ratio;
-      
-      let heightLeft = imgHeight;
-      let position = margin;
-      
-      pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-      heightLeft -= printHeight;
-      
-      while (heightLeft > 0) {
-        position -= printHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-        heightLeft -= printHeight;
-      }
+      pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
       
       if (shouldSave) {
         pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
