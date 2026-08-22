@@ -204,12 +204,23 @@ export default function CartPage() {
       let position = margin;
       
       pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+      
+      // Cover margins with white rectangles to prevent bleeding
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pdfWidth, margin, 'F');
+      pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
+      
       heightLeft -= printHeight;
       
       while (heightLeft > 0) {
         position -= printHeight;
         pdf.addPage();
         pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+        
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdfWidth, margin, 'F');
+        pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
+        
         heightLeft -= printHeight;
       }
       
