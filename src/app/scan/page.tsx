@@ -173,6 +173,7 @@ export default function ScanPage() {
         modelNumber: product.modelNumber,
         price: product.price,
         selectedColor: color.name,
+        colorBarcode: color.barcode || "",
         sizes: product.sizes,
         isSeri: true,
         quantity: qty
@@ -338,7 +339,9 @@ export default function ScanPage() {
                                 onChange={() => toggleColor(color.name)}
                                 style={{ width: '20px', height: '20px' }}
                               />
-                              <span className="text-lg flex-1">{color.name}</span>
+                              <span className="text-lg flex-1">
+                                {color.name} {color.barcode ? `(${color.barcode})` : ''}
+                              </span>
                               {color.name === matchedColor.name && (
                                 <span className="text-sm font-bold px-2 py-1 rounded" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
                                   ممسوح
@@ -411,7 +414,7 @@ export default function ScanPage() {
             <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--primary)' }}>تم مسح هذا المنتج مسبقاً!</h3>
             <p className="mb-6">
               الموديل: <span className="font-bold">{duplicateScanPrompt.product.modelNumber}</span><br/>
-              اللون: <span className="font-bold">{duplicateScanPrompt.matchedColor.name}</span><br/><br/>
+              اللون: <span className="font-bold">{duplicateScanPrompt.matchedColor.name} {duplicateScanPrompt.matchedColor.barcode ? `(${duplicateScanPrompt.matchedColor.barcode})` : ''}</span><br/><br/>
               موجود بالفعل في الفاتورة. هل تريد زيادة الكمية بمقدار 1؟
             </p>
             <div className="flex flex-col gap-3">

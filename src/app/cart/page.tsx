@@ -63,6 +63,7 @@ export default function CartPage() {
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deposit, setDeposit] = useState("");
   const [discountPercentage, setDiscountPercentage] = useState("");
+  const [employeeName, setEmployeeName] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -265,7 +266,7 @@ export default function CartPage() {
         total: total,
         status: "pending",
         branch: branchName,
-        employeeName: auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
+        employeeName: employeeName || auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
         createdAt: serverTimestamp()
       });
       
@@ -333,21 +334,24 @@ export default function CartPage() {
           <div style={{ fontFamily: "'Cairo', sans-serif", color: "#1e293b", background: "#fff", padding: "10px" }}>
             {/* Header Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '20px' }}>
-                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '140px', objectFit: 'contain' }} />
-                <h1 style={{ margin: '10px 0 0 0', color: '#1e293b', fontSize: '32px', fontWeight: '900' }}>طلبية</h1>
+                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '200px', objectFit: 'contain' }} />
             </div>
             
             {/* Customer Info Box */}
             <div style={{ border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', marginBottom: '30px', background: '#fff', display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
               <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName} {customerBrand ? `(${customerBrand})` : ''}</span></div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
+                {customerBrand && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
                 <div style={{ fontSize: '16px', fontWeight: 'bold' }}>الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || customerGovernorate || 'غير متوفر'}</span></div>
+                {customerGovernorate && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>المحافظة: <span style={{ color: '#A62E2E' }}>{customerGovernorate}</span></div>}
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || 'غير متوفر'}</span></div>
               </div>
               <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ fontSize: '16px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
                 <div style={{ fontSize: '16px', fontWeight: 'bold' }}>التاريخ: <span style={{ color: '#A62E2E' }}>{new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                {deliveryDate && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>تاريخ التسليم: <span style={{ color: '#A62E2E' }}>{new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>}
                 <div style={{ fontSize: '16px', fontWeight: 'bold' }}>معلومات الشحن: <span style={{ color: '#A62E2E' }}>{customerShipping || 'استلام من المصنع'}</span></div>
+                {employeeName && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>تم بواسطة: <span style={{ color: '#A62E2E' }}>{employeeName}</span></div>}
               </div>
             </div>
 
@@ -358,8 +362,8 @@ export default function CartPage() {
                   <tr style={{ borderBottom: "2px solid #cbd5e1" }}>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الصنف</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>اللون</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الكمية</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>السعر</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>الكمية</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#1e293b", fontSize: "14px", textAlign: "left" }}>الإجمالي</th>
                   </tr>
                 </thead>
@@ -373,13 +377,15 @@ export default function CartPage() {
                       <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
                         <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
                           {item.name} ({item.modelNumber})
-                          {item.isSeri && <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px', fontWeight: 'normal' }}>المقاسات: {getSizesText(item.name, item.modelNumber, item.sizes)} (طقم {piecesInSeri} قطع)</div>}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center" }}>
-                          {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}
+                          {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}
+                        </td>
+                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569", textAlign: "center" }}>
+                          <div style={{ fontSize: "15px" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</div>
+                          {item.isSeri && <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>{getSizesText(item.name, item.modelNumber, item.sizes)}</div>}
                         </td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
-                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</td>
                         <td style={{ padding: "16px 8px", fontWeight: "900", color: "#1e293b", textAlign: "left", fontSize: "16px" }}>{rowTotal} ج.م</td>
                       </tr>
                     );
@@ -487,7 +493,7 @@ export default function CartPage() {
                 <div key={item.cartItemId} className="flex justify-between items-center p-3" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                   <div className="flex-1">
                     <h4 className="font-bold text-lg">{item.name} (موديل {item.modelNumber})</h4>
-                    <p className="text-sm mt-1">اللون: <span className="font-bold">{item.selectedColor}</span></p>
+                    <p className="text-sm mt-1">اللون: <span className="font-bold">{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}</span></p>
                     {item.isSeri ? (
                       <div className="flex items-center gap-2 mt-2">
                         <span className="text-sm">الكمية (ثري):</span>
@@ -549,6 +555,21 @@ export default function CartPage() {
             
             <h3 className="font-bold mt-6 mb-3 border-b pb-2">تفاصيل الشحن والدفع (اختياري):</h3>
             
+            <div className="mb-4">
+              <label className="block mb-2 font-bold text-sm">البائع / مندوب المبيعات</label>
+              <select 
+                className="input" 
+                value={employeeName}
+                onChange={(e) => setEmployeeName(e.target.value)}
+              >
+                <option value="">اختر البائع...</option>
+                <option value="kirollos">Kirollos</option>
+                <option value="ayat">Ayat</option>
+                <option value="omnia">Omnia</option>
+                <option value="radwa">Radwa</option>
+              </select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 font-bold text-sm">المحافظة</label>
