@@ -196,8 +196,8 @@ export default function InventoryPage() {
       title: "قسم الأولادي",
       sections: [
         { name: "بيبي مقاس 2-3-4-5 (5 - 90)", filter: (num: number) => num >= 5 && num <= 90 },
-        { name: "وسط مقاس 6-8-10-12 (100 - 150)", filter: (num: number) => num >= 100 && num <= 150 },
-        { name: "محير مقاس 14-16-18-20 (300 - 350)", filter: (num: number) => num >= 300 && num <= 350 },
+        { name: "وسط مقاس 6-8-10-12 (100 - 199)", filter: (num: number) => num >= 100 && num <= 199 },
+        { name: "محير مقاس 14-16-18-20 (300 - 399)", filter: (num: number) => num >= 300 && num <= 399 },
       ]
     },
     {
