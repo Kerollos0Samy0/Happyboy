@@ -42,6 +42,7 @@ interface OrderItem {
   modelNumber: string;
   price: number;
   selectedColor: string;
+  colorBarcode?: string;
   sizes: string[];
   isSeri: boolean;
   quantity: number;
@@ -74,6 +75,7 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 500 && num <= 589) return "بيبي بناتي";
   if (num >= 590 && num <= 699) return "وسط بناتي";
   if (num >= 790 && num <= 899) return "محير بناتي";
+  if (num >= 1000 && num <= 2999) return "رياضي";
   return "أخرى";
 };
 
@@ -218,17 +220,21 @@ export default function CreateOrderPage() {
     const selected = colorSelections.filter((c) => c.checked && c.qty > 0);
     if (selected.length === 0) return;
 
-    const newItems: OrderItem[] = selected.map((sel) => ({
-      cartItemId: `${foundProduct.id}_${sel.colorName}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      id: foundProduct.id,
-      name: foundProduct.name,
-      modelNumber: foundProduct.modelNumber,
-      price: foundProduct.price,
-      selectedColor: sel.colorName,
-      sizes: foundProduct.sizes,
-      isSeri: true,
-      quantity: sel.qty,
-    }));
+    const newItems: OrderItem[] = selected.map((sel) => {
+      const colorEntry = foundProduct.colors?.find((c: any) => c.name === sel.colorName);
+      return {
+        cartItemId: `${foundProduct.id}_${sel.colorName}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        id: foundProduct.id,
+        name: foundProduct.name,
+        modelNumber: foundProduct.modelNumber,
+        price: foundProduct.price,
+        selectedColor: sel.colorName,
+        colorBarcode: colorEntry?.barcode || "",
+        sizes: foundProduct.sizes,
+        isSeri: true,
+        quantity: sel.qty,
+      };
+    });
 
     setOrderItems((prev) => [...prev, ...newItems]);
     setFoundProduct(null);

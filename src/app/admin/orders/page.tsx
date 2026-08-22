@@ -20,6 +20,7 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 500 && num <= 589) return "بيبي بناتي";
   if (num >= 590 && num <= 699) return "وسط بناتي";
   if (num >= 790 && num <= 899) return "محير بناتي";
+  if (num >= 1000 && num <= 2999) return "رياضي";
   return "أخرى";
 };
 
@@ -75,7 +76,7 @@ function timeAgo(date: Date): string {
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
   const category = getCategoryName(modelNumber);
-  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
   return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
@@ -83,7 +84,7 @@ const getSizesText = (name: string, modelNumber: string, sizes: string[] | undef
   const category = getCategoryName(modelNumber);
   if (category.includes('بيبي') || name.includes('بيبي')) return '(2-3-4-5)';
   if (category.includes('وسط') || name.includes('وسط')) return '(6-8-10-12)';
-  if (category.includes('محير') || name.includes('محير')) return '(14-16-18-20)';
+  if (category.includes('محير') || category.includes('رياضي') || name.includes('محير')) return '(14-16-18-20)';
   if (sizes && sizes.length > 0) return `(${sizes.join("-")})`;
   return '';
 };

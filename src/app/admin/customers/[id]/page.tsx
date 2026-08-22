@@ -158,7 +158,7 @@ export default function CustomerAccountPage() {
 
   // Add orders to ledger
   orders.forEach(o => {
-    const date = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+    const date = o.createdAt?.toDate ? o.createdAt.toDate() : (o.createdAt ? new Date(o.createdAt) : new Date());
     ledger.push({
       id: o.id,
       type: 'order',
@@ -183,7 +183,7 @@ export default function CustomerAccountPage() {
 
   // Add payments to ledger
   payments.forEach(p => {
-    const date = p.createdAt?.toDate ? p.createdAt.toDate() : new Date();
+    const date = p.createdAt?.toDate ? p.createdAt.toDate() : (p.createdAt ? new Date(p.createdAt) : new Date());
     ledger.push({
       id: p.id,
       type: p.type,

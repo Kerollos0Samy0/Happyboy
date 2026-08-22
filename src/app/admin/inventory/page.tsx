@@ -207,6 +207,13 @@ export default function InventoryPage() {
         { name: "وسط مقاس 6-8-10-12 (600 - 699)", filter: (num: number) => num >= 590 && num <= 699 },
         { name: "محير مقاس 14-16-18-20 (800 - 899)", filter: (num: number) => num >= 790 && num <= 899 },
       ]
+    },
+    {
+      title: "رياضي",
+      sections: [
+        { name: "وسط رياضي", filter: (num: number) => num >= 1000 && num <= 1999 },
+        { name: "محير رياضي", filter: (num: number) => num >= 2000 && num <= 2999 },
+      ]
     }
   ];
 

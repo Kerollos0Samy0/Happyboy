@@ -18,12 +18,13 @@ const getCategoryName = (modelNumber: string) => {
   if (num >= 500 && num <= 589) return "بيبي بناتي";
   if (num >= 590 && num <= 699) return "وسط بناتي";
   if (num >= 790 && num <= 899) return "محير بناتي";
+  if (num >= 1000 && num <= 2999) return "رياضي";
   return "أخرى";
 };
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
   const category = getCategoryName(modelNumber);
-  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
   return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
