@@ -103,6 +103,14 @@ export default function CartPage() {
         }).catch(err => console.error("Error fetching shipping info:", err));
       });
     }
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setEmployeeName(user.displayName || user.email?.split('@')[0] || "Unknown");
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const calculateItemTotal = (item: CartItem) => {
@@ -574,17 +582,13 @@ export default function CartPage() {
             
             <div className="mb-4">
               <label className="block mb-2 font-bold text-sm">البائع / مندوب المبيعات</label>
-              <select 
-                className="input" 
+              <input 
+                type="text" 
+                className="input bg-gray-100 cursor-not-allowed" 
                 value={employeeName}
-                onChange={(e) => setEmployeeName(e.target.value)}
-              >
-                <option value="">اختر البائع...</option>
-                <option value="kirollos">Kirollos</option>
-                <option value="ayat">Ayat</option>
-                <option value="omnia">Omnia</option>
-                <option value="radwa">Radwa</option>
-              </select>
+                readOnly
+                disabled
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
