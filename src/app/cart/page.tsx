@@ -491,9 +491,6 @@ export default function CartPage() {
               </div>
             </div>
             
-            <div style={{ textAlign: 'center', marginTop: '50px', fontSize: '12px', color: '#cbd5e1' }}>
-              نظام إدارة المصنع • تم الإصدار آلياً
-            </div>
           </div>
         </div>
       </div>
