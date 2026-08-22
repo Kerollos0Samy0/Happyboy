@@ -176,21 +176,34 @@ export default function CartPage() {
       
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
       
-      // Calculate dynamic height to fit everything in one continuous page
-      const pdfWidth = 210; // A4 width in mm
+      // Standard A4 format with multi-page support
+      const pdfWidth = 210;
+      const pdfHeight = 297;
       const margin = 10;
       const printWidth = pdfWidth - (margin * 2);
+      const printHeight = pdfHeight - (margin * 2);
+      
       const ratio = printWidth / canvas.width;
       const imgHeight = canvas.height * ratio;
-      const pdfHeight = Math.max(297, imgHeight + (margin * 2)); // At least A4 height
       
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [pdfWidth, pdfHeight]
+        format: "a4"
       });
       
-      pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
+      let heightLeft = imgHeight;
+      let position = margin;
+      
+      pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+      heightLeft -= printHeight;
+      
+      while (heightLeft > 0) {
+        position -= printHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+        heightLeft -= printHeight;
+      }
       
       if (shouldSave) {
         pdf.save(`Happy_Boy_Girl_Order_${orderNum}.pdf`);
@@ -360,6 +373,7 @@ export default function CartPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid #cbd5e1" }}>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الموديل</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الصنف</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>اللون</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الكمية</th>
@@ -376,7 +390,10 @@ export default function CartPage() {
                     return (
                       <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
                         <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
-                          {item.name} ({item.modelNumber})
+                          {item.modelNumber}
+                        </td>
+                        <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
+                          {item.name}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center" }}>
                           {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}
