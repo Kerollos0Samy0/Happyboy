@@ -262,7 +262,20 @@ export default function InventoryPage() {
     }
   ];
 
-    const getProductTable = (prods: Product[]) => {
+  const sectionStats = categories.map(cat => ({
+    title: cat.title,
+    totalPieces: cat.sections.reduce((sum, sec) => {
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0), 0);
+    }, 0),
+    sections: cat.sections.map(sec => {
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+      return { name: sec.name, pieces };
+    })
+  }));
+
+  const getProductTable = (prods: Product[]) => {
     if (prods.length === 0) return null;
     return (
       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200 mt-2">
@@ -551,6 +564,28 @@ export default function InventoryPage() {
               <p className="text-sm font-bold text-gray-500 mb-1">إجمالي القطع</p>
               <h3 className="text-3xl font-black text-gray-900">{totalPieces}</h3>
             </div>
+          </div>
+        </div>
+
+        {/* Detailed Stats */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
+          <h4 className="font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">تفاصيل القطع بالمخزن</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {sectionStats.map((cat, idx) => (
+              <div key={idx}>
+                <h5 className="font-black text-gray-900 mb-3 flex items-center justify-between">
+                  {cat.title} <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-sm">{cat.totalPieces} قطعة</span>
+                </h5>
+                <div className="space-y-2">
+                  {cat.sections.map((sec, sIdx) => (
+                    <div key={sIdx} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
+                      <span className="text-gray-600 font-medium">{sec.name.split(' (')[0]}</span>
+                      <span className="font-bold text-gray-800">{sec.pieces}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
