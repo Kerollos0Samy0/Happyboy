@@ -441,7 +441,10 @@ export default function LiveOrdersPage() {
     if (!emp) return "";
     let display = emp;
     if (display.includes('@')) display = display.split('@')[0];
-    return display.trim().toLowerCase();
+    display = display.trim().toLowerCase();
+    if (display === 'ahmed001') return 'Ahmed';
+    if (display === 'hossam001') return 'Hossam';
+    return display;
   };
 
   const uniqueEmployees = Array.from(new Set(orders.map(o => getDisplayEmployee(o.employeeName)).filter(Boolean))) as string[];
@@ -716,8 +719,8 @@ export default function LiveOrdersPage() {
                         </span>
                       </div>
                       {order.employeeName && (
-                        <span style={{ fontSize: "0.65rem", color: "#8b5cf6", fontWeight: "bold", background: "#ede9fe", padding: "0.1rem 0.3rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
-                          👤 {order.employeeName.includes('@') ? order.employeeName.split('@')[0] : order.employeeName}
+                        <span style={{ background: "#e2e8f0", padding: "2px 8px", borderRadius: "12px", fontSize: "12px", color: "#475569", fontWeight: "bold" }}>
+                          👤 {getDisplayEmployee(order.employeeName)}
                         </span>
                       )}
                     </div>
@@ -856,7 +859,7 @@ export default function LiveOrdersPage() {
                     </p>
                     {selectedOrder.employeeName && (
                       <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#A62E2E" }}>
-                        <strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}
+                        <strong>بواسطة الموظف:</strong> {getDisplayEmployee(selectedOrder.employeeName)}
                       </p>
                     )}
                   </div>
@@ -1048,7 +1051,7 @@ export default function LiveOrdersPage() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
                 <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
                 {selectedOrder.employeeName && (
-                  <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.employeeName}</span>
+                  <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
                 )}
               </div>
             </div>

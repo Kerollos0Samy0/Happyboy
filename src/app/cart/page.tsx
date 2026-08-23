@@ -108,7 +108,10 @@ export default function CartPage() {
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setEmployeeName(user.displayName || user.email?.split('@')[0] || "Unknown");
+        let name = user.displayName || user.email?.split('@')[0] || "Unknown";
+        if (name.toLowerCase() === 'ahmed001') name = 'Ahmed';
+        if (name.toLowerCase() === 'hossam001') name = 'Hossam';
+        setEmployeeName(name);
       }
     });
 
