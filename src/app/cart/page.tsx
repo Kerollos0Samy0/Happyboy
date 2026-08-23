@@ -387,7 +387,6 @@ export default function CartPage() {
               <div style={{ flex: 1, border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', background: '#f8fafc', display: 'flex', gap: '15px' }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>التاريخ: <span style={{ color: '#A62E2E' }}>{new Date().toLocaleDateString('en-GB')}</span></div>
                   <div style={{ fontSize: '15px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
                   <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
                   {customerBrand && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
@@ -404,6 +403,7 @@ export default function CartPage() {
                 {employeeName && (
                   <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{employeeName}</span>
                 )}
+                <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')}</span>
               </div>
             </div>
 
