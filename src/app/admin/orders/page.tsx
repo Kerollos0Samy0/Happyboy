@@ -98,6 +98,7 @@ export default function LiveOrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 
   const handleSelectAll = (checked: boolean, currentVisible: Order[]) => {
