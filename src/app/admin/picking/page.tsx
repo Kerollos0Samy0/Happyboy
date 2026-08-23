@@ -51,6 +51,8 @@ interface Order {
   customerGovernorate: string;
   createdAt: any;
   items: OrderItem[];
+  isDeleted?: boolean;
+  isArchived?: boolean;
 }
 
 interface PickingDetail {
