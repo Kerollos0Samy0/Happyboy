@@ -15,6 +15,7 @@ import {
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { detectBranch } from "../../../lib/location";
+import { deductInventory } from "../../../lib/inventory";
 import { Plus, Trash2, Search, ShoppingCart, Send } from "lucide-react";
 
 /* ───────── types ───────── */
@@ -337,6 +338,9 @@ export default function CreateOrderPage() {
         employeeName: auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
         createdAt: serverTimestamp(),
       });
+
+      // Deduct inventory
+      await deductInventory(orderItems);
 
       setSuccessOrderNumber(formattedOrderNumber);
       setOrderItems([]);

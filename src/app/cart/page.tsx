@@ -6,6 +6,7 @@ import { db } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, runTransaction } from "firebase/firestore";
 import { auth } from "../../lib/firebase";
 import { detectBranch } from "../../lib/location";
+import { deductInventory } from "../../lib/inventory";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -303,6 +304,9 @@ export default function CartPage() {
         createdAt: serverTimestamp()
       });
       
+      // Deduct inventory
+      await deductInventory(sortedCart);
+
       setOrderId(formattedOrderNumber);
       localStorage.removeItem("happyboy_cart");
       
