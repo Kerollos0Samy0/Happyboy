@@ -381,21 +381,21 @@ export default function CartPage() {
           <div style={{ fontFamily: "'Cairo', sans-serif", color: "black", background: "#ffffff" }}>
             {/* Header */}
           <div style={{ fontFamily: "'Cairo', sans-serif", color: "#1e293b", background: "#fff", padding: "10px" }}>
-            {/* Header Section */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
-              {/* Customer Info Box */}
-              <div style={{ flex: 1, border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', background: '#f8fafc', display: 'flex', gap: '15px' }}>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
-                  {customerBrand && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
+              <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{orderId || '---'}</span></p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {customerName}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{customerPhone}</span></p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {customerBrand || '---'}</p>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {customerGovernorate && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>المحافظة: <span style={{ color: '#A62E2E' }}>{customerGovernorate}</span></div>}
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || 'غير متوفر'}</span></div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>الشحن: <span style={{ color: '#A62E2E' }}>{customerShipping || 'استلام من المصنع'}</span></div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>التسليم: <span style={{ color: '#2563eb' }}>{deliveryDate ? new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {customerGovernorate || '---'}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {customerAddress || '---'}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {customerShipping || 'استلام من المصنع'}</p>
+                  <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
+                    <strong>التسليم:</strong> {deliveryDate ? new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -409,45 +409,32 @@ export default function CartPage() {
 
             {/* Elegant List Layout (Borderless Table) */}
             <div style={{ marginBottom: "40px" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #cbd5e1" }}>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الموديل</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الصنف</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>اللون</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الكمية</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>السعر</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#1e293b", fontSize: "14px", textAlign: "center" }}>الإجمالي</th>
+              <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
+              <thead>
+                <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
+                  <th style={{ padding: "8px", textAlign: "center", width: "12%" }}>الموديل</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "20%" }}>الصنف</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "13%" }}>اللون</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "30%" }}>النوع (ثري/قطعة)</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>السعر (ج)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedCart.map((item, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
+                    <td style={{ padding: "8px", textAlign: "center", width: "12%", fontWeight: "bold" }}>{item.modelNumber}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "20%" }}>{item.name}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "13%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
+                      {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
+                    </td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "10%" }}>{item.quantity || 1}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "15%" }}>{item.price}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {sortedCart.map((item, i) => {
-                    const qty = item.quantity || 1;
-                    const piecesInSeri = item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) : 1;
-                    const itemTotalPieces = item.isSeri ? piecesInSeri * qty : qty;
-                    const rowTotal = item.price * itemTotalPieces;
-                    return (
-                      <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
-                        <td style={{ padding: "16px 8px", textAlign: "center", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
-                          {item.modelNumber}
-                        </td>
-                        <td style={{ padding: "16px 8px", textAlign: "center", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
-                          {item.name}
-                        </td>
-                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center", whiteSpace: "nowrap" }}>
-                          {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}
-                        </td>
-                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569", textAlign: "center" }}>
-                          <div style={{ fontSize: "15px" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</div>
-                          {item.isSeri && <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>{getSizesText(item.name, item.modelNumber, item.sizes)}</div>}
-                        </td>
-                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569", textAlign: "center" }}>{item.price} ج.م</td>
-                        <td style={{ padding: "16px 8px", fontWeight: "900", color: "#1e293b", textAlign: "center", fontSize: "16px" }}>{rowTotal} ج.م</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
             </div>
 
             {/* Totals Section */}
