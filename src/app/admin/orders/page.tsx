@@ -452,7 +452,6 @@ export default function LiveOrdersPage() {
     } else if (isRestrictedWarehouseUser) {
       return orderBranch === "المخزن";
     } else {
-      if (orderBranch === "المخزن") return false;
       if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
       return true;
     }
@@ -559,7 +558,7 @@ export default function LiveOrdersPage() {
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
               {[
                 { key: "all",       label: "كل الفروع" },
-                ...(isOwner ? [{ key: "المخزن", label: "المخزن" }] : []),
+                { key: "المخزن", label: "المخزن" },
                 { key: "التجمع",    label: "التجمع" },
                 { key: "العبور",    label: "العبور" },
                 { key: "عين شمس",    label: "عين شمس" },
