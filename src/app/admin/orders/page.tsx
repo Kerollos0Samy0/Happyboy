@@ -1035,6 +1035,7 @@ export default function LiveOrdersPage() {
               <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>التاريخ:</strong> {new Date().toLocaleDateString('en-GB')}</p>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
