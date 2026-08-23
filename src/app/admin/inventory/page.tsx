@@ -248,7 +248,8 @@ export default function InventoryPage() {
                 if (editForm) {
                   const newColors = [...editForm.colors];
                   newColors[index] = { ...newColors[index], [field]: value };
-                  setEditForm({ ...editForm, colors: newColors });
+                  const newTotal = newColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+                  setEditForm({ ...editForm, colors: newColors, quantity: newTotal });
                 }
               };
 
