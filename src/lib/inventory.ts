@@ -25,7 +25,7 @@ export const deductInventory = async (items: any[]) => {
           const currentQty = Number(updatedColors[cIndex].quantity) || 0;
           updatedColors[cIndex] = {
             ...updatedColors[cIndex],
-            quantity: Math.max(0, currentQty - qtyToDeduct)
+            quantity: currentQty - qtyToDeduct
           };
         }
       }

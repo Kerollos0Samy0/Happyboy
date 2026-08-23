@@ -187,8 +187,8 @@ export default function InventoryPage() {
 
   // Calculate totals
   const totalModels = products.length;
-  const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
-  const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
 
   // Grouping Logic
   const categories = [
@@ -289,7 +289,7 @@ export default function InventoryPage() {
                         <input type="number" className="w-24 bg-gray-50 border border-gray-200 rounded p-1.5 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.quantity} onChange={e => handleEditField('quantity', e.target.value)} />
                       ) : (
                         <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-black ${displayProduct.quantity <= 0 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
-                          {displayProduct.quantity}
+                          {Number(displayProduct.quantity) < 0 ? `(${Math.abs(Number(displayProduct.quantity))})` : displayProduct.quantity}
                         </span>
                       )}
                     </td>
@@ -306,7 +306,11 @@ export default function InventoryPage() {
                       {isEditing && hasColors ? (
                         <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].quantity ?? ""} onChange={e => handleEditColor(0, 'quantity', Number(e.target.value))} />
                       ) : (
-                        hasColors ? (displayProduct.colors[0].quantity ?? "-") : "-"
+                        hasColors ? (
+                          Number(displayProduct.colors[0].quantity) < 0 
+                            ? `(${Math.abs(Number(displayProduct.colors[0].quantity))})` 
+                            : (displayProduct.colors[0].quantity ?? "-")
+                        ) : "-"
                       )}
                     </td>
                     <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
@@ -350,7 +354,7 @@ export default function InventoryPage() {
                           {isEditing ? (
                             <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.quantity ?? ""} onChange={e => handleEditColor(idx, 'quantity', Number(e.target.value))} />
                           ) : (
-                            color.quantity ?? "-"
+                            Number(color.quantity) < 0 ? `(${Math.abs(Number(color.quantity))})` : (color.quantity ?? "-")
                           )}
                         </td>
                         <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
