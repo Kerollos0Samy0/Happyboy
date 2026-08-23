@@ -159,9 +159,9 @@ export default function InventoryPage() {
     setEditForm(null);
   };
 
-  const handleColorChange = (index: number, field: "name" | "barcode", value: string) => {
+  const handleColorChange = (index: number, field: keyof ColorEntry, value: any) => {
     const newColors = [...colors];
-    newColors[index][field] = value;
+    newColors[index] = { ...newColors[index], [field]: value };
     setColors(newColors);
   };
 
@@ -174,6 +174,7 @@ export default function InventoryPage() {
     setSuccess(false);
     
     const flatBarcodes = colors.map(c => c.barcode).filter(b => b.trim() !== "");
+    const totalQty = colors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
 
     try {
       const docRef = await addDoc(collection(db, "products"), {
@@ -183,7 +184,7 @@ export default function InventoryPage() {
         sizes: sizes.split(",").map(s => s.trim()),
         colors,
         barcodes: flatBarcodes,
-        quantity: Number(quantity),
+        quantity: totalQty,
         createdAt: serverTimestamp()
       });
 
@@ -673,10 +674,6 @@ export default function InventoryPage() {
                   <label className="block mb-2 font-bold text-sm text-gray-700">السعر (ج.م)</label>
                   <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="مثال: 150" />
                 </div>
-                <div>
-                  <label className="block mb-2 font-bold text-sm text-gray-700">الكمية الإجمالية</label>
-                  <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-gray-100 focus:bg-white" value={quantity} onChange={(e) => setQuantity(e.target.value)} required placeholder="مثال: 595" />
-                </div>
               </div>
               
               <div>
@@ -704,6 +701,10 @@ export default function InventoryPage() {
                       <div className="flex-1">
                         <label className="block mb-1.5 text-xs font-bold text-gray-500">الباركود</label>
                         <input type="text" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono" value={color.barcode} onChange={e => handleColorChange(index, "barcode", e.target.value)} required placeholder="مثال: 123456789" />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block mb-1.5 text-xs font-bold text-gray-500">الكمية</label>
+                        <input type="number" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={color.quantity ?? ""} onChange={e => handleColorChange(index, "quantity", Number(e.target.value))} required placeholder="مثال: 50" />
                       </div>
                       {colors.length > 1 && (
                         <button type="button" onClick={() => removeColor(index)} className="p-2.5 bg-white border border-gray-200 text-red-500 rounded-lg hover:bg-red-50 hover:border-red-100 transition-colors" title="حذف اللون">
