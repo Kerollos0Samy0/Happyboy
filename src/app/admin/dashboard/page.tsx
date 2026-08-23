@@ -168,6 +168,7 @@ export default function AdminDashboardPage() {
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  const totalPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
 
   const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -232,6 +233,13 @@ export default function AdminDashboardPage() {
               <div>
                 <p className={styles.summaryLabel}>رأس مال المخزن</p>
                 <h3 className={styles.summaryValue}>{totalCapital.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.green}`}><Package size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>إجمالي قطع المخزن</p>
+                <h3 className={styles.summaryValue}>{totalPieces.toLocaleString()} <span className={styles.summaryCurrency}>قطعة</span></h3>
               </div>
             </div>
           </div>

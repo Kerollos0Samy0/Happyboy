@@ -378,12 +378,19 @@ export default function LiveOrdersPage() {
     window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
   };
 
-  const uniqueEmployees = Array.from(new Set(orders.map(o => o.employeeName).filter(Boolean))) as string[];
+  const getDisplayEmployee = (emp?: string) => {
+    if (!emp) return "";
+    let display = emp;
+    if (display.includes('@')) display = display.split('@')[0];
+    return display.trim().toLowerCase();
+  };
+
+  const uniqueEmployees = Array.from(new Set(orders.map(o => getDisplayEmployee(o.employeeName)).filter(Boolean))) as string[];
 
   const visibleOrders = orders.filter(o => {
     const orderBranch = o.branch || "أخرى";
     
-    if (employeeFilter !== "all" && o.employeeName !== employeeFilter) return false;
+    if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
 
     if (isOwner) {
       if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
@@ -518,7 +525,7 @@ export default function LiveOrdersPage() {
                     transition: "all 0.15s",
                   }}
                 >
-                  {emp.includes('@') ? emp.split('@')[0] : emp}
+                  {emp}
                 </button>
               ))}
             </div>
