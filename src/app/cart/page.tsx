@@ -400,12 +400,12 @@ export default function CartPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid #cbd5e1" }}>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الموديل</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "right" }}>الصنف</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الموديل</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الصنف</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>اللون</th>
                     <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>الكمية</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px" }}>السعر</th>
-                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#1e293b", fontSize: "14px", textAlign: "left" }}>الإجمالي</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#64748b", fontSize: "14px", textAlign: "center" }}>السعر</th>
+                    <th style={{ padding: "12px 8px", fontWeight: "bold", color: "#1e293b", fontSize: "14px", textAlign: "center" }}>الإجمالي</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -416,10 +416,10 @@ export default function CartPage() {
                     const rowTotal = item.price * itemTotalPieces;
                     return (
                       <tr key={i} style={{ borderBottom: "1px dashed #e2e8f0" }}>
-                        <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
+                        <td style={{ padding: "16px 8px", textAlign: "center", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
                           {item.modelNumber}
                         </td>
-                        <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
+                        <td style={{ padding: "16px 8px", textAlign: "center", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
                           {item.name}
                         </td>
                         <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center", whiteSpace: "nowrap" }}>
@@ -429,8 +429,8 @@ export default function CartPage() {
                           <div style={{ fontSize: "15px" }}>{qty} {item.isSeri ? 'ثري' : 'قطعة'}</div>
                           {item.isSeri && <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>{getSizesText(item.name, item.modelNumber, item.sizes)}</div>}
                         </td>
-                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569" }}>{item.price} ج.م</td>
-                        <td style={{ padding: "16px 8px", fontWeight: "900", color: "#1e293b", textAlign: "left", fontSize: "16px" }}>{rowTotal} ج.م</td>
+                        <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569", textAlign: "center" }}>{item.price} ج.م</td>
+                        <td style={{ padding: "16px 8px", fontWeight: "900", color: "#1e293b", textAlign: "center", fontSize: "16px" }}>{rowTotal} ج.م</td>
                       </tr>
                     );
                   })}
