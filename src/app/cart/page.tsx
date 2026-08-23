@@ -284,6 +284,7 @@ export default function CartPage() {
       const formattedOrderNumber = String(newOrderNumber).padStart(5, '0');
       
       const branchName = await detectBranch(auth.currentUser?.email);
+      const empName = employeeName || auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
 
       await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
@@ -300,12 +301,12 @@ export default function CartPage() {
         total: total,
         status: "pending",
         branch: branchName,
-        employeeName: employeeName || auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
+        employeeName: empName,
         createdAt: serverTimestamp()
       });
       
       // Deduct inventory
-      await deductInventory(sortedCart);
+      await deductInventory(sortedCart, formattedOrderNumber, empName);
 
       setOrderId(formattedOrderNumber);
       localStorage.removeItem("happyboy_cart");

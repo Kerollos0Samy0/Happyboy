@@ -1,8 +1,7 @@
-
 import { db } from './firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-export const deductInventory = async (items: any[]) => {
+export const deductInventory = async (items: any[], orderNumber?: string, employeeName?: string) => {
   const grouped: Record<string, any[]> = {};
   for (const item of items) {
     if (!grouped[item.id]) grouped[item.id] = [];
@@ -27,6 +26,19 @@ export const deductInventory = async (items: any[]) => {
             ...updatedColors[cIndex],
             quantity: currentQty - qtyToDeduct
           };
+
+          // Log movement
+          await addDoc(collection(db, "inventory_logs"), {
+            productId,
+            modelNumber: data.modelNumber,
+            productName: data.name,
+            colorName: item.selectedColor,
+            change: -qtyToDeduct,
+            newQuantity: updatedColors[cIndex].quantity,
+            reason: orderNumber ? `فاتورة رقم ${orderNumber}` : "فاتورة مبيعات",
+            employeeName: employeeName || "Unknown",
+            createdAt: serverTimestamp()
+          });
         }
       }
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle } from "lucide-react";
+import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle, FileText } from "lucide-react";
 
 interface ColorEntry {
   name: string;
@@ -118,6 +118,33 @@ export default function InventoryPage() {
         quantity: Number(editForm.quantity),
         colors: editForm.colors,
       };
+
+      const oldProduct = products.find(p => p.id === id);
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+
+      if (oldProduct && editForm.colors) {
+        for (const newColor of editForm.colors) {
+          const oldColor = oldProduct.colors?.find(c => c.name === newColor.name);
+          const oldQty = Number(oldColor?.quantity) || 0;
+          const newQty = Number(newColor.quantity) || 0;
+          const change = newQty - oldQty;
+          
+          if (change !== 0) {
+            await addDoc(collection(db, "inventory_logs"), {
+              productId: id,
+              modelNumber: editForm.modelNumber,
+              productName: editForm.name,
+              colorName: newColor.name,
+              change: change,
+              newQuantity: newQty,
+              reason: "تعديل يدوي",
+              employeeName: empName,
+              createdAt: serverTimestamp()
+            });
+          }
+        }
+      }
+
       await updateDoc(doc(db, "products", id), updatedData);
       setProducts(products.map(p => p.id === id ? { ...p, ...updatedData } : p));
       setEditingId(null);
@@ -149,7 +176,7 @@ export default function InventoryPage() {
     const flatBarcodes = colors.map(c => c.barcode).filter(b => b.trim() !== "");
 
     try {
-      await addDoc(collection(db, "products"), {
+      const docRef = await addDoc(collection(db, "products"), {
         modelNumber,
         name,
         price: Number(price),
@@ -159,6 +186,24 @@ export default function InventoryPage() {
         quantity: Number(quantity),
         createdAt: serverTimestamp()
       });
+
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+      for (const color of colors) {
+        const qty = Number(color.quantity) || 0;
+        if (qty !== 0) {
+          await addDoc(collection(db, "inventory_logs"), {
+            productId: docRef.id,
+            modelNumber,
+            productName: name,
+            colorName: color.name,
+            change: qty,
+            newQuantity: qty,
+            reason: "إضافة موديل جديد",
+            employeeName: empName,
+            createdAt: serverTimestamp()
+          });
+        }
+      }
       
       setSuccess(true);
       setModelNumber(""); setName(""); setPrice(""); setSizes(""); setQuantity("");
@@ -525,6 +570,13 @@ export default function InventoryPage() {
             <Plus size={18} strokeWidth={2.5} />
             إضافة موديل
           </button>
+          <a 
+            href="/admin/inventory/logs"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+          >
+            <FileText size={18} strokeWidth={2.5} />
+            سجل حركة المخزن
+          </a>
         </div>
 
         {activeTab === 'manage' && (

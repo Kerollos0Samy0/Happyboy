@@ -1,0 +1,511 @@
+[
+  {
+    "name": "ترينج محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "بيج",
+        "barcode": "333"
+      },
+      {
+        "name": "شاركول",
+        "barcode": "335"
+      },
+      {
+        "name": "زيتي",
+        "barcode": "334"
+      }
+    ],
+    "barcodes": [
+      "333",
+      "335",
+      "334"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "355"
+  },
+  {
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "بني",
+        "barcode": "336"
+      },
+      {
+        "name": "شانيه",
+        "barcode": "337"
+      },
+      {
+        "name": "رمادي",
+        "barcode": "338"
+      }
+    ],
+    "barcodes": [
+      "336",
+      "338",
+      "337"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "360"
+  },
+  {
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "رمادي",
+        "barcode": "339"
+      },
+      {
+        "name": "زيتوني",
+        "barcode": "340"
+      },
+      {
+        "name": "كافية",
+        "barcode": "341"
+      }
+    ],
+    "barcodes": [
+      "339",
+      "341",
+      "340"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "365"
+  },
+  {
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "شانيه",
+        "barcode": "342"
+      },
+      {
+        "name": "منت",
+        "barcode": "343"
+      },
+      {
+        "name": "كافيه",
+        "barcode": "344"
+      }
+    ],
+    "barcodes": [
+      "344",
+      "342",
+      "343"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "370"
+  },
+  {
+    "name": "سوت محير حوض",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "فضي",
+        "barcode": "347"
+      },
+      {
+        "name": "جيشي",
+        "barcode": "346"
+      },
+      {
+        "name": "اسود",
+        "barcode": "345"
+      }
+    ],
+    "barcodes": [
+      "346",
+      "347",
+      "345"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "375"
+  },
+  {
+    "name": "سوت محير نص سوسته",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "جيشي",
+        "barcode": "351"
+      },
+      {
+        "name": "منت",
+        "barcode": "352"
+      },
+      {
+        "name": "كافية",
+        "barcode": "353"
+      }
+    ],
+    "barcodes": [
+      "351",
+      "352",
+      "353"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "380"
+  },
+  {
+    "name": "سوت محير حوض",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "ابيض",
+        "barcode": "348"
+      },
+      {
+        "name": "انديجو",
+        "barcode": "349"
+      },
+      {
+        "name": "منت",
+        "barcode": "350"
+      }
+    ],
+    "barcodes": [
+      "350",
+      "348",
+      "349"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "385"
+  },
+  {
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "بني",
+        "barcode": "354"
+      },
+      {
+        "name": "زيتي",
+        "barcode": "355"
+      },
+      {
+        "name": "فضي",
+        "barcode": "356"
+      }
+    ],
+    "barcodes": [
+      "356",
+      "355",
+      "354"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "390"
+  },
+  {
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "بني",
+        "barcode": "358"
+      },
+      {
+        "name": "اسود",
+        "barcode": "357"
+      },
+      {
+        "name": "جيشي",
+        "barcode": "359"
+      }
+    ],
+    "barcodes": [
+      "359",
+      "357",
+      "358"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "395"
+  },
+  {
+    "name": "ترينج وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "شاركول",
+        "barcode": "306"
+      },
+      {
+        "name": "زيتي",
+        "barcode": "307"
+      },
+      {
+        "name": "بيج",
+        "barcode": "305"
+      }
+    ],
+    "barcodes": [
+      "305",
+      "307",
+      "306"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "155"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "شاركول",
+        "barcode": "308"
+      },
+      {
+        "name": "شانيه",
+        "barcode": "309"
+      },
+      {
+        "name": "منت",
+        "barcode": "310"
+      },
+      {
+        "name": "اسود",
+        "barcode": "311"
+      }
+    ],
+    "barcodes": [
+      "308",
+      "309",
+      "310",
+      "311"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "160"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "فضي",
+        "barcode": "312"
+      },
+      {
+        "name": "انديجو",
+        "barcode": "313"
+      },
+      {
+        "name": "بني",
+        "barcode": "314"
+      }
+    ],
+    "barcodes": [
+      "314",
+      "313",
+      "312"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "165"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "انديجو",
+        "barcode": "315"
+      },
+      {
+        "name": "زيتوني",
+        "barcode": "317"
+      },
+      {
+        "name": "فضي",
+        "barcode": "316"
+      }
+    ],
+    "barcodes": [
+      "315",
+      "316",
+      "317"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "170"
+  },
+  {
+    "name": "سوت وسط حوض",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "زيتوني",
+        "barcode": "320"
+      },
+      {
+        "name": "شانيه",
+        "barcode": "319"
+      },
+      {
+        "name": "بني",
+        "barcode": "318"
+      }
+    ],
+    "barcodes": [
+      "320",
+      "319",
+      "318"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "175"
+  },
+  {
+    "name": "سوت وسط نص سوسته",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "بني",
+        "barcode": "321"
+      },
+      {
+        "name": "زيتوني",
+        "barcode": "322"
+      },
+      {
+        "name": "فضي",
+        "barcode": "323"
+      }
+    ],
+    "barcodes": [
+      "322",
+      "323",
+      "321"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "180"
+  },
+  {
+    "name": "سوت وسط حوض",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "انديجو",
+        "barcode": "324"
+      },
+      {
+        "name": "اورانج",
+        "barcode": "325"
+      },
+      {
+        "name": "زيتوني",
+        "barcode": "326"
+      }
+    ],
+    "barcodes": [
+      "325",
+      "326",
+      "324"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "185"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "اسود",
+        "barcode": "327"
+      },
+      {
+        "name": "جيشي",
+        "barcode": "328"
+      },
+      {
+        "name": "رمادي",
+        "barcode": "329"
+      }
+    ],
+    "barcodes": [
+      "328",
+      "329",
+      "327"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "190"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "شانيه",
+        "barcode": "332"
+      },
+      {
+        "name": "اسود",
+        "barcode": "330"
+      },
+      {
+        "name": "منت",
+        "barcode": "331"
+      }
+    ],
+    "barcodes": [
+      "331",
+      "332",
+      "330"
+    ],
+    "price": 0,
+    "quantity": 0,
+    "modelNumber": "195"
+  }
+]

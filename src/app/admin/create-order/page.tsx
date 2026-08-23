@@ -321,6 +321,7 @@ export default function CreateOrderPage() {
 
       const branchName = await detectBranch(auth.currentUser?.email);
 
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
       await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
         customerName: customerName.trim(),
@@ -335,12 +336,12 @@ export default function CreateOrderPage() {
         total,
         status: "pending",
         branch: branchName,
-        employeeName: auth.currentUser?.displayName || auth.currentUser?.email || "Unknown",
+        employeeName: empName,
         createdAt: serverTimestamp(),
       });
 
       // Deduct inventory
-      await deductInventory(orderItems);
+      await deductInventory(orderItems, formattedOrderNumber, empName);
 
       setSuccessOrderNumber(formattedOrderNumber);
       setOrderItems([]);
