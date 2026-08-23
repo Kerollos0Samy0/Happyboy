@@ -1087,7 +1087,26 @@ export default function LiveOrdersPage() {
                 <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>01009516578</span>
                 <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>0224903939</span>
               </div>
-              <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
+              <div style={{ display: "flex", gap: "20px" }}>
+                {/* Model Summary Card */}
+                <div style={{ width: "250px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
+                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', display: 'block', marginBottom: '15px' }}>ملخص الموديلات:</span>
+                  {Object.entries(
+                    (selectedOrder.items || []).reduce((acc, item) => {
+                      const cat = getCategoryName(item.modelNumber);
+                      acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).filter(([_, count]) => count > 0).map(([cat, count]) => (
+                    <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px', marginBottom: '8px' }}>
+                      <span>{cat}</span>
+                      <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Totals Card */}
+                <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
                   <span>إجمالي القطع:</span><strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
                 </div>
@@ -1110,6 +1129,7 @@ export default function LiveOrdersPage() {
                   <span>الإجمالي المستحق:</span>
                   <span>{calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م</span>
                 </div>
+              </div>
               </div>
             </div>
           </div>
