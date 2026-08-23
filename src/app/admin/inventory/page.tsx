@@ -554,25 +554,28 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex bg-gray-100/80 p-1.5 rounded-xl w-fit mb-8 border border-gray-200/50">
+        {/* Tabs / Actions */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
           <button 
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 ${activeTab === 'manage' ? 'bg-white text-blue-700 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`} 
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'manage' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('manage')}
           >
             <Layers size={18} strokeWidth={2.5} />
             عرض الموديلات
           </button>
           <button 
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 ${activeTab === 'add' ? 'bg-white text-blue-700 shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`} 
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'add' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('add')}
           >
             <Plus size={18} strokeWidth={2.5} />
             إضافة موديل
           </button>
+          
+          <div className="hidden md:block flex-1" /> {/* Spacer */}
+          
           <a 
             href="/admin/inventory/logs"
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 hover:border-purple-300 shadow-sm"
           >
             <FileText size={18} strokeWidth={2.5} />
             سجل حركة المخزن
