@@ -535,7 +535,7 @@ export default function InventoryPage() {
             <h1 className="text-3xl font-black text-gray-900 mb-1">إدارة المخزن</h1>
             <p className="text-gray-500 text-sm">نظرة عامة على الموديلات والكميات</p>
           </div>
-          <button onClick={() => router.push("/admin/dashboard")} className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
+          <button onClick={() => router.push("/admin/dashboard")} className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-bold text-base hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
             لوحة التحكم
           </button>
         </div>
@@ -607,14 +607,14 @@ export default function InventoryPage() {
         {/* Tabs / Actions */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
           <button 
-            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'manage' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
+            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-base transition-all duration-300 border-2 ${activeTab === 'manage' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('manage')}
           >
             <Layers size={18} strokeWidth={2.5} />
             عرض الموديلات
           </button>
           <button 
-            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'add' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
+            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-base transition-all duration-300 border-2 ${activeTab === 'add' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('add')}
           >
             <Plus size={18} strokeWidth={2.5} />
@@ -625,7 +625,7 @@ export default function InventoryPage() {
           
           <a 
             href="/admin/inventory/logs"
-            className="flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 hover:border-purple-300 shadow-sm"
+            className="flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-base transition-all duration-300 bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 hover:border-purple-300 shadow-sm"
           >
             <FileText size={18} strokeWidth={2.5} />
             سجل حركة المخزن
