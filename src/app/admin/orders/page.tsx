@@ -1027,9 +1027,6 @@ export default function LiveOrdersPage() {
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
-                  {selectedOrder.employeeName && (
-                    <p style={{ fontSize: "14px", margin: 0, color: "#A62E2E" }}><strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}</p>
-                  )}
                 </div>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
                   <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
@@ -1042,14 +1039,17 @@ export default function LiveOrdersPage() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
                 <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
+                {selectedOrder.employeeName && (
+                  <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.employeeName}</span>
+                )}
               </div>
             </div>
 
             <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
               <thead>
                 <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
-                  <th style={{ padding: "8px", textAlign: "right", width: "35%" }}>الصنف</th>
-                  <th style={{ padding: "8px", textAlign: "right", width: "10%" }}>اللون</th>
+                  <th style={{ padding: "8px", textAlign: "right", width: "32%" }}>الصنف</th>
+                  <th style={{ padding: "8px", textAlign: "right", width: "13%" }}>اللون</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "30%" }}>النوع (ثري/قطعة)</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>السعر (ج)</th>
@@ -1058,8 +1058,8 @@ export default function LiveOrdersPage() {
               <tbody>
                 {selectedOrder.items?.map((item, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
-                    <td style={{ padding: "8px", width: "35%" }}>{item.name} (موديل {item.modelNumber})</td>
-                    <td style={{ padding: "8px", width: "10%" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
+                    <td style={{ padding: "8px", width: "32%" }}>{item.name} (موديل {item.modelNumber})</td>
+                    <td style={{ padding: "8px", width: "13%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
                       {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
                     </td>
@@ -1079,7 +1079,7 @@ export default function LiveOrdersPage() {
                   <span>إجمالي الثريهات:</span><strong>{calculateTotalSeries(selectedOrder.items)} ثري</strong>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
-                  <span>الإجمالي الكلي:</span><strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
+                  <span>إجمالي المبلغ:</span><strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
                 </div>
                 {Number(selectedOrder.discountPercentage || 0) > 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a" }}>

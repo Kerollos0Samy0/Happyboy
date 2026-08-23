@@ -379,7 +379,6 @@ export default function CartPage() {
                   <div style={{ fontSize: '15px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
                   <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
                   {customerBrand && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
-                  {employeeName && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>بواسطة الموظف: <span style={{ color: '#A62E2E' }}>{employeeName}</span></div>}
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {customerGovernorate && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>المحافظة: <span style={{ color: '#A62E2E' }}>{customerGovernorate}</span></div>}
@@ -390,6 +389,9 @@ export default function CartPage() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
                 <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
+                {employeeName && (
+                  <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{employeeName}</span>
+                )}
               </div>
             </div>
 
@@ -420,7 +422,7 @@ export default function CartPage() {
                         <td style={{ padding: "16px 8px", textAlign: "right", fontWeight: "bold", color: "#0f172a", fontSize: "15px" }}>
                           {item.name}
                         </td>
-                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center" }}>
+                        <td style={{ padding: "16px 8px", color: "#475569", fontSize: "15px", fontWeight: "bold", textAlign: "center", whiteSpace: "nowrap" }}>
                           {item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : ''}
                         </td>
                         <td style={{ padding: "16px 8px", fontWeight: "bold", color: "#475569", textAlign: "center" }}>
@@ -464,7 +466,7 @@ export default function CartPage() {
                   <span style={{ fontWeight: 'bold' }}>{totalSeries} ثري</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
-                  <span>إجمالي الفلوس</span>
+                  <span>إجمالي المبلغ</span>
                   <span style={{ fontWeight: 'bold' }}>{total} ج.م</span>
                 </div>
                 
