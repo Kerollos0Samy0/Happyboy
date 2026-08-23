@@ -1060,7 +1060,8 @@ export default function LiveOrdersPage() {
             <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
               <thead>
                 <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
-                  <th style={{ padding: "8px", textAlign: "center", width: "32%" }}>الصنف</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "12%" }}>الموديل</th>
+                  <th style={{ padding: "8px", textAlign: "center", width: "20%" }}>الصنف</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "13%" }}>اللون</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "30%" }}>النوع (ثري/قطعة)</th>
                   <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
@@ -1070,7 +1071,8 @@ export default function LiveOrdersPage() {
               <tbody>
                 {selectedOrder.items?.map((item, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
-                    <td style={{ padding: "8px", textAlign: "center", width: "32%" }}>موديل {item.modelNumber} - {item.name}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "12%", fontWeight: "bold" }}>{item.modelNumber}</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "20%" }}>{item.name}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "13%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
                       {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
