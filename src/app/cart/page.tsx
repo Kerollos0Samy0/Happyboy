@@ -450,36 +450,37 @@ export default function CartPage() {
             </div>
 
             {/* Totals Section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '50px' }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", borderRight: "4px solid #A62E2E", background: "#f8fafc" }}>
-                <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b" }}>📞 أرقام التواصل:</span>
-                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>01009516578</span>
-                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>0224903939</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '20px', marginBottom: '30px' }}>
+              {/* Contact Card */}
+              <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b", borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", width: "100%", textAlign: "center", marginBottom: "5px" }}>📞 أرقام التواصل</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>01009516578</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>0224903939</span>
               </div>
-              <div style={{ display: "flex", gap: "20px" }}>
-                {/* Model Summary Card */}
-                <div style={{ width: "250px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', display: 'block', marginBottom: '15px' }}>ملخص الموديلات:</span>
-                  {Object.entries(
-                    sortedCart.reduce((acc, item) => {
-                      const cat = getCategoryName(item.modelNumber);
-                      acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
-                      return acc;
-                    }, {} as Record<string, number>)
-                  ).filter(([_, count]) => count > 0).map(([cat, count]) => (
-                    <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px', marginBottom: '8px' }}>
-                      <span>{cat}</span>
-                      <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Totals Card */}
-                <div style={{ width: '350px', background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
-                    <span>إجمالي عدد القطع</span>
-                    <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة</span>
+              
+              {/* Model Summary Card */}
+              <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", display: 'block', marginBottom: '15px', textAlign: "center" }}>ملخص الموديلات</span>
+                {Object.entries(
+                  sortedCart.reduce((acc, item) => {
+                    const cat = getCategoryName(item.modelNumber);
+                    acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
+                    return acc;
+                  }, {} as Record<string, number>)
+                ).filter(([_, count]) => count > 0).map(([cat, count]) => (
+                  <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px', marginBottom: '10px' }}>
+                    <span>{cat}</span>
+                    <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
                   </div>
+                ))}
+              </div>
+
+              {/* Totals Card */}
+              <div style={{ flex: "1.5", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
+                  <span>إجمالي عدد القطع</span>
+                  <span style={{ fontWeight: 'bold' }}>{totalPieces} قطعة</span>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '15px' }}>
                   <span>إجمالي عدد الثريهات</span>
                   <span style={{ fontWeight: 'bold' }}>{totalSeries} ثري</span>
@@ -507,7 +508,6 @@ export default function CartPage() {
                   <span style={{ fontWeight: '900', fontSize: '20px' }}>الصافي المستحق</span>
                   <span style={{ fontWeight: '900', fontSize: '22px' }}>{remaining} ج.م</span>
                 </div>
-              </div>
               </div>
             </div>
 
