@@ -121,7 +121,8 @@ export default function OrderPickingPage() {
     }
     
     const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
-      const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+      let fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+      fetchedOrders = fetchedOrders.filter(o => !o.isDeleted && !o.isArchived);
       setOrders(fetchedOrders);
       setLoading(false);
     });
