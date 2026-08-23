@@ -1020,27 +1020,28 @@ export default function LiveOrdersPage() {
       >
         {selectedOrder && (
           <div style={{ width: "100%" }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
-              <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '120px', objectFit: 'contain', margin: '0 auto' }} />
-            </div>
-            
-            <div style={{ marginBottom: "30px", padding: "20px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", display: "flex", gap: "20px" }}>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
-                {selectedOrder.employeeName && (
-                  <p style={{ fontSize: "15px", margin: 0, color: "#A62E2E" }}><strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}</p>
-                )}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
+              <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
+                  {selectedOrder.employeeName && (
+                    <p style={{ fontSize: "14px", margin: 0, color: "#A62E2E" }}><strong>بواسطة الموظف:</strong> {selectedOrder.employeeName}</p>
+                  )}
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
+                  <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
+                    <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
+                  </p>
+                </div>
               </div>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
-                <p style={{ fontSize: "15px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
-                <p style={{ fontSize: "15px", margin: 0, color: "#2563eb" }}>
-                  <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
-                </p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
               </div>
             </div>
 
