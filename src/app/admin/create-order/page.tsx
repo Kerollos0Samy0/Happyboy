@@ -94,6 +94,7 @@ export default function CreateOrderPage() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
   /* ── customer info ── */
+  const [customerId, setCustomerId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerBrand, setCustomerBrand] = useState("");
@@ -255,6 +256,7 @@ export default function CreateOrderPage() {
   };
 
   const handleSelectCustomer = (cust: Customer) => {
+    setCustomerId(cust.id || "");
     setCustomerName(cust.name || "");
     setCustomerPhone(cust.phone || "");
     const isOffice = cust.name?.includes("مكتب") || cust.brandName?.includes("مكتب");
@@ -278,7 +280,9 @@ export default function CreateOrderPage() {
       const q = query(collection(db, "customers"), where("phone", "==", trimmedPhone));
       const snap = await getDocs(q);
       if (!snap.empty) {
-        const custData = snap.docs[0].data();
+        const custDoc = snap.docs[0];
+        const custData = custDoc.data();
+        if (!customerId) setCustomerId(custDoc.id);
         if (custData.name && !customerName) setCustomerName(custData.name);
         const isOffice = custData.name?.includes("مكتب") || custData.brandName?.includes("مكتب");
         if (custData.brandName && !customerBrand && !isOffice) setCustomerBrand(custData.brandName);
@@ -324,6 +328,7 @@ export default function CreateOrderPage() {
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
       await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
+        customerId: customerId,
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerBrand: customerBrand.trim(),
@@ -345,6 +350,7 @@ export default function CreateOrderPage() {
 
       setSuccessOrderNumber(formattedOrderNumber);
       setOrderItems([]);
+      setCustomerId("");
       setCustomerName("");
       setCustomerPhone("");
       setCustomerBrand("");

@@ -102,8 +102,13 @@ export default function CustomerAccountPage() {
     // Fetch Orders
     const ordersQ = query(collection(db, "orders"), where("customerPhone", "==", customer.phone));
     const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
-      const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
-      setOrders(fetchedOrders.filter(o => !('isDeleted' in o) || o['isDeleted'] === false)); // Ignore deleted if property exists
+      const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      const validOrders = fetchedOrders.filter(o => {
+        if (o.isDeleted) return false;
+        if (o.customerId && o.customerId !== customerId) return false;
+        return true;
+      });
+      setOrders(validOrders as Order[]);
     });
 
     // Fetch Payments
