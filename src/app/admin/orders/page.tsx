@@ -1069,7 +1069,7 @@ export default function LiveOrdersPage() {
               <tbody>
                 {selectedOrder.items?.map((item, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
-                    <td style={{ padding: "8px", textAlign: "center", width: "32%" }}>{item.name} (موديل {item.modelNumber})</td>
+                    <td style={{ padding: "8px", textAlign: "center", width: "32%" }}>موديل {item.modelNumber} - {item.name}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "13%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
                     <td style={{ padding: "8px", textAlign: "center", width: "30%" }}>
                       {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
@@ -1081,8 +1081,13 @@ export default function LiveOrdersPage() {
               </tbody>
             </table>
 
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px", marginRight: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px", padding: "10px", borderRight: "4px solid #A62E2E", background: "#f8fafc" }}>
+                <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b" }}>📞 أرقام التواصل:</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>01009516578</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>0224903939</span>
+              </div>
+              <div style={{ width: "350px", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
                   <span>إجمالي القطع:</span><strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
                 </div>

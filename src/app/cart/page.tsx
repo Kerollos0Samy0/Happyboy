@@ -450,7 +450,12 @@ export default function CartPage() {
             </div>
 
             {/* Totals Section */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '50px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '50px' }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", borderRight: "4px solid #A62E2E", background: "#f8fafc" }}>
+                <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b" }}>📞 أرقام التواصل:</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>01009516578</span>
+                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "right" }}>0224903939</span>
+              </div>
               <div style={{ width: '350px' }}>
                 {/* Model Summary */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '15px 0', borderBottom: '2px solid #e2e8f0' }}>
@@ -502,13 +507,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Bottom Contact Info */}
-            <div style={{ display: 'flex', flexDirection: "column", gap: "10px", marginTop: "auto", paddingTop: "40px", zIndex: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "bold", color: "#0f172a" }}>
-                <span>📞</span> 
-                <span dir="ltr">01009516578 - 0224903939</span>
-              </div>
-            </div>
+
             
           </div>
         </div>
