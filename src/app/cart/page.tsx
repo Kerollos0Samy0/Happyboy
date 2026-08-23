@@ -245,20 +245,28 @@ export default function CartPage() {
   };
 
   const handleWhatsAppShare = async (orderNum: string) => {
-    const pdf = await generatePDF(orderNum, false);
-    if (!pdf) return;
-
-    const pdfBlob = pdf.output("blob");
-    const fileName = `Happy_Boy_Girl_Order_${orderNum}.pdf`;
-    
     const phone = customerPhone.replace(/[^0-9]/g, '');
     const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
     const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${remaining} ج.م`;
 
-    pdf.save(fileName);
-    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
+    const whatsappWindow = window.open('about:blank', '_blank');
+
+    const pdf = await generatePDF(orderNum, false);
+    if (!pdf) {
+        if (whatsappWindow) whatsappWindow.close();
+        return;
+    }
+
+    const fileName = `Happy_Boy_Girl_Order_${orderNum}.pdf`;
     
-    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
+    pdf.save(fileName);
+    alert("تم تحميل الفاتورة كملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
+    
+    if (whatsappWindow) {
+      whatsappWindow.location.href = `https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`;
+    } else {
+      window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
+    }
   };
 
   const handleCheckout = async () => {
@@ -344,7 +352,7 @@ export default function CartPage() {
               📥 تحميل الفاتورة PDF
             </button>
             <button onClick={() => handleWhatsAppShare(orderId)} className="btn w-full py-4 text-lg" style={{ background: "#25D366", color: "white" }}>
-              💬 حفظ وإرسال PDF واتساب
+              💬 حفظ و ارسال واتساب
             </button>
             <button onClick={() => router.push("/customer")} className="btn btn-outline w-full mt-2">
               فاتورة جديدة

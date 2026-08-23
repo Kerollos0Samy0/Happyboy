@@ -404,16 +404,6 @@ export default function LiveOrdersPage() {
   const handleWhatsAppShare = async () => {
     if (!selectedOrder) return;
     
-    // Save first just in case
-    await saveOrderDetails();
-    
-    const pdf = await generatePDF(selectedOrder);
-    if (!pdf) return;
-
-    const pdfBlob = pdf.output("blob");
-    const fileName = `فاتورة_${selectedOrder.customerName.replace(/\s+/g, '_')}.pdf`;
-    const file = new File([pdfBlob], fileName, { type: "application/pdf" });
-    
     const phone = selectedOrder.customerPhone.replace(/[^0-9]/g, '');
     const intlPhone = phone.startsWith('0') ? '2' + phone : phone;
     const subtotal = calculateTotal(selectedOrder.items);
@@ -421,12 +411,30 @@ export default function LiveOrdersPage() {
     const remaining = subtotal - discountValue - (selectedOrder.deposit || 0);
     const msgText = `فاتورة طلبك جاهزة يا فندم من Happy Boy&Girl 🤍\nبرجاء مراجعة الفاتورة المرفقة.\nمتبقي عند الاستلام: ${remaining} ج.م`;
 
+    // Open window immediately to prevent popup blockers
+    const whatsappWindow = window.open('about:blank', '_blank');
+    
+    // Save first just in case
+    await saveOrderDetails();
+    
+    const pdf = await generatePDF(selectedOrder);
+    if (!pdf) {
+        if (whatsappWindow) whatsappWindow.close();
+        return;
+    }
+
+    const fileName = `فاتورة_${selectedOrder.customerName.replace(/\s+/g, '_')}.pdf`;
+
     // Download the PDF first
     pdf.save(fileName);
-    alert("تم تحميل الفاتورة כملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
+    alert("تم تحميل الفاتورة كملف PDF بنجاح!\n\nسيتم فتح واتساب الآن مع رقم العميل، يرجى إرفاق الملف المحمل يدوياً للمحادثة.");
     
-    // Open WhatsApp chat directly with the customer
-    window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
+    // Navigate the already opened tab to WhatsApp
+    if (whatsappWindow) {
+      whatsappWindow.location.href = `https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`;
+    } else {
+      window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msgText)}`, '_blank');
+    }
   };
 
   const getDisplayEmployee = (emp?: string) => {
@@ -986,7 +994,7 @@ export default function LiveOrdersPage() {
                 onClick={handleWhatsAppShare}
                 style={{ flex: "1 1 250px", padding: "0.8rem", background: "#25D366", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "16px", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
               >
-                <MessageCircle size={18} /> حفظ وإرسال PDF واتساب
+                <MessageCircle size={18} /> حفظ و ارسال واتساب
               </button>
 
               <button
