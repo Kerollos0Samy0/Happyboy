@@ -98,7 +98,36 @@ export default function LiveOrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+
+  const handleSelectAll = (checked: boolean, currentVisible: Order[]) => {
+    if (checked) {
+      setSelectedOrderIds(currentVisible.map(o => o.id));
+    } else {
+      setSelectedOrderIds([]);
+    }
+  };
+
+  const handleSelectOrder = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOrderIds(prev => [...prev, id]);
+    } else {
+      setSelectedOrderIds(prev => prev.filter(oid => oid !== id));
+    }
+  };
+
+  const deleteSelectedOrders = async () => {
+    if (selectedOrderIds.length === 0) return;
+    if (!confirm(`هل أنت متأكد من حذف ${selectedOrderIds.length} طلب؟ (ملحوظة: ده مش بيرجع الكميات للمخزن، ده بس بيمسح الفواتير كأنها متعملتش)`)) return;
+    
+    try {
+      await Promise.all(selectedOrderIds.map(id => updateDoc(doc(db, "orders", id), { isDeleted: true })));
+      setSelectedOrderIds([]);
+    } catch(e) {
+      console.error(e);
+      alert("حدث خطأ أثناء الحذف");
+    }
+  };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -422,9 +451,32 @@ export default function LiveOrdersPage() {
       {/* Header */}
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>
-          <h2 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
-            🔔 الطلبات الحية <span style={{ color: "#A62E2E" }}>Live Orders</span>
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <h2 style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+              🔔 الطلبات الحية <span style={{ color: "#A62E2E" }}>Live Orders</span>
+            </h2>
+            {isOwner && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.25rem 0.75rem", background: "#fff", borderRadius: "0.5rem", border: "1px solid #e2e8f0" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>
+                  <input 
+                    type="checkbox" 
+                    checked={filteredOrders.length > 0 && selectedOrderIds.length === filteredOrders.length}
+                    onChange={(e) => handleSelectAll(e.target.checked, filteredOrders)}
+                    style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#A62E2E" }}
+                  />
+                  تحديد الكل ({filteredOrders.length})
+                </label>
+                {selectedOrderIds.length > 0 && (
+                  <button 
+                    onClick={deleteSelectedOrders}
+                    style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                  >
+                    <Trash2 size={14} /> حذف المحدد ({selectedOrderIds.length})
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Stats pills */}
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -579,16 +631,27 @@ export default function LiveOrdersPage() {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.25rem" }}>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{
-                        fontWeight: 800, fontSize: "0.82rem", color: "#0f172a",
-                        margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-                      }}>
-                        {order.customerBrand || order.customerName}
-                      </p>
-                      <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: 0 }}>
-                        {order.customerName}
-                      </p>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 }}>
+                      {isOwner && (
+                        <input 
+                          type="checkbox" 
+                          checked={selectedOrderIds.includes(order.id)}
+                          onChange={(e) => handleSelectOrder(order.id, e.target.checked)}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#A62E2E", marginTop: "2px" }}
+                        />
+                      )}
+                      <div>
+                        <p style={{
+                          fontWeight: 800, fontSize: "0.82rem", color: "#0f172a",
+                          margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+                        }}>
+                          {order.customerBrand || order.customerName}
+                        </p>
+                        <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: 0 }}>
+                          {order.customerName}
+                        </p>
+                      </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
                       <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
