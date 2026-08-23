@@ -9,7 +9,8 @@ import {
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { WAREHOUSE_EMAILS } from "../../../lib/location";
-import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download } from "lucide-react";
+import { restoreInventory } from "../../../lib/inventory";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive } from "lucide-react";
 
 const getCategoryName = (modelNumber: string) => {
   const num = parseInt(modelNumber, 10);
@@ -55,6 +56,7 @@ interface Order {
   items: OrderItem[];
   createdAt: any;
   isDeleted?: boolean;
+  isArchived?: boolean;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -96,6 +98,7 @@ export default function LiveOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [showArchived, setShowArchived] = useState<boolean>(false);
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -119,10 +122,17 @@ export default function LiveOrdersPage() {
 
   const deleteSelectedOrders = async () => {
     if (selectedOrderIds.length === 0) return;
-    if (!confirm(`هل أنت متأكد من حذف ${selectedOrderIds.length} طلب؟ (ملحوظة: ده مش بيرجع الكميات للمخزن، ده بس بيمسح الفواتير كأنها متعملتش)`)) return;
+    if (!confirm(`هل أنت متأكد من حذف ${selectedOrderIds.length} طلب وإرجاع كمياتهم للمخزن؟`)) return;
     
     try {
-      await Promise.all(selectedOrderIds.map(id => updateDoc(doc(db, "orders", id), { isDeleted: true })));
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+      await Promise.all(selectedOrderIds.map(async (id) => {
+        const order = orders.find(o => o.id === id);
+        if (order && order.items && order.items.length > 0) {
+          await restoreInventory(order.items, order.orderNumber || order.id, empName);
+        }
+        return updateDoc(doc(db, "orders", id), { isDeleted: true });
+      }));
       setSelectedOrderIds([]);
     } catch(e) {
       console.error(e);
@@ -300,8 +310,19 @@ export default function LiveOrdersPage() {
   };
 
   const deleteOrder = async (orderId: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا الطلب؟")) return;
+    if (!confirm("هل أنت متأكد من حذف هذا الطلب وإرجاع الكميات للمخزن؟")) return;
+    const order = orders.find(o => o.id === orderId);
+    if (order && order.items && order.items.length > 0) {
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+      await restoreInventory(order.items, order.orderNumber || order.id, empName);
+    }
     await updateDoc(doc(db, "orders", orderId), { isDeleted: true });
+    if (selectedOrder?.id === orderId) closeModal();
+  };
+
+  const archiveOrder = async (orderId: string, currentArchived: boolean) => {
+    if (!confirm(`هل أنت متأكد من ${currentArchived ? 'استرجاع' : 'أرشفة'} هذا الطلب؟`)) return;
+    await updateDoc(doc(db, "orders", orderId), { isArchived: !currentArchived });
     if (selectedOrder?.id === orderId) closeModal();
   };
 
@@ -418,6 +439,9 @@ export default function LiveOrdersPage() {
   const uniqueEmployees = Array.from(new Set(orders.map(o => getDisplayEmployee(o.employeeName)).filter(Boolean))) as string[];
 
   const visibleOrders = orders.filter(o => {
+    if (showArchived && !o.isArchived) return false;
+    if (!showArchived && o.isArchived) return false;
+    
     const orderBranch = o.branch || "أخرى";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
@@ -480,7 +504,7 @@ export default function LiveOrdersPage() {
           </div>
 
           {/* Stats pills */}
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
             {[
               { key: "all",       label: `الكل (${stats.total})`,           bg: "#1e293b", color: "#fff" },
               { key: "pending",   label: `انتظار (${stats.pending})`,       bg: "#fef3c7", color: "#b45309" },
@@ -508,6 +532,27 @@ export default function LiveOrdersPage() {
                 {s.label}
               </button>
             ))}
+            
+            <div style={{ flex: 1 }} />
+            
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.3rem",
+                padding: "0.35rem 0.85rem",
+                borderRadius: "9999px",
+                border: showArchived ? "2px solid #6b21a8" : "2px solid transparent",
+                background: showArchived ? "#f3e8ff" : "#f1f5f9",
+                color: showArchived ? "#6b21a8" : "#475569",
+                fontFamily: "inherit",
+                fontWeight: 700,
+                fontSize: "0.78rem",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              <Archive size={14} /> {showArchived ? "إخفاء الأرشيف" : "عرض الأرشيف"}
+            </button>
           </div>
 
           {!isRestrictedWarehouseUser && (
@@ -743,7 +788,7 @@ export default function LiveOrdersPage() {
           >
             {/* Toolbar Top */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "2px solid #e2e8f0", paddingBottom: "1rem" }}>
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                 <select
                   className="input"
                   style={{ padding: "0.4rem 0.75rem", fontSize: "0.85rem", fontWeight: "bold", background: STATUS_CONFIG[selectedOrder.status]?.bg, color: STATUS_CONFIG[selectedOrder.status]?.color, border: "none" }}
@@ -756,6 +801,22 @@ export default function LiveOrdersPage() {
                   <option value="delivered">📦 تم التسليم</option>
                   <option value="cancelled">❌ ملغي</option>
                 </select>
+                {isOwner && (
+                  <>
+                    <button 
+                      onClick={() => archiveOrder(selectedOrder.id, !!selectedOrder.isArchived)}
+                      style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.4rem 0.75rem", background: selectedOrder.isArchived ? "#fef3c7" : "#f1f5f9", color: selectedOrder.isArchived ? "#b45309" : "#475569", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                    >
+                      <Archive size={16} /> {selectedOrder.isArchived ? 'إلغاء الأرشفة' : 'أرشفة الطلب'}
+                    </button>
+                    <button 
+                      onClick={() => deleteOrder(selectedOrder.id)}
+                      style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.4rem 0.75rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                    >
+                      <Trash2 size={16} /> حذف الطلب
+                    </button>
+                  </>
+                )}
               </div>
               <button onClick={closeModal} style={{ background: "#f1f5f9", border: "none", cursor: "pointer", color: "#64748b", padding: "0.5rem", borderRadius: "50%" }}>
                 <X size={20} />
