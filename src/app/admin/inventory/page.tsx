@@ -260,6 +260,15 @@ export default function InventoryPage() {
         { name: "وسط رياضي", filter: (num: number) => num >= 1000 && num <= 1999 },
         { name: "محير رياضي", filter: (num: number) => num >= 2000 && num <= 2999 },
       ]
+    },
+    {
+      title: "Summer Melton",
+      sections: [
+        { name: "وسط أولادي", filter: (num: number) => num >= 3000 && num <= 3999 },
+        { name: "محير أولادي", filter: (num: number) => num >= 4000 && num <= 4999 },
+        { name: "وسط بناتي", filter: (num: number) => num >= 5000 && num <= 5999 },
+        { name: "محير بناتي", filter: (num: number) => num >= 6000 && num <= 6999 },
+      ]
     }
   ];
 
@@ -345,7 +354,12 @@ export default function InventoryPage() {
                     </td>
                     <td className="p-4 border-l border-gray-100" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="number" className="w-24 bg-gray-50 border border-gray-200 rounded p-1.5 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.quantity} onChange={e => handleEditField('quantity', e.target.value)} />
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-xs text-gray-500 font-bold">المجموع</span>
+                          <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-sm font-black bg-blue-50 text-blue-700 border border-blue-100">
+                            {displayProduct.quantity}
+                          </span>
+                        </div>
                       ) : (
                         <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-black ${displayProduct.quantity <= 0 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
                           {Number(displayProduct.quantity) < 0 ? `(${Math.abs(Number(displayProduct.quantity))})` : displayProduct.quantity}
@@ -521,7 +535,7 @@ export default function InventoryPage() {
             <h1 className="text-3xl font-black text-gray-900 mb-1">إدارة المخزن</h1>
             <p className="text-gray-500 text-sm">نظرة عامة على الموديلات والكميات</p>
           </div>
-          <button onClick={() => router.push("/admin/dashboard")} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
+          <button onClick={() => router.push("/admin/dashboard")} className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
             لوحة التحكم
           </button>
         </div>
@@ -593,14 +607,14 @@ export default function InventoryPage() {
         {/* Tabs / Actions */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
           <button 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'manage' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
+            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'manage' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('manage')}
           >
             <Layers size={18} strokeWidth={2.5} />
             عرض الموديلات
           </button>
           <button 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'add' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
+            className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${activeTab === 'add' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`} 
             onClick={() => setActiveTab('add')}
           >
             <Plus size={18} strokeWidth={2.5} />
@@ -611,7 +625,7 @@ export default function InventoryPage() {
           
           <a 
             href="/admin/inventory/logs"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 hover:border-purple-300 shadow-sm"
+            className="flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all duration-300 bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 hover:border-purple-300 shadow-sm"
           >
             <FileText size={18} strokeWidth={2.5} />
             سجل حركة المخزن
