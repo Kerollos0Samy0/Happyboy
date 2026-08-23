@@ -371,25 +371,25 @@ export default function CartPage() {
             {/* Header */}
           <div style={{ fontFamily: "'Cairo', sans-serif", color: "#1e293b", background: "#fff", padding: "10px" }}>
             {/* Header Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #1e293b', paddingBottom: '20px', marginBottom: '20px' }}>
-                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '200px', objectFit: 'contain' }} />
-            </div>
-            
-            {/* Customer Info Box */}
-            <div style={{ border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', marginBottom: '30px', background: '#fff', display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-              <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
-                {customerBrand && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>اسم البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
-                {customerGovernorate && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>المحافظة: <span style={{ color: '#A62E2E' }}>{customerGovernorate}</span></div>}
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || 'غير متوفر'}</span></div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
+              {/* Customer Info Box */}
+              <div style={{ flex: 1, border: '1px solid #1e293b', padding: '15px', borderRadius: '10px', background: '#f8fafc', display: 'flex', gap: '15px' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>اسم العميل: <span style={{ color: '#A62E2E' }}>{customerName}</span></div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>رقم الهاتف: <span style={{ color: '#A62E2E' }} dir="ltr">{customerPhone}</span></div>
+                  {customerBrand && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>البراند: <span style={{ color: '#A62E2E' }}>{customerBrand}</span></div>}
+                  {employeeName && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>بواسطة الموظف: <span style={{ color: '#A62E2E' }}>{employeeName}</span></div>}
+                </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {customerGovernorate && <div style={{ fontSize: '15px', fontWeight: 'bold' }}>المحافظة: <span style={{ color: '#A62E2E' }}>{customerGovernorate}</span></div>}
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>العنوان: <span style={{ color: '#A62E2E' }}>{customerAddress || 'غير متوفر'}</span></div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>الشحن: <span style={{ color: '#A62E2E' }}>{customerShipping || 'استلام من المصنع'}</span></div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold' }}>التسليم: <span style={{ color: '#2563eb' }}>{deliveryDate ? new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                </div>
               </div>
-              <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>رقم الطلبية: <span style={{ color: '#A62E2E' }}>{orderId}</span></div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>التاريخ: <span style={{ color: '#A62E2E' }}>{new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
-                {deliveryDate && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>تاريخ التسليم: <span style={{ color: '#A62E2E' }}>{new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>}
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>معلومات الشحن: <span style={{ color: '#A62E2E' }}>{customerShipping || 'استلام من المصنع'}</span></div>
-                {employeeName && <div style={{ fontSize: '16px', fontWeight: 'bold' }}>تم بواسطة: <span style={{ color: '#A62E2E' }}>{employeeName}</span></div>}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
               </div>
             </div>
 
