@@ -1039,17 +1039,24 @@ export default function LiveOrdersPage() {
       >
         {selectedOrder && (() => {
           const items = selectedOrder.items || [];
-          const ITEMS_PER_PAGE = 10;
+          const ITEMS_PER_PAGE = 20;
           const pages = [];
           for (let i = 0; i < items.length; i += ITEMS_PER_PAGE) {
             pages.push(items.slice(i, i + ITEMS_PER_PAGE));
           }
           if (pages.length === 0) pages.push([]);
+          
+          const lastPageItems = pages[pages.length - 1];
+          const isFirstPageLast = pages.length === 1;
+          const maxItemsForTotals = isFirstPageLast ? 12 : 16; 
+          if (lastPageItems.length > maxItemsForTotals) {
+             pages.push([]); // Empty page to ensure totals fit perfectly
+          }
 
           return pages.map((pageItems, pageIndex) => (
             <div key={pageIndex} className="invoice-page" style={{ width: "100%", padding: "20px", boxSizing: "border-box" }}>
               
-              {/* Header (On all pages) */}
+              {/* Header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
                 {pageIndex === 0 ? (
                   <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
@@ -1069,21 +1076,35 @@ export default function LiveOrdersPage() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
                     <p style={{ fontSize: "14px", margin: 0, color: "#475569" }}><strong>تابع الفاتورة رقم:</strong> {selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</p>
                   </div>
                 )}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-                  <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
-                  {selectedOrder.employeeName && (
-                    <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
-                  )}
-                  <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
-                </div>
+                
+                {pageIndex === 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
+                    {selectedOrder.employeeName && (
+                      <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
+                    )}
+                    <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      {selectedOrder.employeeName && (
+                        <span style={{ fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
+                      )}
+                      <span style={{ marginTop: "2px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
+                    </div>
+                    <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '50px', objectFit: 'contain' }} />
+                  </div>
+                )}
               </div>
 
               {/* Table */}
-              <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
+              {pageItems.length > 0 && (
+                <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
                 <thead>
                   <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
                     <th style={{ padding: "8px", textAlign: "center", width: "8%" }}>الموديل</th>
@@ -1109,6 +1130,7 @@ export default function LiveOrdersPage() {
                   ))}
                 </tbody>
               </table>
+              )}
 
               {/* Totals (Only on the last page) */}
               {pageIndex === pages.length - 1 && (
