@@ -1041,10 +1041,10 @@ export default function LiveOrdersPage() {
           const items = selectedOrder.items || [];
           const FIRST_PAGE_LIMIT = 25;
           const OTHER_PAGE_LIMIT = 28;
-          const pages = [];
+          const pages: any[][] = [];
           let i = 0;
           while (i < items.length) {
-            const take = pages.length === 0 ? FIRST_PAGE_LIMIT : OTHER_PAGE_LIMIT;
+            const take: number = pages.length === 0 ? FIRST_PAGE_LIMIT : OTHER_PAGE_LIMIT;
             pages.push(items.slice(i, i + take));
             i += take;
           }
