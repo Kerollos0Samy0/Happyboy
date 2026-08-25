@@ -1080,8 +1080,9 @@ export default function LiveOrdersPage() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-                    <p style={{ fontSize: "14px", margin: 0, color: "#475569" }}><strong>تابع الفاتورة رقم:</strong> {selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", justifyContent: "center" }}>
+                    <p style={{ fontSize: "15px", margin: 0, color: "#1e293b" }}><strong>تابع الفاتورة رقم:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
+                    <p style={{ fontSize: "14px", margin: 0, color: "#475569", fontWeight: "bold" }}>{new Date().toLocaleDateString('en-GB')} &nbsp;|&nbsp; صفحة {pageIndex + 1} من {pages.length}</p>
                   </div>
                 )}
                 
@@ -1094,14 +1095,8 @@ export default function LiveOrdersPage() {
                     <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: '15px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      {selectedOrder.employeeName && (
-                        <span style={{ fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
-                      )}
-                      <span style={{ marginTop: "2px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
-                    </div>
-                    <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '50px', objectFit: 'contain' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '65px', objectFit: 'contain' }} />
                   </div>
                 )}
               </div>
