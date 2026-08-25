@@ -377,20 +377,45 @@ export default function LiveOrdersPage() {
       });
       
       const pdfWidth = 210; // A4 width in mm
-      const margin = 10;
+      const pdfHeight = 297; // A4 height in mm
+      const margin = 10; // 1cm margin
       const printWidth = pdfWidth - (margin * 2);
+      const printHeight = pdfHeight - (margin * 2);
+      
       const ratio = printWidth / canvas.width;
       const imgHeight = canvas.height * ratio;
-      const pdfHeight = Math.max(297, imgHeight + (margin * 2));
       
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [pdfWidth, pdfHeight]
+        format: "a4"
       });
       
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
+      
+      let heightLeft = imgHeight;
+      let position = margin;
+      
+      pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+      
+      // Cover margins with white rectangles to prevent bleeding from previous page
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pdfWidth, margin, 'F');
+      pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
+      
+      heightLeft -= printHeight;
+      
+      while (heightLeft > 0) {
+        position -= printHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+        
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdfWidth, margin, 'F');
+        pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
+        
+        heightLeft -= printHeight;
+      }
       
       return pdf;
     } finally {
