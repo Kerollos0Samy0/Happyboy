@@ -1039,16 +1039,20 @@ export default function LiveOrdersPage() {
       >
         {selectedOrder && (() => {
           const items = selectedOrder.items || [];
-          const ITEMS_PER_PAGE = 20;
+          const FIRST_PAGE_LIMIT = 25;
+          const OTHER_PAGE_LIMIT = 28;
           const pages = [];
-          for (let i = 0; i < items.length; i += ITEMS_PER_PAGE) {
-            pages.push(items.slice(i, i + ITEMS_PER_PAGE));
+          let i = 0;
+          while (i < items.length) {
+            const take = pages.length === 0 ? FIRST_PAGE_LIMIT : OTHER_PAGE_LIMIT;
+            pages.push(items.slice(i, i + take));
+            i += take;
           }
           if (pages.length === 0) pages.push([]);
           
           const lastPageItems = pages[pages.length - 1];
           const isFirstPageLast = pages.length === 1;
-          const maxItemsForTotals = isFirstPageLast ? 12 : 16; 
+          const maxItemsForTotals = isFirstPageLast ? 16 : 22; 
           if (lastPageItems.length > maxItemsForTotals) {
              pages.push([]); // Empty page to ensure totals fit perfectly
           }
@@ -1118,14 +1122,14 @@ export default function LiveOrdersPage() {
                 <tbody>
                   {pageItems.map((item, i) => (
                     <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
-                      <td style={{ padding: "8px", textAlign: "center", width: "8%", fontWeight: "bold", whiteSpace: "nowrap" }}>{item.modelNumber}</td>
-                      <td style={{ padding: "8px", textAlign: "center", width: "30%", whiteSpace: "nowrap" }}>{item.name}</td>
-                      <td style={{ padding: "8px", textAlign: "center", width: "12%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
-                      <td style={{ padding: "8px", textAlign: "center", width: "33%", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "8%", fontWeight: "bold", whiteSpace: "nowrap" }}>{item.modelNumber}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "30%", whiteSpace: "nowrap" }}>{item.name}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "12%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "33%", whiteSpace: "nowrap" }}>
                         {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
                       </td>
-                      <td style={{ padding: "8px", textAlign: "center", width: "7%", whiteSpace: "nowrap" }}>{item.quantity || 1}</td>
-                      <td style={{ padding: "8px", textAlign: "center", width: "10%", whiteSpace: "nowrap" }}>{item.price}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "7%", whiteSpace: "nowrap" }}>{item.quantity || 1}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "center", width: "10%", whiteSpace: "nowrap" }}>{item.price}</td>
                     </tr>
                   ))}
                 </tbody>
