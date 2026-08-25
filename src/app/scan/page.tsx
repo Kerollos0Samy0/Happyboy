@@ -36,6 +36,30 @@ const getCategoryName = (modelNumber: string) => {
   return "أخرى";
 };
 
+const playBeep = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1500, ctx.currentTime);
+    
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+  } catch (e) {
+    console.error("Audio beep failed", e);
+  }
+};
+
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -133,6 +157,7 @@ export default function ScanPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function handleScanSuccess(barcode: string, scanner: any) {
+    playBeep(); // 🎵 Play the beep sound!
     scanner.pause(true);
     setScannedResult(barcode);
     setLoading(true);
