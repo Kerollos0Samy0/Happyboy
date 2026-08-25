@@ -9,8 +9,8 @@ import {
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { WAREHOUSE_EMAILS } from "../../../lib/location";
-import { restoreInventory } from "../../../lib/inventory";
-import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive } from "lucide-react";
+import { restoreInventory, deductInventory } from "../../../lib/inventory";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive, Copy } from "lucide-react";
 
 const getCategoryName = (modelNumber: string) => {
   const num = parseInt(modelNumber, 10);
@@ -326,6 +326,53 @@ export default function LiveOrdersPage() {
     if (!confirm(`هل أنت متأكد من ${currentArchived ? 'استرجاع' : 'أرشفة'} هذا الطلب؟`)) return;
     await updateDoc(doc(db, "orders", orderId), { isArchived: !currentArchived });
     if (selectedOrder?.id === orderId) closeModal();
+  };
+
+  const duplicateOrder = async (orderId: string) => {
+    if (!confirm("هل أنت متأكد من تكرار (نسخ) هذا الطلب لنفس العميل؟ سيتم خصم الكميات مرة أخرى من المخزن.")) return;
+    const orderToCopy = orders.find(o => o.id === orderId);
+    if (!orderToCopy) return;
+
+    try {
+      const { addDoc, collection, serverTimestamp, runTransaction } = await import("firebase/firestore");
+      const counterRef = doc(db, "counters", "orders");
+      let newOrderNumber = 1;
+      
+      await runTransaction(db, async (transaction) => {
+        const counterDoc = await transaction.get(counterRef);
+        if (!counterDoc.exists()) {
+          transaction.set(counterRef, { current: 1 });
+          newOrderNumber = 1;
+        } else {
+          newOrderNumber = counterDoc.data().current + 1;
+          transaction.update(counterRef, { current: newOrderNumber });
+        }
+      });
+      
+      const formattedOrderNumber = String(newOrderNumber).padStart(5, '0');
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+
+      if (orderToCopy.items && orderToCopy.items.length > 0) {
+        await deductInventory(orderToCopy.items, formattedOrderNumber, empName);
+      }
+      
+      const newOrderData = {
+        ...orderToCopy,
+        id: undefined,
+        orderNumber: formattedOrderNumber,
+        status: "pending",
+        isArchived: false,
+        createdAt: serverTimestamp(),
+        employeeName: empName
+      };
+      
+      await addDoc(collection(db, "orders"), newOrderData);
+      
+      alert(`تم تكرار الطلب بنجاح برقم: ${formattedOrderNumber}`);
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء تكرار الطلب");
+    }
   };
 
   // PDF
@@ -775,6 +822,28 @@ export default function LiveOrdersPage() {
                       {st.label}
                     </span>
                   </div>
+                  {isOwner && (
+                    <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.4rem", borderTop: "1px solid #f1f5f9", paddingTop: "0.4rem" }}>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); duplicateOrder(order.id); }}
+                        style={{ flex: 1, padding: "0.3rem", background: "#f1f5f9", border: "none", borderRadius: "0.3rem", color: "#475569", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="تكرار"
+                      >
+                        <Copy size={14} /> تكرار
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); archiveOrder(order.id, !!order.isArchived); }}
+                        style={{ flex: 1, padding: "0.3rem", background: order.isArchived ? "#fef3c7" : "#f1f5f9", border: "none", borderRadius: "0.3rem", color: order.isArchived ? "#b45309" : "#475569", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="أرشفة"
+                      >
+                        <Archive size={14} /> أرشفة
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
+                        style={{ flex: 1, padding: "0.3rem", background: "#fee2e2", border: "none", borderRadius: "0.3rem", color: "#991b1b", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="حذف"
+                      >
+                        <Trash2 size={14} /> حذف
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
