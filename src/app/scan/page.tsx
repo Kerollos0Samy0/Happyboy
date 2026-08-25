@@ -313,7 +313,12 @@ export default function ScanPage() {
             ) : product && matchedColor ? (
               <div className="flex flex-col gap-4">
                 <div className="p-4" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
-                  <h3 className="text-xl">{product.name} (موديل: {product.modelNumber})</h3>
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="text-xl">{product.name} (موديل: {product.modelNumber})</h3>
+                    <span className="text-xl font-bold px-3 py-1 rounded-full whitespace-nowrap" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
+                      {product.price} ج.م
+                    </span>
+                  </div>
                   <div className="mt-3 mb-2 p-3 bg-green-50 text-green-800 rounded text-center font-bold text-lg border border-green-200">
                     ✅ الموديل متاح في المخزن
                   </div>
@@ -417,6 +422,7 @@ export default function ScanPage() {
             <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--primary)' }}>تم مسح هذا المنتج مسبقاً!</h3>
             <p className="mb-6">
               الموديل: <span className="font-bold">{duplicateScanPrompt.product.modelNumber}</span><br/>
+              السعر: <span className="font-bold" style={{ color: "var(--primary)" }}>{duplicateScanPrompt.product.price} ج.م</span><br/>
               اللون: <span className="font-bold">{duplicateScanPrompt.matchedColor.name} {duplicateScanPrompt.matchedColor.barcode ? `(${duplicateScanPrompt.matchedColor.barcode})` : ''}</span><br/><br/>
               موجود بالفعل في الفاتورة. هل تريد زيادة الكمية بمقدار 1؟
             </p>
