@@ -1039,8 +1039,8 @@ export default function LiveOrdersPage() {
       >
         {selectedOrder && (() => {
           const items = selectedOrder.items || [];
-          const FIRST_PAGE_LIMIT = 25;
-          const OTHER_PAGE_LIMIT = 28;
+          const FIRST_PAGE_LIMIT = 34;
+          const OTHER_PAGE_LIMIT = 37;
           const pages: any[][] = [];
           let i = 0;
           while (i < items.length) {
@@ -1052,7 +1052,7 @@ export default function LiveOrdersPage() {
           
           const lastPageItems = pages[pages.length - 1];
           const isFirstPageLast = pages.length === 1;
-          const maxItemsForTotals = isFirstPageLast ? 16 : 22; 
+          const maxItemsForTotals = isFirstPageLast ? 22 : 26; 
           if (lastPageItems.length > maxItemsForTotals) {
              pages.push([]); // Empty page to ensure totals fit perfectly
           }
