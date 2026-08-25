@@ -208,7 +208,7 @@ export default function CartPage() {
         const imgHeight = canvas.height * ratio;
         
         if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
+        pdf.addImage(imgData, "JPEG", margin, 0, printWidth, imgHeight);
       }
       
       if (shouldSave) {
