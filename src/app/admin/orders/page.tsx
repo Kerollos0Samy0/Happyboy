@@ -1039,8 +1039,8 @@ export default function LiveOrdersPage() {
       >
         {selectedOrder && (() => {
           const items = selectedOrder.items || [];
-          const FIRST_PAGE_LIMIT = 34;
-          const OTHER_PAGE_LIMIT = 37;
+          const FIRST_PAGE_LIMIT = 32;
+          const OTHER_PAGE_LIMIT = 35;
           const pages: any[][] = [];
           let i = 0;
           while (i < items.length) {
