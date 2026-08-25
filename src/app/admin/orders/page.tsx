@@ -368,22 +368,9 @@ export default function LiveOrdersPage() {
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
       
-      const canvas = await html2canvas(invoiceEl, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        windowWidth: invoiceEl.scrollWidth,
-        windowHeight: invoiceEl.scrollHeight
-      });
-      
       const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
       const margin = 10; // 1cm margin
       const printWidth = pdfWidth - (margin * 2);
-      const printHeight = pdfHeight - (margin * 2);
-      
-      const ratio = printWidth / canvas.width;
-      const imgHeight = canvas.height * ratio;
       
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -391,30 +378,24 @@ export default function LiveOrdersPage() {
         format: "a4"
       });
       
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pages = invoiceEl.querySelectorAll('.invoice-page');
       
-      let heightLeft = imgHeight;
-      let position = margin;
-      
-      pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
-      
-      // Cover margins with white rectangles to prevent bleeding from previous page
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(0, 0, pdfWidth, margin, 'F');
-      pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
-      
-      heightLeft -= printHeight;
-      
-      while (heightLeft > 0) {
-        position -= printHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", margin, position, printWidth, imgHeight);
+      for (let i = 0; i < pages.length; i++) {
+        const pageEl = pages[i] as HTMLElement;
+        const canvas = await html2canvas(pageEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: pageEl.scrollWidth,
+          windowHeight: pageEl.scrollHeight
+        });
         
-        pdf.setFillColor(255, 255, 255);
-        pdf.rect(0, 0, pdfWidth, margin, 'F');
-        pdf.rect(0, pdfHeight - margin, pdfWidth, margin, 'F');
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const ratio = printWidth / canvas.width;
+        const imgHeight = canvas.height * ratio;
         
-        heightLeft -= printHeight;
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "JPEG", margin, margin, printWidth, imgHeight);
       }
       
       return pdf;
@@ -1045,125 +1026,138 @@ export default function LiveOrdersPage() {
         </div>
       )}
 
-      {/* Hidden Invoice for PDF Generation (Replaced with Modern Clean Design) */}
+      {/* Hidden Invoice for PDF Generation */}
       <div
         ref={invoiceRef}
         style={{
-          display: "none", width: "794px", padding: "20px",
+          display: "none", width: "794px",
           background: "white", color: "black",
           position: "absolute", top: "-9999px", left: "-9999px", direction: "rtl",
           fontFamily: "'Cairo', sans-serif",
           boxSizing: "border-box"
         }}
       >
-        {selectedOrder && (
-          <div style={{ width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
-              <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
-                  <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
-                  <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
-                    <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-                <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
-                {selectedOrder.employeeName && (
-                  <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
-                )}
-                <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')}</span>
-              </div>
-            </div>
+        {selectedOrder && (() => {
+          const items = selectedOrder.items || [];
+          const ITEMS_PER_PAGE = 15;
+          const pages = [];
+          for (let i = 0; i < items.length; i += ITEMS_PER_PAGE) {
+            pages.push(items.slice(i, i + ITEMS_PER_PAGE));
+          }
+          if (pages.length === 0) pages.push([]);
 
-            <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
-              <thead>
-                <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
-                  <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الموديل</th>
-                  <th style={{ padding: "8px", textAlign: "center", width: "28%" }}>الصنف</th>
-                  <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>اللون</th>
-                  <th style={{ padding: "8px", textAlign: "center", width: "22%" }}>النوع (ثري/قطعة)</th>
-                  <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
-                  <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>السعر (ج)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedOrder.items?.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
-                    <td style={{ padding: "8px", textAlign: "center", width: "10%", fontWeight: "bold" }}>{item.modelNumber}</td>
-                    <td style={{ padding: "8px", textAlign: "center", width: "28%", whiteSpace: "nowrap" }}>{item.name}</td>
-                    <td style={{ padding: "8px", textAlign: "center", width: "15%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
-                    <td style={{ padding: "8px", textAlign: "center", width: "22%" }}>
-                      {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
-                    </td>
-                    <td style={{ padding: "8px", textAlign: "center", width: "10%" }}>{item.quantity || 1}</td>
-                    <td style={{ padding: "8px", textAlign: "center", width: "15%" }}>{item.price}</td>
+          return pages.map((pageItems, pageIndex) => (
+            <div key={pageIndex} className="invoice-page" style={{ width: "100%", padding: "20px", boxSizing: "border-box" }}>
+              
+              {/* Header (On all pages) */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
+                <div style={{ flex: 1, padding: "12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", display: "flex", gap: "15px" }}>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الطلب:</strong> <span style={{ color: "#A62E2E", fontWeight: "bold" }}>{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span></p>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>اسم العميل:</strong> {selectedOrder.customerName}</p>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>رقم الهاتف:</strong> <span dir="ltr">{selectedOrder.customerPhone}</span></p>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
+                  </div>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
+                    <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
+                    <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
+                      <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+                  <img src="/ColoredLogo.png" alt="Happy Boy Logo" style={{ height: '80px', objectFit: 'contain' }} />
+                  {selectedOrder.employeeName && (
+                    <span style={{ marginTop: "5px", fontSize: "14px", color: "#A62E2E", fontWeight: "bold" }}>{getDisplayEmployee(selectedOrder.employeeName)}</span>
+                  )}
+                  <span style={{ marginTop: "5px", fontSize: "14px", fontWeight: "bold", color: "#475569" }}>{new Date().toLocaleDateString('en-GB')} - صفحة {pageIndex + 1}/{pages.length}</span>
+                </div>
+              </div>
+
+              {/* Table */}
+              <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", marginBottom: "20px" }}>
+                <thead>
+                  <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1", fontSize: "14px" }}>
+                    <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الموديل</th>
+                    <th style={{ padding: "8px", textAlign: "center", width: "28%" }}>الصنف</th>
+                    <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>اللون</th>
+                    <th style={{ padding: "8px", textAlign: "center", width: "22%" }}>النوع (ثري/قطعة)</th>
+                    <th style={{ padding: "8px", textAlign: "center", width: "10%" }}>الكمية</th>
+                    <th style={{ padding: "8px", textAlign: "center", width: "15%" }}>السعر (ج)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pageItems.map((item, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "14px" }}>
+                      <td style={{ padding: "8px", textAlign: "center", width: "10%", fontWeight: "bold" }}>{item.modelNumber}</td>
+                      <td style={{ padding: "8px", textAlign: "center", width: "28%", whiteSpace: "nowrap" }}>{item.name}</td>
+                      <td style={{ padding: "8px", textAlign: "center", width: "15%", whiteSpace: "nowrap" }}>{item.selectedColor} {item.colorBarcode ? `(${item.colorBarcode})` : '(---)'}</td>
+                      <td style={{ padding: "8px", textAlign: "center", width: "22%" }}>
+                        {item.isSeri ? `ثري (${getSizesCount(item.name, item.modelNumber, item.sizes)} مقاس) ${getSizesText(item.name, item.modelNumber, item.sizes)}` : 'قطعة واحدة'}
+                      </td>
+                      <td style={{ padding: "8px", textAlign: "center", width: "10%" }}>{item.quantity || 1}</td>
+                      <td style={{ padding: "8px", textAlign: "center", width: "15%" }}>{item.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "stretch", gap: "20px", marginBottom: "30px" }}>
-              {/* Contact Card */}
-              <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b", borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", width: "100%", textAlign: "center", marginBottom: "5px" }}>📞 أرقام التواصل</span>
-                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>01009516578</span>
-                <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>0224903939</span>
-              </div>
-              
-              {/* Model Summary Card */}
-              <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", display: 'block', marginBottom: '15px', textAlign: "center" }}>ملخص الموديلات</span>
-                {Object.entries(
-                  (selectedOrder.items || []).reduce((acc, item) => {
-                    const cat = getCategoryName(item.modelNumber);
-                    acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).filter(([_, count]) => count > 0).map(([cat, count]) => (
-                  <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px', marginBottom: '10px' }}>
-                    <span>{cat}</span>
-                    <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
+              {/* Totals (Only on the last page) */}
+              {pageIndex === pages.length - 1 && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "stretch", gap: "20px", marginBottom: "30px" }}>
+                  <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "16px", fontWeight: "bold", color: "#1e293b", borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", width: "100%", textAlign: "center", marginBottom: "5px" }}>📞 أرقام التواصل</span>
+                    <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>01009516578</span>
+                    <span style={{ fontSize: "18px", fontWeight: "bold", direction: "ltr", textAlign: "center", color: "#A62E2E" }}>0224903939</span>
                   </div>
-                ))}
-              </div>
-              
-              {/* Totals Card */}
-              <div style={{ flex: "1.5", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
-                  <span>إجمالي القطع:</span><strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
-                  <span>إجمالي الثريهات:</span><strong>{calculateTotalSeries(selectedOrder.items)} ثري</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
-                  <span>إجمالي المبلغ:</span><strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
-                </div>
-                {Number(selectedOrder.discountPercentage || 0) > 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a" }}>
-                    <span>الخصم ({selectedOrder.discountPercentage}%):</span>
-                    <strong>- {(calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage)) / 100} ج.م</strong>
+                  
+                  <div style={{ flex: "1", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b', borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", display: 'block', marginBottom: '15px', textAlign: "center" }}>ملخص الموديلات</span>
+                    {Object.entries(
+                      (selectedOrder.items || []).reduce((acc, item) => {
+                        const cat = getCategoryName(item.modelNumber);
+                        acc[cat] = (acc[cat] || 0) + (item.isSeri ? (item.quantity || 1) : 0);
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).filter(([_, count]) => count > 0).map(([cat, count]) => (
+                      <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '15px', marginBottom: '10px' }}>
+                        <span>{cat}</span>
+                        <span style={{ fontWeight: 'bold' }}>{count} ثري</span>
+                      </div>
+                    ))}
                   </div>
-                )}
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a", alignItems: "center" }}>
-                  <span>العربون المدفوع:</span><strong>{selectedOrder.deposit || 0}</strong>
+                  
+                  <div style={{ flex: "1.5", background: "#f8fafc", padding: "20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                      <span>إجمالي القطع:</span><strong>{calculateTotalPieces(selectedOrder.items)} قطعة</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                      <span>إجمالي الثريهات:</span><strong>{calculateTotalSeries(selectedOrder.items)} ثري</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px" }}>
+                      <span>إجمالي المبلغ:</span><strong>{calculateTotal(selectedOrder.items)} ج.م</strong>
+                    </div>
+                    {Number(selectedOrder.discountPercentage || 0) > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a" }}>
+                        <span>الخصم ({selectedOrder.discountPercentage}%):</span>
+                        <strong>- {(calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage)) / 100} ج.م</strong>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "15px", color: "#16a34a", alignItems: "center" }}>
+                      <span>العربون المدفوع:</span><strong>{selectedOrder.deposit || 0}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "bold", borderTop: "1px solid #cbd5e1", paddingTop: "15px", color: "#A62E2E" }}>
+                      <span>الإجمالي المستحق:</span>
+                      <span>{calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م</span>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "bold", borderTop: "1px solid #cbd5e1", paddingTop: "15px", color: "#A62E2E" }}>
-                  <span>الإجمالي المستحق:</span>
-                  <span>{calculateTotal(selectedOrder.items) - ((calculateTotal(selectedOrder.items) * Number(selectedOrder.discountPercentage || 0)) / 100) - Number(selectedOrder.deposit || 0)} ج.م</span>
-                </div>
-              </div>
+              )}
             </div>
-          </div>
-        )}
+          ));
+        })()}
       </div>
     </div>
   );
