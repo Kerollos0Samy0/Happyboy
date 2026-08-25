@@ -242,16 +242,16 @@ export default function InventoryPage() {
       title: "قسم الأولادي",
       sections: [
         { name: "بيبي مقاس 2-3-4-5 (5 - 90)", filter: (num: number) => num >= 5 && num <= 90 },
-        { name: "وسط مقاس 6-8-10-12 (100 - 199)", filter: (num: number) => num >= 100 && num <= 199 },
-        { name: "محير مقاس 14-16-18-20 (300 - 399)", filter: (num: number) => num >= 300 && num <= 399 },
+        { name: "وسط مقاس 6-8-10-12 (100 - 299)", filter: (num: number) => num >= 100 && num <= 299 },
+        { name: "محير مقاس 14-16-18-20 (300 - 499)", filter: (num: number) => num >= 300 && num <= 499 },
       ]
     },
     {
       title: "قسم البناتي",
       sections: [
         { name: "بيبي مقاس 2-3-4-5 (500 - 565)", filter: (num: number) => num >= 500 && num <= 565 },
-        { name: "وسط مقاس 6-8-10-12 (600 - 699)", filter: (num: number) => num >= 590 && num <= 699 },
-        { name: "محير مقاس 14-16-18-20 (800 - 899)", filter: (num: number) => num >= 790 && num <= 899 },
+        { name: "وسط مقاس 6-8-10-12 (600 - 789)", filter: (num: number) => num >= 590 && num <= 789 },
+        { name: "محير مقاس 14-16-18-20 (800 - 999)", filter: (num: number) => num >= 790 && num <= 999 },
       ]
     },
     {
