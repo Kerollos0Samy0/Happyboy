@@ -321,12 +321,12 @@ export default function CartPage() {
           
           <div className="p-4 mb-6" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
             <h3 className="mb-2">طرق الدفع المتاحة:</h3>
-            <p><strong>فودافون كاش:</strong> 01012345678</p>
+            <p><strong>فودافون كاش:</strong> 01090687792</p>
             <p className="flex items-center justify-center gap-2">
-              <strong>انستاباي:</strong> ahmed.1010.2020@instapay
+              <strong>انستاباي:</strong> 01090687792
             </p>
             <p className="mt-2 text-sm font-bold" style={{ color: "var(--primary)" }}>المتبقي دفعه: {remaining} ج.م</p>
-            <a href="instapay://" className="btn btn-outline w-full mt-4 flex items-center justify-center gap-2" style={{ borderColor: "#6f42c1", color: "#6f42c1" }}>
+            <a href="instapay://pay?pa=01090687792" className="btn btn-outline w-full mt-4 flex items-center justify-center gap-2" style={{ borderColor: "#6f42c1", color: "#6f42c1" }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
               فتح تطبيق انستاباي لتحويل العربون
             </a>
