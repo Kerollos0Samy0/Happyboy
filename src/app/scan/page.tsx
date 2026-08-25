@@ -44,16 +44,18 @@ const playBeep = () => {
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
 
+    // Classic POS Scanner Beep (2500Hz sine wave, 100ms duration)
     osc.type = "sine";
-    osc.frequency.setValueAtTime(1500, ctx.currentTime);
+    osc.frequency.setValueAtTime(2500, ctx.currentTime);
     
-    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.5, ctx.currentTime + 0.08);
+    gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
 
     osc.connect(gainNode);
     gainNode.connect(ctx.destination);
 
-    osc.start();
+    osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
   } catch (e) {
     console.error("Audio beep failed", e);
