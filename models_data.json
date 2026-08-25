@@ -1079,6 +1079,62 @@
     "quantity": 0
   },
   {
+    "modelNumber": "200",
+    "name": "ترينج وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "اسود",
+        "barcode": "549"
+      },
+      {
+        "name": "برجاندي",
+        "barcode": "548"
+      },
+      {
+        "name": "زيتي",
+        "barcode": "547"
+      }
+    ],
+    "barcodes": [
+      "547",
+      "548",
+      "549"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
+    "modelNumber": "205",
+    "name": "ترينج وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "زهري",
+        "barcode": "552"
+      },
+      {
+        "name": "كافية",
+        "barcode": "551"
+      },
+      {
+        "name": "هافان",
+        "barcode": "550"
+      }
+    ],
+    "barcodes": [
+      "550",
+      "551",
+      "552"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
     "modelNumber": "300",
     "name": "ترينج محير كابيشو",
     "sizes": [
@@ -1634,6 +1690,34 @@
       "357",
       "358",
       "359"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
+    "modelNumber": "400",
+    "name": "ترينج محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "اسود",
+        "barcode": "546"
+      },
+      {
+        "name": "برجاندي",
+        "barcode": "545"
+      },
+      {
+        "name": "زيتي",
+        "barcode": "544"
+      }
+    ],
+    "barcodes": [
+      "544",
+      "545",
+      "546"
     ],
     "price": 0,
     "quantity": 0
@@ -2603,6 +2687,62 @@
     "quantity": 0
   },
   {
+    "modelNumber": "700",
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "ابيض",
+        "barcode": "563"
+      },
+      {
+        "name": "اسود",
+        "barcode": "564"
+      },
+      {
+        "name": "موف",
+        "barcode": "562"
+      }
+    ],
+    "barcodes": [
+      "562",
+      "563",
+      "564"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
+    "modelNumber": "705",
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "اسود",
+        "barcode": "567"
+      },
+      {
+        "name": "بني",
+        "barcode": "565"
+      },
+      {
+        "name": "موف",
+        "barcode": "566"
+      }
+    ],
+    "barcodes": [
+      "565",
+      "566",
+      "567"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
     "modelNumber": "800",
     "name": "ترينج محير",
     "sizes": [
@@ -3168,6 +3308,62 @@
       "302",
       "303",
       "304"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
+    "modelNumber": "900",
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "ابيض",
+        "barcode": "569"
+      },
+      {
+        "name": "اسود",
+        "barcode": "570"
+      },
+      {
+        "name": "موف",
+        "barcode": "568"
+      }
+    ],
+    "barcodes": [
+      "568",
+      "569",
+      "570"
+    ],
+    "price": 0,
+    "quantity": 0
+  },
+  {
+    "modelNumber": "905",
+    "name": "سوت محير كابيشو",
+    "sizes": [
+      "0"
+    ],
+    "colors": [
+      {
+        "name": "ابيض",
+        "barcode": "571"
+      },
+      {
+        "name": "اسود",
+        "barcode": "572"
+      },
+      {
+        "name": "روز",
+        "barcode": "573"
+      }
+    ],
+    "barcodes": [
+      "571",
+      "572",
+      "573"
     ],
     "price": 0,
     "quantity": 0
@@ -4733,7 +4929,10 @@
     "barcodes": [
       "451",
       "452",
-      "453"
+      "453",
+      "559",
+      "560",
+      "561"
     ],
     "price": 0,
     "quantity": 0
