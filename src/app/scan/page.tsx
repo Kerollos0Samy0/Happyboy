@@ -81,6 +81,31 @@ export default function ScanPage() {
 
   const scannedResultRef = useRef<string | null>(null);
   const [cartStats, setCartStats] = useState<Record<string, number>>({});
+  
+  const [syncing, setSyncing] = useState(false);
+
+  const syncProducts = async () => {
+    setSyncing(true);
+    try {
+      const snapshot = await getDocs(collection(db, "products"));
+      const prods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      localStorage.setItem('offline_products', JSON.stringify(prods));
+      localStorage.setItem('offline_products_time', Date.now().toString());
+      alert("تم مزامنة المنتجات بنجاح! يمكن المسح بدون نت الآن.");
+    } catch(err) {
+      console.error(err);
+      alert("حدث خطأ أثناء المزامنة");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    const cachedTime = localStorage.getItem('offline_products_time');
+    if (!cachedTime || (Date.now() - Number(cachedTime) > 12 * 60 * 60 * 1000)) {
+      syncProducts();
+    }
+  }, []);
 
   const checkDuplicateAndProceed = (prodData: Product, matched: ColorEntry) => {
     const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
@@ -166,6 +191,25 @@ export default function ScanPage() {
     setError("");
     
     try {
+      const cachedProductsStr = localStorage.getItem('offline_products');
+      if (cachedProductsStr) {
+        const cachedProducts = JSON.parse(cachedProductsStr);
+        let foundProduct = null;
+        for (const p of cachedProducts) {
+          if (p.barcodes && p.barcodes.includes(barcode)) {
+            foundProduct = p;
+            break;
+          }
+        }
+        
+        if (foundProduct) {
+          const matched = foundProduct.colors.find((c:any) => c.barcode === barcode) || foundProduct.colors[0];
+          checkDuplicateAndProceed(foundProduct, matched);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const q = query(collection(db, "products"), where("barcodes", "array-contains", barcode));
       const querySnapshot = await getDocs(q);
       
@@ -259,6 +303,20 @@ export default function ScanPage() {
     setError("");
     
     try {
+      const cachedProductsStr = localStorage.getItem('offline_products');
+      if (cachedProductsStr) {
+        const cachedProducts = JSON.parse(cachedProductsStr);
+        const foundProduct = cachedProducts.find((p:any) => p.modelNumber == searchModel.trim());
+        
+        if (foundProduct) {
+          setScannedResult(searchModel);
+          const defaultColor = foundProduct.colors[0];
+          checkDuplicateAndProceed(foundProduct, defaultColor);
+          setLoading(false);
+          return;
+        }
+      }
+
       const q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
       const querySnapshot = await getDocs(q);
       
@@ -282,6 +340,11 @@ export default function ScanPage() {
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6 relative">
+      <div className="w-full flex justify-between px-4 mb-4" style={{ maxWidth: "500px" }}>
+        <button onClick={syncProducts} disabled={syncing} className="btn bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+          {syncing ? "جاري المزامنة..." : "🔄 تحميل الموديلات (Offline)"}
+        </button>
+      </div>
       <div className="card w-full" style={{ maxWidth: "500px", marginBottom: "1rem" }}>
         <h3 className="text-center font-bold mb-3" style={{ color: "var(--primary)" }}>📊 ملخص الفاتورة الحالية</h3>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
