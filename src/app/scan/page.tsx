@@ -340,11 +340,6 @@ export default function ScanPage() {
 
   return (
     <div className="animate-fade-in flex flex-col items-center mt-6 relative">
-      <div className="w-full flex justify-between px-4 mb-4" style={{ maxWidth: "500px" }}>
-        <button onClick={syncProducts} disabled={syncing} className="btn bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
-          {syncing ? "جاري المزامنة..." : "🔄 تحميل الموديلات (Offline)"}
-        </button>
-      </div>
       <div className="card w-full" style={{ maxWidth: "500px", marginBottom: "1rem" }}>
         <h3 className="text-center font-bold mb-3" style={{ color: "var(--primary)" }}>📊 ملخص الفاتورة الحالية</h3>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>

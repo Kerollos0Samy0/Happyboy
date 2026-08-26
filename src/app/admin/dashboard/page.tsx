@@ -113,6 +113,20 @@ export default function AdminDashboardPage() {
     );
   }
 
+  const syncProducts = () => {
+    try {
+      if (products.length === 0) {
+        alert("برجاء الانتظار حتى يتم تحميل المنتجات أولاً");
+        return;
+      }
+      localStorage.setItem('offline_products', JSON.stringify(products));
+      localStorage.setItem('offline_products_time', Date.now().toString());
+      alert("تم حفظ الموديلات لتعمل بدون إنترنت (Offline) في صفحة المسح!");
+    } catch(err) {
+      alert("حدث خطأ أثناء المزامنة");
+    }
+  };
+
   // --- Calculations ---
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -292,10 +306,15 @@ export default function AdminDashboardPage() {
                     </a>
                   </>
                 )}
-                <a href="/customer" className={`${styles.linkItem} ${styles.green}`}>
-                  <div className={styles.linkContent}><QrCode size={20} /> مسح الموديلات</div>
-                  <ChevronLeft size={18} style={{color: '#86efac'}} />
-                </a>
+                <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                  <a href="/customer" className={`${styles.linkItem} ${styles.green}`} style={{ flex: 1 }}>
+                    <div className={styles.linkContent}><QrCode size={20} /> مسح الموديلات</div>
+                    <ChevronLeft size={18} style={{color: '#86efac'}} />
+                  </a>
+                  <button onClick={syncProducts} className={`${styles.linkItem}`} style={{ background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer', flex: 1, padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                    <Archive size={20} style={{ marginLeft: '0.5rem' }} /> تحميل الموديلات (Offline)
+                  </button>
+                </div>
               </div>
               
               <div className={styles.qrSection}>
