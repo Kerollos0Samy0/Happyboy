@@ -290,7 +290,7 @@ export default function CartPage() {
         deliveryDate,
         deposit: depositNum,
         discountPercentage: discountNum,
-        items: sortedCart,
+        items: JSON.parse(JSON.stringify(sortedCart)),
         total: total,
         status: "pending",
         branch: branchName,
@@ -304,9 +304,9 @@ export default function CartPage() {
       setOrderId(formattedOrderNumber);
       localStorage.removeItem("happyboy_cart");
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating order: ", error);
-      alert("حدث خطأ أثناء تأكيد الطلب");
+      alert("حدث خطأ أثناء تأكيد الطلب: " + (error?.message || error));
     } finally {
       setLoading(false);
     }

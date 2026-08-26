@@ -249,7 +249,7 @@ export default function InventoryPage() {
     {
       title: "قسم البناتي",
       sections: [
-        { name: "بيبي مقاس 2-3-4-5 (500 - 565)", filter: (num: number) => num >= 500 && num <= 565 },
+        { name: "بيبي مقاس 2-3-4-5 (500 - 589)", filter: (num: number) => num >= 500 && num <= 589 },
         { name: "وسط مقاس 6-8-10-12 (600 - 789)", filter: (num: number) => num >= 590 && num <= 789 },
         { name: "محير مقاس 14-16-18-20 (800 - 999)", filter: (num: number) => num >= 790 && num <= 999 },
       ]
