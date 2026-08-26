@@ -22,6 +22,11 @@ export default function RootLayout({
                 <img src="/logo.png" alt="HappyBoy Face Logo" width={40} height={40} style={{ objectFit: 'contain' }} />
                 <span>Happy Boy&Girl</span>
               </div>
+              <nav>
+                <a href="/price-check" className="btn btn-outline" style={{ borderColor: 'var(--primary)', color: 'var(--primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>
+                  استعلام عن السعر 💰
+                </a>
+              </nav>
             </div>
           </header>
           <main className="container mt-6">{children}</main>
