@@ -189,6 +189,24 @@ export default function PriceCheckPage() {
                     {product.price} ج.م
                   </div>
                 </div>
+                
+                {product.colors && product.colors.length > 0 && (
+                  <div className="p-4 text-right" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
+                    <h4 className="font-bold mb-3" style={{ color: "var(--primary)" }}>🎨 تفاصيل الألوان المتاحة للموديل:</h4>
+                    <div className="flex flex-col gap-2">
+                      {product.colors.map((color, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3" style={{ background: "var(--background)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}>
+                          <span className="font-bold text-lg">{color.name}</span>
+                          {color.barcode ? (
+                            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded" dir="ltr">{color.barcode}</span>
+                          ) : (
+                            <span className="text-sm text-gray-400">بدون باركود</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
             
