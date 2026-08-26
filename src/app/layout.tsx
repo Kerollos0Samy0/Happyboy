@@ -5,6 +5,7 @@ import AuthProvider from "./AuthProvider";
 export const metadata: Metadata = {
   title: "Happy Boy&Girl",
   description: "Management system for Stock HappyBoy factory and stores.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
