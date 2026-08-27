@@ -584,6 +584,8 @@ export default function InventoryPage() {
             tr:nth-child(even) { background-color: #fcfcfc; }
             .model-name { font-weight: bold; color: #2563eb; }
             .barcode { display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; margin: 2px; font-family: monospace; }
+            .req-qty { color: #dc2626; font-weight: bold; font-size: 13px; margin-right: 5px; }
+            .zero-qty { color: #6b7280; font-size: 13px; margin-right: 5px; }
             @media print {
               button { display: none; }
               body { padding: 0; }
@@ -592,8 +594,8 @@ export default function InventoryPage() {
           </style>
         </head>
         <body>
-          <h1>تقرير النواقص (كمية 0)</h1>
-          <p class="subtitle">إجمالي الموديلات المطلوبة: ${zeroQtyProducts.length}</p>
+          <h1>تقرير النواقص والمطلوب (عجز المخزن)</h1>
+          <p class="subtitle">إجمالي الموديلات: ${zeroQtyProducts.length}</p>
           
           <div style="text-align: center; margin-bottom: 20px;">
             <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">طباعة التقرير</button>
@@ -604,23 +606,35 @@ export default function InventoryPage() {
               <tr>
                 <th style="width: 80px;">الموديل</th>
                 <th>اسم الموديل</th>
-                <th>الألوان والباركود</th>
+                <th style="width: 100px;">إجمالي العجز</th>
+                <th>تفاصيل الألوان (رصيد 0 أو عجز)</th>
               </tr>
             </thead>
             <tbody>
-              ${zeroQtyProducts.map(p => `
+              ${zeroQtyProducts.map(p => {
+                const totalReq = Number(p.quantity) < 0 ? Math.abs(Number(p.quantity)) : 0;
+                return `
                 <tr>
                   <td style="font-weight: bold; text-align: center;">${p.modelNumber}</td>
                   <td class="model-name">${p.name || 'غير محدد'}</td>
+                  <td style="text-align: center; font-weight: bold; color: ${totalReq > 0 ? '#dc2626' : '#6b7280'};">
+                    ${totalReq > 0 ? totalReq : 'صفر'}
+                  </td>
                   <td>
-                    ${p.colors && p.colors.length > 0 ? p.colors.map(c => `
-                      <div style="margin-bottom: 4px;">
-                        ${c.name}: <span class="barcode">${c.barcode}</span>
+                    ${p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) <= 0).map(c => {
+                      const cQty = Number(c.quantity) || 0;
+                      const statusHtml = cQty < 0 
+                        ? \`<span class="req-qty">(عجز: \${Math.abs(cQty)})</span>\` 
+                        : \`<span class="zero-qty">(رصيد 0)</span>\`;
+                      return \`
+                      <div style="margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #eee;">
+                        \${c.name}: <span class="barcode">\${c.barcode}</span> \${statusHtml}
                       </div>
-                    `).join('') : '<span style="color: #999;">لا يوجد ألوان مسجلة</span>'}
+                      \`;
+                    }).join('') : '<span style="color: #999;">لا يوجد ألوان مسجلة</span>'}
                   </td>
                 </tr>
-              `).join('')}
+              `}).join('')}
             </tbody>
           </table>
           
