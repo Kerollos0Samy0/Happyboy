@@ -266,6 +266,18 @@ export default function CartPage() {
     }
   };
 
+    const handleDirectPrint = async (orderNum: string) => {
+      const pdf = await generatePDF(orderNum, false);
+      if (!pdf) return;
+      pdf.autoPrint();
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url, "_blank");
+      if (!printWindow) {
+        window.location.href = url;
+      }
+    };
+
   const handleCheckout = async () => {
     if (cart.length === 0) return;
     
@@ -345,6 +357,9 @@ export default function CartPage() {
           </div>
           
           <div className="flex flex-col gap-2">
+            <button onClick={() => handleDirectPrint(orderId)} className="btn w-full py-4 text-lg" style={{ background: "#475569", color: "white" }}>
+              🖨️ طباعة الفاتورة
+            </button>
             <button onClick={() => generatePDF(orderId, true)} className="btn w-full py-4 text-lg" style={{ background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1" }}>
               📥 تحميل الفاتورة PDF
             </button>
