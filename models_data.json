@@ -4841,11 +4841,16 @@
       {
         "name": "بني فاتح",
         "barcode": "443"
+      },
+      {
+        "name": "فوشيا",
+        "barcode": "444"
       }
     ],
     "barcodes": [
       "442",
-      "443"
+      "443",
+      "444"
     ],
     "price": 0,
     "quantity": 0
@@ -5272,19 +5277,5 @@
     ],
     "price": 0,
     "quantity": 0
-  },
-  {
-    "modelNumber": "5030",
-    "name": "موديل 5030",
-    "sizes": [],
-    "colors": [
-      {
-        "name": "فوشيا",
-        "barcode": "444"
-      }
-    ],
-    "barcodes": [
-      "444"
-    ]
   }
 ]
