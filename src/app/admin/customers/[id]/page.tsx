@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { auth, db } from "../../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, doc, getDoc, onSnapshot, query, where, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where, orderBy, addDoc, serverTimestamp, or } from "firebase/firestore";
 import { ChevronRight, User, Building, Phone, DollarSign, Plus, Receipt, CreditCard, History, Banknote } from "lucide-react";
 
 interface Customer {
@@ -97,10 +97,22 @@ export default function CustomerAccountPage() {
   }, [customerId, router]);
 
   useEffect(() => {
-    if (!customer?.phone) return;
+    if (!customer) return;
 
     // Fetch Orders
-    const ordersQ = query(collection(db, "orders"), where("customerPhone", "==", customer.phone));
+    let ordersQ;
+    if (customer.phone) {
+      ordersQ = query(
+        collection(db, "orders"),
+        or(
+          where("customerId", "==", customerId),
+          where("customerPhone", "==", customer.phone)
+        )
+      );
+    } else {
+      ordersQ = query(collection(db, "orders"), where("customerId", "==", customerId));
+    }
+
     const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
       const validOrders = fetchedOrders.filter(o => {
@@ -123,7 +135,7 @@ export default function CustomerAccountPage() {
       unsubscribeOrders();
       unsubscribePayments();
     };
-  }, [customer?.phone, customerId]);
+  }, [customer, customerId]);
 
   const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault();

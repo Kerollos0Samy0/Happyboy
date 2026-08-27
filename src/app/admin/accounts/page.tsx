@@ -97,7 +97,11 @@ interface AccountData extends Customer {
 
   const accountsData: AccountData[] = useMemo(() => {
     return customers.map(c => {
-      const custOrders = orders.filter(o => o.customerPhone === c.phone);
+      const custOrders = orders.filter(o => {
+        if (o.customerId && c.id && o.customerId === c.id) return true;
+        if (c.phone && o.customerPhone === c.phone) return true;
+        return false;
+      });
       const custPayments = payments.filter(p => p.customerId === c.id);
 
       let totalOrders = 0;
