@@ -10,7 +10,7 @@ import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { WAREHOUSE_EMAILS } from "../../../lib/location";
 import { restoreInventory, deductInventory } from "../../../lib/inventory";
-import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive, Copy } from "lucide-react";
+import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive, Copy, Layers } from "lucide-react";
 
 const getCategoryName = (modelNumber: string) => {
   const num = parseInt(modelNumber, 10);
@@ -143,6 +143,57 @@ export default function LiveOrdersPage() {
     } catch(e) {
       console.error(e);
       alert("حدث خطأ أثناء الحذف");
+    }
+  };
+
+  const mergeSelectedOrders = async () => {
+    if (selectedOrderIds.length < 2) {
+      alert("يرجى تحديد طلبين أو أكثر لضمهم");
+      return;
+    }
+    
+    const ordersToMerge = orders.filter(o => selectedOrderIds.includes(o.id)).sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+        return dateA - dateB;
+    });
+
+    const primaryOrder = ordersToMerge[0];
+    const secondaryOrders = ordersToMerge.slice(1);
+
+    if (!confirm(`سيتم ضم ${secondaryOrders.length} طلب إلى الطلب الأساسي رقم ${primaryOrder.orderNumber || primaryOrder.id.slice(0,8)}.\nسيتم مسح الطلبات الفرعية ونقل المنتجات للطلب الأساسي (بدون استرجاع المخزون).\nهل أنت متأكد؟`)) return;
+
+    try {
+      let mergedItems = [...(primaryOrder.items || [])];
+      let totalDeposit = Number(primaryOrder.deposit || 0);
+
+      for (const order of secondaryOrders) {
+        mergedItems = mergedItems.concat(order.items || []);
+        totalDeposit += Number(order.deposit || 0);
+      }
+
+      const newTotal = calculateTotal(mergedItems);
+
+      // Update primary order
+      await updateDoc(doc(db, "orders", primaryOrder.id), {
+        items: mergedItems,
+        total: newTotal,
+        deposit: totalDeposit
+      });
+
+      // Soft delete secondary orders without restoring inventory
+      await Promise.all(secondaryOrders.map(order => 
+        updateDoc(doc(db, "orders", order.id), { 
+          isDeleted: true,
+          mergedInto: primaryOrder.id
+        })
+      ));
+
+      setSelectedOrderIds([]);
+      alert("تم ضم الطلبات بنجاح! ✅");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء ضم الطلبات");
     }
   };
 
@@ -677,12 +728,20 @@ export default function LiveOrdersPage() {
                   تحديد الكل ({filteredOrders.length})
                 </label>
                 {selectedOrderIds.length > 0 && (
-                  <button 
-                    onClick={deleteSelectedOrders}
-                    style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
-                  >
-                    <Trash2 size={14} /> حذف المحدد ({selectedOrderIds.length})
-                  </button>
+                  <div style={{ display: "flex", gap: "5px" }}>
+                    <button 
+                      onClick={mergeSelectedOrders}
+                      style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fef08a", color: "#854d0e", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                    >
+                      <Layers size={14} /> ضم المحدد ({selectedOrderIds.length})
+                    </button>
+                    <button 
+                      onClick={deleteSelectedOrders}
+                      style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                    >
+                      <Trash2 size={14} /> حذف المحدد ({selectedOrderIds.length})
+                    </button>
+                  </div>
                 )}
               </div>
             )}
