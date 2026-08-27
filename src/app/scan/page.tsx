@@ -139,20 +139,7 @@ export default function ScanPage() {
     scannedResultRef.current = scannedResult;
   }, [scannedResult]);
 
-  const isReloading = useRef(false);
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isReloading.current) return; // Skip warning if we are intentionally reloading
-      const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
-      if (existingCart.length > 0) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
 
   useEffect(() => {
     updateCartStats();
@@ -308,7 +295,6 @@ export default function ScanPage() {
     setScannedResult(null);
     setProduct(null);
     setMatchedColor(null);
-    isReloading.current = true;
     window.location.reload();
   };
 
@@ -500,7 +486,6 @@ export default function ScanPage() {
                 setScannedResult(null);
                 setProduct(null);
                 setMatchedColor(null);
-                isReloading.current = true;
                 window.location.reload();
               }}
             >
@@ -538,7 +523,6 @@ export default function ScanPage() {
                   alert("تمت زيادة الكمية بنجاح!");
                   setDuplicateScanPrompt(null);
                   setScannedResult(null);
-                  isReloading.current = true;
                   window.location.reload();
                 }}
               >
@@ -562,7 +546,6 @@ export default function ScanPage() {
                   onClick={() => {
                     setDuplicateScanPrompt(null);
                     setScannedResult(null);
-                    isReloading.current = true;
                     window.location.reload();
                   }}
                 >
@@ -583,10 +566,7 @@ export default function ScanPage() {
             <div className="flex gap-4">
               <button 
                 className="btn btn-primary flex-1"
-                onClick={() => {
-                  isReloading.current = true;
-                  router.push("/cart");
-                }}
+                onClick={() => router.push("/cart")}
               >
                 نعم، قفّل الفاتورة
               </button>
