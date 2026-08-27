@@ -53,7 +53,7 @@ export default function AnalyticsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user: any) => {
       if (!user) {
         router.push("/admin/login");
       } else {
@@ -68,13 +68,13 @@ export default function AnalyticsPage() {
     if (loading) return;
 
     const ordersQ = query(collection(db, "orders"));
-    const unsubscribeOrders = onSnapshot(ordersQ, (snapshot) => {
+    const unsubscribeOrders = onSnapshot(ordersQ, (snapshot: any) => {
       const modelSalesMap: Record<string, { count: number, name: string, totalRevenue: number }> = {};
       const customerMap: Record<string, { totalSpent: number, orderCount: number, phone: string }> = {};
       const govMap: Record<string, number> = {};
       const employeeMap: Record<string, { totalSales: number, orderCount: number }> = {};
 
-      snapshot.docs.forEach(doc => {
+      snapshot.docs.forEach((doc: any) => {
         const order = doc.data();
         if (order.isDeleted) return;
 
