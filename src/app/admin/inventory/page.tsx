@@ -558,9 +558,8 @@ export default function InventoryPage() {
     );
   };
 
-  
   const handlePrintZeroQty = () => {
-    const zeroQtyProducts = products.filter(p => (Number(p.quantity) || 0) <= 0);
+    const zeroQtyProducts = products.filter(p => (Number(p.quantity) || 0) < 0);
     zeroQtyProducts.sort((a, b) => {
       const numA = parseInt(String(a.modelNumber).replace(/\D/g, ''), 10) || 0;
       const numB = parseInt(String(b.modelNumber).replace(/\D/g, ''), 10) || 0;
@@ -570,7 +569,7 @@ export default function InventoryPage() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return alert('الرجاء السماح بالنوافذ المنبثقة (Pop-ups) للطباعة');
 
-    const html = `
+    const html = \`
       <html dir="rtl">
         <head>
           <title>تقرير النواقص - الموديلات المطلوبة</title>
@@ -595,7 +594,7 @@ export default function InventoryPage() {
         </head>
         <body>
           <h1>تقرير النواقص والمطلوب (عجز المخزن)</h1>
-          <p class="subtitle">إجمالي الموديلات: ${zeroQtyProducts.length}</p>
+          <p class="subtitle">إجمالي الموديلات: \${zeroQtyProducts.length}</p>
           
           <div style="text-align: center; margin-bottom: 20px;">
             <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">طباعة التقرير</button>
@@ -607,13 +606,13 @@ export default function InventoryPage() {
                 <th style="width: 80px;">الموديل</th>
                 <th>اسم الموديل</th>
                 <th style="width: 100px;">إجمالي العجز</th>
-                <th>تفاصيل الألوان (رصيد 0 أو عجز)</th>
+                <th>تفاصيل الألوان (عجز فقط)</th>
               </tr>
             </thead>
             <tbody>
-              ${zeroQtyProducts.map(p => {
+              \${zeroQtyProducts.map(p => {
                 const totalReq = Number(p.quantity) < 0 ? Math.abs(Number(p.quantity)) : 0;
-                return '<tr><td style="font-weight: bold; text-align: center;">' + p.modelNumber + '</td><td class="model-name">' + (p.name || 'غير محدد') + '</td><td style="text-align: center; font-weight: bold; color: ' + (totalReq > 0 ? '#dc2626' : '#6b7280') + ';">' + (totalReq > 0 ? totalReq : 'صفر') + '</td><td>' + (p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) <= 0).map(c => {
+                return '<tr><td style="font-weight: bold; text-align: center;">' + p.modelNumber + '</td><td class="model-name">' + (p.name || 'غير محدد') + '</td><td style="text-align: center; font-weight: bold; color: ' + (totalReq > 0 ? '#dc2626' : '#6b7280') + ';">' + (totalReq > 0 ? totalReq : 'صفر') + '</td><td>' + (p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) < 0).map(c => {
                       const cQty = Number(c.quantity) || 0;
                       const statusHtml = cQty < 0 ? '<span class="req-qty">(عجز: ' + Math.abs(cQty) + ')</span>' : '<span class="zero-qty">(رصيد 0)</span>';
                       return '<div style="margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #eee;">' + c.name + ': <span class="barcode">' + c.barcode + '</span> ' + statusHtml + '</div>';
