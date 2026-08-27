@@ -631,9 +631,7 @@ export default function InventoryPage() {
               `).join('')}
             </tbody>
           </table>
-          <script>
-            setTimeout(() => { window.print(); }, 500);
-          </script>
+          
         </body>
       </html>
     `;
