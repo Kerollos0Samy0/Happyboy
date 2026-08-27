@@ -529,14 +529,50 @@ export default function CartPage() {
         
         <div className="mb-4 p-4" style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)" }}>
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold">بيانات العميل:</h3>
+            <h3 className="font-bold">بيانات العميل (قابلة للتعديل):</h3>
             <button onClick={() => router.push("/customer")} className="btn btn-outline text-sm px-3 py-1">
-              تغيير / اختيار عميل
+              تغيير / اختيار عميل من القائمة
             </button>
           </div>
-          <p><strong>الاسم:</strong> {customerName || "غير محدد"}</p>
-          <p><strong>البراند:</strong> {customerBrand || "غير محدد"}</p>
-          <p><strong>الهاتف:</strong> {customerPhone || "غير محدد"}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block mb-2 font-bold text-sm">اسم العميل</label>
+              <input 
+                type="text" 
+                className="input bg-white" 
+                value={customerName}
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  localStorage.setItem("customerName", e.target.value);
+                }}
+              />
+            </div>
+            <div>
+              <label className="block mb-2 font-bold text-sm">رقم الهاتف</label>
+              <input 
+                type="text" 
+                className="input bg-white" 
+                value={customerPhone}
+                onChange={(e) => {
+                  setCustomerPhone(e.target.value);
+                  localStorage.setItem("customerPhone", e.target.value);
+                }}
+                dir="ltr"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block mb-2 font-bold text-sm">البراند</label>
+              <input 
+                type="text" 
+                className="input bg-white" 
+                value={customerBrand}
+                onChange={(e) => {
+                  setCustomerBrand(e.target.value);
+                  localStorage.setItem("customerBrand", e.target.value);
+                }}
+              />
+            </div>
+          </div>
         </div>
         
         <h3 className="font-bold mt-6 mb-3 border-b pb-2">المنتجات المختارة:</h3>
