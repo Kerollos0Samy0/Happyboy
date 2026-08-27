@@ -652,6 +652,63 @@ export default function LiveOrdersPage() {
               onChange={(e) => setEndDate(e.target.value)}
               style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
             />
+            
+            <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+              <button 
+                onClick={() => {
+                  // Adjusting for local timezone when generating ISO string
+                  const getLocalISO = (d: Date) => {
+                    const offset = d.getTimezoneOffset() * 60000;
+                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
+                  };
+                  const today = getLocalISO(new Date());
+                  setStartDate(today); setEndDate(today);
+                }}
+                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+              >اليوم</button>
+              <button 
+                onClick={() => {
+                  const getLocalISO = (d: Date) => {
+                    const offset = d.getTimezoneOffset() * 60000;
+                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
+                  };
+                  const yesterday = new Date();
+                  yesterday.setDate(yesterday.getDate() - 1);
+                  const yStr = getLocalISO(yesterday);
+                  setStartDate(yStr); setEndDate(yStr);
+                }}
+                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+              >أمس</button>
+              <button 
+                onClick={() => {
+                  const getLocalISO = (d: Date) => {
+                    const offset = d.getTimezoneOffset() * 60000;
+                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
+                  };
+                  const curr = new Date();
+                  const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1); // Monday as first day of week
+                  const firstDay = new Date(curr.setDate(first));
+                  setStartDate(getLocalISO(firstDay));
+                  setEndDate(getLocalISO(new Date()));
+                }}
+                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+              >هذا الأسبوع</button>
+              <button 
+                onClick={() => {
+                  const getLocalISO = (d: Date) => {
+                    const offset = d.getTimezoneOffset() * 60000;
+                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
+                  };
+                  const date = new Date();
+                  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+                  setStartDate(getLocalISO(firstDay));
+                  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                  setEndDate(getLocalISO(lastDay));
+                }}
+                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+              >هذا الشهر</button>
+            </div>
+
             {(startDate || endDate) && (
               <button 
                 onClick={() => { setStartDate(""); setEndDate(""); }}
