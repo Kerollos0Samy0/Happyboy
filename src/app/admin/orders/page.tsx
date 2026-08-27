@@ -105,6 +105,8 @@ export default function LiveOrdersPage() {
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   const handleSelectAll = (checked: boolean, currentVisible: Order[]) => {
     if (checked) {
@@ -508,6 +510,20 @@ export default function LiveOrdersPage() {
     if (showArchived && !o.isArchived) return false;
     if (!showArchived && o.isArchived) return false;
     
+    if (startDate || endDate) {
+      const orderDate = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (orderDate < start) return false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (orderDate > end) return false;
+      }
+    }
+
     const orderBranch = o.branch || "أخرى";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
@@ -618,6 +634,32 @@ export default function LiveOrdersPage() {
             >
               <Archive size={14} /> {showArchived ? "إخفاء الأرشيف" : "عرض الأرشيف"}
             </button>
+          </div>
+
+          {/* Date Filters */}
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>من:</span>
+            <input 
+              type="date" 
+              value={startDate} 
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
+            />
+            <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>إلى:</span>
+            <input 
+              type="date" 
+              value={endDate} 
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
+            />
+            {(startDate || endDate) && (
+              <button 
+                onClick={() => { setStartDate(""); setEndDate(""); }}
+                style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "none", background: "#fee2e2", color: "#991b1b", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer" }}
+              >
+                مسح التواريخ
+              </button>
+            )}
           </div>
 
           {!isRestrictedWarehouseUser && (
