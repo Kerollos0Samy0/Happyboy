@@ -415,15 +415,23 @@ export default function LiveOrdersPage() {
         await deductInventory(orderToCopy.items, formattedOrderNumber, empName);
       }
       
-      const newOrderData = {
-        ...orderToCopy,
-        id: undefined,
-        orderNumber: formattedOrderNumber,
-        status: "pending",
-        isArchived: false,
-        createdAt: serverTimestamp(),
-        employeeName: empName
-      };
+              const { id, ...restOrderData } = orderToCopy;
+        
+        // Remove any undefined properties
+        Object.keys(restOrderData).forEach(key => {
+          if ((restOrderData as any)[key] === undefined) {
+            delete (restOrderData as any)[key];
+          }
+        });
+
+        const newOrderData = {
+          ...restOrderData,
+          orderNumber: formattedOrderNumber,
+          status: "pending",
+          isArchived: false,
+          createdAt: serverTimestamp(),
+          employeeName: empName
+        };
       
       await addDoc(collection(db, "orders"), newOrderData);
       
