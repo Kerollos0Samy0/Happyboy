@@ -107,6 +107,7 @@ export default function LiveOrdersPage() {
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handleSelectAll = (checked: boolean, currentVisible: Order[]) => {
     if (checked) {
@@ -524,6 +525,16 @@ export default function LiveOrdersPage() {
       }
     }
 
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = 
+        (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+        (o.customerPhone && o.customerPhone.includes(q)) ||
+        (o.customerBrand && o.customerBrand.toLowerCase().includes(q)) ||
+        (o.orderNumber && o.orderNumber.includes(q));
+      if (!matchesSearch) return false;
+    }
+
     const orderBranch = o.branch || "أخرى";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
@@ -582,6 +593,36 @@ export default function LiveOrdersPage() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Search Bar */}
+          <div style={{ display: "flex", width: "100%", marginBottom: "0.75rem" }}>
+            <div style={{ position: "relative", flex: 1, maxWidth: "500px" }}>
+              <Search size={16} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
+              <input 
+                type="text" 
+                placeholder="ابحث بالاسم، رقم التليفون، البراند، أو رقم الأوردر..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem 0.75rem",
+                  paddingRight: "2.2rem",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #cbd5e1",
+                  fontSize: "0.85rem",
+                  fontFamily: "inherit"
+                }}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery("")}
+                  style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", cursor: "pointer", color: "#94a3b8" }}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Stats pills */}
