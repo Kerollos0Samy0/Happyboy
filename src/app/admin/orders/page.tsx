@@ -646,12 +646,6 @@ export default function LiveOrdersPage() {
         const margin = 10;
         const printWidth = pdfWidth - (margin * 2);
 
-        const pdf = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4"
-        });
-
         const container = allInvoicesRef.current;
         const origDisplay = container.style.display;
         const origWidth = container.style.width;
@@ -667,28 +661,49 @@ export default function LiveOrdersPage() {
         container.style.top = "0px";
         container.style.zIndex = "-9999";
 
-        const pages = container.querySelectorAll('.batch-invoice-page');
+        const pages = Array.from(container.querySelectorAll('.batch-invoice-page'));
         
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        let pageIndex = 0;
-        for (let i = 0; i < pages.length; i++) {
-          const pageEl = pages[i] as HTMLElement;
-          const canvas = await html2canvas(pageEl, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            windowWidth: pageEl.scrollWidth,
-            windowHeight: pageEl.scrollHeight
-          });
-          
-          const imgData = canvas.toDataURL("image/jpeg", 0.95);
-          const ratio = printWidth / canvas.width;
-          const imgHeight = canvas.height * ratio;
-          
-          if (pageIndex > 0) pdf.addPage();
-          pdf.addImage(imgData, "JPEG", margin, 0, printWidth, imgHeight);
-          pageIndex++;
+        const ordersMap = new Map();
+        pages.forEach((pageEl) => {
+           const oid = pageEl.getAttribute('data-order-id');
+           const cName = pageEl.getAttribute('data-customer-name') || "عميل";
+           if (!ordersMap.has(oid)) {
+              ordersMap.set(oid, { customerName: cName, elements: [] });
+           }
+           ordersMap.get(oid).elements.push(pageEl);
+        });
+
+        for (const [oid, orderData] of ordersMap.entries()) {
+           const pdf = new jsPDF({
+             orientation: "portrait",
+             unit: "mm",
+             format: "a4"
+           });
+           
+           for (let i = 0; i < orderData.elements.length; i++) {
+             const pageEl = orderData.elements[i];
+             const canvas = await html2canvas(pageEl, {
+               scale: 2,
+               useCORS: true,
+               backgroundColor: "#ffffff",
+               windowWidth: pageEl.scrollWidth,
+               windowHeight: pageEl.scrollHeight
+             });
+             
+             const imgData = canvas.toDataURL("image/jpeg", 0.95);
+             const ratio = printWidth / canvas.width;
+             const imgHeight = canvas.height * ratio;
+             
+             if (i > 0) pdf.addPage();
+             pdf.addImage(imgData, "JPEG", margin, 0, printWidth, imgHeight);
+           }
+           
+           const safeName = orderData.customerName.replace(/\s+/g, '_');
+           pdf.save(`فاتورة_${safeName}.pdf`);
+           
+           await new Promise(r => setTimeout(r, 300));
         }
 
         container.style.display = origDisplay;
@@ -697,7 +712,6 @@ export default function LiveOrdersPage() {
         container.style.left = origLeft;
         container.style.top = origTop;
         container.style.zIndex = origZIndex;
-        pdf.save("جميع_الفواتير.pdf");
       } catch (e) {
         console.error("Error generating combined PDF", e);
         alert("حدث خطأ أثناء تحميل الفواتير");
@@ -1609,7 +1623,7 @@ export default function LiveOrdersPage() {
           }
 
           return pages.map((pageItems, pageIndex) => (
-            <div key={pageIndex} className="batch-invoice-page invoice-page" style={{ width: "100%", padding: "20px", boxSizing: "border-box" }}>
+            <div key={pageIndex} data-order-id={order.id} data-customer-name={order.customerName} className="batch-invoice-page invoice-page" style={{ width: "100%", padding: "20px", boxSizing: "border-box" }}>
               
               {/* Header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "15px", gap: "20px" }}>
