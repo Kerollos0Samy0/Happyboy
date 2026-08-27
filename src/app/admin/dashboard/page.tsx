@@ -52,6 +52,7 @@ interface Product {
   modelNumber: string;
   price: number;
   quantity: number;
+  sizes?: string[];
   isDeleted?: boolean;
 }
 
