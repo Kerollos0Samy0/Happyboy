@@ -613,28 +613,12 @@ export default function InventoryPage() {
             <tbody>
               ${zeroQtyProducts.map(p => {
                 const totalReq = Number(p.quantity) < 0 ? Math.abs(Number(p.quantity)) : 0;
-                return `
-                <tr>
-                  <td style="font-weight: bold; text-align: center;">${p.modelNumber}</td>
-                  <td class="model-name">${p.name || 'غير محدد'}</td>
-                  <td style="text-align: center; font-weight: bold; color: ${totalReq > 0 ? '#dc2626' : '#6b7280'};">
-                    ${totalReq > 0 ? totalReq : 'صفر'}
-                  </td>
-                  <td>
-                    ${p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) <= 0).map(c => {
+                return '<tr><td style="font-weight: bold; text-align: center;">' + p.modelNumber + '</td><td class="model-name">' + (p.name || 'غير محدد') + '</td><td style="text-align: center; font-weight: bold; color: ' + (totalReq > 0 ? '#dc2626' : '#6b7280') + ';">' + (totalReq > 0 ? totalReq : 'صفر') + '</td><td>' + (p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) <= 0).map(c => {
                       const cQty = Number(c.quantity) || 0;
-                      const statusHtml = cQty < 0 
-                        ? \`<span class="req-qty">(عجز: \${Math.abs(cQty)})</span>\` 
-                        : \`<span class="zero-qty">(رصيد 0)</span>\`;
-                      return \`
-                      <div style="margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #eee;">
-                        \${c.name}: <span class="barcode">\${c.barcode}</span> \${statusHtml}
-                      </div>
-                      \`;
-                    }).join('') : '<span style="color: #999;">لا يوجد ألوان مسجلة</span>'}
-                  </td>
-                </tr>
-              `}).join('')}
+                      const statusHtml = cQty < 0 ? '<span class="req-qty">(عجز: ' + Math.abs(cQty) + ')</span>' : '<span class="zero-qty">(رصيد 0)</span>';
+                      return '<div style="margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #eee;">' + c.name + ': <span class="barcode">' + c.barcode + '</span> ' + statusHtml + '</div>';
+                    }).join('') : '<span style="color: #999;">لا يوجد ألوان مسجلة</span>') + '</td></tr>';
+              }).join('')}
             </tbody>
           </table>
           
