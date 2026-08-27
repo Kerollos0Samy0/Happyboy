@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle, FileText } from "lucide-react";
+import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle, FileText, Printer } from "lucide-react";
 
 const getCategoryName = (modelStr: string) => {
   const m = parseInt(modelStr.replace(/\D/g, ''), 10);
@@ -566,6 +566,82 @@ export default function InventoryPage() {
     );
   };
 
+  
+  const handlePrintZeroQty = () => {
+    const zeroQtyProducts = products.filter(p => (Number(p.quantity) || 0) <= 0);
+    zeroQtyProducts.sort((a, b) => {
+      const numA = parseInt(String(a.modelNumber).replace(/\D/g, ''), 10) || 0;
+      const numB = parseInt(String(b.modelNumber).replace(/\D/g, ''), 10) || 0;
+      return numA - numB;
+    });
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return alert('الرجاء السماح بالنوافذ المنبثقة (Pop-ups) للطباعة');
+
+    const html = `
+      <html dir="rtl">
+        <head>
+          <title>تقرير النواقص - الموديلات المطلوبة</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
+            h1 { text-align: center; color: #111; margin-bottom: 5px; }
+            p.subtitle { text-align: center; color: #666; margin-top: 0; margin-bottom: 30px; font-size: 16px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+            th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: right; }
+            th { background-color: #f8f9fa; font-weight: bold; color: #000; }
+            tr:nth-child(even) { background-color: #fcfcfc; }
+            .model-name { font-weight: bold; color: #2563eb; }
+            .barcode { display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; margin: 2px; font-family: monospace; }
+            @media print {
+              button { display: none; }
+              body { padding: 0; }
+              table { font-size: 12px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>تقرير النواقص (كمية 0)</h1>
+          <p class="subtitle">إجمالي الموديلات المطلوبة: ${zeroQtyProducts.length}</p>
+          
+          <div style="text-align: center; margin-bottom: 20px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">طباعة التقرير</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">الموديل</th>
+                <th>اسم الموديل</th>
+                <th>الألوان والباركود</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${zeroQtyProducts.map(p => `
+                <tr>
+                  <td style="font-weight: bold; text-align: center;">${p.modelNumber}</td>
+                  <td class="model-name">${p.name || 'غير محدد'}</td>
+                  <td>
+                    ${p.colors && p.colors.length > 0 ? p.colors.map(c => `
+                      <div style="margin-bottom: 4px;">
+                        ${c.name}: <span class="barcode">${c.barcode}</span>
+                      </div>
+                    `).join('') : '<span style="color: #999;">لا يوجد ألوان مسجلة</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <div className="animate-fade-in flex flex-col items-center mt-8 mb-16 px-4">
       <div className="w-full max-w-[1200px]">
@@ -576,9 +652,17 @@ export default function InventoryPage() {
             <h1 className="text-3xl font-black text-gray-900 mb-1">إدارة المخزن</h1>
             <p className="text-gray-500 text-sm">نظرة عامة على الموديلات والكميات</p>
           </div>
-          <button onClick={() => router.push("/admin/dashboard")} className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-bold text-base hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
-            لوحة التحكم
-          </button>
+          
+            <div className="flex gap-3">
+              <button onClick={handlePrintZeroQty} className="px-6 py-3.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full font-bold text-base hover:bg-blue-100 transition-all shadow-sm flex items-center gap-2">
+                <Printer size={20} />
+                <span className="hidden sm:inline">طباعة النواقص</span>
+              </button>
+              <button onClick={() => router.push("/admin/dashboard")} className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-bold text-base hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm flex items-center gap-2">
+                لوحة التحكم
+              </button>
+            </div>
+
         </div>
 
         {/* Stats */}
