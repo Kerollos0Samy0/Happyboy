@@ -7,6 +7,27 @@ import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc
 import { onAuthStateChanged } from "firebase/auth";
 import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle, FileText } from "lucide-react";
 
+const getCategoryName = (modelStr: string) => {
+  const m = parseInt(modelStr.replace(/\D/g, ''), 10);
+  if (isNaN(m)) return "غير معروف";
+  if (m >= 1000 && m <= 1040) return "أولادي صيفي";
+  if (m >= 2000 && m <= 2040) return "بناتي صيفي";
+  if (m >= 3000 && m <= 3040) return "بيبي أولادي صيفي";
+  if (m >= 4000 && m <= 4040) return "بيبي بناتي صيفي";
+  if (m >= 1041 && m <= 1099) return "أولادي شتوي";
+  if (m >= 2041 && m <= 2099) return "بناتي شتوي";
+  if (m >= 3041 && m <= 3099) return "بيبي أولادي شتوي";
+  if (m >= 4041 && m <= 4099) return "بيبي بناتي شتوي";
+  if (m >= 5000 && m <= 5100) return "سمر ميلتون";
+  return "غير معروف";
+};
+
+const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || category.includes('سمر') || category.includes('شتوي') || category.includes('صيفي') || name.includes('بيبي') || name.includes('سوت') || name.includes('موديل')) return 4;
+  return sizes && sizes.length > 0 ? sizes.length : 1;
+};
+
 interface ColorEntry {
   name: string;
   barcode: string;
@@ -70,8 +91,17 @@ export default function InventoryPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (forceRefresh = false) => {
     try {
+      if (!forceRefresh) {
+        const cached = localStorage.getItem('inventory_products_cache');
+        const cachedTime = localStorage.getItem('inventory_products_time');
+        if (cached && cachedTime && (Date.now() - Number(cachedTime) < 3600000)) { // 1 hour cache
+          setProducts(JSON.parse(cached));
+          return;
+        }
+      }
+
       const snapshot = await getDocs(collection(db, "products"));
       const prods = snapshot.docs
         .filter(doc => !doc.data().isDeleted)
@@ -86,10 +116,13 @@ export default function InventoryPage() {
           p.colors.sort((c1, c2) => Number(c1.barcode) - Number(c2.barcode));
         }
       });
+      
+      localStorage.setItem('inventory_products_cache', JSON.stringify(prods));
+      localStorage.setItem('inventory_products_time', Date.now().toString());
 
       setProducts(prods);
-    } catch (err) {
-      console.error("Error fetching products:", err);
+    } catch (error) {
+      console.error("Error fetching products", error);
     }
   };
 
@@ -209,7 +242,7 @@ export default function InventoryPage() {
       setSuccess(true);
       setModelNumber(""); setName(""); setPrice(""); setSizes(""); setQuantity("");
       setColors([{ name: "", barcode: "" }]);
-      fetchProducts();
+      fetchProducts(true);
     } catch (error) {
       alert("خطأ أثناء الإضافة");
     } finally {
@@ -233,8 +266,16 @@ export default function InventoryPage() {
 
   // Calculate totals
   const totalModels = products.length;
-  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  const totalPieces = products.reduce((sum, p) => {
+    const threhas = Math.max(0, Number(p.quantity) || 0);
+    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
+    return sum + (threhas * piecesPerThreha);
+  }, 0);
+  const totalCapital = products.reduce((sum, p) => {
+    const threhas = Math.max(0, Number(p.quantity) || 0);
+    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
+    return sum + (threhas * piecesPerThreha * (Number(p.price) || 0));
+  }, 0);
 
   // Grouping Logic
   const categories = [
@@ -276,11 +317,11 @@ export default function InventoryPage() {
     title: cat.title,
     totalPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0), 0);
+      return sum + prods.reduce((acc, p) => acc + (Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name || '', p.modelNumber, p.sizes)), 0);
     }, 0),
     sections: cat.sections.map(sec => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+      const pieces = prods.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name || '', p.modelNumber, p.sizes)), 0);
       return { name: sec.name, pieces };
     })
   }));
@@ -634,17 +675,29 @@ export default function InventoryPage() {
 
         {activeTab === 'manage' && (
           <div className="w-full">
-            <div className="relative w-full md:w-[400px] mb-8">
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8 animate-fade-in-up">
+              <div className="relative w-full md:w-1/2 group">
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  className="w-full bg-white border border-gray-200 text-gray-900 text-sm font-bold rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block pr-12 p-4 transition-all shadow-sm hover:border-gray-300 outline-none" 
+                  placeholder="بحث برقم الموديل أو الاسم..." 
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
               </div>
-              <input 
-                type="text" 
-                className="w-full bg-white border border-gray-200 text-gray-900 text-sm font-bold rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent block pr-12 p-4 transition-all shadow-sm hover:border-gray-300 outline-none" 
-                placeholder="بحث برقم الموديل أو الاسم..." 
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
+              
+              <button 
+                onClick={() => fetchProducts(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl shadow-md transition-all flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                تحديث البيانات
+              </button>
             </div>
             
             {filteredProducts.length === 0 ? (

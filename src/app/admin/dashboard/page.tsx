@@ -183,8 +183,16 @@ export default function AdminDashboardPage() {
 
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
-  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
-  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalCapital = products.reduce((sum, p) => {
+    const threhas = Math.max(0, Number(p.quantity) || 0);
+    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
+    return sum + (threhas * piecesPerThreha * (Number(p.price) || 0));
+  }, 0);
+  const totalPieces = products.reduce((sum, p) => {
+    const threhas = Math.max(0, Number(p.quantity) || 0);
+    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
+    return sum + (threhas * piecesPerThreha);
+  }, 0);
 
   const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
