@@ -594,6 +594,7 @@ export default function LiveOrdersPage() {
               </div>
             )}
           </div>
+        </div>
 
         {/* Filters Card */}
         <div style={{ background: "#fff", padding: "1rem", borderRadius: "0.75rem", border: "1px solid #e2e8f0", marginBottom: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
@@ -822,7 +823,6 @@ export default function LiveOrdersPage() {
             </div>
           )}
         </div>
-      </div>
         {/* Grid */}
         {loading ? (
           <p style={{ textAlign: "center", color: "#64748b", padding: "3rem" }}>جاري تحميل الطلبات...</p>
