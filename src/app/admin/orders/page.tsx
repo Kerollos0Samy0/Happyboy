@@ -600,7 +600,7 @@ export default function LiveOrdersPage() {
           
           {/* Row 1: Search & Archives */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
-            <div style={{ position: "relative", flex: "1 1 300px" }}>
+            <div style={{ position: "relative", flex: 1, minWidth: "300px" }}>
               <Search size={16} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
               <input 
                 type="text" 
@@ -680,7 +680,7 @@ export default function LiveOrdersPage() {
           </div>
 
           {/* Row 3: Date Filters */}
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", marginBottom: "1rem", background: "#f8fafc", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid #f1f5f9" }}>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", marginBottom: "1rem", background: "#f8fafc", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid #f1f5f9" }}>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
               <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>من:</span>
               <input 
@@ -698,7 +698,7 @@ export default function LiveOrdersPage() {
               />
             </div>
             
-            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", flex: 1, justifyContent: "flex-end" }}>
               <button 
                 onClick={() => {
                   const getLocalISO = (d: Date) => { const offset = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - offset).toISOString().split('T')[0]; };
