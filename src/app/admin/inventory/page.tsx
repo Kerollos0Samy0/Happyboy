@@ -266,16 +266,8 @@ export default function InventoryPage() {
 
   // Calculate totals
   const totalModels = products.length;
-  const totalPieces = products.reduce((sum, p) => {
-    const threhas = Math.max(0, Number(p.quantity) || 0);
-    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
-    return sum + (threhas * piecesPerThreha);
-  }, 0);
-  const totalCapital = products.reduce((sum, p) => {
-    const threhas = Math.max(0, Number(p.quantity) || 0);
-    const piecesPerThreha = getSizesCount(p.name || '', p.modelNumber, p.sizes);
-    return sum + (threhas * piecesPerThreha * (Number(p.price) || 0));
-  }, 0);
+  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
 
   // Grouping Logic
   const categories = [
@@ -317,11 +309,11 @@ export default function InventoryPage() {
     title: cat.title,
     totalPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + (Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name || '', p.modelNumber, p.sizes)), 0);
+      return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0), 0);
     }, 0),
     sections: cat.sections.map(sec => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      const pieces = prods.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name || '', p.modelNumber, p.sizes)), 0);
+      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
       return { name: sec.name, pieces };
     })
   }));
