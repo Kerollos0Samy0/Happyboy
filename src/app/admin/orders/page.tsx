@@ -822,7 +822,7 @@ export default function LiveOrdersPage() {
             </div>
           )}
         </div>
-
+      </div>
         {/* Grid */}
         {loading ? (
           <p style={{ textAlign: "center", color: "#64748b", padding: "3rem" }}>جاري تحميل الطلبات...</p>
