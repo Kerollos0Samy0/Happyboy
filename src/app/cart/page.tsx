@@ -76,6 +76,18 @@ export default function CartPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
+      if (existingCart.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
     setCart(savedCart);
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");

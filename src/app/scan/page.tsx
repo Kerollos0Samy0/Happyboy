@@ -140,6 +140,18 @@ export default function ScanPage() {
   }, [scannedResult]);
 
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const existingCart = JSON.parse(localStorage.getItem("happyboy_cart") || "[]");
+      if (existingCart.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
     updateCartStats();
     // We no longer force redirect to /customer if they just want to scan
     const customerPhone = localStorage.getItem("customerPhone");
