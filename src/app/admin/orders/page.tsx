@@ -595,9 +595,12 @@ export default function LiveOrdersPage() {
             )}
           </div>
 
-          {/* Search Bar */}
-          <div style={{ display: "flex", width: "100%", marginBottom: "0.75rem" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: "500px" }}>
+        {/* Filters Card */}
+        <div style={{ background: "#fff", padding: "1rem", borderRadius: "0.75rem", border: "1px solid #e2e8f0", marginBottom: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          
+          {/* Row 1: Search & Archives */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
+            <div style={{ position: "relative", flex: "1 1 300px" }}>
               <Search size={16} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
               <input 
                 type="text" 
@@ -606,12 +609,13 @@ export default function LiveOrdersPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "0.5rem 0.75rem",
-                  paddingRight: "2.2rem",
+                  padding: "0.6rem 0.75rem",
+                  paddingRight: "2.5rem",
                   borderRadius: "0.5rem",
                   border: "1px solid #cbd5e1",
-                  fontSize: "0.85rem",
-                  fontFamily: "inherit"
+                  fontSize: "0.9rem",
+                  fontFamily: "inherit",
+                  outline: "none"
                 }}
               />
               {searchQuery && (
@@ -623,10 +627,29 @@ export default function LiveOrdersPage() {
                 </button>
               )}
             </div>
+
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "0.6rem 1rem",
+                borderRadius: "0.5rem",
+                border: showArchived ? "1px solid #6b21a8" : "1px solid #cbd5e1",
+                background: showArchived ? "#f3e8ff" : "#fff",
+                color: showArchived ? "#6b21a8" : "#475569",
+                fontFamily: "inherit",
+                fontWeight: 700,
+                fontSize: "0.85rem",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              <Archive size={16} /> {showArchived ? "إخفاء الأرشيف" : "عرض الأرشيف"}
+            </button>
           </div>
 
-          {/* Stats pills */}
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+          {/* Row 2: Status Pills */}
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1rem" }}>
             {[
               { key: "all",       label: `الكل (${stats.total})`,           bg: "#1e293b", color: "#fff" },
               { key: "pending",   label: `انتظار (${stats.pending})`,       bg: "#fef3c7", color: "#b45309" },
@@ -639,14 +662,14 @@ export default function LiveOrdersPage() {
                 key={s.key}
                 onClick={() => setFilterStatus(s.key)}
                 style={{
-                  padding: "0.35rem 0.85rem",
+                  padding: "0.4rem 1rem",
                   borderRadius: "9999px",
                   border: filterStatus === s.key ? "2px solid #A62E2E" : "2px solid transparent",
                   background: s.bg,
                   color: s.color,
                   fontFamily: "inherit",
                   fontWeight: 700,
-                  fontSize: "0.78rem",
+                  fontSize: "0.8rem",
                   cursor: "pointer",
                   transition: "all 0.15s",
                 }}
@@ -654,183 +677,148 @@ export default function LiveOrdersPage() {
                 {s.label}
               </button>
             ))}
-            
-            <div style={{ flex: 1 }} />
-            
-            <button
-              onClick={() => setShowArchived(!showArchived)}
-              style={{
-                display: "flex", alignItems: "center", gap: "0.3rem",
-                padding: "0.35rem 0.85rem",
-                borderRadius: "9999px",
-                border: showArchived ? "2px solid #6b21a8" : "2px solid transparent",
-                background: showArchived ? "#f3e8ff" : "#f1f5f9",
-                color: showArchived ? "#6b21a8" : "#475569",
-                fontFamily: "inherit",
-                fontWeight: 700,
-                fontSize: "0.78rem",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-            >
-              <Archive size={14} /> {showArchived ? "إخفاء الأرشيف" : "عرض الأرشيف"}
-            </button>
           </div>
 
-          {/* Date Filters */}
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
-            <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>من:</span>
-            <input 
-              type="date" 
-              value={startDate} 
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
-            />
-            <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>إلى:</span>
-            <input 
-              type="date" 
-              value={endDate} 
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
-            />
+          {/* Row 3: Date Filters */}
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", marginBottom: "1rem", background: "#f8fafc", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid #f1f5f9" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>من:</span>
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{ padding: "0.3rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
+              />
+              <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", marginInlineStart: "0.5rem" }}>إلى:</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{ padding: "0.3rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.85rem", fontFamily: "inherit" }}
+              />
+            </div>
             
-            <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
               <button 
                 onClick={() => {
-                  // Adjusting for local timezone when generating ISO string
-                  const getLocalISO = (d: Date) => {
-                    const offset = d.getTimezoneOffset() * 60000;
-                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-                  };
-                  const today = getLocalISO(new Date());
-                  setStartDate(today); setEndDate(today);
+                  const getLocalISO = (d: Date) => { const offset = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - offset).toISOString().split('T')[0]; };
+                  const today = getLocalISO(new Date()); setStartDate(today); setEndDate(today);
                 }}
-                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+                style={{ padding: "0.3rem 0.75rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#fff", color: "#475569", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
               >اليوم</button>
               <button 
                 onClick={() => {
-                  const getLocalISO = (d: Date) => {
-                    const offset = d.getTimezoneOffset() * 60000;
-                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-                  };
-                  const yesterday = new Date();
-                  yesterday.setDate(yesterday.getDate() - 1);
-                  const yStr = getLocalISO(yesterday);
-                  setStartDate(yStr); setEndDate(yStr);
+                  const getLocalISO = (d: Date) => { const offset = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - offset).toISOString().split('T')[0]; };
+                  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                  const yStr = getLocalISO(yesterday); setStartDate(yStr); setEndDate(yStr);
                 }}
-                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+                style={{ padding: "0.3rem 0.75rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#fff", color: "#475569", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
               >أمس</button>
               <button 
                 onClick={() => {
-                  const getLocalISO = (d: Date) => {
-                    const offset = d.getTimezoneOffset() * 60000;
-                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-                  };
-                  const curr = new Date();
-                  const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1); // Monday as first day of week
+                  const getLocalISO = (d: Date) => { const offset = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - offset).toISOString().split('T')[0]; };
+                  const curr = new Date(); const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1); 
                   const firstDay = new Date(curr.setDate(first));
-                  setStartDate(getLocalISO(firstDay));
-                  setEndDate(getLocalISO(new Date()));
+                  setStartDate(getLocalISO(firstDay)); setEndDate(getLocalISO(new Date()));
                 }}
-                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+                style={{ padding: "0.3rem 0.75rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#fff", color: "#475569", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
               >هذا الأسبوع</button>
               <button 
                 onClick={() => {
-                  const getLocalISO = (d: Date) => {
-                    const offset = d.getTimezoneOffset() * 60000;
-                    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-                  };
-                  const date = new Date();
-                  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-                  setStartDate(getLocalISO(firstDay));
-                  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-                  setEndDate(getLocalISO(lastDay));
+                  const getLocalISO = (d: Date) => { const offset = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - offset).toISOString().split('T')[0]; };
+                  const date = new Date(); const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+                  setStartDate(getLocalISO(firstDay)); const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0); setEndDate(getLocalISO(lastDay));
                 }}
-                style={{ padding: "0.25rem 0.6rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
+                style={{ padding: "0.3rem 0.75rem", borderRadius: "9999px", border: "1px solid #cbd5e1", background: "#fff", color: "#475569", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.15s" }}
               >هذا الشهر</button>
             </div>
 
             {(startDate || endDate) && (
               <button 
                 onClick={() => { setStartDate(""); setEndDate(""); }}
-                style={{ padding: "0.25rem 0.5rem", borderRadius: "0.375rem", border: "none", background: "#fee2e2", color: "#991b1b", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer" }}
+                style={{ padding: "0.3rem 0.75rem", borderRadius: "0.375rem", border: "none", background: "#fee2e2", color: "#991b1b", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer" }}
               >
                 مسح التواريخ
               </button>
             )}
           </div>
 
+          {/* Row 4: Branch & Employee Filters */}
           {!isRestrictedWarehouseUser && (
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
-              {[
-                { key: "all",       label: "كل الفروع" },
-                { key: "المخزن", label: "المخزن" },
-                { key: "التجمع",    label: "التجمع" },
-                { key: "العبور",    label: "العبور" },
-                { key: "عين شمس",    label: "عين شمس" },
-                { key: "أخرى",      label: "أخرى" },
-              ].map(b => (
-                <button
-                  key={b.key}
-                  onClick={() => setBranchFilter(b.key)}
-                  style={{
-                    padding: "0.35rem 0.85rem",
-                    borderRadius: "9999px",
-                    border: branchFilter === b.key ? "2px solid #3b82f6" : "2px solid transparent",
-                    background: branchFilter === b.key ? "#dbeafe" : "#e2e8f0",
-                    color: branchFilter === b.key ? "#1d4ed8" : "#475569",
-                    fontFamily: "inherit",
-                    fontWeight: 700,
-                    fontSize: "0.78rem",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {b.label}
-                </button>
-              ))}
-            </div>
-          )}
-          
-          {!isRestrictedWarehouseUser && uniqueEmployees.length > 0 && (
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", width: "100%", marginTop: "0.5rem" }}>
-              <button
-                onClick={() => setEmployeeFilter("all")}
-                style={{
-                  padding: "0.35rem 0.85rem",
-                  borderRadius: "9999px",
-                  border: employeeFilter === "all" ? "2px solid #8b5cf6" : "2px solid transparent",
-                  background: employeeFilter === "all" ? "#ede9fe" : "#f1f5f9",
-                  color: employeeFilter === "all" ? "#6d28d9" : "#475569",
-                  fontFamily: "inherit",
-                  fontWeight: 700,
-                  fontSize: "0.78rem",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                كل الموظفين
-              </button>
-              {uniqueEmployees.map(emp => (
-                <button
-                  key={emp}
-                  onClick={() => setEmployeeFilter(emp)}
-                  style={{
-                    padding: "0.35rem 0.85rem",
-                    borderRadius: "9999px",
-                    border: employeeFilter === emp ? "2px solid #8b5cf6" : "2px solid transparent",
-                    background: employeeFilter === emp ? "#ede9fe" : "#f1f5f9",
-                    color: employeeFilter === emp ? "#6d28d9" : "#475569",
-                    fontFamily: "inherit",
-                    fontWeight: 700,
-                    fontSize: "0.78rem",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {emp}
-                </button>
-              ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>الفرع:</span>
+                {[
+                  { key: "all",       label: "كل الفروع" },
+                  { key: "المخزن", label: "المخزن" },
+                  { key: "التجمع",    label: "التجمع" },
+                  { key: "العبور",    label: "العبور" },
+                  { key: "عين شمس",    label: "عين شمس" },
+                  { key: "أخرى",      label: "أخرى" },
+                ].map(b => (
+                  <button
+                    key={b.key}
+                    onClick={() => setBranchFilter(b.key)}
+                    style={{
+                      padding: "0.3rem 0.8rem",
+                      borderRadius: "9999px",
+                      border: branchFilter === b.key ? "2px solid #3b82f6" : "1px solid #e2e8f0",
+                      background: branchFilter === b.key ? "#dbeafe" : "#f8fafc",
+                      color: branchFilter === b.key ? "#1d4ed8" : "#64748b",
+                      fontFamily: "inherit",
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+              
+              {uniqueEmployees.length > 0 && (
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>الموظف:</span>
+                  <button
+                    onClick={() => setEmployeeFilter("all")}
+                    style={{
+                      padding: "0.3rem 0.8rem",
+                      borderRadius: "9999px",
+                      border: employeeFilter === "all" ? "2px solid #8b5cf6" : "1px solid #e2e8f0",
+                      background: employeeFilter === "all" ? "#ede9fe" : "#f8fafc",
+                      color: employeeFilter === "all" ? "#6d28d9" : "#64748b",
+                      fontFamily: "inherit",
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    الكل
+                  </button>
+                  {uniqueEmployees.map(emp => (
+                    <button
+                      key={emp}
+                      onClick={() => setEmployeeFilter(emp)}
+                      style={{
+                        padding: "0.3rem 0.8rem",
+                        borderRadius: "9999px",
+                        border: employeeFilter === emp ? "2px solid #8b5cf6" : "1px solid #e2e8f0",
+                        background: employeeFilter === emp ? "#ede9fe" : "#f8fafc",
+                        color: employeeFilter === emp ? "#6d28d9" : "#64748b",
+                        fontFamily: "inherit",
+                        fontWeight: 700,
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {emp}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
