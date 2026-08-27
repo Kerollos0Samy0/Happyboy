@@ -5272,5 +5272,19 @@
     ],
     "price": 0,
     "quantity": 0
+  },
+  {
+    "modelNumber": "5030",
+    "name": "موديل 5030",
+    "sizes": [],
+    "colors": [
+      {
+        "name": "فوشيا",
+        "barcode": "444"
+      }
+    ],
+    "barcodes": [
+      "444"
+    ]
   }
 ]
