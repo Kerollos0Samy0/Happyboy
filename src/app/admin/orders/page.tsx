@@ -55,6 +55,7 @@ interface Order {
   status: string;
   branch?: string;
   employeeName?: string;
+  notes?: string;
   items: OrderItem[];
   createdAt: any;
   isDeleted?: boolean;
@@ -1087,9 +1088,29 @@ export default function LiveOrdersPage() {
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Items Table */}
+                <div style={{ marginTop: "15px" }}>
+                  <p style={{ fontSize: "16px", margin: 0, display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <strong>ملاحظات:</strong>
+                    <textarea 
+                      value={selectedOrder.notes || ''} 
+                      onChange={e => handleOrderChange('notes', e.target.value)} 
+                      placeholder="لا يوجد ملاحظات..."
+                      style={{ 
+                        width: "100%", 
+                        minHeight: "60px", 
+                        padding: "8px", 
+                        border: "1px solid #cbd5e1", 
+                        borderRadius: "5px", 
+                        resize: "vertical", 
+                        outline: "none", 
+                        fontSize: "14px", 
+                        fontFamily: "inherit" 
+                      }} 
+                    />
+                  </p>
+                </div>
+              </div>              {/* Items Table */}
               <div style={{ overflowX: "auto", width: "100%", paddingBottom: "10px" }}>
                 <table style={{ width: "100%", minWidth: "650px", borderCollapse: "collapse", marginBottom: "20px" }}>
                 <thead>
@@ -1274,6 +1295,11 @@ export default function LiveOrdersPage() {
                       <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
                         <strong>التسليم:</strong> {selectedOrder.deliveryDate || (selectedOrder.createdAt?.toDate ? selectedOrder.createdAt.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '')}
                       </p>
+                      {selectedOrder.notes && (
+                        <p style={{ fontSize: "14px", margin: 0, color: "#dc2626", fontWeight: "bold" }}>
+                          <strong>ملاحظات:</strong> {selectedOrder.notes}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : (

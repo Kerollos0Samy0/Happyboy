@@ -68,6 +68,7 @@ export default function CartPage() {
   const [deposit, setDeposit] = useState("");
   const [discountPercentage, setDiscountPercentage] = useState("");
   const [employeeName, setEmployeeName] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -319,6 +320,7 @@ export default function CartPage() {
         status: "pending",
         branch: branchName,
         employeeName: empName,
+        notes: orderNotes,
         createdAt: serverTimestamp()
       });
       
@@ -415,6 +417,11 @@ export default function CartPage() {
                       <p style={{ fontSize: "14px", margin: 0, color: "#2563eb" }}>
                         <strong>التسليم:</strong> {deliveryDate ? new Date(deliveryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </p>
+                      {orderNotes && (
+                        <p style={{ fontSize: "14px", margin: 0, color: "#dc2626", fontWeight: "bold" }}>
+                          <strong>ملاحظات:</strong> {orderNotes}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -727,6 +734,16 @@ export default function CartPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block mb-2 font-bold text-sm">ملاحظات على الطلب</label>
+              <textarea 
+                className="input min-h-[80px]" 
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="أي تفاصيل إضافية عن الطلب..."
+              />
             </div>
             
             {depositNum > 0 && (
