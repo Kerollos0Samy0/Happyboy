@@ -654,11 +654,22 @@ export default function LiveOrdersPage() {
 
         const container = allInvoicesRef.current;
         const origDisplay = container.style.display;
+        const origWidth = container.style.width;
+        const origPosition = container.style.position;
+        const origLeft = container.style.left;
+        const origTop = container.style.top;
+        const origZIndex = container.style.zIndex;
+
         container.style.display = "block";
+        container.style.width = "794px";
+        container.style.position = "fixed";
+        container.style.left = "0px";
+        container.style.top = "0px";
+        container.style.zIndex = "-9999";
 
         const pages = container.querySelectorAll('.batch-invoice-page');
         
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         let pageIndex = 0;
         for (let i = 0; i < pages.length; i++) {
@@ -681,6 +692,11 @@ export default function LiveOrdersPage() {
         }
 
         container.style.display = origDisplay;
+        container.style.width = origWidth;
+        container.style.position = origPosition;
+        container.style.left = origLeft;
+        container.style.top = origTop;
+        container.style.zIndex = origZIndex;
         pdf.save("جميع_الفواتير.pdf");
       } catch (e) {
         console.error("Error generating combined PDF", e);
