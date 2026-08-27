@@ -8,15 +8,17 @@ export const deductInventory = async (items: any[], orderNumber?: string, employ
     grouped[item.id].push(item);
   }
 
-  for (const productId of Object.keys(grouped)) {
+  await Promise.all(Object.keys(grouped).map(async (productId) => {
     try {
       const prodRef = doc(db, 'products', productId);
       const snap = await getDoc(prodRef);
-      if (!snap.exists()) continue;
+      if (!snap.exists()) return;
 
       const data = snap.data();
       let updatedColors = data.colors ? [...data.colors] : [];
       
+      const logPromises = [];
+
       for (const item of grouped[productId]) {
         const qtyToDeduct = item.quantity || 1;
         const cIndex = updatedColors.findIndex((c: any) => c.name === item.selectedColor);
@@ -27,8 +29,8 @@ export const deductInventory = async (items: any[], orderNumber?: string, employ
             quantity: currentQty - qtyToDeduct
           };
 
-          // Log movement
-          await addDoc(collection(db, "inventory_logs"), {
+          // Log movement concurrently
+          logPromises.push(addDoc(collection(db, "inventory_logs"), {
             productId,
             modelNumber: data.modelNumber,
             productName: data.name,
@@ -38,20 +40,23 @@ export const deductInventory = async (items: any[], orderNumber?: string, employ
             reason: orderNumber ? `فاتورة رقم ${orderNumber}` : "فاتورة مبيعات",
             employeeName: employeeName || "Unknown",
             createdAt: serverTimestamp()
-          });
+          }));
         }
       }
 
       const newTotalQty = updatedColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
 
-      await updateDoc(prodRef, {
-        colors: updatedColors,
-        quantity: newTotalQty
-      });
+      await Promise.all([
+        updateDoc(prodRef, {
+          colors: updatedColors,
+          quantity: newTotalQty
+        }),
+        ...logPromises
+      ]);
     } catch (err) {
       console.error('Error updating inventory for product', productId, err);
     }
-  }
+  }));
 };
 
 
@@ -64,15 +69,17 @@ export const restoreInventory = async (items: any[], orderNumber?: string, emplo
     grouped[pId].push(item);
   }
 
-  for (const productId of Object.keys(grouped)) {
+  await Promise.all(Object.keys(grouped).map(async (productId) => {
     try {
       const prodRef = doc(db, "products", productId);
       const snap = await getDoc(prodRef);
-      if (!snap.exists()) continue;
+      if (!snap.exists()) return;
 
       const data = snap.data();
       let updatedColors = data.colors ? [...data.colors] : [];
       
+      const logPromises = [];
+
       for (const item of grouped[productId]) {
         const qtyToRestore = item.quantity || 1;
         const cIndex = updatedColors.findIndex((c: any) => c.name === item.selectedColor);
@@ -83,7 +90,7 @@ export const restoreInventory = async (items: any[], orderNumber?: string, emplo
             quantity: currentQty + qtyToRestore
           };
 
-          await addDoc(collection(db, "inventory_logs"), {
+          logPromises.push(addDoc(collection(db, "inventory_logs"), {
             productId,
             modelNumber: data.modelNumber,
             productName: data.name,
@@ -93,19 +100,21 @@ export const restoreInventory = async (items: any[], orderNumber?: string, emplo
             reason: orderNumber ? `حذف فاتورة رقم ${orderNumber}` : "مرتجع فاتورة",
             employeeName: employeeName || "Unknown",
             createdAt: serverTimestamp()
-          });
+          }));
         }
       }
 
       const newTotalQty = updatedColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
 
-      await updateDoc(prodRef, {
-        colors: updatedColors,
-        quantity: newTotalQty
-      });
+      await Promise.all([
+        updateDoc(prodRef, {
+          colors: updatedColors,
+          quantity: newTotalQty
+        }),
+        ...logPromises
+      ]);
     } catch (err) {
       console.error("Error restoring inventory for product", productId, err);
     }
-  }
+  }));
 };
-
