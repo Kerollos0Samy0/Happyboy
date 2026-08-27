@@ -569,7 +569,7 @@ export default function InventoryPage() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return alert('الرجاء السماح بالنوافذ المنبثقة (Pop-ups) للطباعة');
 
-    const html = \`
+    const html = `
       <html dir="rtl">
         <head>
           <title>تقرير النواقص - الموديلات المطلوبة</title>
@@ -594,7 +594,7 @@ export default function InventoryPage() {
         </head>
         <body>
           <h1>تقرير النواقص والمطلوب (عجز المخزن)</h1>
-          <p class="subtitle">إجمالي الموديلات: \${zeroQtyProducts.length}</p>
+          <p class="subtitle">إجمالي الموديلات: ${zeroQtyProducts.length}</p>
           
           <div style="text-align: center; margin-bottom: 20px;">
             <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">طباعة التقرير</button>
@@ -610,7 +610,7 @@ export default function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              \${zeroQtyProducts.map(p => {
+              ${zeroQtyProducts.map(p => {
                 const totalReq = Number(p.quantity) < 0 ? Math.abs(Number(p.quantity)) : 0;
                 return '<tr><td style="font-weight: bold; text-align: center;">' + p.modelNumber + '</td><td class="model-name">' + (p.name || 'غير محدد') + '</td><td style="text-align: center; font-weight: bold; color: ' + (totalReq > 0 ? '#dc2626' : '#6b7280') + ';">' + (totalReq > 0 ? totalReq : 'صفر') + '</td><td>' + (p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) < 0).map(c => {
                       const cQty = Number(c.quantity) || 0;
