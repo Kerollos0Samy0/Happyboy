@@ -307,24 +307,29 @@ export default function InventoryPage() {
 
   const sectionStats = categories.map(cat => ({
     title: cat.title,
-    totalSeries: cat.sections.reduce((sum, sec) => {
+    totalPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
       return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0), 0);
     }, 0),
-    totalPieces: cat.sections.reduce((sum, sec) => {
+    totalSeries: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name, p.modelNumber, p.sizes), 0);
+      return sum + prods.reduce((acc, p) => acc + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
     }, 0),
-    totalShortages: cat.sections.reduce((sum, sec) => {
+    totalShortagesPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
       return sum + prods.reduce((acc, p) => acc + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
     }, 0),
+    totalShortagesSeries: cat.sections.reduce((sum, sec) => {
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      return sum + prods.reduce((acc, p) => acc + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+    }, 0),
     sections: cat.sections.map(sec => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      const series = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name, p.modelNumber, p.sizes), 0);
-      const shortages = prods.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
-      return { name: sec.name, series, pieces, shortages };
+      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+      const series = prods.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+      const shortagesPieces = prods.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
+      const shortagesSeries = prods.reduce((sum, p) => sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+      return { name: sec.name, pieces, series, shortagesPieces, shortagesSeries };
     })
   }));
 
@@ -713,9 +718,9 @@ export default function InventoryPage() {
                 <h5 className="font-black text-gray-900 mb-3 flex flex-col gap-2">
                   <span>{cat.title}</span>
                   <div className="flex gap-2 text-xs">
-                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded" title="إجمالي الثريهات">{cat.totalSeries} ثري</span>
-                    <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded" title="إجمالي القطع">{cat.totalPieces} قطعة</span>
-                    <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded" title="إجمالي النواقص">{cat.totalShortages} عجز</span>
+                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded" title="إجمالي الثريهات">{(cat.totalSeries || 0).toLocaleString()} ثري</span>
+                    <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded" title="إجمالي القطع">{(cat.totalPieces || 0).toLocaleString()} قطعة</span>
+                    <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded" title="إجمالي النواقص">{(cat.totalShortagesPieces || 0).toLocaleString()} ق | {(cat.totalShortagesSeries || 0).toLocaleString()} ث</span>
                   </div>
                 </h5>
                 <div className="space-y-2">
@@ -723,9 +728,9 @@ export default function InventoryPage() {
                     <div key={sIdx} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                       <span className="text-gray-600 font-medium">{sec.name.split(' (')[0]}</span>
                       <div className="flex gap-2">
-                         <span className="font-bold text-blue-700" title="ثريهات">{sec.series} ث</span>
-                         <span className="font-bold text-emerald-600" title="قطع">{sec.pieces} ق</span>
-                         {sec.shortages > 0 && <span className="font-bold text-red-500" title="عجز">{sec.shortages} عجز</span>}
+                         <span className="font-bold text-blue-700" title="ثريهات">{(sec.series || 0).toLocaleString()} ث</span>
+                         <span className="font-bold text-emerald-600" title="قطع">{(sec.pieces || 0).toLocaleString()} ق</span>
+                         {sec.shortagesPieces > 0 && <span className="font-bold text-red-500" title="عجز">{(sec.shortagesPieces || 0).toLocaleString()} ق | {(sec.shortagesSeries || 0).toLocaleString()} ث</span>}
                       </div>
                     </div>
                   ))}
