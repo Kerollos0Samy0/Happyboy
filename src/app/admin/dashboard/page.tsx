@@ -197,14 +197,16 @@ export default function AdminDashboardPage() {
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const netInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const EXCEL_BASELINE = 40246;
   const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-  const totalInventorySeries = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+  const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
   
-  const totalShortagesPieces = products.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
-  const totalShortagesSeries = products.reduce((sum, p) => sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+  const totalShortagesPieces = Math.max(0, totalSalesPieces - deductedFromOriginal);
+  const netInventoryPieces = totalInventoryPieces - totalShortagesPieces;
   
-  const deductedFromOriginal = Math.max(0, totalSalesPieces - totalShortagesPieces);
+  // Keep series calculations approximate based on standard 4 pieces
+  const totalInventorySeries = Math.round(totalInventoryPieces / 4);
+  const totalShortagesSeries = Math.round(totalShortagesPieces / 4);
 
   const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
