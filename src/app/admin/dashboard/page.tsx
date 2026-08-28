@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
     const orderTotal = Number(order.total) || 0;
     const orderDeposit = Number(order.deposit) || 0;
 
-    if (order.status === "cancelled") return;
+    if (order.status === "cancelled" || order.isDeleted) return;
 
     if (orderDate >= today) salesToday += orderTotal;
     if (orderDate >= startOfMonth) salesMonth += orderTotal;
@@ -286,8 +286,8 @@ export default function AdminDashboardPage() {
                 <h3 className={styles.summaryValue}>{totalCapital.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
               </div>
             </div>
-            <div className={styles.summaryCard} style={{ gridColumn: "1 / -1", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-              <div>
+            <div className={styles.summaryCard} style={{ gridColumn: "1 / -1", width: "100%", display: "block", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+              <div style={{ width: "100%" }}>
                 <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#1e293b" }}>📊 ملخص دقيق للمخزن والمبيعات</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
                   
