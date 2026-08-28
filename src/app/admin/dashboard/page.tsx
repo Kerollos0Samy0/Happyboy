@@ -135,8 +135,12 @@ export default function AdminDashboardPage() {
 
   let salesToday = 0;
   let salesMonth = 0;
+  let totalSales = 0;
   let totalDeposits = 0;
   let totalRemaining = 0;
+
+  let totalSalesPieces = 0;
+  let totalSalesSeries = 0;
   
   let pendingOrders = 0;
   let shippedOrders = 0;
@@ -153,6 +157,7 @@ export default function AdminDashboardPage() {
 
     if (orderDate >= today) salesToday += orderTotal;
     if (orderDate >= startOfMonth) salesMonth += orderTotal;
+    totalSales += orderTotal;
 
     totalDeposits += orderDeposit;
     totalRemaining += (orderTotal - orderDeposit);
@@ -173,7 +178,11 @@ export default function AdminDashboardPage() {
       order.items.forEach(item => {
         const qty = item.quantity || 1;
         const totalPieces = item.isSeri ? getSizesCount(item.name || '', item.modelNumber, item.sizes) * qty : qty;
+        const totalSeries = item.isSeri ? qty : 0;
         
+        totalSalesPieces += totalPieces;
+        totalSalesSeries += totalSeries;
+
         if (!modelSalesMap[item.modelNumber]) {
           modelSalesMap[item.modelNumber] = { count: 0, name: item.name };
         }
@@ -185,7 +194,12 @@ export default function AdminDashboardPage() {
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
-  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  
+  const totalInventorySeries = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0) * getSizesCount(p.name, p.modelNumber, p.sizes), 0);
+  
+  const totalShortagesSeries = products.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
+  const totalShortagesPieces = products.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)) * getSizesCount(p.name, p.modelNumber, p.sizes), 0);
 
   const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -247,6 +261,13 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.green}`}><DollarSign size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>إجمالي المبيعات الكلي</p>
+                <h3 className={styles.summaryValue}>{totalSales.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
               <div className={`${styles.iconWrap} ${styles.yellow}`}><Wallet size={28} /></div>
               <div>
                 <p className={styles.summaryLabel}>العربون المحصل</p>
@@ -263,8 +284,22 @@ export default function AdminDashboardPage() {
             <div className={styles.summaryCard}>
               <div className={`${styles.iconWrap} ${styles.green}`}><Package size={28} /></div>
               <div>
-                <p className={styles.summaryLabel}>إجمالي قطع المخزن</p>
-                <h3 className={styles.summaryValue}>{totalPieces.toLocaleString()} <span className={styles.summaryCurrency}>قطعة</span></h3>
+                <p className={styles.summaryLabel}>المخزن (قطع وثريهات)</p>
+                <h3 className={styles.summaryValue}>{totalInventoryPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalInventorySeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.blue}`}><TrendingUp size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>المبيعات (قطع وثريهات)</p>
+                <h3 className={styles.summaryValue}>{totalSalesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalSalesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
+              </div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={`${styles.iconWrap} ${styles.yellow}`}><AlertTriangle size={28} /></div>
+              <div>
+                <p className={styles.summaryLabel}>النواقص (قطع وثريهات)</p>
+                <h3 className={styles.summaryValue}>{totalShortagesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalShortagesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
               </div>
             </div>
           </div>
