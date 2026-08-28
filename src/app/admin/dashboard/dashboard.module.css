@@ -6,7 +6,7 @@
 }
 
 .contentWrapper {
-  max-width: 1200px;
+  width: 100%;
   margin: 2rem auto 0;
   padding: 0 1.5rem;
 }
