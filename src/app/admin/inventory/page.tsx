@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db, auth } from "../../../lib/firebase";
-import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, updateDoc, query, where } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag, AlertTriangle, FileText, Printer } from "lucide-react";
 
@@ -179,6 +179,68 @@ export default function InventoryPage() {
       }
 
       await updateDoc(doc(db, "products", id), updatedData);
+
+      // Check if price changed to update pending orders
+      if (oldProduct && Number(oldProduct.price) !== Number(editForm.price)) {
+        const newPrice = Number(editForm.price);
+        
+        const getCatName = (modelNumber: string) => {
+          const num = parseInt(modelNumber, 10);
+          if (isNaN(num)) return "أخرى";
+          if (num >= 5 && num <= 90) return "بيبي ولادي";
+          if (num >= 100 && num <= 299) return "وسط ولادي";
+          if (num >= 300 && num <= 499) return "محير ولادي";
+          if (num >= 500 && num <= 589) return "بيبي بناتي";
+          if (num >= 590 && num <= 789) return "وسط بناتي";
+          if (num >= 790 && num <= 999) return "محير بناتي";
+          if (num >= 1000 && num <= 2999) return "رياضي";
+          if (num >= 3000 && num <= 4999) return "سمر ولادي";
+          if (num >= 5000 && num <= 6999) return "سمر بناتي";
+          return "أخرى";
+        };
+        
+        const getSizesCnt = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+          const category = getCatName(modelNumber);
+          if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || (name || "").includes('بيبي') || (name || "").includes('وسط') || (name || "").includes('محير')) return 4;
+          return sizes && sizes.length > 0 ? sizes.length : 1;
+        };
+
+        const pendingQuery = query(collection(db, "orders"), where("status", "==", "pending"));
+        const pendingSnapshot = await getDocs(pendingQuery);
+
+        for (const orderDoc of pendingSnapshot.docs) {
+          const orderData = orderDoc.data();
+          if (!orderData.items) continue;
+          
+          let needsUpdate = false;
+          let newTotal = 0;
+
+          const updatedItems = orderData.items.map((item: any) => {
+            if (String(item.modelNumber).trim() === String(editForm.modelNumber).trim()) {
+              item.price = newPrice;
+              needsUpdate = true;
+            }
+            
+            const qty = item.quantity || 1;
+            const sizesCount = getSizesCnt(item.name, item.modelNumber, item.sizes);
+            
+            if (item.isSeri) {
+              newTotal += item.price * sizesCount * qty;
+            } else {
+              newTotal += item.price * qty;
+            }
+            return item;
+          });
+
+          if (needsUpdate) {
+            await updateDoc(doc(db, "orders", orderDoc.id), {
+              items: updatedItems,
+              total: newTotal
+            });
+          }
+        }
+      }
+
       setProducts(products.map(p => p.id === id ? { ...p, ...updatedData } : p));
       setEditingId(null);
       setEditForm(null);
