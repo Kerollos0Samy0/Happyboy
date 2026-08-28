@@ -696,7 +696,7 @@ export default function InventoryPage() {
       `;
     });
 
-    const html = \`
+    const html = `
       <html dir="rtl">
         <head>
           <title>تقرير النواقص - الموديلات المطلوبة</title>
@@ -723,21 +723,21 @@ export default function InventoryPage() {
         </head>
         <body>
           <h1>تقرير النواقص والمطلوب (عجز المخزن)</h1>
-          <p class="subtitle">إجمالي الموديلات اللي فيها عجز: \${zeroQtyProducts.length}</p>
+          <p class="subtitle">إجمالي الموديلات اللي فيها عجز: ${zeroQtyProducts.length}</p>
           
           <div class="summary-box">
-            إجمالي العجز الكلي في المخزن: \${grandTotalShortages} قطعة
+            إجمالي العجز الكلي في المخزن: ${grandTotalShortages} قطعة
           </div>
 
           <div style="text-align: center; margin-bottom: 20px;">
             <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;">طباعة التقرير</button>
           </div>
 
-          \${tablesHtml}
+          ${tablesHtml}
           
         </body>
       </html>
-    \`;
+    `;
 
     printWindow.document.write(html);
     printWindow.document.close();
