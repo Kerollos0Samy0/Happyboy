@@ -155,6 +155,8 @@ export default function AdminDashboardPage() {
     const orderTotal = Number(order.total) || 0;
     const orderDeposit = Number(order.deposit) || 0;
 
+    if (order.status === "cancelled") return;
+
     if (orderDate >= today) salesToday += orderTotal;
     if (orderDate >= startOfMonth) salesMonth += orderTotal;
     totalSales += orderTotal;
@@ -195,8 +197,8 @@ export default function AdminDashboardPage() {
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-  const totalInventorySeries = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+  const totalInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const totalInventorySeries = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
   
   const totalShortagesPieces = products.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
   const totalShortagesSeries = products.reduce((sum, p) => sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
@@ -306,7 +308,7 @@ export default function AdminDashboardPage() {
             <div className={styles.summaryCard}>
               <div className={`${styles.iconWrap} ${styles.yellow}`}><AlertTriangle size={28} /></div>
               <div>
-                <p className={styles.summaryLabel}>النواقص (قطع وثريهات)</p>
+                <p className={styles.summaryLabel}>عجز الرصيد (موديلات بالسالب)</p>
                 <h3 className={styles.summaryValue}>
                   {totalShortagesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
                   <br />
