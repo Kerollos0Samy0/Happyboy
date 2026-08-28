@@ -98,9 +98,17 @@
 /* Top Summary Cards */
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .summaryGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .summaryGrid { grid-template-columns: repeat(5, 1fr); }
 }
 
 .summaryCard {
