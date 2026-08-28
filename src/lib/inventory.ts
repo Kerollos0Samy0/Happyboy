@@ -20,7 +20,20 @@ export const deductInventory = async (items: any[], orderNumber?: string, employ
       const logPromises = [];
 
       for (const item of grouped[productId]) {
-        const qtyToDeduct = item.quantity || 1;
+        let qtyToDeduct = item.quantity || 1;
+        if (item.isSeri) {
+          const category = data.modelNumber ? parseInt(data.modelNumber.replace(/\\D/g, ''), 10) : NaN;
+          let sizesCount = 1;
+          if (!isNaN(category)) {
+            if ((category >= 5 && category <= 90) || (category >= 500 && category <= 589) || (category >= 3000 && category <= 3099) || (category >= 4000 && category <= 4099) || (data.name && (data.name.includes('بيبي') || data.name.includes('سمر')))) {
+              sizesCount = 4;
+            } else if (item.sizes && item.sizes.length > 0) {
+              sizesCount = item.sizes.length;
+            }
+          }
+          qtyToDeduct = qtyToDeduct * sizesCount;
+        }
+
         const cIndex = updatedColors.findIndex((c: any) => c.name === item.selectedColor);
         if (cIndex !== -1) {
           const currentQty = Number(updatedColors[cIndex].quantity) || 0;
@@ -81,7 +94,20 @@ export const restoreInventory = async (items: any[], orderNumber?: string, emplo
       const logPromises = [];
 
       for (const item of grouped[productId]) {
-        const qtyToRestore = item.quantity || 1;
+        let qtyToRestore = item.quantity || 1;
+        if (item.isSeri) {
+          const category = data.modelNumber ? parseInt(data.modelNumber.replace(/\\D/g, ''), 10) : NaN;
+          let sizesCount = 1;
+          if (!isNaN(category)) {
+            if ((category >= 5 && category <= 90) || (category >= 500 && category <= 589) || (category >= 3000 && category <= 3099) || (category >= 4000 && category <= 4099) || (data.name && (data.name.includes('بيبي') || data.name.includes('سمر')))) {
+              sizesCount = 4;
+            } else if (item.sizes && item.sizes.length > 0) {
+              sizesCount = item.sizes.length;
+            }
+          }
+          qtyToRestore = qtyToRestore * sizesCount;
+        }
+
         const cIndex = updatedColors.findIndex((c: any) => c.name === item.selectedColor);
         if (cIndex !== -1) {
           const currentQty = Number(updatedColors[cIndex].quantity) || 0;
