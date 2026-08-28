@@ -811,25 +811,25 @@ export default function InventoryPage() {
         {/* Detailed Stats */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
           <h4 className="font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">تفاصيل القطع بالمخزن</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {sectionStats.map((cat, idx) => (
               <div key={idx}>
                 <h5 className="font-black text-gray-900 mb-3 flex flex-col gap-2">
                   <span>{cat.title}</span>
-                  <div className="flex gap-2 text-xs">
+                  <div className="flex flex-wrap gap-2 text-xs">
                     <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded" title="إجمالي الثريهات">{(cat.totalSeries || 0).toLocaleString()} ثري</span>
                     <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded" title="إجمالي القطع">{(cat.totalPieces || 0).toLocaleString()} قطعة</span>
                     <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded" title="إجمالي النواقص">{(cat.totalShortagesPieces || 0).toLocaleString()} ق | {(cat.totalShortagesSeries || 0).toLocaleString()} ث</span>
                   </div>
                 </h5>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {cat.sections.map((sec, sIdx) => (
-                    <div key={sIdx} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
-                      <span className="text-gray-600 font-medium">{sec.name.split(' (')[0]}</span>
-                      <div className="flex gap-2">
-                         <span className="font-bold text-blue-700" title="ثريهات">{(sec.series || 0).toLocaleString()} ث</span>
-                         <span className="font-bold text-emerald-600" title="قطع">{(sec.pieces || 0).toLocaleString()} ق</span>
-                         {sec.shortagesPieces > 0 && <span className="font-bold text-red-500" title="عجز">{(sec.shortagesPieces || 0).toLocaleString()} ق | {(sec.shortagesSeries || 0).toLocaleString()} ث</span>}
+                    <div key={sIdx} className="flex flex-col xl:flex-row justify-between xl:items-center text-sm border-b border-gray-50 pb-3 gap-2">
+                      <span className="text-gray-600 font-bold">{sec.name.split(' (')[0]}</span>
+                      <div className="flex flex-wrap gap-2">
+                         <span className="font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded" title="ثريهات">{(sec.series || 0).toLocaleString()} ث</span>
+                         <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded" title="قطع">{(sec.pieces || 0).toLocaleString()} ق</span>
+                         {sec.shortagesPieces > 0 && <span className="font-bold text-red-600 bg-red-50 px-2 py-1 rounded" title="عجز">{(sec.shortagesPieces || 0).toLocaleString()} ق | {(sec.shortagesSeries || 0).toLocaleString()} ث</span>}
                       </div>
                     </div>
                   ))}
