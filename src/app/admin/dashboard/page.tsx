@@ -197,11 +197,14 @@ export default function AdminDashboardPage() {
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const totalInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
-  const totalInventorySeries = products.reduce((sum, p) => sum + ((Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+  const netInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalInventorySeries = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
   
   const totalShortagesPieces = products.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
   const totalShortagesSeries = products.reduce((sum, p) => sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+  
+  const deductedFromOriginal = Math.max(0, totalSalesPieces - totalShortagesPieces);
 
   const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -283,37 +286,38 @@ export default function AdminDashboardPage() {
                 <h3 className={styles.summaryValue}>{totalCapital.toLocaleString()} <span className={styles.summaryCurrency}>ج.م</span></h3>
               </div>
             </div>
-            <div className={styles.summaryCard}>
-              <div className={`${styles.iconWrap} ${styles.green}`}><Package size={28} /></div>
+            <div className={styles.summaryCard} style={{ gridColumn: "1 / -1", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
               <div>
-                <p className={styles.summaryLabel}>المخزن (قطع وثريهات)</p>
-                <h3 className={styles.summaryValue}>
-                  {totalInventoryPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
-                  <br />
-                  {totalInventorySeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
-                </h3>
-              </div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={`${styles.iconWrap} ${styles.blue}`}><TrendingUp size={28} /></div>
-              <div>
-                <p className={styles.summaryLabel}>المبيعات (قطع وثريهات)</p>
-                <h3 className={styles.summaryValue}>
-                  {totalSalesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
-                  <br />
-                  {totalSalesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
-                </h3>
-              </div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={`${styles.iconWrap} ${styles.yellow}`}><AlertTriangle size={28} /></div>
-              <div>
-                <p className={styles.summaryLabel}>عجز الرصيد (موديلات بالسالب)</p>
-                <h3 className={styles.summaryValue}>
-                  {totalShortagesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
-                  <br />
-                  {totalShortagesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
-                </h3>
+                <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#1e293b" }}>📊 ملخص دقيق للمخزن والمبيعات</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
+                  
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب (البضاعة المتبقية)</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+                  
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedFromOriginal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الفواتير)</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>مبيعات سالبة (بضاعة لم تكن مسجلة)</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalShortagesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #8b5cf6" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>الصافي الكلي للمخزن</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{netInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <p style={{ fontSize: "0.75rem", color: "#94a3b8" }}>(الموجب - السالب)</p>
+                  </div>
+
+                </div>
               </div>
             </div>
           </div>
