@@ -285,21 +285,33 @@ export default function AdminDashboardPage() {
               <div className={`${styles.iconWrap} ${styles.green}`}><Package size={28} /></div>
               <div>
                 <p className={styles.summaryLabel}>المخزن (قطع وثريهات)</p>
-                <h3 className={styles.summaryValue}>{totalInventoryPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalInventorySeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
+                <h3 className={styles.summaryValue}>
+                  {totalInventoryPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
+                  <br />
+                  {totalInventorySeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
+                </h3>
               </div>
             </div>
             <div className={styles.summaryCard}>
               <div className={`${styles.iconWrap} ${styles.blue}`}><TrendingUp size={28} /></div>
               <div>
                 <p className={styles.summaryLabel}>المبيعات (قطع وثريهات)</p>
-                <h3 className={styles.summaryValue}>{totalSalesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalSalesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
+                <h3 className={styles.summaryValue}>
+                  {totalSalesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
+                  <br />
+                  {totalSalesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
+                </h3>
               </div>
             </div>
             <div className={styles.summaryCard}>
               <div className={`${styles.iconWrap} ${styles.yellow}`}><AlertTriangle size={28} /></div>
               <div>
                 <p className={styles.summaryLabel}>النواقص (قطع وثريهات)</p>
-                <h3 className={styles.summaryValue}>{totalShortagesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span> | {totalShortagesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span></h3>
+                <h3 className={styles.summaryValue}>
+                  {totalShortagesPieces.toLocaleString()} <span className={styles.summaryCurrency}>ق</span>
+                  <br />
+                  {totalShortagesSeries.toLocaleString()} <span className={styles.summaryCurrency}>ث</span>
+                </h3>
               </div>
             </div>
           </div>
