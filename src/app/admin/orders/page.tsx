@@ -1252,11 +1252,10 @@ export default function LiveOrdersPage() {
                       <strong>البراند:</strong> 
                       <input type="text" value={selectedOrder.customerBrand || ''} onChange={e => handleOrderChange('customerBrand', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
                     </p>
-                    {selectedOrder.employeeName && (
-                      <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#A62E2E" }}>
-                        <strong>بواسطة الموظف:</strong> {getDisplayEmployee(selectedOrder.employeeName)}
-                      </p>
-                    )}
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#A62E2E" }}>
+                      <strong>الموظف:</strong>
+                      <input type="text" value={selectedOrder.employeeName || ''} onChange={e => handleOrderChange('employeeName', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#A62E2E", fontWeight: "bold" }} placeholder="اسم الموظف" />
+                    </p>
                   </div>
                   <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>
                     <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
