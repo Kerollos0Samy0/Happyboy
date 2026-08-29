@@ -431,6 +431,14 @@ export default function InventoryPage() {
                 }
               };
 
+              const handleDeleteColor = (index: number) => {
+                if (editForm) {
+                  const newColors = editForm.colors.filter((_, i) => i !== index);
+                  const newTotal = newColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+                  setEditForm({ ...editForm, colors: newColors, quantity: newTotal });
+                }
+              };
+
               const trClass = "hover:bg-gray-50/50 transition-colors group border-t-[3px] border-gray-200";
 
               return (
@@ -498,7 +506,10 @@ export default function InventoryPage() {
                     </td>
                     <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                       {isEditing && hasColors ? (
-                        <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
+                        <div className="flex items-center gap-1">
+                          <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
+                          <button onClick={() => handleDeleteColor(0)} className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded" title="حذف اللون"><Trash2 size={14} /></button>
+                        </div>
                       ) : (
                         hasColors ? displayProduct.colors[0].barcode : "-"
                       )}
@@ -542,7 +553,10 @@ export default function InventoryPage() {
                         </td>
                         <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                           {isEditing ? (
-                            <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
+                            <div className="flex items-center gap-1">
+                              <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
+                              <button onClick={() => handleDeleteColor(idx)} className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded" title="حذف اللون"><Trash2 size={14} /></button>
+                            </div>
                           ) : (
                             color.barcode
                           )}
