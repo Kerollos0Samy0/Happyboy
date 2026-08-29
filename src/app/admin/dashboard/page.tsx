@@ -294,14 +294,26 @@ export default function AdminDashboardPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
                   
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي البضاعة المتاحة حالياً (بالمخزن)</p>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب (البضاعة المتبقية)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+                  
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedFromOriginal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
                   </div>
 
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الفواتير)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
                   </div>
+
+                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>مبيعات سالبة (بضاعة لم تكن مسجلة)</p>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalShortagesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                  </div>
+
+
 
                 </div>
               </div>
