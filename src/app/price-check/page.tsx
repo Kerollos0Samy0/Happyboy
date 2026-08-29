@@ -103,6 +103,28 @@ export default function PriceCheckPage() {
     setError("");
     
     try {
+      const cachedProductsStr = localStorage.getItem('offline_products');
+      if (cachedProductsStr) {
+        const cachedProducts = JSON.parse(cachedProductsStr);
+        let foundProduct = null;
+        for (const p of cachedProducts) {
+          if (p.barcodes && p.barcodes.includes(barcode.trim())) {
+            foundProduct = p;
+            break;
+          }
+          if (p.modelNumber === barcode.trim()) {
+            foundProduct = p;
+            break;
+          }
+        }
+        
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setLoading(false);
+          return;
+        }
+      }
+
       let q = query(collection(db, "products"), where("barcodes", "array-contains", barcode.trim()));
       let querySnapshot = await getDocs(q);
       
@@ -135,6 +157,28 @@ export default function PriceCheckPage() {
     setScannedResult(searchModel);
     
     try {
+      const cachedProductsStr = localStorage.getItem('offline_products');
+      if (cachedProductsStr) {
+        const cachedProducts = JSON.parse(cachedProductsStr);
+        let foundProduct = null;
+        for (const p of cachedProducts) {
+          if (p.modelNumber === searchModel.trim()) {
+            foundProduct = p;
+            break;
+          }
+          if (p.barcodes && p.barcodes.includes(searchModel.trim())) {
+            foundProduct = p;
+            break;
+          }
+        }
+        
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setLoading(false);
+          return;
+        }
+      }
+
       let q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
       let querySnapshot = await getDocs(q);
       
