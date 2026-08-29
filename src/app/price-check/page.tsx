@@ -205,9 +205,9 @@ export default function PriceCheckPage() {
                   <div className="p-4 text-right" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
                     <h4 className="font-bold mb-3" style={{ color: "var(--primary)" }}>🎨 الألوان المتاحة للموديل:</h4>
                     <div className="flex flex-col gap-2">
-                      {Array.from(new Set(product.colors.map(c => c.name.trim().replace(/ى/g, 'ي').replace(/ة/g, 'ه')))).map((colorName, idx) => (
+                      {product.colors.filter(c => c.name && c.name.trim() !== '').map((color, idx) => (
                         <div key={idx} className="flex justify-between items-center p-3" style={{ background: "var(--background)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}>
-                          <span className="font-bold text-lg">{colorName}</span>
+                          <span className="font-bold text-lg">{color.name} {color.barcode ? `(${color.barcode})` : ''}</span>
                         </div>
                       ))}
                     </div>
