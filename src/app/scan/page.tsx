@@ -198,7 +198,11 @@ export default function ScanPage() {
         const cachedProducts = JSON.parse(cachedProductsStr);
         let foundProduct = null;
         for (const p of cachedProducts) {
-          if (p.barcodes && p.barcodes.includes(barcode)) {
+          if (p.barcodes && p.barcodes.includes(barcode.trim())) {
+            foundProduct = p;
+            break;
+          }
+          if (p.modelNumber === barcode.trim()) {
             foundProduct = p;
             break;
           }
@@ -212,9 +216,13 @@ export default function ScanPage() {
         }
       }
       
-      const q = query(collection(db, "products"), where("barcodes", "array-contains", barcode));
-      const querySnapshot = await getDocs(q);
+      let q = query(collection(db, "products"), where("barcodes", "array-contains", barcode.trim()));
+      let querySnapshot = await getDocs(q);
       
+      if (querySnapshot.empty) {
+        q = query(collection(db, "products"), where("modelNumber", "==", barcode.trim()));
+        querySnapshot = await getDocs(q);
+      }
       if (querySnapshot.empty) {
         setError("لم يتم العثور على أي منتج بهذا الباركود");
       } else {
