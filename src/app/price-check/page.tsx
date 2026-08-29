@@ -103,9 +103,15 @@ export default function PriceCheckPage() {
     setError("");
     
     try {
-      const q = query(collection(db, "products"), where("barcodes", "array-contains", barcode));
-      const querySnapshot = await getDocs(q);
+      let q = query(collection(db, "products"), where("barcodes", "array-contains", barcode.trim()));
+      let querySnapshot = await getDocs(q);
       
+      if (querySnapshot.empty) {
+        // Fallback to check if the scanned barcode matches a model number
+        q = query(collection(db, "products"), where("modelNumber", "==", barcode.trim()));
+        querySnapshot = await getDocs(q);
+      }
+
       if (querySnapshot.empty) {
         setError("لم يتم العثور على أي منتج بهذا الباركود");
       } else {
