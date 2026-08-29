@@ -129,11 +129,16 @@ export default function PriceCheckPage() {
     setScannedResult(searchModel);
     
     try {
-      const q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
-      const querySnapshot = await getDocs(q);
+      let q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
+      let querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
-        setError("لم يتم العثور على أي منتج برقم الموديل هذا");
+        q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
+        querySnapshot = await getDocs(q);
+      }
+
+      if (querySnapshot.empty) {
+        setError("لم يتم العثور على أي منتج بهذا الرقم (كموديل أو باركود)");
       } else {
         const prodData = querySnapshot.docs[0].data() as Product;
         prodData.id = querySnapshot.docs[0].id;
@@ -163,7 +168,7 @@ export default function PriceCheckPage() {
               <div className="flex items-center gap-2">
                 <input 
                   type="text" 
-                  placeholder="ابحث برقم الموديل يدوياً" 
+                  placeholder="ابحث برقم الموديل أو الباركود" 
                   className="input flex-1"
                   value={searchModel}
                   onChange={(e) => setSearchModel(e.target.value)}
