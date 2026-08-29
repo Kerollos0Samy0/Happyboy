@@ -79,7 +79,16 @@ async function runResetAndDeduct() {
         
         const sizesCount = item.isSeri ? getSizesCount(item.name, item.modelNumber, item.sizes) : 1;
         const qtyToDeduct = (item.quantity || 1) * sizesCount;
-        const color = item.selectedColor;
+        const normalize = (str) => {
+          if (!str) return "";
+          let n = str.trim();
+          n = n.replace(/ى/g, "ي").replace(/[أإآ]/g, "ا");
+          n = n.replace(/ة/g, "ه"); // كافية -> كافيه, مسطردة -> مسطرده
+          if (n === 'شاركول') return 'شاركويل';
+          if (n === 'بسستاج' || n === 'بسستاج') return 'بستاج';
+          return n;
+        };
+        const color = normalize(item.selectedColor);
         
         if (!deductions[pId]) deductions[pId] = {};
         if (!deductions[pId][color]) deductions[pId][color] = 0;
@@ -113,7 +122,16 @@ async function runResetAndDeduct() {
           originalQty = 0;
         }
         
-        const deductQty = productDeductions[color.name] || 0;
+        const normalize = (str) => {
+          if (!str) return "";
+          let n = str.trim();
+          n = n.replace(/ى/g, "ي").replace(/[أإآ]/g, "ا");
+          n = n.replace(/ة/g, "ه"); 
+          if (n === 'شاركول') return 'شاركويل';
+          if (n === 'بسستاج' || n === 'بسستاج') return 'بستاج';
+          return n;
+        };
+        const deductQty = productDeductions[normalize(color.name)] || 0;
         let finalQty = originalQty - deductQty;
         
         totalComputed += finalQty;
