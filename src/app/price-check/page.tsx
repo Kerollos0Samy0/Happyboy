@@ -106,16 +106,9 @@ export default function PriceCheckPage() {
       const cachedProductsStr = localStorage.getItem('offline_products');
       if (cachedProductsStr) {
         const cachedProducts = JSON.parse(cachedProductsStr);
-        let foundProduct = null;
-        for (const p of cachedProducts) {
-          if (p.barcodes && p.barcodes.includes(barcode.trim())) {
-            foundProduct = p;
-            break;
-          }
-          if (p.modelNumber === barcode.trim()) {
-            foundProduct = p;
-            break;
-          }
+        let foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(barcode.trim()));
+        if (!foundProduct) {
+          foundProduct = cachedProducts.find((p:any) => p.modelNumber === barcode.trim());
         }
         
         if (foundProduct) {
@@ -160,16 +153,9 @@ export default function PriceCheckPage() {
       const cachedProductsStr = localStorage.getItem('offline_products');
       if (cachedProductsStr) {
         const cachedProducts = JSON.parse(cachedProductsStr);
-        let foundProduct = null;
-        for (const p of cachedProducts) {
-          if (p.modelNumber === searchModel.trim()) {
-            foundProduct = p;
-            break;
-          }
-          if (p.barcodes && p.barcodes.includes(searchModel.trim())) {
-            foundProduct = p;
-            break;
-          }
+        let foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(searchModel.trim()));
+        if (!foundProduct) {
+          foundProduct = cachedProducts.find((p:any) => p.modelNumber === searchModel.trim());
         }
         
         if (foundProduct) {
@@ -179,11 +165,11 @@ export default function PriceCheckPage() {
         }
       }
 
-      let q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
+      let q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
       let querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
-        q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
+        q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
         querySnapshot = await getDocs(q);
       }
 

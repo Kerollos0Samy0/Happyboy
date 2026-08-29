@@ -196,16 +196,9 @@ export default function ScanPage() {
       const cachedProductsStr = localStorage.getItem('offline_products');
       if (cachedProductsStr) {
         const cachedProducts = JSON.parse(cachedProductsStr);
-        let foundProduct = null;
-        for (const p of cachedProducts) {
-          if (p.barcodes && p.barcodes.includes(barcode.trim())) {
-            foundProduct = p;
-            break;
-          }
-          if (p.modelNumber === barcode.trim()) {
-            foundProduct = p;
-            break;
-          }
+        let foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(barcode.trim()));
+        if (!foundProduct) {
+          foundProduct = cachedProducts.find((p:any) => p.modelNumber === barcode.trim());
         }
         
         if (foundProduct) {
@@ -316,19 +309,28 @@ export default function ScanPage() {
       const cachedProductsStr = localStorage.getItem('offline_products');
       if (cachedProductsStr) {
         const cachedProducts = JSON.parse(cachedProductsStr);
-        const foundProduct = cachedProducts.find((p:any) => p.modelNumber == searchModel.trim());
+        let foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(searchModel.trim()));
+        if (!foundProduct) {
+          foundProduct = cachedProducts.find((p:any) => p.modelNumber == searchModel.trim());
+        }
         
         if (foundProduct) {
           setScannedResult(searchModel);
-          const defaultColor = foundProduct.colors[0];
+          // Try to match the color based on barcode if it was a barcode match
+          const defaultColor = foundProduct.colors.find((c:any) => c.barcode === searchModel.trim()) || foundProduct.colors[0];
           checkDuplicateAndProceed(foundProduct, defaultColor);
           setLoading(false);
           return;
         }
       }
 
-      const q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
-      const querySnapshot = await getDocs(q);
+      let q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
+      let querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
+        querySnapshot = await getDocs(q);
+      }
       
       if (querySnapshot.empty) {
         setError("لم يتم العثور على أي منتج برقم الموديل هذا");
