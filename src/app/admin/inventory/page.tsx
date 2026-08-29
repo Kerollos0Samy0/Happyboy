@@ -130,7 +130,10 @@ export default function InventoryPage() {
     if (!window.confirm("هل أنت متأكد من الحذف؟")) return;
     try {
       await updateDoc(doc(db, "products", id), { isDeleted: true });
-      setProducts(products.filter(p => p.id !== id));
+      const newProducts = products.filter(p => p.id !== id);
+      setProducts(newProducts);
+      localStorage.setItem('inventory_products_cache', JSON.stringify(newProducts));
+      localStorage.setItem('inventory_products_time', Date.now().toString());
     } catch (err) {
       alert("خطأ أثناء الحذف");
     }
@@ -144,12 +147,14 @@ export default function InventoryPage() {
   const saveEdit = async (id: string) => {
     if (!editForm) return;
     try {
+      const newBarcodes = editForm.colors.map(c => c.barcode).filter(Boolean);
       const updatedData = {
         modelNumber: editForm.modelNumber,
         name: editForm.name,
         price: Number(editForm.price),
         quantity: Number(editForm.quantity),
         colors: editForm.colors,
+        barcodes: newBarcodes,
       };
 
       const oldProduct = products.find(p => p.id === id);
@@ -241,7 +246,10 @@ export default function InventoryPage() {
         }
       }
 
-      setProducts(products.map(p => p.id === id ? { ...p, ...updatedData } : p));
+      const newProducts = products.map(p => p.id === id ? { ...p, ...updatedData } : p);
+      setProducts(newProducts);
+      localStorage.setItem('inventory_products_cache', JSON.stringify(newProducts));
+      localStorage.setItem('inventory_products_time', Date.now().toString());
       setEditingId(null);
       setEditForm(null);
     } catch (err) {
