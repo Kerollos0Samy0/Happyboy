@@ -113,7 +113,7 @@ export default function PriceCheckPage() {
       }
 
       if (querySnapshot.empty) {
-        setError("لم يتم العثور على أي منتج بهذا الباركود");
+        setError("لم يتم العثور على الباركود: " + barcode.trim());
       } else {
         const prodData = querySnapshot.docs[0].data() as Product;
         prodData.id = querySnapshot.docs[0].id;
