@@ -1080,6 +1080,9 @@ export default function LiveOrdersPage() {
                         <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: 0 }}>
                           {order.customerName}
                         </p>
+                        <p style={{ fontSize: "0.75rem", color: "#334155", margin: 0, marginTop: "3px", fontWeight: "bold" }}>
+                          رقم: {order.orderNumber || order.id.slice(0, 8)}
+                        </p>
                       </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
