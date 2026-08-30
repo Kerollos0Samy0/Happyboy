@@ -142,6 +142,9 @@ export default function AdminDashboardPage() {
   let totalSalesPieces = 0;
   let totalSalesSeries = 0;
   
+  let totalBoysSales = 0;
+  let totalGirlsSales = 0;
+  
   let pendingOrders = 0;
   let shippedOrders = 0;
   let deliveredOrders = 0;
@@ -185,6 +188,10 @@ export default function AdminDashboardPage() {
         totalSalesPieces += totalPieces;
         totalSalesSeries += totalSeries;
 
+        const category = getCategoryName(item.modelNumber);
+        if (category.includes("ولادي") || category.includes("رياضي")) totalBoysSales += totalPieces;
+        else if (category.includes("بناتي")) totalGirlsSales += totalPieces;
+
         if (!modelSalesMap[item.modelNumber]) {
           modelSalesMap[item.modelNumber] = { count: 0, name: item.name };
         }
@@ -195,15 +202,47 @@ export default function AdminDashboardPage() {
 
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
-  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  const totalCapital = products.reduce((sum, p) => {
+    let positiveQty = Math.max(0, Number(p.quantity) || 0);
+    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
+      positiveQty = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+    }
+    return sum + (positiveQty * (Number(p.price) || 0));
+  }, 0);
   
   const EXCEL_BASELINE = 40246;
-  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const totalInventoryPieces = products.reduce((sum, p) => {
+    if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.max(0, Number(p.quantity) || 0);
+    return sum + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+  }, 0);
   const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
   
   const totalShortagesPieces = Math.max(0, totalSalesPieces - deductedFromOriginal);
   const netInventoryPieces = totalInventoryPieces - totalShortagesPieces;
   
+  let negBoys = 0;
+  let negGirls = 0;
+  let totalNeg = 0;
+  products.forEach(p => {
+    let qty = Number(p.quantity) || 0;
+    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
+      qty = p.colors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+    }
+    if (qty < 0) {
+      const absQty = Math.abs(qty);
+      totalNeg += absQty;
+      const cat = getCategoryName(p.modelNumber);
+      if (cat.includes("ولادي") || cat.includes("رياضي")) negBoys += absQty;
+      else if (cat.includes("بناتي")) negGirls += absQty;
+    }
+  });
+
+  const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+
+  const boysNegPct = totalNeg > 0 ? ((negBoys / totalNeg) * 100).toFixed(1) : "0.0";
+  const girlsNegPct = totalNeg > 0 ? ((negGirls / totalNeg) * 100).toFixed(1) : "0.0";
+
   // Keep series calculations approximate based on standard 4 pieces
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(totalShortagesPieces / 4);
@@ -306,11 +345,19 @@ export default function AdminDashboardPage() {
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الفواتير)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
+                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysSalesPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsSalesPct}</span>
+                    </div>
                   </div>
 
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>مبيعات سالبة (بضاعة لم تكن مسجلة)</p>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>مبيعات سالبة (النواقص)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalShortagesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
+                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysNegPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsNegPct}</span>
+                    </div>
                   </div>
 
 
