@@ -223,19 +223,43 @@ export default function AdminDashboardPage() {
   let negBoys = 0;
   let negGirls = 0;
   let totalNeg = 0;
+  let posBoys = 0;
+  let posGirls = 0;
+
   products.forEach(p => {
     let qty = Number(p.quantity) || 0;
+    let posQty = 0;
+
     if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
       qty = p.colors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+      posQty = p.colors.reduce((sum, c) => sum + Math.max(0, Number(c.quantity) || 0), 0);
+    } else {
+      posQty = Math.max(0, qty);
     }
+
+    const cat = getCategoryName(p.modelNumber);
+
+    if (posQty > 0) {
+      if (cat.includes("ولادي") || cat.includes("رياضي")) posBoys += posQty;
+      else if (cat.includes("بناتي")) posGirls += posQty;
+    }
+
     if (qty < 0) {
       const absQty = Math.abs(qty);
       totalNeg += absQty;
-      const cat = getCategoryName(p.modelNumber);
       if (cat.includes("ولادي") || cat.includes("رياضي")) negBoys += absQty;
       else if (cat.includes("بناتي")) negGirls += absQty;
     }
   });
+
+  const boysPosPct = totalInventoryPieces > 0 ? ((posBoys / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const girlsPosPct = totalInventoryPieces > 0 ? ((posGirls / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+
+  const deductedBoys = Math.max(0, totalBoysSales - negBoys);
+  const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
+  
+  const boysDeductedPct = deductedFromOriginal > 0 ? ((deductedBoys / deductedFromOriginal) * 100).toFixed(1) : "0.0";
+  const girlsDeductedPct = deductedFromOriginal > 0 ? ((deductedGirls / deductedFromOriginal) * 100).toFixed(1) : "0.0";
 
   const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
   const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
@@ -335,11 +359,19 @@ export default function AdminDashboardPage() {
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب (البضاعة المتبقية)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
+                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysPosPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsPosPct}</span>
+                    </div>
                   </div>
                   
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedFromOriginal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
+                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysDeductedPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
+                    </div>
                   </div>
 
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
