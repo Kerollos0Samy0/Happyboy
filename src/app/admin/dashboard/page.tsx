@@ -202,19 +202,10 @@ export default function AdminDashboardPage() {
 
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
-  const totalCapital = products.reduce((sum, p) => {
-    let positiveQty = Math.max(0, Number(p.quantity) || 0);
-    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
-      positiveQty = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
-    }
-    return sum + (positiveQty * (Number(p.price) || 0));
-  }, 0);
+  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
   const EXCEL_BASELINE = 40246;
-  const totalInventoryPieces = products.reduce((sum, p) => {
-    if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.max(0, Number(p.quantity) || 0);
-    return sum + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
-  }, 0);
+  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
   const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
   
   const totalShortagesPieces = Math.max(0, totalSalesPieces - deductedFromOriginal);
@@ -228,14 +219,7 @@ export default function AdminDashboardPage() {
 
   products.forEach(p => {
     let qty = Number(p.quantity) || 0;
-    let posQty = 0;
-
-    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
-      qty = p.colors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
-      posQty = p.colors.reduce((sum, c) => sum + Math.max(0, Number(c.quantity) || 0), 0);
-    } else {
-      posQty = Math.max(0, qty);
-    }
+    let posQty = Math.max(0, qty);
 
     const cat = getCategoryName(p.modelNumber);
 
@@ -279,6 +263,7 @@ export default function AdminDashboardPage() {
   const isPrivileged = userEmail && (
     isOwner || 
     userEmail.toLowerCase().includes('ayat') || 
+    userEmail.toLowerCase().includes('omnia') || 
     userEmail.toLowerCase().includes('accounting') || 
     userEmail.toLowerCase().includes('kerollos')
   );

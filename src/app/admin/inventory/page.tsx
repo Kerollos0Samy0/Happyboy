@@ -133,6 +133,7 @@ export default function InventoryPage() {
           user.email.toLowerCase().includes('ahmed001') || 
           user.email.toLowerCase().includes('hossam001') || 
           user.email.toLowerCase().includes('ayat') || 
+          user.email.toLowerCase().includes('omnia') || 
           user.email.toLowerCase().includes('accounting') || 
           user.email.toLowerCase().includes('kerollos')
         );

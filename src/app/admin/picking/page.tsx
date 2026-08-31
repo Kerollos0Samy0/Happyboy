@@ -101,6 +101,7 @@ export default function OrderPickingPage() {
           user.email.toLowerCase().includes('ahmed001') || 
           user.email.toLowerCase().includes('hossam001') || 
           user.email.toLowerCase().includes('ayat') || 
+          user.email.toLowerCase().includes('omnia') || 
           user.email.toLowerCase().includes('accounting') || 
           user.email.toLowerCase().includes('kerollos')
         );
@@ -297,7 +298,16 @@ export default function OrderPickingPage() {
             </h1>
           </div>
           
-          <div style={{ display: "flex", gap: "1rem", width: "100%", maxWidth: "500px" }}>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", flexWrap: "wrap", width: "100%" }}>
+            <a href="/print_batches.html" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", background: "#3b82f6", color: "white", padding: "0.75rem 1.5rem", borderRadius: "8px", fontWeight: "bold", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              📄 طباعة دفعات التجميع المتقدمة
+            </a>
+            <a href="/orders_status_report.html" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", background: "#ef4444", color: "white", padding: "0.75rem 1.5rem", borderRadius: "8px", fontWeight: "bold", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              ⚠️ تقرير النواقص والأوردرات الجاهزة
+            </a>
+          </div>
+          
+          <div style={{ display: "flex", gap: "1rem", width: "100%", maxWidth: "500px", marginTop: "1rem" }}>
             <div style={{ position: "relative", flex: 1 }}>
               <Search size={18} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
               <input 
