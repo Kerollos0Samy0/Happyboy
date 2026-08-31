@@ -309,9 +309,9 @@ export default function ScanPage() {
       const cachedProductsStr = localStorage.getItem('offline_products');
       if (cachedProductsStr) {
         const cachedProducts = JSON.parse(cachedProductsStr);
-        let foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(searchModel.trim()));
+        let foundProduct = cachedProducts.find((p:any) => p.modelNumber == searchModel.trim());
         if (!foundProduct) {
-          foundProduct = cachedProducts.find((p:any) => p.modelNumber == searchModel.trim());
+          foundProduct = cachedProducts.find((p:any) => p.barcodes && p.barcodes.includes(searchModel.trim()));
         }
         
         if (foundProduct) {
@@ -324,11 +324,11 @@ export default function ScanPage() {
         }
       }
 
-      let q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
+      let q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
       let querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
-        q = query(collection(db, "products"), where("modelNumber", "==", searchModel.trim()));
+        q = query(collection(db, "products"), where("barcodes", "array-contains", searchModel.trim()));
         querySnapshot = await getDocs(q);
       }
       
