@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const EXCEL_BASELINE = 40246;
+  const EXCEL_BASELINE = 45629;
   const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
   const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
   
