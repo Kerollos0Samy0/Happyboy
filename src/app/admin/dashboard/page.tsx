@@ -144,6 +144,8 @@ export default function AdminDashboardPage() {
   
   let totalBoysSales = 0;
   let totalGirlsSales = 0;
+  let totalSportSales = 0;
+  let totalSummerSales = 0;
   
   let pendingOrders = 0;
   let shippedOrders = 0;
@@ -189,7 +191,9 @@ export default function AdminDashboardPage() {
         totalSalesSeries += totalSeries;
 
         const category = getCategoryName(item.modelNumber);
-        if (category.includes("ولادي") || category.includes("رياضي")) totalBoysSales += totalPieces;
+        if (category === "رياضي") totalSportSales += totalPieces;
+        else if (category.includes("سمر")) totalSummerSales += totalPieces;
+        else if (category.includes("ولادي")) totalBoysSales += totalPieces;
         else if (category.includes("بناتي")) totalGirlsSales += totalPieces;
 
         if (!modelSalesMap[item.modelNumber]) {
@@ -200,7 +204,7 @@ export default function AdminDashboardPage() {
     }
   });
 
-  const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) > 0 && (Number(p.quantity) || 0) < 5);
+  const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) < 5).sort((a, b) => (Number(a.quantity) || 0) - (Number(b.quantity) || 0)).slice(0, 10);
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
@@ -212,9 +216,14 @@ export default function AdminDashboardPage() {
   
   let negBoys = 0;
   let negGirls = 0;
+  let negSport = 0;
+  let negSummer = 0;
   let totalNeg = 0;
+  
   let posBoys = 0;
   let posGirls = 0;
+  let posSport = 0;
+  let posSummer = 0;
 
   products.forEach(p => {
     let qty = Number(p.quantity) || 0;
@@ -223,32 +232,46 @@ export default function AdminDashboardPage() {
     const cat = getCategoryName(p.modelNumber);
 
     if (posQty > 0) {
-      if (cat.includes("ولادي") || cat.includes("رياضي")) posBoys += posQty;
+      if (cat === "رياضي") posSport += posQty;
+      else if (cat.includes("سمر")) posSummer += posQty;
+      else if (cat.includes("ولادي")) posBoys += posQty;
       else if (cat.includes("بناتي")) posGirls += posQty;
     }
 
     if (qty < 0) {
       const absQty = Math.abs(qty);
       totalNeg += absQty;
-      if (cat.includes("ولادي") || cat.includes("رياضي")) negBoys += absQty;
+      if (cat === "رياضي") negSport += absQty;
+      else if (cat.includes("سمر")) negSummer += absQty;
+      else if (cat.includes("ولادي")) negBoys += absQty;
       else if (cat.includes("بناتي")) negGirls += absQty;
     }
   });
 
   const boysPosPct = totalInventoryPieces > 0 ? ((posBoys / totalInventoryPieces) * 100).toFixed(1) : "0.0";
   const girlsPosPct = totalInventoryPieces > 0 ? ((posGirls / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const sportPosPct = totalInventoryPieces > 0 ? ((posSport / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const summerPosPct = totalInventoryPieces > 0 ? ((posSummer / totalInventoryPieces) * 100).toFixed(1) : "0.0";
 
   const deductedBoys = Math.max(0, totalBoysSales - negBoys);
   const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
+  const deductedSport = Math.max(0, totalSportSales - negSport);
+  const deductedSummer = Math.max(0, totalSummerSales - negSummer);
   
   const boysDeductedPct = deductedFromOriginal > 0 ? ((deductedBoys / deductedFromOriginal) * 100).toFixed(1) : "0.0";
   const girlsDeductedPct = deductedFromOriginal > 0 ? ((deductedGirls / deductedFromOriginal) * 100).toFixed(1) : "0.0";
+  const sportDeductedPct = deductedFromOriginal > 0 ? ((deductedSport / deductedFromOriginal) * 100).toFixed(1) : "0.0";
+  const summerDeductedPct = deductedFromOriginal > 0 ? ((deductedSummer / deductedFromOriginal) * 100).toFixed(1) : "0.0";
 
   const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
   const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const sportSalesPct = totalSalesPieces > 0 ? ((totalSportSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const summerSalesPct = totalSalesPieces > 0 ? ((totalSummerSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
 
   const boysNegPct = totalNeg > 0 ? ((negBoys / totalNeg) * 100).toFixed(1) : "0.0";
   const girlsNegPct = totalNeg > 0 ? ((negGirls / totalNeg) * 100).toFixed(1) : "0.0";
+  const sportNegPct = totalNeg > 0 ? ((negSport / totalNeg) * 100).toFixed(1) : "0.0";
+  const summerNegPct = totalNeg > 0 ? ((negSummer / totalNeg) * 100).toFixed(1) : "0.0";
 
   // Keep series calculations approximate based on standard 4 pieces
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
@@ -343,9 +366,11 @@ export default function AdminDashboardPage() {
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب (البضاعة المتبقية)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
-                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysPosPct}</span>
+                    <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center", fontSize: "0.875rem", fontWeight: "600" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysPosPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsPosPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportPosPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerPosPct}</span>
                     </div>
                   </div>
                   
@@ -355,15 +380,19 @@ export default function AdminDashboardPage() {
                     <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
                       <span style={{ color: "#3b82f6" }}>اولادي: %{boysDeductedPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportDeductedPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerDeductedPct}</span>
                     </div>
                   </div>
 
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الفواتير)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold", justifyContent: "center" }}>
                       <span style={{ color: "#3b82f6" }}>اولادي: %{boysSalesPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsSalesPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportSalesPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerSalesPct}</span>
                     </div>
                   </div>
 
@@ -373,6 +402,8 @@ export default function AdminDashboardPage() {
                     <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
                       <span style={{ color: "#3b82f6" }}>اولادي: %{boysNegPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsNegPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportNegPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerNegPct}</span>
                     </div>
                   </div>
 
