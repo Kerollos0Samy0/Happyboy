@@ -206,7 +206,9 @@ export default function LiveOrdersPage() {
 
   const isWarehouseUser = userEmail ? WAREHOUSE_EMAILS.includes(userEmail.toLowerCase()) : false;
   const isOwner = userEmail ? (userEmail.toLowerCase().includes('ahmed001') || userEmail.toLowerCase().includes('hossam001')) : false;
+  const isAyat = userEmail ? userEmail.toLowerCase().includes('ayat') : false;
   const isRestrictedWarehouseUser = isWarehouseUser && !isOwner;
+
 
   // Item editing state
   const [addModelSearch, setAddModelSearch] = useState("");
@@ -754,7 +756,7 @@ export default function LiveOrdersPage() {
               <Download size={14} /> 
               {isGeneratingAllPDFs ? "جاري التحميل..." : "تحميل الفواتير PDF 📥"}
             </button>
-            {isOwner && (
+            {(isOwner || isAyat) && (
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.25rem 0.75rem", background: "#fff", borderRadius: "0.5rem", border: "1px solid #e2e8f0" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>
                   <input 
@@ -773,12 +775,14 @@ export default function LiveOrdersPage() {
                     >
                       <Layers size={14} /> ضم المحدد ({selectedOrderIds.length})
                     </button>
-                    <button 
-                      onClick={deleteSelectedOrders}
-                      style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
-                    >
-                      <Trash2 size={14} /> حذف المحدد ({selectedOrderIds.length})
-                    </button>
+                    {isOwner && (
+                      <button 
+                        onClick={deleteSelectedOrders}
+                        style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.25rem", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}
+                      >
+                        <Trash2 size={14} /> حذف المحدد ({selectedOrderIds.length})
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1061,7 +1065,7 @@ export default function LiveOrdersPage() {
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.25rem" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 }}>
-                      {isOwner && (
+                      {(isOwner || isAyat) && (
                         <input 
                           type="checkbox" 
                           checked={selectedOrderIds.includes(order.id)}
@@ -1143,7 +1147,7 @@ export default function LiveOrdersPage() {
                       {st.label}
                     </span>
                   </div>
-                  {isOwner && (
+                  {(isOwner || isAyat) && (
                     <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.4rem", borderTop: "1px solid #f1f5f9", paddingTop: "0.4rem" }}>
                       <button 
                         onClick={(e) => { e.stopPropagation(); duplicateOrder(order.id); }}
@@ -1151,18 +1155,22 @@ export default function LiveOrdersPage() {
                       >
                         <Copy size={14} /> تكرار
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); archiveOrder(order.id, !!order.isArchived); }}
-                        style={{ flex: 1, padding: "0.3rem", background: order.isArchived ? "#fef3c7" : "#f1f5f9", border: "none", borderRadius: "0.3rem", color: order.isArchived ? "#b45309" : "#475569", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="أرشفة"
-                      >
-                        <Archive size={14} /> أرشفة
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
-                        style={{ flex: 1, padding: "0.3rem", background: "#fee2e2", border: "none", borderRadius: "0.3rem", color: "#991b1b", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="حذف"
-                      >
-                        <Trash2 size={14} /> حذف
-                      </button>
+                      {isOwner && (
+                        <>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); archiveOrder(order.id, !!order.isArchived); }}
+                            style={{ flex: 1, padding: "0.3rem", background: order.isArchived ? "#fef3c7" : "#f1f5f9", border: "none", borderRadius: "0.3rem", color: order.isArchived ? "#b45309" : "#475569", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="أرشفة"
+                          >
+                            <Archive size={14} /> أرشفة
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
+                            style={{ flex: 1, padding: "0.3rem", background: "#fee2e2", border: "none", borderRadius: "0.3rem", color: "#991b1b", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: "bold" }} title="حذف"
+                          >
+                            <Trash2 size={14} /> حذف
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
