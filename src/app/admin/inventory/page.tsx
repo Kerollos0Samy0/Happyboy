@@ -68,6 +68,62 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOutofStock, setFilterOutofStock] = useState(false);
 
+  // Quick Add State
+  const [quickAddModal, setQuickAddModal] = useState<{
+    isOpen: boolean;
+    product: Product | null;
+    colorIndex: number;
+  } | null>(null);
+  const [quickAddAmount, setQuickAddAmount] = useState<string>("");
+
+  const handleQuickAddSave = async () => {
+    if (!quickAddModal?.product || quickAddAmount === "") return;
+    const amount = Number(quickAddAmount);
+    if (amount === 0) {
+      setQuickAddModal(null);
+      return;
+    }
+    try {
+      const product = quickAddModal.product;
+      const colorIndex = quickAddModal.colorIndex;
+      const oldColor = product.colors[colorIndex];
+      const oldQty = Number(oldColor.quantity) || 0;
+      const newQty = oldQty + amount;
+      
+      const updatedColors = [...product.colors];
+      updatedColors[colorIndex] = { ...oldColor, quantity: newQty };
+      
+      const newTotal = updatedColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+      
+      await addDoc(collection(db, "inventory_logs"), {
+        productId: product.id,
+        modelNumber: product.modelNumber,
+        productName: product.name,
+        colorName: oldColor.name,
+        change: amount,
+        newQuantity: newQty,
+        reason: "تزويد سريع للكمية",
+        employeeName: empName,
+        createdAt: serverTimestamp()
+      });
+      
+      await updateDoc(doc(db, "products", product.id), {
+        colors: updatedColors,
+        quantity: newTotal
+      });
+      
+      const newProducts = products.map(p => p.id === product.id ? { ...p, colors: updatedColors, quantity: newTotal } : p);
+      setProducts(newProducts);
+      localStorage.setItem('inventory_products_cache', JSON.stringify(newProducts));
+      
+      setQuickAddModal(null);
+      setQuickAddAmount("");
+    } catch (err) {
+      alert("حدث خطأ أثناء تحديث الكمية");
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -505,11 +561,20 @@ export default function InventoryPage() {
                       {isEditing && hasColors ? (
                         <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].quantity ?? ""} onChange={e => handleEditColor(0, 'quantity', Number(e.target.value))} />
                       ) : (
-                        hasColors ? (
-                          Number(displayProduct.colors[0].quantity) < 0 
-                            ? `(${Math.abs(Number(displayProduct.colors[0].quantity))})` 
-                            : (displayProduct.colors[0].quantity ?? "-")
-                        ) : "-"
+                        <div className="flex items-center justify-center gap-2">
+                          <span>
+                            {hasColors ? (
+                              Number(displayProduct.colors[0].quantity) < 0 
+                                ? `(${Math.abs(Number(displayProduct.colors[0].quantity))})` 
+                                : (displayProduct.colors[0].quantity ?? "-")
+                            ) : "-"}
+                          </span>
+                          {hasColors && !isEditing && (
+                            <button onClick={() => { setQuickAddModal({ isOpen: true, product: product, colorIndex: 0 }); setQuickAddAmount(""); }} className="p-1 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded" title="إضافة كمية">
+                              <Plus size={14} />
+                            </button>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
@@ -556,7 +621,16 @@ export default function InventoryPage() {
                           {isEditing ? (
                             <input type="number" className="w-16 mx-auto block bg-white border border-gray-200 rounded p-1 text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.quantity ?? ""} onChange={e => handleEditColor(idx, 'quantity', Number(e.target.value))} />
                           ) : (
-                            Number(color.quantity) < 0 ? `(${Math.abs(Number(color.quantity))})` : (color.quantity ?? "-")
+                            <div className="flex items-center justify-center gap-2">
+                              <span>
+                                {Number(color.quantity) < 0 ? `(${Math.abs(Number(color.quantity))})` : (color.quantity ?? "-")}
+                              </span>
+                              {!isEditing && (
+                                <button onClick={() => { setQuickAddModal({ isOpen: true, product: product, colorIndex: idx }); setQuickAddAmount(""); }} className="p-1 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded" title="إضافة كمية">
+                                  <Plus size={14} />
+                                </button>
+                              )}
+                            </div>
                           )}
                         </td>
                         <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
@@ -1018,6 +1092,44 @@ export default function InventoryPage() {
           </div>
         )}
       </div>
+
+      {quickAddModal?.isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl animate-fade-in-up" dir="rtl">
+            <h3 className="text-xl font-bold mb-4">تزويد كمية للون</h3>
+            <div className="mb-4 text-gray-600 text-sm">
+              <p><span className="font-bold">الموديل:</span> {quickAddModal.product?.modelNumber} - {quickAddModal.product?.name}</p>
+              <p><span className="font-bold">اللون:</span> {quickAddModal.product?.colors[quickAddModal.colorIndex].name}</p>
+              <p><span className="font-bold">الكمية الحالية:</span> {quickAddModal.product?.colors[quickAddModal.colorIndex].quantity}</p>
+            </div>
+            <div className="mb-6">
+              <label className="block mb-2 text-sm font-bold">الكمية المضافة (+ أو -)</label>
+              <input 
+                type="number" 
+                autoFocus
+                className="w-full border border-gray-300 rounded p-3 text-center text-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                value={quickAddAmount}
+                onChange={(e) => setQuickAddAmount(e.target.value)}
+                placeholder="مثال: 10"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={handleQuickAddSave}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700"
+              >
+                تأكيد
+              </button>
+              <button 
+                onClick={() => setQuickAddModal(null)}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
