@@ -358,6 +358,7 @@ export default function LiveOrdersPage() {
         deliveryDate: selectedOrder.deliveryDate || "",
         deposit: Number(selectedOrder.deposit) || 0,
         discountPercentage: Number(selectedOrder.discountPercentage) || 0,
+        notes: selectedOrder.notes || "",
         items: selectedOrder.items,
         total: newTotal
       };
