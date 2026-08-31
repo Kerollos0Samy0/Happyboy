@@ -204,12 +204,11 @@ export default function AdminDashboardPage() {
   const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const EXCEL_BASELINE = 45629;
   const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  const netInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const EXCEL_BASELINE = netInventoryPieces + totalSalesPieces;
   const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
-  
   const totalShortagesPieces = Math.max(0, totalSalesPieces - deductedFromOriginal);
-  const netInventoryPieces = totalInventoryPieces - totalShortagesPieces;
   
   let negBoys = 0;
   let negGirls = 0;
