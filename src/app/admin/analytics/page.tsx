@@ -90,9 +90,8 @@ export default function AnalyticsPage() {
           customerMap[order.customerName].orderCount += 1;
         }
 
-        if (order.customerCountry) {
-          countryMap[order.customerCountry] = (countryMap[order.customerCountry] || 0) + 1;
-        }
+        const country = order.customerCountry || "مصر";
+        countryMap[country] = (countryMap[country] || 0) + 1;
 
         if (order.customerGovernorate) {
           govMap[order.customerGovernorate] = (govMap[order.customerGovernorate] || 0) + 1;
@@ -278,6 +277,16 @@ export default function AnalyticsPage() {
                   </tr>
                 ))}
               </tbody>
+              <tfoot style={{ background: "#f8fafc", borderTop: "2px solid #e2e8f0" }}>
+                <tr>
+                  <td colSpan={2} style={{ padding: "1rem", fontWeight: "bold", textAlign: "left" }}>إجمالي الطلبات:</td>
+                  <td style={{ padding: "1rem", fontWeight: "bold" }}>
+                    <span style={{ background: "#dbeafe", color: "#1e3a8a", padding: "0.25rem 0.75rem", borderRadius: "999px", fontSize: "0.9rem" }}>
+                      {allCountries.reduce((sum, [_, count]) => sum + count, 0)} طلب
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           )}
         </div>
