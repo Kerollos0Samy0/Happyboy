@@ -7,7 +7,6 @@ export const WAREHOUSE_EMAILS = [
 export const BRANCH_LOCATIONS = [
   { name: "التجمع", lat: 30.0074, lng: 31.4326 },
   { name: "العبور", lat: 30.2223, lng: 31.4820 },
-  { name: "عين شمس", lat: 30.1294, lng: 31.3323 },
 ];
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -32,14 +31,14 @@ export async function detectBranch(userEmail?: string | null): Promise<string> {
   // 2. Fallback to GPS for other branches
   return new Promise((resolve) => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
-      resolve("أخرى"); // Geolocation not supported or SSR
+      resolve("التجمع"); // Geolocation not supported or SSR
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        let closestBranch = "أخرى";
+        let closestBranch = "التجمع";
         let minDistance = Infinity;
 
         for (const branch of BRANCH_LOCATIONS) {
@@ -54,12 +53,12 @@ export async function detectBranch(userEmail?: string | null): Promise<string> {
         if (minDistance <= 20) {
           resolve(closestBranch);
         } else {
-          resolve("أخرى");
+          resolve("التجمع");
         }
       },
       (error) => {
         console.warn("Geolocation error:", error);
-        resolve("أخرى");
+        resolve("التجمع");
       },
       { timeout: 10000, maximumAge: 60000 }
     );

@@ -43,12 +43,13 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState<"models" | "customers" | "employees" | "governorates">("models");
+  const [activeTab, setActiveTab] = useState<"models" | "customers" | "employees" | "governorates" | "countries">("models");
 
   const [allModels, setAllModels] = useState<any[]>([]);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [allGovs, setAllGovs] = useState<any[]>([]);
+  const [allCountries, setAllCountries] = useState<any[]>([]);
 
   const router = useRouter();
 
@@ -72,6 +73,7 @@ export default function AnalyticsPage() {
       const modelSalesMap: Record<string, { count: number, name: string, totalRevenue: number }> = {};
       const customerMap: Record<string, { totalSpent: number, orderCount: number, phone: string }> = {};
       const govMap: Record<string, number> = {};
+      const countryMap: Record<string, number> = {};
       const employeeMap: Record<string, { totalSales: number, orderCount: number }> = {};
 
       snapshot.docs.forEach((doc: any) => {
@@ -86,6 +88,10 @@ export default function AnalyticsPage() {
           }
           customerMap[order.customerName].totalSpent += orderTotal;
           customerMap[order.customerName].orderCount += 1;
+        }
+
+        if (order.customerCountry) {
+          countryMap[order.customerCountry] = (countryMap[order.customerCountry] || 0) + 1;
         }
 
         if (order.customerGovernorate) {
@@ -119,6 +125,7 @@ export default function AnalyticsPage() {
       setAllModels(Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count));
       setAllCustomers(Object.entries(customerMap).sort((a, b) => b[1].totalSpent - a[1].totalSpent));
       setAllGovs(Object.entries(govMap).sort((a, b) => b[1] - a[1]));
+      setAllCountries(Object.entries(countryMap).sort((a, b) => b[1] - a[1]));
       setAllEmployees(Object.entries(employeeMap).sort((a, b) => b[1].totalSales - a[1].totalSales));
     });
 
@@ -155,6 +162,7 @@ export default function AnalyticsPage() {
           <button onClick={() => setActiveTab("customers")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "customers" ? "#8b5cf6" : "transparent", color: activeTab === "customers" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Star size={18} /> أفضل العملاء</button>
           <button onClick={() => setActiveTab("employees")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "employees" ? "#8b5cf6" : "transparent", color: activeTab === "employees" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><UserCheck size={18} /> أداء الموظفين</button>
           <button onClick={() => setActiveTab("governorates")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "governorates" ? "#8b5cf6" : "transparent", color: activeTab === "governorates" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><MapPin size={18} /> المحافظات</button>
+          <button onClick={() => setActiveTab("countries")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "countries" ? "#8b5cf6" : "transparent", color: activeTab === "countries" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><MapPin size={18} /> البلدان</button>
         </div>
 
         <div style={{ background: "#fff", borderRadius: "1rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", overflowX: "auto" }}>
@@ -245,6 +253,27 @@ export default function AnalyticsPage() {
                   <tr key={gov} style={{ borderBottom: "1px solid #f1f5f9" }}>
                     <td style={{ padding: "1rem", fontWeight: "bold", color: index < 3 ? "#8b5cf6" : "#94a3b8" }}>#{index + 1}</td>
                     <td style={{ padding: "1rem", fontWeight: "bold" }}>{gov}</td>
+                    <td style={{ padding: "1rem" }}><span style={{ background: "#fee2e2", color: "#991b1b", padding: "0.25rem 0.75rem", borderRadius: "999px", fontWeight: "bold", fontSize: "0.85rem" }}>{count} طلب</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {activeTab === "countries" && (
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "right", minWidth: "600px" }}>
+              <thead style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                <tr>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>الترتيب</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>البلد</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>عدد الطلبات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allCountries.map(([country, count], index) => (
+                  <tr key={country} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ padding: "1rem", fontWeight: "bold", color: index < 3 ? "#8b5cf6" : "#94a3b8" }}>#{index + 1}</td>
+                    <td style={{ padding: "1rem", fontWeight: "bold" }}>{country}</td>
                     <td style={{ padding: "1rem" }}><span style={{ background: "#fee2e2", color: "#991b1b", padding: "0.25rem 0.75rem", borderRadius: "999px", fontWeight: "bold", fontSize: "0.85rem" }}>{count} طلب</span></td>
                   </tr>
                 ))}

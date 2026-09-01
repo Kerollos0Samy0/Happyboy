@@ -45,6 +45,7 @@ interface Order {
   customerName: string;
   customerPhone: string;
   customerBrand?: string;
+  customerCountry?: string;
   customerGovernorate?: string;
   customerAddress?: string;
   customerShipping?: string;
@@ -352,6 +353,7 @@ export default function LiveOrdersPage() {
         customerName: selectedOrder.customerName,
         customerPhone: selectedOrder.customerPhone,
         customerBrand: selectedOrder.customerBrand || "",
+        customerCountry: selectedOrder.customerCountry || "مصر",
         customerGovernorate: selectedOrder.customerGovernorate || "",
         customerAddress: selectedOrder.customerAddress || "",
         customerShipping: selectedOrder.customerShipping || "",
@@ -602,7 +604,7 @@ export default function LiveOrdersPage() {
       if (!matchesSearch) return false;
     }
 
-    const orderBranch = o.branch || "أخرى";
+    const orderBranch = o.branch || "التجمع";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
 
@@ -949,8 +951,6 @@ export default function LiveOrdersPage() {
                   { key: "المخزن", label: "المخزن" },
                   { key: "التجمع",    label: "التجمع" },
                   { key: "العبور",    label: "العبور" },
-                  { key: "عين شمس",    label: "عين شمس" },
-                  { key: "أخرى",      label: "أخرى" },
                 ].map(b => (
                   <button
                     key={b.key}
@@ -1093,7 +1093,7 @@ export default function LiveOrdersPage() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
                       <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                         <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
-                          {order.branch || "أخرى"}
+                          {order.branch || "التجمع"}
                         </span>
                         <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
                           {timeAgo(date)}
@@ -1270,6 +1270,30 @@ export default function LiveOrdersPage() {
                     </p>
                   </div>
                   <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>البلد:</strong> 
+                      <select value={selectedOrder.customerCountry || 'مصر'} onChange={e => handleOrderChange('customerCountry', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }}>
+                        <option value="مصر">مصر</option>
+                        <option value="السعودية">السعودية</option>
+                        <option value="الإمارات">الإمارات</option>
+                        <option value="الكويت">الكويت</option>
+                        <option value="قطر">قطر</option>
+                        <option value="البحرين">البحرين</option>
+                        <option value="عمان">عمان</option>
+                        <option value="الأردن">الأردن</option>
+                        <option value="العراق">العراق</option>
+                        <option value="المغرب">المغرب</option>
+                        <option value="الجزائر">الجزائر</option>
+                        <option value="تونس">تونس</option>
+                        <option value="ليبيا">ليبيا</option>
+                        <option value="السودان">السودان</option>
+                        <option value="سوريا">سوريا</option>
+                        <option value="فلسطين">فلسطين</option>
+                        <option value="لبنان">لبنان</option>
+                        <option value="اليمن">اليمن</option>
+                        <option value="أخرى">أخرى</option>
+                      </select>
+                    </p>
                     <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
                       <strong>المحافظة:</strong> 
                       <input type="text" value={selectedOrder.customerGovernorate || ''} onChange={e => handleOrderChange('customerGovernorate', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }} />
@@ -1489,6 +1513,7 @@ export default function LiveOrdersPage() {
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {selectedOrder.customerBrand}</p>
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <p style={{ fontSize: "14px", margin: 0 }}><strong>البلد:</strong> {selectedOrder.customerCountry || "مصر"}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {selectedOrder.customerGovernorate}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {selectedOrder.customerAddress}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {selectedOrder.customerShipping}</p>
@@ -1655,6 +1680,7 @@ export default function LiveOrdersPage() {
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {order.customerBrand}</p>
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <p style={{ fontSize: "14px", margin: 0 }}><strong>البلد:</strong> {order.customerCountry || "مصر"}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {order.customerGovernorate}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {order.customerAddress}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {order.customerShipping}</p>

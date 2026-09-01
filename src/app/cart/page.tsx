@@ -61,6 +61,7 @@ export default function CartPage() {
   const [customerBrand, setCustomerBrand] = useState("");
   
   // Checkout Fields
+  const [customerCountry, setCustomerCountry] = useState("مصر");
   const [customerGovernorate, setCustomerGovernorate] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerShipping, setCustomerShipping] = useState("");
@@ -93,6 +94,7 @@ export default function CartPage() {
     setCart(savedCart);
     setCustomerName(localStorage.getItem("customerName") || "عميل غير معروف");
     setCustomerBrand(localStorage.getItem("customerBrand") || "");
+    setCustomerCountry(localStorage.getItem("customerCountry") || "مصر");
     setCustomerGovernorate(localStorage.getItem("customerGovernorate") || "");
     setCustomerAddress(localStorage.getItem("customerAddress") || "");
     setCustomerShipping(localStorage.getItem("customerShipping") || "");
@@ -113,6 +115,7 @@ export default function CartPage() {
                return timeB - timeA;
             });
             const lastOrder = docs[0];
+            if (lastOrder.customerCountry) setCustomerCountry(lastOrder.customerCountry);
             if (lastOrder.customerGovernorate) setCustomerGovernorate(lastOrder.customerGovernorate);
             if (lastOrder.customerAddress) setCustomerAddress(lastOrder.customerAddress);
             if (lastOrder.customerShipping) setCustomerShipping(lastOrder.customerShipping);
@@ -309,6 +312,7 @@ export default function CartPage() {
         customerName,
         customerPhone,
         customerBrand,
+        customerCountry,
         customerGovernorate,
         customerAddress,
         customerShipping,
@@ -411,6 +415,7 @@ export default function CartPage() {
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>البراند:</strong> {customerBrand || '---'}</p>
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <p style={{ fontSize: "14px", margin: 0 }}><strong>البلد:</strong> {customerCountry || 'مصر'}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>المحافظة:</strong> {customerGovernorate || '---'}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>العنوان:</strong> {customerAddress || '---'}</p>
                       <p style={{ fontSize: "14px", margin: 0 }}><strong>الشحن:</strong> {customerShipping || 'استلام من المصنع'}</p>
@@ -666,7 +671,38 @@ export default function CartPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block mb-2 font-bold text-sm">البلد / الدولة</label>
+                <select 
+                  className="input" 
+                  value={customerCountry}
+                  onChange={(e) => {
+                    setCustomerCountry(e.target.value);
+                    localStorage.setItem("customerCountry", e.target.value);
+                  }}
+                >
+                  <option value="مصر">مصر</option>
+                  <option value="السعودية">السعودية</option>
+                  <option value="الإمارات">الإمارات</option>
+                  <option value="الكويت">الكويت</option>
+                  <option value="قطر">قطر</option>
+                  <option value="البحرين">البحرين</option>
+                  <option value="عمان">عمان</option>
+                  <option value="الأردن">الأردن</option>
+                  <option value="العراق">العراق</option>
+                  <option value="المغرب">المغرب</option>
+                  <option value="الجزائر">الجزائر</option>
+                  <option value="تونس">تونس</option>
+                  <option value="ليبيا">ليبيا</option>
+                  <option value="السودان">السودان</option>
+                  <option value="سوريا">سوريا</option>
+                  <option value="فلسطين">فلسطين</option>
+                  <option value="لبنان">لبنان</option>
+                  <option value="اليمن">اليمن</option>
+                  <option value="أخرى">أخرى</option>
+                </select>
+              </div>
               <div>
                 <label className="block mb-2 font-bold text-sm">المحافظة</label>
                 <input 
