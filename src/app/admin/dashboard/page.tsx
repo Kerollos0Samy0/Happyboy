@@ -153,6 +153,7 @@ export default function AdminDashboardPage() {
 
   const customerMap: Record<string, number> = {};
   const govMap: Record<string, number> = {};
+  const countryMap: Record<string, number> = {};
   const modelSalesMap: Record<string, { count: number, name: string }> = {};
   const colorSalesMap: Record<string, Record<string, number>> = {};
 
@@ -178,6 +179,13 @@ export default function AdminDashboardPage() {
     if (order.customerName) {
       customerMap[order.customerName] = (customerMap[order.customerName] || 0) + orderTotal;
     }
+    
+    // Country logic
+    const ctry = (order as any).customerCountry; // In case customerCountry is missing from Order interface
+    if (ctry) {
+      countryMap[ctry] = (countryMap[ctry] || 0) + 1;
+    }
+
     if (order.customerGovernorate) {
       govMap[order.customerGovernorate] = (govMap[order.customerGovernorate] || 0) + 1;
     }
@@ -312,6 +320,7 @@ export default function AdminDashboardPage() {
     .slice(0, 10);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const topGovs = Object.entries(govMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const topCountries = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   const isOwner = userEmail && (userEmail.toLowerCase().includes('ahmed001') || userEmail.toLowerCase().includes('hossam001'));
   const isPrivileged = userEmail && (
@@ -614,6 +623,21 @@ export default function AdminDashboardPage() {
                         <span className={styles.itemLabel}>
                           <span className={styles.itemRank}>{i+1}</span>
                           {gov}
+                        </span>
+                        <span className={`${styles.itemValue} ${styles.white}`}>{count} طلبات</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className={styles.subTitle}><MapPin size={16} style={{color: '#8b5cf6'}}/> البلدان الأكثر طلباً</h3>
+                  <div className={styles.itemList}>
+                    {topCountries.length === 0 ? <p style={{fontSize: '0.875rem', color: '#9ca3af'}}>لا يوجد طلبات بعد</p> : topCountries.map(([country, count], i) => (
+                      <div key={country} className={styles.itemCard}>
+                        <span className={styles.itemLabel}>
+                          <span className={styles.itemRank}>{i+1}</span>
+                          {country}
                         </span>
                         <span className={`${styles.itemValue} ${styles.white}`}>{count} طلبات</span>
                       </div>
