@@ -73,7 +73,7 @@ export default function AnalyticsPage() {
       const modelSalesMap: Record<string, { count: number, name: string, totalRevenue: number }> = {};
       const customerMap: Record<string, { totalSpent: number, orderCount: number, phone: string }> = {};
       const govMap: Record<string, number> = {};
-      const countryMap: Record<string, number> = {};
+      const countryMap: Record<string, { count: number, totalRevenue: number }> = {};
       const employeeMap: Record<string, { totalSales: number, orderCount: number }> = {};
 
       snapshot.docs.forEach((doc: any) => {
@@ -91,7 +91,11 @@ export default function AnalyticsPage() {
         }
 
         const country = order.customerCountry || "مصر";
-        countryMap[country] = (countryMap[country] || 0) + 1;
+        if (!countryMap[country]) {
+          countryMap[country] = { count: 0, totalRevenue: 0 };
+        }
+        countryMap[country].count += 1;
+        countryMap[country].totalRevenue += orderTotal;
 
         if (order.customerGovernorate) {
           govMap[order.customerGovernorate] = (govMap[order.customerGovernorate] || 0) + 1;
@@ -124,7 +128,7 @@ export default function AnalyticsPage() {
       setAllModels(Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count));
       setAllCustomers(Object.entries(customerMap).sort((a, b) => b[1].totalSpent - a[1].totalSpent));
       setAllGovs(Object.entries(govMap).sort((a, b) => b[1] - a[1]));
-      setAllCountries(Object.entries(countryMap).sort((a, b) => b[1] - a[1]));
+      setAllCountries(Object.entries(countryMap).sort((a, b) => b[1].count - a[1].count));
       setAllEmployees(Object.entries(employeeMap).sort((a, b) => b[1].totalSales - a[1].totalSales));
     });
 
@@ -266,14 +270,16 @@ export default function AnalyticsPage() {
                   <th style={{ padding: "1rem", color: "#64748b" }}>الترتيب</th>
                   <th style={{ padding: "1rem", color: "#64748b" }}>البلد</th>
                   <th style={{ padding: "1rem", color: "#64748b" }}>عدد الطلبات</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>إجمالي المبيعات</th>
                 </tr>
               </thead>
               <tbody>
-                {allCountries.map(([country, count], index) => (
+                {allCountries.map(([country, data], index) => (
                   <tr key={country} style={{ borderBottom: "1px solid #f1f5f9" }}>
                     <td style={{ padding: "1rem", fontWeight: "bold", color: index < 3 ? "#8b5cf6" : "#94a3b8" }}>#{index + 1}</td>
                     <td style={{ padding: "1rem", fontWeight: "bold" }}>{country}</td>
-                    <td style={{ padding: "1rem" }}><span style={{ background: "#fee2e2", color: "#991b1b", padding: "0.25rem 0.75rem", borderRadius: "999px", fontWeight: "bold", fontSize: "0.85rem" }}>{count} طلب</span></td>
+                    <td style={{ padding: "1rem" }}><span style={{ background: "#fee2e2", color: "#991b1b", padding: "0.25rem 0.75rem", borderRadius: "999px", fontWeight: "bold", fontSize: "0.85rem" }}>{data.count} طلب</span></td>
+                    <td style={{ padding: "1rem", fontWeight: "bold", color: "#10b981" }}>{data.totalRevenue.toLocaleString()} ج.م</td>
                   </tr>
                 ))}
               </tbody>
@@ -282,8 +288,11 @@ export default function AnalyticsPage() {
                   <td colSpan={2} style={{ padding: "1rem", fontWeight: "bold", textAlign: "left" }}>إجمالي الطلبات:</td>
                   <td style={{ padding: "1rem", fontWeight: "bold" }}>
                     <span style={{ background: "#dbeafe", color: "#1e3a8a", padding: "0.25rem 0.75rem", borderRadius: "999px", fontSize: "0.9rem" }}>
-                      {allCountries.reduce((sum, [_, count]) => sum + count, 0)} طلب
+                      {allCountries.reduce((sum, [_, data]) => sum + data.count, 0)} طلب
                     </span>
+                  </td>
+                  <td style={{ padding: "1rem", fontWeight: "bold", color: "#10b981" }}>
+                    {allCountries.reduce((sum, [_, data]) => sum + data.totalRevenue, 0).toLocaleString()} ج.م
                   </td>
                 </tr>
               </tfoot>
