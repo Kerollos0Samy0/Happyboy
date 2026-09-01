@@ -953,7 +953,6 @@ export default function LiveOrdersPage() {
                 <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>الفرع:</span>
                 {[
                   { key: "all",       label: "كل الفروع" },
-                  { key: "المخزن", label: "المخزن" },
                   { key: "التجمع",    label: "التجمع" },
                   { key: "العبور",    label: "العبور" },
                 ].map(b => (
