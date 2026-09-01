@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
     }
   });
 
-  const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) < 5).sort((a, b) => (Number(a.quantity) || 0) - (Number(b.quantity) || 0)).slice(0, 10);
+  const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) < 0).sort((a, b) => (Number(a.quantity) || 0) - (Number(b.quantity) || 0)).slice(0, 10);
   const zeroSalesColors: { id: string, modelNumber: string, name: string, colors: string[] }[] = [];
   products.forEach(p => {
     if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
@@ -282,8 +282,10 @@ export default function AdminDashboardPage() {
   const deductedSport = Math.max(0, totalSportSales - negSport);
   const deductedSummer = Math.max(0, totalSummerSales - negSummer);
   
-  const boysDeductedPct = deductedFromOriginal > 0 ? ((deductedBoys / deductedFromOriginal) * 100).toFixed(1) : "0.0";
-  const girlsDeductedPct = deductedFromOriginal > 0 ? ((deductedGirls / deductedFromOriginal) * 100).toFixed(1) : "0.0";
+  const deductedOriginalExcelTotal = deductedBoys + deductedGirls;
+  
+  const boysDeductedPct = deductedOriginalExcelTotal > 0 ? ((deductedBoys / deductedOriginalExcelTotal) * 100).toFixed(1) : "0.0";
+  const girlsDeductedPct = deductedOriginalExcelTotal > 0 ? ((deductedGirls / deductedOriginalExcelTotal) * 100).toFixed(1) : "0.0";
   const sportDeductedPct = deductedFromOriginal > 0 ? ((deductedSport / deductedFromOriginal) * 100).toFixed(1) : "0.0";
   const summerDeductedPct = deductedFromOriginal > 0 ? ((deductedSummer / deductedFromOriginal) * 100).toFixed(1) : "0.0";
 
@@ -301,7 +303,13 @@ export default function AdminDashboardPage() {
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(totalShortagesPieces / 4);
 
-  const topSellers = Object.entries(modelSalesMap).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
+  const productQtyMap: Record<string, number> = {};
+  products.forEach(p => { productQtyMap[p.modelNumber] = Number(p.quantity) || 0; });
+
+  const topSellers = Object.entries(modelSalesMap)
+    .filter(([model]) => (productQtyMap[model] || 0) >= 0)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 10);
   const topCustomers = Object.entries(customerMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const topGovs = Object.entries(govMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
@@ -400,12 +408,10 @@ export default function AdminDashboardPage() {
                   
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
-                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedFromOriginal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedOriginalExcelTotal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
                     <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
                       <span style={{ color: "#3b82f6" }}>اولادي: %{boysDeductedPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
-                      <span style={{ color: "#eab308" }}>رياضي: %{sportDeductedPct}</span>
-                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerDeductedPct}</span>
                     </div>
                   </div>
 
@@ -553,7 +559,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <h3 className={styles.subTitle}><AlertTriangle size={16} style={{color: '#ef4444'}}/> نواقص المخزن (أقل من 5)</h3>
+                  <h3 className={styles.subTitle}><AlertTriangle size={16} style={{color: '#ef4444'}}/> نواقص المخزن (العينات)</h3>
                   <div className={styles.itemList}>
                     {lowStockProducts.length === 0 ? <p style={{fontSize: '0.875rem', color: '#16a34a', display: 'flex', gap: '0.5rem', alignItems: 'center'}}><CheckCircle size={16}/> المخزن بحالة ممتازة</p> : lowStockProducts.map(p => (
                       <div key={p.id} className={`${styles.itemCard} ${styles.red}`}>
