@@ -154,6 +154,7 @@ export default function AdminDashboardPage() {
   const customerMap: Record<string, number> = {};
   const govMap: Record<string, number> = {};
   const modelSalesMap: Record<string, { count: number, name: string }> = {};
+  const colorSalesMap: Record<string, Record<string, number>> = {};
 
   orders.forEach(order => {
     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
@@ -200,12 +201,35 @@ export default function AdminDashboardPage() {
           modelSalesMap[item.modelNumber] = { count: 0, name: item.name };
         }
         modelSalesMap[item.modelNumber].count += totalPieces;
+        
+        const colorName = String(item.selectedColor || "").trim();
+        if (!colorSalesMap[item.modelNumber]) {
+          colorSalesMap[item.modelNumber] = {};
+        }
+        colorSalesMap[item.modelNumber][colorName] = (colorSalesMap[item.modelNumber][colorName] || 0) + totalPieces;
       });
     }
   });
 
   const lowStockProducts = products.filter(p => (Number(p.quantity) || 0) < 5).sort((a, b) => (Number(a.quantity) || 0) - (Number(b.quantity) || 0)).slice(0, 10);
-  const zeroSalesProducts = products.filter(p => !modelSalesMap[p.modelNumber] && (Number(p.quantity) || 0) > 0);
+  const zeroSalesColors: { id: string, modelNumber: string, name: string, colors: string[] }[] = [];
+  products.forEach(p => {
+    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
+      const modelSoldMap = colorSalesMap[p.modelNumber] || {};
+      const unsoldColors = p.colors
+        .map((c: any) => String(c.name || "").trim())
+        .filter((c: string) => (modelSoldMap[c] || 0) === 0 && c !== "");
+      
+      if (unsoldColors.length > 0) {
+        zeroSalesColors.push({
+          id: p.id || p.modelNumber,
+          modelNumber: p.modelNumber,
+          name: p.name || "",
+          colors: unsoldColors
+        });
+      }
+    }
+  });
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
   const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
@@ -542,11 +566,12 @@ export default function AdminDashboardPage() {
               </div>
 
               <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)'}}>
-                <h3 className={styles.subTitle}><Archive size={16} style={{color: '#9ca3af'}}/> بضاعة راكدة (لم تباع)</h3>
+                <h3 className={styles.subTitle}><Archive size={16} style={{color: '#9ca3af'}}/> ألوان لم تباع</h3>
                 <div className={styles.tagsWrap}>
-                  {zeroSalesProducts.length === 0 ? <p style={{fontSize: '0.875rem', color: '#16a34a'}}>ممتاز، كل الموديلات تباع!</p> : zeroSalesProducts.map(p => (
-                    <span key={p.id} className={styles.tag}>
-                      {p.name} (#{p.modelNumber})
+                  {zeroSalesColors.length === 0 ? <p style={{fontSize: '0.875rem', color: '#16a34a'}}>ممتاز، كل الألوان تباع!</p> : zeroSalesColors.map(p => (
+                    <span key={p.id} className={styles.tag} style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem'}}>
+                      <span style={{fontWeight: 'bold'}}>{p.name} (#{p.modelNumber})</span>
+                      <span style={{fontSize: '0.75rem', color: '#6b7280'}}>{p.colors.map(c => c === 'شاركويل' ? 'شاركول' : c).join('، ')}</span>
                     </span>
                   ))}
                 </div>
