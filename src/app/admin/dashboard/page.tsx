@@ -558,7 +558,7 @@ export default function AdminDashboardPage() {
                     {lowStockProducts.length === 0 ? <p style={{fontSize: '0.875rem', color: '#16a34a', display: 'flex', gap: '0.5rem', alignItems: 'center'}}><CheckCircle size={16}/> المخزن بحالة ممتازة</p> : lowStockProducts.map(p => (
                       <div key={p.id} className={`${styles.itemCard} ${styles.red}`}>
                         <span style={{fontWeight: 'bold'}}>{p.name} <span style={{fontWeight: 'normal', opacity: 0.7}}>(#{p.modelNumber})</span></span>
-                        <span style={{fontWeight: '900'}}>{p.quantity} <span style={{fontWeight: 'normal', fontSize: '0.75rem'}}>ثري</span></span>
+                        <span style={{fontWeight: '900'}}>{p.quantity} <span style={{fontWeight: 'normal', fontSize: '0.75rem'}}>قطعة</span></span>
                       </div>
                     ))}
                   </div>
