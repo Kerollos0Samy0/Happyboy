@@ -409,8 +409,8 @@ export default function AdminDashboardPage() {
                   <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedOriginalExcelTotal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
-                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysDeductedPct}</span>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "1rem", display: "flex", gap: "20px", fontWeight: "bold", justifyContent: "center" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysDeductedPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
                     </div>
                   </div>
