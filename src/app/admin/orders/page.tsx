@@ -105,6 +105,7 @@ export default function LiveOrdersPage() {
   const [showArchived, setShowArchived] = useState<boolean>(false);
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
@@ -605,8 +606,10 @@ export default function LiveOrdersPage() {
     }
 
     const orderBranch = o.branch || "التجمع";
+    const orderCountry = o.customerCountry || "مصر";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
+    if (countryFilter !== "all" && orderCountry !== countryFilter) return false;
 
     if (isOwner) {
       if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
@@ -618,6 +621,8 @@ export default function LiveOrdersPage() {
       return true;
     }
   });
+
+  const uniqueCountries = Array.from(new Set(orders.filter(o => !o.isDeleted).map(o => o.customerCountry || "مصر"))).sort();
 
   const filteredOrders = filterStatus === "all"
     ? visibleOrders
@@ -1015,6 +1020,49 @@ export default function LiveOrdersPage() {
                   ))}
                 </div>
               )}
+              
+              {uniqueCountries.length > 0 && (
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>البلد:</span>
+                  <button
+                    onClick={() => setCountryFilter("all")}
+                    style={{
+                      padding: "0.3rem 0.8rem",
+                      borderRadius: "9999px",
+                      border: countryFilter === "all" ? "2px solid #10b981" : "1px solid #e2e8f0",
+                      background: countryFilter === "all" ? "#d1fae5" : "#f8fafc",
+                      color: countryFilter === "all" ? "#047857" : "#64748b",
+                      fontFamily: "inherit",
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    الكل
+                  </button>
+                  {uniqueCountries.map(country => (
+                    <button
+                      key={country}
+                      onClick={() => setCountryFilter(country)}
+                      style={{
+                        padding: "0.3rem 0.8rem",
+                        borderRadius: "9999px",
+                        border: countryFilter === country ? "2px solid #10b981" : "1px solid #e2e8f0",
+                        background: countryFilter === country ? "#d1fae5" : "#f8fafc",
+                        color: countryFilter === country ? "#047857" : "#64748b",
+                        fontFamily: "inherit",
+                        fontWeight: 700,
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1094,6 +1142,9 @@ export default function LiveOrdersPage() {
                       <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                         <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
                           {order.branch || "التجمع"}
+                        </span>
+                        <span style={{ fontSize: "0.68rem", color: "#047857", fontWeight: "bold", background: "#d1fae5", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
+                          {order.customerCountry || "مصر"}
                         </span>
                         <span style={{ fontSize: "0.68rem", color: "#94a3b8", whiteSpace: "nowrap" }}>
                           {timeAgo(date)}
