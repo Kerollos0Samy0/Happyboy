@@ -186,7 +186,7 @@ export default function AdminDashboardPage() {
       countryMap[ctry] = (countryMap[ctry] || 0) + 1;
     }
 
-    if (order.customerGovernorate) {
+    if (order.customerGovernorate && (!ctry || ctry === 'مصر')) {
       govMap[order.customerGovernorate] = (govMap[order.customerGovernorate] || 0) + 1;
     }
 
