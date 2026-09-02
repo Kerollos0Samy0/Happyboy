@@ -188,31 +188,36 @@ export default function AdminDashboardPage() {
 
     if (order.customerGovernorate && (!ctry || ctry === 'مصر')) {
       let govName = order.customerGovernorate.trim();
-      govName = govName
-        .replace(/^إ/, 'ا').replace(/^أ/, 'ا').replace(/^آ/, 'ا')
-        .replace(/ة$/, 'ه')
-        .replace("اسكندريه", "الاسكندريه").replace("الاسكندرية", "الاسكندريه")
-        .replace("القاهرة", "القاهره").replace("الجيزة", "الجيزه")
-        .replace("الغربية", "الغربيه").replace("الدقهلية", "الدقهليه")
-        .replace("الشرقية", "الشرقيه").replace("المنوفية", "المنوفيه")
-        .replace("القليوبية", "القليوبيه").replace("البحيرة", "البحيره")
-        .replace("الإسماعيلية", "الاسماعيليه").replace("الاسماعيلية", "الاسماعيليه")
-        .replace("بني سويف", "بنى سويف").replace("الوادي الجديد", "الوادى الجديد")
-        .replace("بورسعيد", "بور سعيد");
-        
-      if (govName === "القاهره") govName = "القاهرة";
-      if (govName === "الاسكندريه" || govName === "اسكندريه" || govName === "إسكندرية") govName = "الإسكندرية";
-      if (govName === "الجيزه") govName = "الجيزة";
-      if (govName === "الغربيه") govName = "الغربية";
-      if (govName === "الدقهليه") govName = "الدقهلية";
-      if (govName === "الشرقيه") govName = "الشرقية";
-      if (govName === "المنوفيه") govName = "المنوفية";
-      if (govName === "القليوبيه") govName = "القليوبية";
-      if (govName === "البحيره") govName = "البحيرة";
-      if (govName === "الاسماعيليه") govName = "الإسماعيلية";
-      if (govName === "بنى سويف") govName = "بني سويف";
-      if (govName === "الوادى الجديد") govName = "الوادي الجديد";
-      if (govName === "بور سعيد") govName = "بورسعيد";
+      
+      const text = govName.replace(/ة/g, 'ه').replace(/[أإآ]/g, 'ا');
+      
+      if (text.includes("قاهره")) govName = "القاهرة";
+      else if (text.includes("اسكندريه")) govName = "الإسكندرية";
+      else if (text.includes("جيزه")) govName = "الجيزة";
+      else if (text.includes("قليوبيه")) govName = "القليوبية";
+      else if (text.includes("بورسعيد") || text.includes("بور سعيد")) govName = "بورسعيد";
+      else if (text.includes("سويس")) govName = "السويس";
+      else if (text.includes("اسماعيليه")) govName = "الإسماعيلية";
+      else if (text.includes("شرقيه")) govName = "الشرقية";
+      else if (text.includes("دقهليه")) govName = "الدقهلية";
+      else if (text.includes("غربيه")) govName = "الغربية";
+      else if (text.includes("منوفيه")) govName = "المنوفية";
+      else if (text.includes("كفر الشيخ")) govName = "كفر الشيخ";
+      else if (text.includes("بحيره")) govName = "البحيرة";
+      else if (text.includes("دمياط")) govName = "دمياط";
+      else if (text.includes("مطروح")) govName = "مطروح";
+      else if (text.includes("فيوم")) govName = "الفيوم";
+      else if (text.includes("بنى سويف") || text.includes("بني سويف")) govName = "بني سويف";
+      else if (text.includes("منيا")) govName = "المنيا";
+      else if (text.includes("اسيوط")) govName = "أسيوط";
+      else if (text.includes("سوهاج")) govName = "سوهاج";
+      else if (text.includes("قنا")) govName = "قنا";
+      else if (text.includes("اقصر")) govName = "الأقصر";
+      else if (text.includes("اسوان")) govName = "أسوان";
+      else if (text.includes("وادى جديد") || text.includes("وادي جديد")) govName = "الوادي الجديد";
+      else if (text.includes("بحر احمر") || text.includes("بحر الأحمر")) govName = "البحر الأحمر";
+      else if (text.includes("شمال سينا")) govName = "شمال سيناء";
+      else if (text.includes("جنوب سينا")) govName = "جنوب سيناء";
 
       govMap[govName] = (govMap[govName] || 0) + 1;
     }
