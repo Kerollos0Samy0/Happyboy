@@ -186,7 +186,12 @@ export default function AdminDashboardPage() {
       countryMap[ctry] = (countryMap[ctry] || 0) + 1;
     }
 
-    if (order.customerGovernorate && (!ctry || ctry === 'مصر')) {
+    if (!order.customerGovernorate || order.customerGovernorate.trim() === "" || order.customerGovernorate.trim() === "غير محدد" || order.customerGovernorate.trim() === "undefined" || order.customerGovernorate.trim() === "null") {
+      if (!ctry || ctry === 'مصر') {
+        const gName = "غير محدد";
+        govMap[gName] = (govMap[gName] || 0) + 1;
+      }
+    } else if (order.customerGovernorate && (!ctry || ctry === 'مصر')) {
       let govName = order.customerGovernorate.trim();
       
       const text = govName.replace(/ة/g, 'ه').replace(/[أإآ]/g, 'ا');

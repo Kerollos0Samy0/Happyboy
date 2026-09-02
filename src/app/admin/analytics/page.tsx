@@ -106,7 +106,16 @@ export default function AnalyticsPage() {
         countryMap[country].count += 1;
         countryMap[country].totalRevenue += orderTotal;
 
-        if (order.customerGovernorate && country === "مصر") {
+        if (!order.customerGovernorate || order.customerGovernorate.trim() === "" || order.customerGovernorate.trim() === "غير محدد" || order.customerGovernorate.trim() === "undefined" || order.customerGovernorate.trim() === "null") {
+          if (country === "مصر") {
+            const gName = "غير محدد";
+            if (!govMap[gName]) {
+              govMap[gName] = { count: 0, totalRevenue: 0 };
+            }
+            govMap[gName].count += 1;
+            govMap[gName].totalRevenue += orderTotal;
+          }
+        } else if (order.customerGovernorate && country === "مصر") {
           let govName = order.customerGovernorate.trim();
           
           const text = govName.replace(/ة/g, 'ه').replace(/[أإآ]/g, 'ا');
