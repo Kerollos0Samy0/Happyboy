@@ -7,7 +7,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { 
   TrendingUp, Users, Package, MapPin, 
-  ChevronRight, BarChart2, Star, UserCheck
+  ChevronRight, BarChart2, Star, UserCheck, Store
 } from "lucide-react";
 
 const getCategoryName = (modelNumber: string) => {
@@ -43,13 +43,14 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState<"models" | "customers" | "employees" | "governorates" | "countries">("models");
+  const [activeTab, setActiveTab] = useState<"models" | "customers" | "employees" | "governorates" | "countries" | "branches">("models");
 
   const [allModels, setAllModels] = useState<any[]>([]);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [allGovs, setAllGovs] = useState<any[]>([]);
   const [allCountries, setAllCountries] = useState<any[]>([]);
+  const [allBranches, setAllBranches] = useState<any[]>([]);
 
   const router = useRouter();
 
@@ -74,6 +75,7 @@ export default function AnalyticsPage() {
       const customerMap: Record<string, { totalSpent: number, orderCount: number, phone: string }> = {};
       const govMap: Record<string, { count: number, totalRevenue: number }> = {};
       const countryMap: Record<string, { count: number, totalRevenue: number }> = {};
+      const branchMap: Record<string, { count: number, totalRevenue: number }> = {};
       const employeeMap: Record<string, { totalSales: number, orderCount: number }> = {};
 
       snapshot.docs.forEach((doc: any) => {
@@ -81,6 +83,13 @@ export default function AnalyticsPage() {
         if (order.isDeleted) return;
 
         const orderTotal = Number(order.total) || 0;
+        
+        const branch = order.branch || "التجمع";
+        if (!branchMap[branch]) {
+          branchMap[branch] = { count: 0, totalRevenue: 0 };
+        }
+        branchMap[branch].count += 1;
+        branchMap[branch].totalRevenue += orderTotal;
 
         if (order.customerName) {
           if (!customerMap[order.customerName]) {
@@ -134,6 +143,7 @@ export default function AnalyticsPage() {
       setAllGovs(Object.entries(govMap).sort((a, b) => b[1].count - a[1].count));
       setAllCountries(Object.entries(countryMap).sort((a, b) => b[1].count - a[1].count));
       setAllEmployees(Object.entries(employeeMap).sort((a, b) => b[1].totalSales - a[1].totalSales));
+      setAllBranches(Object.entries(branchMap).sort((a, b) => b[1].count - a[1].count));
     });
 
     return () => unsubscribeOrders();
@@ -170,6 +180,7 @@ export default function AnalyticsPage() {
           <button onClick={() => setActiveTab("employees")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "employees" ? "#8b5cf6" : "transparent", color: activeTab === "employees" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><UserCheck size={18} /> أداء الموظفين</button>
           <button onClick={() => setActiveTab("governorates")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "governorates" ? "#8b5cf6" : "transparent", color: activeTab === "governorates" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><MapPin size={18} /> المحافظات</button>
           <button onClick={() => setActiveTab("countries")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "countries" ? "#8b5cf6" : "transparent", color: activeTab === "countries" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><MapPin size={18} /> البلدان</button>
+          <button onClick={() => setActiveTab("branches")} style={{ flex: 1, padding: "0.75rem 1rem", border: "none", borderRadius: "0.5rem", background: activeTab === "branches" ? "#8b5cf6" : "transparent", color: activeTab === "branches" ? "#fff" : "#475569", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Store size={18} /> الفروع</button>
         </div>
 
         <div style={{ background: "#fff", borderRadius: "1rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", overflowX: "auto" }}>
@@ -312,6 +323,42 @@ export default function AnalyticsPage() {
                   </td>
                   <td style={{ padding: "1rem", fontWeight: "bold", color: "#10b981" }}>
                     {allCountries.reduce((sum, [_, data]) => sum + data.totalRevenue, 0).toLocaleString()} ج.م
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          )}
+
+          {activeTab === "branches" && (
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "right", minWidth: "600px" }}>
+              <thead style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                <tr>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>الترتيب</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>الفرع</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>عدد الطلبات</th>
+                  <th style={{ padding: "1rem", color: "#64748b" }}>إجمالي المبيعات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allBranches.map(([branch, data], index) => (
+                  <tr key={branch} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ padding: "1rem", fontWeight: "bold", color: index < 3 ? "#8b5cf6" : "#94a3b8" }}>#{index + 1}</td>
+                    <td style={{ padding: "1rem", fontWeight: "bold" }}>{branch}</td>
+                    <td style={{ padding: "1rem" }}><span style={{ background: "#fee2e2", color: "#991b1b", padding: "0.25rem 0.75rem", borderRadius: "999px", fontWeight: "bold", fontSize: "0.85rem" }}>{data.count} طلب</span></td>
+                    <td style={{ padding: "1rem", fontWeight: "bold", color: "#10b981" }}>{data.totalRevenue.toLocaleString()} ج.م</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot style={{ background: "#f8fafc", borderTop: "2px solid #e2e8f0" }}>
+                <tr>
+                  <td colSpan={2} style={{ padding: "1rem", fontWeight: "bold", textAlign: "left" }}>إجمالي الطلبات:</td>
+                  <td style={{ padding: "1rem", fontWeight: "bold" }}>
+                    <span style={{ background: "#dbeafe", color: "#1e3a8a", padding: "0.25rem 0.75rem", borderRadius: "999px", fontSize: "0.9rem" }}>
+                      {allBranches.reduce((sum, [_, data]) => sum + data.count, 0)} طلب
+                    </span>
+                  </td>
+                  <td style={{ padding: "1rem", fontWeight: "bold", color: "#10b981" }}>
+                    {allBranches.reduce((sum, [_, data]) => sum + data.totalRevenue, 0).toLocaleString()} ج.م
                   </td>
                 </tr>
               </tfoot>
