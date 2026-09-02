@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
           
           const text = govName.replace(/ة/g, 'ه').replace(/[أإآ]/g, 'ا');
           
-          if (text.includes("قاهره") || text.includes("مدينة نصر") || text.includes("مصر الجديده") || text.includes("تجمع") || text.includes("معادى") || text.includes("حلوان") || text.includes("شروق") || text.includes("رحاب") || text.includes("مدينتى") || text.includes("مرج") || text.includes("سلام") || text.includes("شبرا مصر")) govName = "القاهرة";
+          if (text.includes("قاهره") || text.includes("مدينة نصر") || text.includes("مصر الجديده") || text.includes("تجمع") || text.includes("معادى") || text.includes("حلوان") || text.includes("شروق") || text.includes("رحاب") || text.includes("مدينتى") || text.includes("مرج") || text.includes("سلام") || text.includes("شبرا مصر") || text.includes("زيتون") || text.includes("مطريه") || text.includes("عين شمس")) govName = "القاهرة";
           else if (text.includes("اسكندريه") || text.includes("عجمى") || text.includes("برج العرب") || text.includes("سموحه") || text.includes("ميامى") || text.includes("سيدى بشر")) govName = "الإسكندرية";
           else if (text.includes("جيزه") || text.includes("اكتوبر") || text.includes("زايد") || text.includes("مهندسين") || text.includes("دقى") || text.includes("هرم") || text.includes("فيصل") || text.includes("عجوزه") || text.includes("امبابه")) govName = "الجيزة";
           else if (text.includes("قليوبيه") || text.includes("بنها") || text.includes("شبرا الخيمه") || text.includes("عبور") || text.includes("طوخ") || text.includes("قناطر") || text.includes("خانكه") || text.includes("قليوب")) govName = "القليوبية";
