@@ -111,33 +111,33 @@ export default function AnalyticsPage() {
           
           const text = govName.replace(/ة/g, 'ه').replace(/[أإآ]/g, 'ا');
           
-          if (text.includes("قاهره")) govName = "القاهرة";
-          else if (text.includes("اسكندريه")) govName = "الإسكندرية";
-          else if (text.includes("جيزه")) govName = "الجيزة";
-          else if (text.includes("قليوبيه")) govName = "القليوبية";
+          if (text.includes("قاهره") || text.includes("مدينة نصر") || text.includes("مصر الجديده") || text.includes("تجمع") || text.includes("معادى") || text.includes("حلوان") || text.includes("شروق") || text.includes("رحاب") || text.includes("مدينتى") || text.includes("مرج") || text.includes("سلام") || text.includes("شبرا مصر")) govName = "القاهرة";
+          else if (text.includes("اسكندريه") || text.includes("عجمى") || text.includes("برج العرب") || text.includes("سموحه") || text.includes("ميامى") || text.includes("سيدى بشر")) govName = "الإسكندرية";
+          else if (text.includes("جيزه") || text.includes("اكتوبر") || text.includes("زايد") || text.includes("مهندسين") || text.includes("دقى") || text.includes("هرم") || text.includes("فيصل") || text.includes("عجوزه") || text.includes("امبابه")) govName = "الجيزة";
+          else if (text.includes("قليوبيه") || text.includes("بنها") || text.includes("شبرا الخيمه") || text.includes("عبور") || text.includes("طوخ") || text.includes("قناطر") || text.includes("خانكه") || text.includes("قليوب")) govName = "القليوبية";
           else if (text.includes("بورسعيد") || text.includes("بور سعيد")) govName = "بورسعيد";
           else if (text.includes("سويس")) govName = "السويس";
           else if (text.includes("اسماعيليه")) govName = "الإسماعيلية";
-          else if (text.includes("شرقيه")) govName = "الشرقية";
-          else if (text.includes("دقهليه")) govName = "الدقهلية";
-          else if (text.includes("غربيه")) govName = "الغربية";
-          else if (text.includes("منوفيه")) govName = "المنوفية";
-          else if (text.includes("كفر الشيخ")) govName = "كفر الشيخ";
-          else if (text.includes("بحيره")) govName = "البحيرة";
-          else if (text.includes("دمياط")) govName = "دمياط";
-          else if (text.includes("مطروح")) govName = "مطروح";
+          else if (text.includes("شرقيه") || text.includes("زقازيق") || text.includes("عاشر من رمضان") || text.includes("بلبيس") || text.includes("فاقوس") || text.includes("منيا القمح") || text.includes("ابو كبير")) govName = "الشرقية";
+          else if (text.includes("دقهليه") || text.includes("منصوره") || text.includes("ميت غمر") || text.includes("سنبلاوين") || text.includes("دكرنس") || text.includes("بلقاس") || text.includes("طلخا") || text.includes("شربين")) govName = "الدقهلية";
+          else if (text.includes("غربيه") || text.includes("طنطا") || text.includes("محله") || text.includes("زفتى") || text.includes("سمنود") || text.includes("كفر الزيات") || text.includes("قطور")) govName = "الغربية";
+          else if (text.includes("منوفيه") || text.includes("شبين الكوم") || text.includes("سادات") || text.includes("اشمون") || text.includes("منوف") || text.includes("تلا") || text.includes("قويسنا") || text.includes("باجور")) govName = "المنوفية";
+          else if (text.includes("كفر الشيخ") || text.includes("دسوق") || text.includes("بلطيم") || text.includes("فوه") || text.includes("حامول")) govName = "كفر الشيخ";
+          else if (text.includes("بحيره") || text.includes("دمنهور") || text.includes("كفر الدوار") || text.includes("رشيد") || text.includes("ايتاى البارود") || text.includes("ابو المطامير") || text.includes("شبراخيت")) govName = "البحيرة";
+          else if (text.includes("دمياط") || text.includes("فارسكور") || text.includes("زرقا") || text.includes("كفر سعد")) govName = "دمياط";
+          else if (text.includes("مطروح") || text.includes("علمين") || text.includes("ضبعه")) govName = "مطروح";
           else if (text.includes("فيوم")) govName = "الفيوم";
-          else if (text.includes("بنى سويف") || text.includes("بني سويف")) govName = "بني سويف";
-          else if (text.includes("منيا")) govName = "المنيا";
-          else if (text.includes("اسيوط")) govName = "أسيوط";
-          else if (text.includes("سوهاج")) govName = "سوهاج";
-          else if (text.includes("قنا")) govName = "قنا";
-          else if (text.includes("اقصر")) govName = "الأقصر";
-          else if (text.includes("اسوان")) govName = "أسوان";
-          else if (text.includes("وادى جديد") || text.includes("وادي جديد")) govName = "الوادي الجديد";
-          else if (text.includes("بحر احمر") || text.includes("بحر الأحمر")) govName = "البحر الأحمر";
-          else if (text.includes("شمال سينا")) govName = "شمال سيناء";
-          else if (text.includes("جنوب سينا")) govName = "جنوب سيناء";
+          else if (text.includes("بنى سويف") || text.includes("بني سويف") || text.includes("واسطى") || text.includes("ببا")) govName = "بني سويف";
+          else if (text.includes("منيا") || text.includes("مغاغه") || text.includes("بنى مزار") || text.includes("سمالوط") || text.includes("ملوى")) govName = "المنيا";
+          else if (text.includes("اسيوط") || text.includes("ديروط") || text.includes("قوصيه") || text.includes("ابنوب") || text.includes("منفلوط")) govName = "أسيوط";
+          else if (text.includes("سوهاج") || text.includes("اخميم") || text.includes("جرجا") || text.includes("طما") || text.includes("طهطا") || text.includes("بلينا")) govName = "سوهاج";
+          else if (text.includes("قنا") || text.includes("نجع حمادى") || text.includes("قوص") || text.includes("دشنا")) govName = "قنا";
+          else if (text.includes("اقصر") || text.includes("اسنا") || text.includes("ارمنت")) govName = "الأقصر";
+          else if (text.includes("اسوان") || text.includes("ادفو") || text.includes("كوم امبو") || text.includes("دراو")) govName = "أسوان";
+          else if (text.includes("وادى جديد") || text.includes("وادي جديد") || text.includes("خارجه") || text.includes("داخله")) govName = "الوادي الجديد";
+          else if (text.includes("بحر احمر") || text.includes("بحر الأحمر") || text.includes("غردقه") || text.includes("سفاجا") || text.includes("قصير")) govName = "البحر الأحمر";
+          else if (text.includes("شمال سينا") || text.includes("عريش")) govName = "شمال سيناء";
+          else if (text.includes("جنوب سينا") || text.includes("شرم الشيخ") || text.includes("طور") || text.includes("دهب")) govName = "جنوب سيناء";
 
           if (!govMap[govName]) {
             govMap[govName] = { count: 0, totalRevenue: 0 };
