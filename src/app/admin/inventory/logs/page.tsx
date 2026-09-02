@@ -78,8 +78,30 @@ export default function InventoryLogsPage() {
     return true;
   });
 
-  const totalAdded = filteredLogs.reduce((sum, log) => log.change > 0 ? sum + log.change : sum, 0);
-  const totalDeducted = filteredLogs.reduce((sum, log) => log.change < 0 ? sum + Math.abs(log.change) : sum, 0);
+  const uniqueFilteredLogs = filteredLogs.reduce((acc, log) => {
+    const logDate = log.createdAt?.toDate ? log.createdAt.toDate() : new Date();
+    const isDuplicate = acc.some((existingLog: any) => {
+      if (
+        existingLog.modelNumber === log.modelNumber &&
+        existingLog.colorName === log.colorName &&
+        existingLog.change === log.change &&
+        existingLog.reason === log.reason
+      ) {
+        const existingDate = existingLog.createdAt?.toDate ? existingLog.createdAt.toDate() : new Date();
+        const diffMs = Math.abs(existingDate.getTime() - logDate.getTime());
+        return diffMs < 60000; // Within 60 seconds
+      }
+      return false;
+    });
+
+    if (!isDuplicate) {
+      acc.push(log);
+    }
+    return acc;
+  }, [] as LogEntry[]);
+
+  const totalAdded = uniqueFilteredLogs.reduce((sum, log) => log.change > 0 ? sum + log.change : sum, 0);
+  const totalDeducted = uniqueFilteredLogs.reduce((sum, log) => log.change < 0 ? sum + Math.abs(log.change) : sum, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-[family-name:var(--font-cairo)]" dir="rtl">
@@ -166,10 +188,10 @@ export default function InventoryLogsPage() {
               <tbody>
                 {loading ? (
                   <tr><td colSpan={7} className="p-8 text-center text-gray-500">جاري تحميل السجل...</td></tr>
-                ) : filteredLogs.length === 0 ? (
+                ) : uniqueFilteredLogs.length === 0 ? (
                   <tr><td colSpan={7} className="p-8 text-center text-gray-500">لا توجد حركات مسجلة.</td></tr>
                 ) : (
-                  filteredLogs.map(log => {
+                  uniqueFilteredLogs.map(log => {
                     const date = log.createdAt?.toDate ? log.createdAt.toDate() : new Date();
                     const isPositive = log.change > 0;
                     return (

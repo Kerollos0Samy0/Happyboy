@@ -75,12 +75,15 @@ export default function InventoryPage() {
     colorIndex: number;
   } | null>(null);
   const [quickAddAmount, setQuickAddAmount] = useState<string>("");
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
 
   const handleQuickAddSave = async () => {
-    if (!quickAddModal?.product || quickAddAmount === "") return;
+    if (!quickAddModal?.product || quickAddAmount === "" || isQuickAdding) return;
+    setIsQuickAdding(true);
     const amount = Number(quickAddAmount);
     if (amount === 0) {
       setQuickAddModal(null);
+      setIsQuickAdding(false);
       return;
     }
     try {
@@ -121,6 +124,8 @@ export default function InventoryPage() {
       setQuickAddAmount("");
     } catch (err) {
       alert("حدث خطأ أثناء تحديث الكمية");
+    } finally {
+      setIsQuickAdding(false);
     }
   };
 
@@ -1117,9 +1122,10 @@ export default function InventoryPage() {
             <div className="flex gap-3">
               <button 
                 onClick={handleQuickAddSave}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700"
+                disabled={isQuickAdding}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                تأكيد
+                {isQuickAdding ? "جاري الحفظ..." : "تأكيد"}
               </button>
               <button 
                 onClick={() => setQuickAddModal(null)}
