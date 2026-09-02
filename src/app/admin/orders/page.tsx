@@ -614,7 +614,7 @@ export default function LiveOrdersPage() {
     
     if (govFilter !== "all") {
       const g = o.customerGovernorate ? o.customerGovernorate.trim() : "";
-      if (govFilter === "غير محدد" && g !== "") return false;
+      if (govFilter === "غير محدد" && g !== "" && g !== "غير محدد" && g !== "undefined" && g !== "null") return false;
       if (govFilter !== "غير محدد" && g !== govFilter) return false;
     }
 
@@ -630,7 +630,11 @@ export default function LiveOrdersPage() {
   });
 
   const uniqueCountries = Array.from(new Set(orders.filter(o => !o.isDeleted).map(o => o.customerCountry || "مصر"))).sort();
-  const uniqueGovs = Array.from(new Set(orders.filter(o => !o.isDeleted && o.customerGovernorate && o.customerGovernorate.trim() !== "").map(o => o.customerGovernorate?.trim()))).sort();
+  const uniqueGovs = Array.from(new Set(
+    orders
+      .filter(o => !o.isDeleted && o.customerGovernorate && o.customerGovernorate.trim() !== "" && (!o.customerCountry || o.customerCountry === "مصر"))
+      .map(o => o.customerGovernorate?.trim())
+  )).sort();
 
   const filteredOrders = filterStatus === "all"
     ? visibleOrders
@@ -1071,7 +1075,7 @@ export default function LiveOrdersPage() {
                 </div>
               )}
 
-              {uniqueGovs.length > 0 && (
+              {uniqueGovs.length > 0 && (countryFilter === "all" || countryFilter === "مصر") && (
                 <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
                   <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>المحافظة:</span>
                   <select
