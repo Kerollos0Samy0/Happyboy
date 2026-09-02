@@ -1,4 +1,4 @@
-﻿
+
 "use client";
 import { useEffect, useState } from "react";
 import { db } from "../../../../lib/firebase";
@@ -23,6 +23,8 @@ export default function InventoryLogsPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [daysFilter, setDaysFilter] = useState("all");
+  const [userFilter, setUserFilter] = useState("all");
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -43,11 +45,41 @@ export default function InventoryLogsPage() {
     fetchLogs();
   }, []);
 
-  const filteredLogs = logs.filter(log => 
-    log.modelNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.reason?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const uniqueUsers = Array.from(new Set(logs.map(log => log.employeeName).filter(Boolean)));
+
+  const filteredLogs = logs.filter(log => {
+    const matchesSearch = log.modelNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.reason?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    if (userFilter !== 'all' && log.employeeName !== userFilter) return false;
+
+    if (daysFilter !== 'all') {
+      const logDate = log.createdAt?.toDate ? log.createdAt.toDate() : new Date();
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      if (daysFilter === 'today') {
+        const logDay = new Date(logDate.getFullYear(), logDate.getMonth(), logDate.getDate());
+        if (logDay.getTime() !== today.getTime()) return false;
+      } else if (daysFilter === '7') {
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        if (logDate < sevenDaysAgo) return false;
+      } else if (daysFilter === '30') {
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        if (logDate < thirtyDaysAgo) return false;
+      }
+    }
+    
+    return true;
+  });
+
+  const totalAdded = filteredLogs.reduce((sum, log) => log.change > 0 ? sum + log.change : sum, 0);
+  const totalDeducted = filteredLogs.reduce((sum, log) => log.change < 0 ? sum + Math.abs(log.change) : sum, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-[family-name:var(--font-cairo)]" dir="rtl">
@@ -66,8 +98,23 @@ export default function InventoryLogsPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-          <div className="relative max-w-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between border-r-4 border-r-green-500">
+            <div>
+              <p className="text-gray-500 font-medium mb-1">إجمالي القطع المضافة</p>
+              <p className="text-3xl font-black text-green-600">+{totalAdded}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between border-r-4 border-r-red-500">
+            <div>
+              <p className="text-gray-500 font-medium mb-1">إجمالي القطع المخصومة</p>
+              <p className="text-3xl font-black text-red-600">-{totalDeducted}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative max-w-md w-full">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input 
               type="text" 
@@ -76,6 +123,29 @@ export default function InventoryLogsPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+          </div>
+          
+          <div className="flex gap-2 w-full md:w-auto">
+            <select
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              className="w-full md:w-auto px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+            >
+              <option value="all">كل المستخدمين</option>
+              {uniqueUsers.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))}
+            </select>
+            <select
+              value={daysFilter}
+              onChange={(e) => setDaysFilter(e.target.value)}
+              className="w-full md:w-auto px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+            >
+              <option value="all">كل الأيام</option>
+              <option value="today">اليوم</option>
+              <option value="7">آخر 7 أيام</option>
+              <option value="30">آخر 30 يوم</option>
+            </select>
           </div>
         </div>
 
