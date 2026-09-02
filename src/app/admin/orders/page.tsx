@@ -106,6 +106,7 @@ export default function LiveOrdersPage() {
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [govFilter, setGovFilter] = useState<string>("all");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
@@ -610,6 +611,12 @@ export default function LiveOrdersPage() {
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
     if (countryFilter !== "all" && orderCountry !== countryFilter) return false;
+    
+    if (govFilter !== "all") {
+      const g = o.customerGovernorate ? o.customerGovernorate.trim() : "";
+      if (govFilter === "غير محدد" && g !== "") return false;
+      if (govFilter !== "غير محدد" && g !== govFilter) return false;
+    }
 
     if (isOwner) {
       if (branchFilter !== "all" && orderBranch !== branchFilter) return false;
@@ -623,6 +630,7 @@ export default function LiveOrdersPage() {
   });
 
   const uniqueCountries = Array.from(new Set(orders.filter(o => !o.isDeleted).map(o => o.customerCountry || "مصر"))).sort();
+  const uniqueGovs = Array.from(new Set(orders.filter(o => !o.isDeleted && o.customerGovernorate && o.customerGovernorate.trim() !== "").map(o => o.customerGovernorate?.trim()))).sort();
 
   const filteredOrders = filterStatus === "all"
     ? visibleOrders
@@ -1060,6 +1068,35 @@ export default function LiveOrdersPage() {
                       {country}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {uniqueGovs.length > 0 && (
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569", width: "60px" }}>المحافظة:</span>
+                  <select
+                    value={govFilter}
+                    onChange={(e) => setGovFilter(e.target.value)}
+                    style={{
+                      padding: "0.4rem 0.8rem",
+                      borderRadius: "0.5rem",
+                      border: govFilter !== "all" ? "2px solid #f59e0b" : "1px solid #cbd5e1",
+                      background: govFilter !== "all" ? "#fef3c7" : "#fff",
+                      color: govFilter !== "all" ? "#b45309" : "#475569",
+                      fontFamily: "inherit",
+                      fontWeight: 700,
+                      fontSize: "0.8rem",
+                      cursor: "pointer",
+                      outline: "none",
+                      minWidth: "200px"
+                    }}
+                  >
+                    <option value="all">كل المحافظات</option>
+                    <option value="غير محدد">غير محدد (فارغ)</option>
+                    {uniqueGovs.map(gov => (
+                      <option key={gov} value={gov}>{gov}</option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
