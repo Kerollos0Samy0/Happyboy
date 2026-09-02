@@ -107,11 +107,47 @@ export default function AnalyticsPage() {
         countryMap[country].totalRevenue += orderTotal;
 
         if (order.customerGovernorate && country === "مصر") {
-          if (!govMap[order.customerGovernorate]) {
-            govMap[order.customerGovernorate] = { count: 0, totalRevenue: 0 };
+          let govName = order.customerGovernorate.trim();
+          // Normalize Arabic text to avoid duplicates
+          govName = govName
+            .replace(/^إ/, 'ا').replace(/^أ/, 'ا').replace(/^آ/, 'ا')
+            .replace(/ة$/, 'ه')
+            .replace("اسكندريه", "الاسكندريه")
+            .replace("الاسكندرية", "الاسكندريه")
+            .replace("القاهرة", "القاهره")
+            .replace("الجيزة", "الجيزه")
+            .replace("الغربية", "الغربيه")
+            .replace("الدقهلية", "الدقهليه")
+            .replace("الشرقية", "الشرقيه")
+            .replace("المنوفية", "المنوفيه")
+            .replace("القليوبية", "القليوبيه")
+            .replace("البحيرة", "البحيره")
+            .replace("الإسماعيلية", "الاسماعيليه")
+            .replace("الاسماعيلية", "الاسماعيليه")
+            .replace("بني سويف", "بنى سويف")
+            .replace("الوادي الجديد", "الوادى الجديد")
+            .replace("بورسعيد", "بور سعيد");
+            
+          // Now fix some presentation names back to their correct Arabic spelling
+          if (govName === "القاهره") govName = "القاهرة";
+          if (govName === "الاسكندريه" || govName === "اسكندريه" || govName === "إسكندرية") govName = "الإسكندرية";
+          if (govName === "الجيزه") govName = "الجيزة";
+          if (govName === "الغربيه") govName = "الغربية";
+          if (govName === "الدقهليه") govName = "الدقهلية";
+          if (govName === "الشرقيه") govName = "الشرقية";
+          if (govName === "المنوفيه") govName = "المنوفية";
+          if (govName === "القليوبيه") govName = "القليوبية";
+          if (govName === "البحيره") govName = "البحيرة";
+          if (govName === "الاسماعيليه") govName = "الإسماعيلية";
+          if (govName === "بنى سويف") govName = "بني سويف";
+          if (govName === "الوادى الجديد") govName = "الوادي الجديد";
+          if (govName === "بور سعيد") govName = "بورسعيد";
+
+          if (!govMap[govName]) {
+            govMap[govName] = { count: 0, totalRevenue: 0 };
           }
-          govMap[order.customerGovernorate].count += 1;
-          govMap[order.customerGovernorate].totalRevenue += orderTotal;
+          govMap[govName].count += 1;
+          govMap[govName].totalRevenue += orderTotal;
         }
 
         const empName = getDisplayEmployee(order.employeeName);
