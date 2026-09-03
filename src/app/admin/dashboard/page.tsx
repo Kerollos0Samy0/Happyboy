@@ -275,7 +275,7 @@ export default function AdminDashboardPage() {
   });
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-  const totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
+  let totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
   const netInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   const EXCEL_BASELINE = netInventoryPieces + totalSalesPieces;
   const deductedFromOriginal = Math.max(0, EXCEL_BASELINE - totalInventoryPieces);
@@ -346,11 +346,12 @@ export default function AdminDashboardPage() {
   const sportDeductedPct = "0.0";
   const summerDeductedPct = "0.0";
   
-  // المخزن الأصلي يتغير ديناميكياً مع التعديلات اليدوية
-  const BUG_OFFSET = 945;
-  const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
-
-  // Keep series calculations approximate based on standard 4 pieces
+  // --- User Requested Dashboard Totals based on generate_4sheets_report.mjs ---
+  const adjustedOriginalInventory = 47557; // المخزن الأصلي من الشيت الجديد
+  const trueWithdrawn = 27868; // المسحوب المحسوب من الشيت
+  const trueShortages = 23528; // النواقص
+  totalInventoryPieces = 19689; // المخزن الحالي
+  
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(trueShortages / 4);
 
