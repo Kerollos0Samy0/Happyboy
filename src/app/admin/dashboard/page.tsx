@@ -29,12 +29,9 @@ const getCategoryName = (modelNumber: string) => {
 };
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
-  if (sizes && sizes.length > 0) return sizes.length;
-  
   const category = getCategoryName(modelNumber);
   if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
-  
-  return 1;
+  return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
 interface Order {
@@ -336,21 +333,21 @@ export default function AdminDashboardPage() {
 
   const deductedBoys = Math.max(0, totalBoysSales - negBoys);
   const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
-  const deductedSport = Math.max(0, totalSportSales - negSport);
-  const deductedSummer = Math.max(0, totalSummerSales - negSummer);
+  // اليوزر أكد إن الرياضي والسمر مكانش ليهم أي رصيد موجب، فكل مبيعاتهم نواقص إجبارياً
+  const deductedSport = 0;
+  const deductedSummer = 0;
+  
   const totalDeducted = deductedBoys + deductedGirls + deductedSport + deductedSummer;
+  const trueWithdrawn = totalDeducted;
+  const trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
 
   const boysDeductedPct = totalDeducted > 0 ? ((deductedBoys / totalDeducted) * 100).toFixed(1) : "0.0";
   const girlsDeductedPct = totalDeducted > 0 ? ((deductedGirls / totalDeducted) * 100).toFixed(1) : "0.0";
-  const sportDeductedPct = totalDeducted > 0 ? ((deductedSport / totalDeducted) * 100).toFixed(1) : "0.0";
-  const summerDeductedPct = totalDeducted > 0 ? ((deductedSummer / totalDeducted) * 100).toFixed(1) : "0.0";
-
-  const trueShortages = totalNeg;
-  const trueWithdrawn = Math.max(0, totalSalesPieces - trueShortages);
+  const sportDeductedPct = "0.0";
+  const summerDeductedPct = "0.0";
   
   // المخزن الأصلي يتغير ديناميكياً مع التعديلات اليدوية
-  // تم طرح 5165 لمعادلة النواقص القديمة التي لم تسجل بالسالب، ليظل الأساس 47725
-  const BUG_OFFSET = 5165;
+  const BUG_OFFSET = 5048;
   const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
 
   // Keep series calculations approximate based on standard 4 pieces
