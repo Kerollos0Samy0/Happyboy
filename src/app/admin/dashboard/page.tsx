@@ -142,11 +142,6 @@ export default function AdminDashboardPage() {
   let totalSalesPieces = 0;
   let totalSalesSeries = 0;
   
-  let totalBoysSales = 0;
-  let totalGirlsSales = 0;
-  let totalSportSales = 0;
-  let totalSummerSales = 0;
-  
   let pendingOrders = 0;
   let shippedOrders = 0;
   let deliveredOrders = 0;
@@ -317,27 +312,6 @@ export default function AdminDashboardPage() {
     }
   });
 
-  const boysPosPct = totalInventoryPieces > 0 ? ((posBoys / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-  const girlsPosPct = totalInventoryPieces > 0 ? ((posGirls / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-  const sportPosPct = totalInventoryPieces > 0 ? ((posSport / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-  const summerPosPct = totalInventoryPieces > 0 ? ((posSummer / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-
-  const deductedBoys = Math.max(0, totalBoysSales - negBoys);
-  const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
-  const deductedSport = Math.max(0, totalSportSales - negSport);
-  const deductedSummer = Math.max(0, totalSummerSales - negSummer);
-  
-  const deductedOriginalExcelTotal = deductedBoys + deductedGirls;
-  
-  const boysDeductedPct = deductedOriginalExcelTotal > 0 ? ((deductedBoys / deductedOriginalExcelTotal) * 100).toFixed(1) : "0.0";
-  const girlsDeductedPct = deductedOriginalExcelTotal > 0 ? ((deductedGirls / deductedOriginalExcelTotal) * 100).toFixed(1) : "0.0";
-  const sportDeductedPct = deductedFromOriginal > 0 ? ((deductedSport / deductedFromOriginal) * 100).toFixed(1) : "0.0";
-  const summerDeductedPct = deductedFromOriginal > 0 ? ((deductedSummer / deductedFromOriginal) * 100).toFixed(1) : "0.0";
-
-  const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
-  const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
-  const sportSalesPct = totalSalesPieces > 0 ? ((totalSportSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
-  const summerSalesPct = totalSalesPieces > 0 ? ((totalSummerSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
 
   const boysNegPct = totalNeg > 0 ? ((negBoys / totalNeg) * 100).toFixed(1) : "0.0";
   const girlsNegPct = totalNeg > 0 ? ((negGirls / totalNeg) * 100).toFixed(1) : "0.0";
@@ -493,12 +467,7 @@ export default function AdminDashboardPage() {
                       <span style={{ color: "#eab308" }}>رياضي: %{sportNegPct}</span>
                       <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerNegPct}</span>
                     </div>
-                  </div>
-                  </div>
-
-
-
-                </div>
+                  </div>                </div>
               </div>
             </div>
           </div>
