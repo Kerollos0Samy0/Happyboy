@@ -347,7 +347,7 @@ export default function AdminDashboardPage() {
   const summerDeductedPct = "0.0";
   
   // المخزن الأصلي يتغير ديناميكياً مع التعديلات اليدوية
-  const BUG_OFFSET = 5048;
+  const BUG_OFFSET = 945;
   const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
 
   // Keep series calculations approximate based on standard 4 pieces
