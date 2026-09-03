@@ -106,13 +106,33 @@ async function main() {
     }
   });
 
-  // We are no longer relying on المخزن.xlsx for original stock.
-  // Instead, we calculate it dynamically based on DB current stock and sales.
+  console.log("Reading المخزن.xlsx for Original Stock...");
+  const wbStore = XLSX.readFile("المخزن.xlsx");
+  const wsStore = wbStore.Sheets[wbStore.SheetNames[0]];
+  const storeData = XLSX.utils.sheet_to_json(wsStore);
+
+  const originalStockMap = new Map(); // barcode -> info
+  
+  for (const row of storeData) {
+    let cb = (row["الباركود"] || "").toString().trim();
+    if (cb) {
+      const qty = Number(row["عدد القطع"] || row["قطعة"]) || 0;
+      const cat = (row["التصنيف2"] || row["التصنيف"] || "").toString().trim();
+      const model = (row["كود الموديل"] || row["الموديل"] || "").toString().trim();
+      const colorName = (row["اللون"] || "").toString().trim();
+      
+      if (!originalStockMap.has(cb)) {
+        originalStockMap.set(cb, { originalQty: 0, categoryExcel: cat, model, colorName });
+      }
+      originalStockMap.get(cb).originalQty += qty;
+    }
+  }
+
   const categoryJsonStr = readFileSync(join(__dirname, "model_categories.json"), "utf-8");
   const modelCategories = JSON.parse(categoryJsonStr);
 
-  // Combine all barcodes
-  const allBarcodes = new Set([...productsMap.keys(), ...dbCurrentStockMap.keys(), ...soldMap.keys()]);
+  // Combine barcodes from original stock and sales
+  const allBarcodes = new Set([...originalStockMap.keys(), ...soldMap.keys()]);
   const categoriesMap = new Map();
   // Initialize the 4 specific categories
   categoriesMap.set("الكل", []);
@@ -125,29 +145,25 @@ async function main() {
   for (const cb of allBarcodes) {
     if (!cb) continue; // Skip empty barcodes
     
-    const pData = productsMap.get(cb) || { modelNumber: "", category: "", name: "", colorName: "" };
+    const oData = originalStockMap.get(cb) || { originalQty: 0, categoryExcel: "", model: "", colorName: "" };
+    const pData = productsMap.get(cb) || { modelNumber: "", name: "", colorName: "" };
     
-    const model = pData.modelNumber;
-    const name = pData.name;
-    const colorName = pData.colorName;
+    const model = pData.modelNumber || oData.model;
+    const name = pData.name || ""; 
+    const colorName = pData.colorName || oData.colorName;
     
+    const originalQty = oData.originalQty || 0;
     const sales = soldMap.get(cb) || 0;
-    const currentDB = dbCurrentStockMap.get(cb) || 0;
     
-    // User formulas:
-    // النواقص (Shortages) = الموديلات اللي كميتها اقل من 0
-    const nawakes = currentDB < 0 ? Math.abs(currentDB) : 0;
+    // User logic:
+    // النواقص = الموديلات اللي كميتها اقل من 0 (Sales exceed Original)
+    const nawakes = sales > originalQty ? sales - originalQty : 0;
     
-    // المخزن (Current Stock) = اجمالي عدد القطع الفعلي اللي في المخزن (Positive values)
-    const makhzanHaly = currentDB > 0 ? currentDB : 0;
+    // المخزن الحالي = الباقي الموجب
+    const makhzanHaly = originalQty > sales ? originalQty - sales : 0;
     
-    // المسحوب (Deducted) = المبيعات - النواقص
-    // Ensure this doesn't go below 0 just in case.
-    let mas7oob = sales - nawakes;
-    if (mas7oob < 0) mas7oob = 0; 
-    
-    // المخزن الاصلي (Original Stock) = المسحوب + المخزن الحالي
-    const originalQty = mas7oob + makhzanHaly;
+    // المسحوب = المبيعات - النواقص (أو الأقل بين المبيعات والأصلي)
+    const mas7oob = sales - nawakes;
     
     // Skip if there's no data for this barcode at all
     if (originalQty === 0 && sales === 0) continue;
