@@ -342,12 +342,15 @@ export default function AdminDashboardPage() {
   const sportDeductedPct = totalDeducted > 0 ? ((deductedSport / totalDeducted) * 100).toFixed(1) : "0.0";
   const summerDeductedPct = totalDeducted > 0 ? ((deductedSummer / totalDeducted) * 100).toFixed(1) : "0.0";
 
-  const trueWithdrawn = 45629 + 2096 - totalInventoryPieces;
-  const trueShortages = totalSalesPieces - trueWithdrawn;
+  const trueShortages = totalNeg;
+  const trueWithdrawn = Math.max(0, totalSalesPieces - trueShortages);
+  
+  // المخزن الأصلي + التعديلات اليدوية = المخزن الحالي + المسحوب
+  const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn;
 
   // Keep series calculations approximate based on standard 4 pieces
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
-  const totalShortagesSeries = Math.round(totalShortagesPieces / 4);
+  const totalShortagesSeries = Math.round(trueShortages / 4);
 
   const productQtyMap: Record<string, number> = {};
   products.forEach(p => { productQtyMap[p.modelNumber] = Number(p.quantity) || 0; });
@@ -440,7 +443,14 @@ export default function AdminDashboardPage() {
             <div className={styles.summaryCard} style={{ gridColumn: "1 / -1", width: "100%", display: "block", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
               <div style={{ width: "100%" }}>
                 <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#1e293b" }}>📊 ملخص دقيق للمخزن والمبيعات</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
+                
+                <div style={{ padding: "1rem", background: "#f1f5f9", borderRadius: "8px", border: "1px dashed #cbd5e1", marginBottom: "1rem", textAlign: "center" }}>
+                  <p style={{ fontSize: "0.9rem", color: "#475569", fontWeight: "bold" }}>إجمالي المخزن الأصلي (شاملاً التعديلات اليدوية)</p>
+                  <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#334155" }}>{adjustedOriginalInventory.toLocaleString()} <span style={{ fontSize: "1rem", color: "#64748b" }}>قطعة</span></h4>
+                  <p style={{ fontSize: "0.75rem", color: "#94a3b8" }}>هذا الرقم يمثل المخزن الأصلي مضافاً إليه أي تعديلات يدوية تمت في النظام</p>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
                   
                   {/* Total Sales */}
                   <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
