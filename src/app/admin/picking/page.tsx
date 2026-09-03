@@ -85,6 +85,7 @@ export default function OrderPickingPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all_active");
+  const [colorFilter, setColorFilter] = useState("all");
   const [expandedModels, setExpandedModels] = useState<Record<string, boolean>>({});
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
   const [updating, setUpdating] = useState(false);
@@ -167,12 +168,21 @@ export default function OrderPickingPage() {
 
   const markOrderAsPicked = async (order: Order) => {
     if (updating) return;
-    if (!confirm("هل أنت متأكد من تأكيد تحضير جميع الأصناف في هذا الأوردر؟")) return;
+    if (!confirm(colorFilter === "all" ? "هل أنت متأكد من تأكيد تحضير جميع الأصناف في هذا الأوردر؟" : "هل أنت متأكد من تأكيد تحضير الأصناف باللون المحدد في هذا الأوردر؟")) return;
     setUpdating(true);
     try {
       const orderRef = doc(db, "orders", order.id);
-      const newItems = (order.items || []).map(item => ({ ...item, isPicked: true }));
-      await updateDoc(orderRef, { items: newItems });
+      const orderDoc = await getDoc(orderRef);
+      if (orderDoc.exists()) {
+        const orderData = orderDoc.data() as Order;
+        const newItems = (orderData.items || []).map(item => {
+          if (colorFilter === "all" || item.selectedColor === colorFilter) {
+            return { ...item, isPicked: true };
+          }
+          return item;
+        });
+        await updateDoc(orderRef, { items: newItems });
+      }
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("حدث خطأ أثناء تحديث حالة التجهيز");
@@ -181,6 +191,19 @@ export default function OrderPickingPage() {
     }
   };
 
+  // Extract all unique colors from orders
+  const allColors = new Set<string>();
+  orders.forEach(order => {
+    if (Array.isArray(order.items)) {
+      order.items.forEach(item => {
+        if (item.selectedColor) {
+          allColors.add(item.selectedColor);
+        }
+      });
+    }
+  });
+  const uniqueColors = Array.from(allColors).sort();
+
   // Group items by modelNumber
   const groupedModels: Record<string, PickingModel> = {};
 
@@ -188,6 +211,8 @@ export default function OrderPickingPage() {
     if (Array.isArray(order.items)) {
       order.items.forEach((item, index) => {
         if (!item.modelNumber) return;
+        
+        if (colorFilter !== "all" && item.selectedColor !== colorFilter) return;
 
         if (!groupedModels[item.modelNumber]) {
           groupedModels[item.modelNumber] = {
@@ -250,11 +275,18 @@ export default function OrderPickingPage() {
   const ordersArray = orders.filter(order => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return (order.orderNumber || "").toLowerCase().includes(query) || 
+      const matchesSearch = (order.orderNumber || "").toLowerCase().includes(query) || 
              order.customerName.toLowerCase().includes(query) || 
              (order.customerPhone || "").includes(query) ||
              (order.items || []).some(i => i.modelNumber && i.modelNumber.toLowerCase().includes(query));
+      if (!matchesSearch) return false;
     }
+    
+    if (colorFilter !== "all") {
+      const hasColor = (order.items || []).some(item => item.selectedColor === colorFilter);
+      if (!hasColor) return false;
+    }
+    
     return true;
   });
 
@@ -307,8 +339,8 @@ export default function OrderPickingPage() {
             </a>
           </div>
           
-          <div style={{ display: "flex", gap: "1rem", width: "100%", maxWidth: "500px", marginTop: "1rem" }}>
-            <div style={{ position: "relative", flex: 1 }}>
+          <div style={{ display: "flex", gap: "1rem", width: "100%", marginTop: "1rem", flexWrap: "wrap" }}>
+            <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={18} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
               <input 
                 type="text" 
@@ -319,9 +351,19 @@ export default function OrderPickingPage() {
               />
             </div>
             <select
+              value={colorFilter}
+              onChange={(e) => setColorFilter(e.target.value)}
+              style={{ padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem", background: "white", cursor: "pointer", flex: "1 1 150px", maxWidth: "250px" }}
+            >
+              <option value="all">🎨 جميع الألوان</option>
+              {uniqueColors.map(color => (
+                <option key={color} value={color}>{color}</option>
+              ))}
+            </select>
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem", background: "white", cursor: "pointer", minWidth: "150px" }}
+              style={{ padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none", fontSize: "0.95rem", background: "white", cursor: "pointer", flex: "1 1 150px", maxWidth: "250px" }}
             >
               <option value="all_active">قيد الانتظار والدفع (افتراضي)</option>
               <option value="pending">⏳ قيد الانتظار</option>
@@ -501,7 +543,10 @@ export default function OrderPickingPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {ordersArray.map((order) => {
                 const isExpanded = expandedOrders[order.id];
-                const orderItems = order.items || [];
+                const orderItems = colorFilter === "all" 
+                  ? (order.items || []) 
+                  : (order.items || []).filter(item => item.selectedColor === colorFilter);
+                
                 const totalItems = orderItems.length;
                 const pickedItems = orderItems.filter(i => i.isPicked).length;
                 const isAllPicked = pickedItems === totalItems && totalItems > 0;
@@ -602,7 +647,9 @@ export default function OrderPickingPage() {
                               </tr>
                             </thead>
                             <tbody>
-                              {orderItems.map((item, idx) => (
+                              {orderItems.map((item, idx) => {
+                                const originalIndex = order.items ? order.items.indexOf(item) : idx;
+                                return (
                                 <tr key={`${item.cartItemId || idx}`} style={{ borderBottom: idx === orderItems.length - 1 ? "none" : "1px solid #e2e8f0" }}>
                                   <td style={{ padding: "1rem 0.75rem", fontWeight: "bold", color: "#334155" }}>
                                     {item.name}
@@ -627,7 +674,7 @@ export default function OrderPickingPage() {
                                       </span>
                                     ) : (
                                       <button 
-                                        onClick={(e) => { e.stopPropagation(); markAsPicked(order.id, idx); }}
+                                        onClick={(e) => { e.stopPropagation(); markAsPicked(order.id, originalIndex); }}
                                         disabled={updating}
                                         style={{ 
                                           background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", 
@@ -640,7 +687,8 @@ export default function OrderPickingPage() {
                                     )}
                                   </td>
                                 </tr>
-                              ))}
+                                );
+                              })}
                             </tbody>
                           </table>
                         )}
