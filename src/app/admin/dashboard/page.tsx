@@ -141,8 +141,10 @@ export default function AdminDashboardPage() {
 
   let totalSalesPieces = 0;
   let totalSalesSeries = 0;
-  
-  let pendingOrders = 0;
+  let totalBoysSales = 0;
+  let totalGirlsSales = 0;
+  let totalSportSales = 0;
+  let totalSummerSales = 0;
   let shippedOrders = 0;
   let deliveredOrders = 0;
 
@@ -231,6 +233,12 @@ export default function AdminDashboardPage() {
         totalSalesPieces += totalPieces;
         totalSalesSeries += totalSeries;
 
+        const category = getCategoryName(item.modelNumber);
+        if (category === "رياضي") totalSportSales += totalPieces;
+        else if (category.includes("سمر")) totalSummerSales += totalPieces;
+        else if (category.includes("ولادي")) totalBoysSales += totalPieces;
+        else if (category.includes("بناتي")) totalGirlsSales += totalPieces;
+
         if (!modelSalesMap[item.modelNumber]) {
           modelSalesMap[item.modelNumber] = { count: 0, name: item.name };
         }
@@ -278,7 +286,10 @@ export default function AdminDashboardPage() {
   let negSummer = 0;
   let totalNeg = 0;
   
-
+  let posBoys = 0;
+  let posGirls = 0;
+  let posSport = 0;
+  let posSummer = 0;
 
   products.forEach(p => {
     let qty = Number(p.quantity) || 0;
@@ -286,7 +297,12 @@ export default function AdminDashboardPage() {
 
     const cat = getCategoryName(p.modelNumber);
 
-
+    if (posQty > 0) {
+      if (cat === "رياضي") posSport += posQty;
+      else if (cat.includes("سمر")) posSummer += posQty;
+      else if (cat.includes("ولادي")) posBoys += posQty;
+      else if (cat.includes("بناتي")) posGirls += posQty;
+    }
 
     if (qty < 0) {
       const absQty = Math.abs(qty);
@@ -299,10 +315,34 @@ export default function AdminDashboardPage() {
   });
 
 
+  const boysPosPct = totalInventoryPieces > 0 ? ((posBoys / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const girlsPosPct = totalInventoryPieces > 0 ? ((posGirls / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const sportPosPct = totalInventoryPieces > 0 ? ((posSport / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+  const summerPosPct = totalInventoryPieces > 0 ? ((posSummer / totalInventoryPieces) * 100).toFixed(1) : "0.0";
+
   const boysNegPct = totalNeg > 0 ? ((negBoys / totalNeg) * 100).toFixed(1) : "0.0";
   const girlsNegPct = totalNeg > 0 ? ((negGirls / totalNeg) * 100).toFixed(1) : "0.0";
   const sportNegPct = totalNeg > 0 ? ((negSport / totalNeg) * 100).toFixed(1) : "0.0";
   const summerNegPct = totalNeg > 0 ? ((negSummer / totalNeg) * 100).toFixed(1) : "0.0";
+
+  const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const sportSalesPct = totalSalesPieces > 0 ? ((totalSportSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+  const summerSalesPct = totalSalesPieces > 0 ? ((totalSummerSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
+
+  const deductedBoys = Math.max(0, totalBoysSales - negBoys);
+  const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
+  const deductedSport = Math.max(0, totalSportSales - negSport);
+  const deductedSummer = Math.max(0, totalSummerSales - negSummer);
+  const totalDeducted = deductedBoys + deductedGirls + deductedSport + deductedSummer;
+
+  const boysDeductedPct = totalDeducted > 0 ? ((deductedBoys / totalDeducted) * 100).toFixed(1) : "0.0";
+  const girlsDeductedPct = totalDeducted > 0 ? ((deductedGirls / totalDeducted) * 100).toFixed(1) : "0.0";
+  const sportDeductedPct = totalDeducted > 0 ? ((deductedSport / totalDeducted) * 100).toFixed(1) : "0.0";
+  const summerDeductedPct = totalDeducted > 0 ? ((deductedSummer / totalDeducted) * 100).toFixed(1) : "0.0";
+
+  const trueWithdrawn = 45629 + 2096 - totalInventoryPieces;
+  const trueShortages = totalSalesPieces - trueWithdrawn;
 
   // Keep series calculations approximate based on standard 4 pieces
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
@@ -401,57 +441,51 @@ export default function AdminDashboardPage() {
                 <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#1e293b" }}>📊 ملخص دقيق للمخزن والمبيعات</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
                   
-                  {/* First Row: Inventory Math */}
-                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderTop: "4px solid #10b981", gridColumn: "1 / -1", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-                    <p style={{ fontSize: "1rem", color: "#64748b", fontWeight: "bold", marginBottom: "1rem", textAlign: "center" }}>معادلة المخزن الموجب (رأس المال الحالي)</p>
-                    
-                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "1rem", textAlign: "center" }}>
-                      
-                      <div style={{ flex: "1 1 150px" }}>
-                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>الإكسيل الأصلي</p>
-                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>45,629</h4>
-                      </div>
-
-                      <div style={{ fontSize: "1.5rem", color: "#94a3b8", fontWeight: "bold" }}>+</div>
-
-                      <div style={{ flex: "1 1 150px" }}>
-                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>الإضافات الفعلية</p>
-                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#10b981" }}>2,096</h4>
-                      </div>
-
-                      <div style={{ fontSize: "1.5rem", color: "#94a3b8", fontWeight: "bold" }}>-</div>
-
-                      <div style={{ flex: "1 1 150px" }}>
-                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold", lineHeight: 1.2 }}>المسحوب الفعلي<br/><span style={{fontSize:"0.7rem"}}>(المتوفر من المخزن)</span></p>
-                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#f59e0b" }}>{(45629 + 2096 - totalInventoryPieces).toLocaleString()}</h4>
-                      </div>
-
-                      <div style={{ fontSize: "1.5rem", color: "#0f172a", fontWeight: "bold" }}>=</div>
-
-                      <div style={{ flex: "1 1 150px", background: "#ecfdf5", padding: "0.5rem", borderRadius: "8px" }}>
-                        <p style={{ fontSize: "0.85rem", color: "#047857", fontWeight: "bold" }}>المخزن الموجب الحالي</p>
-                        <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#047857" }}>{totalInventoryPieces.toLocaleString()}</h4>
-                      </div>
-
-                    </div>
-                  </div>
-                  
-                  {/* Second Row: Orders & Shortages */}
+                  {/* Total Sales */}
                   <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الأوردرات)</p>
-                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem" }}>كل القطع المطلوبة (متوفرة + نواقص)</p>
+                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysSalesPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsSalesPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportSalesPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerSalesPct}</span>
+                    </div>
                   </div>
 
+                  {/* Positive Inventory */}
+                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب الحالي</p>
+                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#047857" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysPosPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsPosPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportPosPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerPosPct}</span>
+                    </div>
+                  </div>
+
+                  {/* Shortages */}
                   <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
                     <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي النواقص الفعلي (المطلوب طباعته)</p>
-                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#ef4444" }}>{(totalSalesPieces - (45629 + 2096 - totalInventoryPieces)).toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0.5rem 0" }}>يحتوي على النواقص المسجلة والمخفية للرياضي والسمر</p>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap" }}>
+                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#ef4444" }}>{trueShortages.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap", marginTop: "0.5rem" }}>
                       <span style={{ color: "#3b82f6" }}>أولادي: %{boysNegPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsNegPct}</span>
                       <span style={{ color: "#eab308" }}>رياضي: %{sportNegPct}</span>
                       <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerNegPct}</span>
+                    </div>
+                  </div>
+
+                  {/* Deducted / Withdrawn */}
+                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب الفعلي (المتوفر من المخزن)</p>
+                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#f59e0b" }}>{trueWithdrawn.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysDeductedPct}</span>
+                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
+                      <span style={{ color: "#eab308" }}>رياضي: %{sportDeductedPct}</span>
+                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerDeductedPct}</span>
                     </div>
                   </div>                </div>
               </div>
