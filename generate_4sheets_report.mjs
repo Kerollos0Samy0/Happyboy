@@ -114,12 +114,14 @@ async function main() {
   const originalStockMap = new Map(); // barcode -> info
   
   for (const row of storeData) {
-    let cb = (row["الباركود"] || "").toString().trim();
+    let rawBarcode = (row["الباركود"] || row["Code"] || "").toString().trim();
+    let cb = rawBarcode;
+    let model = (row["الكود"] || row["كود الموديل"] || row["الموديل"] || row["Code"] || "").toString().trim();
+
     if (cb) {
-      const qty = Number(row["عدد القطع"] || row["قطعة"]) || 0;
-      const cat = (row["التصنيف2"] || row["التصنيف"] || "").toString().trim();
-      const model = (row["كود الموديل"] || row["الموديل"] || "").toString().trim();
-      const colorName = (row["اللون"] || "").toString().trim();
+      const qty = Number(row["القطعة"] || row["عدد القطع"] || row["قطعة"]) || 0;
+      const cat = (row["التصنيف"] || row["التصنيف2"] || "").toString().trim();
+      const colorName = (row["اللون"] || row["Column1"] || "").toString().trim();
       
       if (!originalStockMap.has(cb)) {
         originalStockMap.set(cb, { originalQty: 0, categoryExcel: cat, model, colorName });
