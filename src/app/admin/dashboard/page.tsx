@@ -345,8 +345,10 @@ export default function AdminDashboardPage() {
   const trueShortages = totalNeg;
   const trueWithdrawn = Math.max(0, totalSalesPieces - trueShortages);
   
-  // المخزن الأصلي اللي اليوزر طلبه
-  const adjustedOriginalInventory = 47725;
+  // المخزن الأصلي يتغير ديناميكياً مع التعديلات اليدوية
+  // تم طرح 5165 لمعادلة النواقص القديمة التي لم تسجل بالسالب، ليظل الأساس 47725
+  const BUG_OFFSET = 5165;
+  const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
 
   // Keep series calculations approximate based on standard 4 pieces
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
