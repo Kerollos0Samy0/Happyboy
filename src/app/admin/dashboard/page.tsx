@@ -348,9 +348,8 @@ export default function AdminDashboardPage() {
   
   // --- User Requested Dashboard Totals based on generate_4sheets_report.mjs ---
   const adjustedOriginalInventory = 47557; // المخزن الأصلي من الشيت الجديد
-  trueWithdrawn = 27868; // المسحوب المحسوب من الشيت
-  trueShortages = 23528; // النواقص
-  totalInventoryPieces = 19689; // المخزن الحالي
+  trueWithdrawn = Math.max(0, adjustedOriginalInventory - totalInventoryPieces);
+  trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
   
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(trueShortages / 4);
