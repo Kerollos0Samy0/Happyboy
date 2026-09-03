@@ -145,6 +145,7 @@ export default function AdminDashboardPage() {
   let totalGirlsSales = 0;
   let totalSportSales = 0;
   let totalSummerSales = 0;
+  let pendingOrders = 0;
   let shippedOrders = 0;
   let deliveredOrders = 0;
 
