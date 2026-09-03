@@ -29,9 +29,12 @@ const getCategoryName = (modelNumber: string) => {
 };
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
+  if (sizes && sizes.length > 0) return sizes.length;
+  
   const category = getCategoryName(modelNumber);
   if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
-  return sizes && sizes.length > 0 ? sizes.length : 1;
+  
+  return 1;
 };
 
 interface Order {
@@ -156,11 +159,11 @@ export default function AdminDashboardPage() {
   const colorSalesMap: Record<string, Record<string, number>> = {};
 
   orders.forEach(order => {
+    if (order.status === "cancelled" || order.status === "ملغي" || order.isDeleted) return;
+
     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
     const orderTotal = Number(order.total) || 0;
     const orderDeposit = Number(order.deposit) || 0;
-
-    if (order.status === "cancelled" || order.isDeleted) return;
 
     if (orderDate >= today) salesToday += orderTotal;
     if (orderDate >= startOfMonth) salesMonth += orderTotal;
