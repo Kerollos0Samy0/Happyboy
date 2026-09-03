@@ -441,46 +441,59 @@ export default function AdminDashboardPage() {
                 <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#1e293b" }}>📊 ملخص دقيق للمخزن والمبيعات</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
                   
-                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #10b981" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المخزن الموجب (البضاعة المتبقية)</p>
-                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalInventoryPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center", fontSize: "0.875rem", fontWeight: "600" }}>
-                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysPosPct}</span>
-                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsPosPct}</span>
-                      <span style={{ color: "#eab308" }}>رياضي: %{sportPosPct}</span>
-                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerPosPct}</span>
+                  {/* First Row: Inventory Math */}
+                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderTop: "4px solid #10b981", gridColumn: "1 / -1", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <p style={{ fontSize: "1rem", color: "#64748b", fontWeight: "bold", marginBottom: "1rem", textAlign: "center" }}>معادلة المخزن الموجب (رأس المال الحالي)</p>
+                    
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "1rem", textAlign: "center" }}>
+                      
+                      <div style={{ flex: "1 1 150px" }}>
+                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>الإكسيل الأصلي</p>
+                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>45,629</h4>
+                      </div>
+
+                      <div style={{ fontSize: "1.5rem", color: "#94a3b8", fontWeight: "bold" }}>+</div>
+
+                      <div style={{ flex: "1 1 150px" }}>
+                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>الإضافات الفعلية</p>
+                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#10b981" }}>2,096</h4>
+                      </div>
+
+                      <div style={{ fontSize: "1.5rem", color: "#94a3b8", fontWeight: "bold" }}>-</div>
+
+                      <div style={{ flex: "1 1 150px" }}>
+                        <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold", lineHeight: 1.2 }}>المسحوب الفعلي<br/><span style={{fontSize:"0.7rem"}}>(المتوفر من المخزن)</span></p>
+                        <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#f59e0b" }}>{(45629 + 2096 - totalInventoryPieces).toLocaleString()}</h4>
+                      </div>
+
+                      <div style={{ fontSize: "1.5rem", color: "#0f172a", fontWeight: "bold" }}>=</div>
+
+                      <div style={{ flex: "1 1 150px", background: "#ecfdf5", padding: "0.5rem", borderRadius: "8px" }}>
+                        <p style={{ fontSize: "0.85rem", color: "#047857", fontWeight: "bold" }}>المخزن الموجب الحالي</p>
+                        <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#047857" }}>{totalInventoryPieces.toLocaleString()}</h4>
+                      </div>
+
                     </div>
                   </div>
                   
-                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>المسحوب من الإكسيل الأصلي</p>
-                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{deductedOriginalExcelTotal.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "1rem", display: "flex", gap: "20px", fontWeight: "bold", justifyContent: "center" }}>
-                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysDeductedPct}</span>
-                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsDeductedPct}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الفواتير)</p>
+                  {/* Second Row: Orders & Shortages */}
+                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #3b82f6", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي المبيعات (كل الأوردرات)</p>
                     <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalSalesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold", justifyContent: "center" }}>
-                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysSalesPct}</span>
-                      <span style={{ color: "#ec4899" }}>بناتي: %{girlsSalesPct}</span>
-                      <span style={{ color: "#eab308" }}>رياضي: %{sportSalesPct}</span>
-                      <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerSalesPct}</span>
-                    </div>
+                    <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem" }}>كل القطع المطلوبة (متوفرة + نواقص)</p>
                   </div>
 
-                  <div style={{ padding: "1rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444" }}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>مبيعات سالبة (النواقص)</p>
-                    <h4 style={{ fontSize: "1.5rem", margin: "0.5rem 0", color: "#0f172a" }}>{totalShortagesPieces.toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem", display: "flex", gap: "15px", fontWeight: "bold" }}>
-                      <span style={{ color: "#3b82f6" }}>اولادي: %{boysNegPct}</span>
+                  <div style={{ padding: "1.25rem", background: "#fff", borderRadius: "8px", borderLeft: "4px solid #ef4444", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "bold" }}>إجمالي النواقص الفعلي (المطلوب طباعته)</p>
+                    <h4 style={{ fontSize: "1.75rem", margin: "0.5rem 0", color: "#ef4444" }}>{(totalSalesPieces - (45629 + 2096 - totalInventoryPieces)).toLocaleString()} <span style={{ fontSize: "0.9rem", color: "#64748b" }}>قطعة</span></h4>
+                    <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0.5rem 0" }}>يحتوي على النواقص المسجلة والمخفية للرياضي والسمر</p>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", gap: "10px", fontWeight: "bold", flexWrap: "wrap" }}>
+                      <span style={{ color: "#3b82f6" }}>أولادي: %{boysNegPct}</span>
                       <span style={{ color: "#ec4899" }}>بناتي: %{girlsNegPct}</span>
                       <span style={{ color: "#eab308" }}>رياضي: %{sportNegPct}</span>
                       <span style={{ color: "#10b981" }}>سمر ميلتون: %{summerNegPct}</span>
                     </div>
+                  </div>
                   </div>
 
 
