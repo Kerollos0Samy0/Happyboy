@@ -347,7 +347,13 @@ export default function AdminDashboardPage() {
   const summerDeductedPct = "0.0";
   
   // --- User Requested Dashboard Totals based on generate_4sheets_report.mjs ---
-  const adjustedOriginalInventory = 47557; // المخزن الأصلي من الشيت الجديد
+  const BASE_ORIGINAL = 47557; // المخزن الأصلي الأساسي من الشيت
+  const BASE_CURRENT = 18969; // إجمالي المخزن وقت التحديث
+  
+  // أي زيادة يدوية في المخزن الحالي ستُضاف فوراً للمخزن الأصلي
+  const manualEditsDiff = totalInventoryPieces - BASE_CURRENT;
+  const adjustedOriginalInventory = BASE_ORIGINAL + manualEditsDiff;
+  
   trueWithdrawn = Math.max(0, adjustedOriginalInventory - totalInventoryPieces);
   trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
   
