@@ -231,12 +231,6 @@ export default function AdminDashboardPage() {
         totalSalesPieces += totalPieces;
         totalSalesSeries += totalSeries;
 
-        const category = getCategoryName(item.modelNumber);
-        if (category === "رياضي") totalSportSales += totalPieces;
-        else if (category.includes("سمر")) totalSummerSales += totalPieces;
-        else if (category.includes("ولادي")) totalBoysSales += totalPieces;
-        else if (category.includes("بناتي")) totalGirlsSales += totalPieces;
-
         if (!modelSalesMap[item.modelNumber]) {
           modelSalesMap[item.modelNumber] = { count: 0, name: item.name };
         }
@@ -284,10 +278,7 @@ export default function AdminDashboardPage() {
   let negSummer = 0;
   let totalNeg = 0;
   
-  let posBoys = 0;
-  let posGirls = 0;
-  let posSport = 0;
-  let posSummer = 0;
+
 
   products.forEach(p => {
     let qty = Number(p.quantity) || 0;
@@ -295,12 +286,7 @@ export default function AdminDashboardPage() {
 
     const cat = getCategoryName(p.modelNumber);
 
-    if (posQty > 0) {
-      if (cat === "رياضي") posSport += posQty;
-      else if (cat.includes("سمر")) posSummer += posQty;
-      else if (cat.includes("ولادي")) posBoys += posQty;
-      else if (cat.includes("بناتي")) posGirls += posQty;
-    }
+
 
     if (qty < 0) {
       const absQty = Math.abs(qty);
