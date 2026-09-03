@@ -155,15 +155,6 @@ export default function InventoryPage() {
 
   const fetchProducts = async (forceRefresh = false) => {
     try {
-      if (!forceRefresh) {
-        const cached = localStorage.getItem('inventory_products_cache');
-        const cachedTime = localStorage.getItem('inventory_products_time');
-        if (cached && cachedTime && (Date.now() - Number(cachedTime) < 3600000)) { // 1 hour cache
-          setProducts(JSON.parse(cached));
-          return;
-        }
-      }
-
       const snapshot = await getDocs(collection(db, "products"));
       const prods = snapshot.docs
         .filter(doc => !doc.data().isDeleted)
