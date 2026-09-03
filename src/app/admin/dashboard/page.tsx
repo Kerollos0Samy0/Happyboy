@@ -338,8 +338,8 @@ export default function AdminDashboardPage() {
   const deductedSummer = 0;
   
   const totalDeducted = deductedBoys + deductedGirls + deductedSport + deductedSummer;
-  const trueWithdrawn = totalDeducted;
-  const trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
+  let trueWithdrawn = totalDeducted;
+  let trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
 
   const boysDeductedPct = totalDeducted > 0 ? ((deductedBoys / totalDeducted) * 100).toFixed(1) : "0.0";
   const girlsDeductedPct = totalDeducted > 0 ? ((deductedGirls / totalDeducted) * 100).toFixed(1) : "0.0";
@@ -348,8 +348,8 @@ export default function AdminDashboardPage() {
   
   // --- User Requested Dashboard Totals based on generate_4sheets_report.mjs ---
   const adjustedOriginalInventory = 47557; // المخزن الأصلي من الشيت الجديد
-  const trueWithdrawn = 27868; // المسحوب المحسوب من الشيت
-  const trueShortages = 23528; // النواقص
+  trueWithdrawn = 27868; // المسحوب المحسوب من الشيت
+  trueShortages = 23528; // النواقص
   totalInventoryPieces = 19689; // المخزن الحالي
   
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
