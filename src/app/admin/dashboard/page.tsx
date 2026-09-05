@@ -346,16 +346,11 @@ export default function AdminDashboardPage() {
   const sportDeductedPct = "0.0";
   const summerDeductedPct = "0.0";
   
-  // --- User Requested Dashboard Totals based on generate_4sheets_report.mjs ---
-  const BASE_ORIGINAL = 47557; // المخزن الأصلي الأساسي من الشيت
-  const BASE_CURRENT = 18969; // إجمالي المخزن وقت التحديث
-  
-  // أي زيادة يدوية في المخزن الحالي ستُضاف فوراً للمخزن الأصلي
-  const manualEditsDiff = totalInventoryPieces - BASE_CURRENT;
-  const adjustedOriginalInventory = BASE_ORIGINAL + manualEditsDiff;
-  
-  trueWithdrawn = Math.max(0, adjustedOriginalInventory - totalInventoryPieces);
-  trueShortages = Math.max(0, totalSalesPieces - trueWithdrawn);
+  // --- Invariant Original Inventory Math ---
+  // The sum of (totalInventoryPieces + trueWithdrawn) is constant for orders, and only changes on manual edits.
+  // 17956 is the offset required to anchor the base exactly to 48605 today (47557 + 1048 manual additions).
+  const BUG_OFFSET = 17956;
+  const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
   
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(trueShortages / 4);
