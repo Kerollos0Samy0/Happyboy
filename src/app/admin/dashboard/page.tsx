@@ -348,8 +348,8 @@ export default function AdminDashboardPage() {
   
   // --- Invariant Original Inventory Math ---
   // The sum of (totalInventoryPieces + trueWithdrawn) is constant for orders, and only changes on manual edits.
-  // 210 is the offset required to anchor the base exactly to 48605 today (47557 + 1048 manual additions).
-  const BUG_OFFSET = 210;
+  // BUG_OFFSET is set to 0 per user's request to absorb the 210 historical surplus pieces directly into the base.
+  const BUG_OFFSET = 0;
   const adjustedOriginalInventory = totalInventoryPieces + trueWithdrawn - BUG_OFFSET;
   
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
