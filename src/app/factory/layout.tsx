@@ -52,6 +52,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                   لوحة التجهيز
                 </Link>
                 <Link 
+                  href="/factory/production" 
+                  className={`px-3 py-2 rounded-md transition-colors ${pathname === '/factory/production' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+                >
+                  إدارة المصنع والإنتاج
+                </Link>
+                <Link 
                   href="/factory/invoices" 
                   className={`px-3 py-2 rounded-md transition-colors ${pathname === '/factory/invoices' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
                 >
@@ -73,6 +79,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                 className={`px-3 py-2 whitespace-nowrap rounded-md text-sm transition-colors ${pathname === '/factory/dashboard' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 لوحة التجهيز
+              </Link>
+              <Link 
+                href="/factory/production" 
+                className={`px-3 py-2 whitespace-nowrap rounded-md text-sm transition-colors ${pathname === '/factory/production' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                المصنع
               </Link>
               <Link 
                 href="/factory/invoices" 
