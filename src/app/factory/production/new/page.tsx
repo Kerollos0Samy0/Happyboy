@@ -225,8 +225,14 @@ export default function NewProductionOrderPage() {
 
         </div>
         
-        <style jsx global>{
+        <style jsx global>{`
           @media print {
+            @page {
+              margin: 0;
+            }
+            body {
+              margin: 1cm;
+            }
             body * {
               visibility: hidden;
             }
@@ -249,7 +255,7 @@ export default function NewProductionOrderPage() {
               width: 100%;
             }
           }
-        }</style>
+        `}</style>
       </div>
     );
   }
@@ -280,7 +286,7 @@ export default function NewProductionOrderPage() {
           {/* Right Column - Image Upload */}
           <div className="md:col-span-1 bg-white p-6 rounded-lg shadow-sm h-fit sticky top-24">
             <label className="block text-sm font-bold text-gray-700 mb-2">???? ??????? ???????? *</label>
-            <div className={order-2 border-dashed rounded-xl h-72 flex flex-col items-center justify-center relative overflow-hidden transition }>
+            <div className={`border-2 border-dashed rounded-xl h-72 flex flex-col items-center justify-center relative overflow-hidden transition ${imageBase64 ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
               
               {imageBase64 ? (
                 <>
@@ -401,7 +407,7 @@ export default function NewProductionOrderPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className={lex items-center gap-2 px-8 py-3 rounded-lg font-bold text-white transition shadow-md }
+            className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-white transition shadow-md ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
           >
             {loading ? (
               <>

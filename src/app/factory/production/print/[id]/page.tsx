@@ -162,8 +162,14 @@ export default function PrintProductionOrderPage() {
 
       </div>
       
-      <style jsx global>{
+      <style jsx global>{`
         @media print {
+          @page {
+            margin: 0;
+          }
+          body {
+            margin: 1cm;
+          }
           body * {
             visibility: hidden;
           }
@@ -186,7 +192,7 @@ export default function PrintProductionOrderPage() {
             width: 100%;
           }
         }
-      }</style>
+      `}</style>
     </div>
   );
 }

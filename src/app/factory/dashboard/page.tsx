@@ -200,12 +200,12 @@ export default function FactoryDashboard() {
             const totalPieces = stageOrders.reduce((sum, o) => sum + (Number(o.totalQuantity) || 0), 0);
 
             return (
-              <Droppable key={stage.id} droppableId={stage- + stage.id}>
+              <Droppable key={stage.id} droppableId={`stage-${stage.id}`}>
                 {(provided, snapshot) => (
                   <div 
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={shrink-0 w-64 rounded-xl border flex flex-col h-full   }
+                    className={`shrink-0 w-64 rounded-xl border flex flex-col h-full ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
                   >
                     {/* Column Header */}
                     <div className="p-3 border-b border-black/5 flex justify-between items-center bg-black/5 rounded-t-xl shrink-0">
@@ -233,7 +233,7 @@ export default function FactoryDashboard() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={g-white p-3 rounded-lg border border-gray-200 relative group transition shadow-sm }
+                                className={`bg-white p-3 rounded-lg border border-gray-200 relative group transition shadow-sm ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-500 rotate-2' : 'hover:shadow-md'}`}
                               >
                                 
                                 {/* Top Actions (3 dots menu) */}
@@ -250,7 +250,7 @@ export default function FactoryDashboard() {
                                   
                                   {activeMenuId === order.id && (
                                     <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-36 overflow-hidden z-20 flex flex-col">
-                                      <Link href={/factory/production/print/ + order.id} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
+                                      <Link href={`/factory/production/print/${order.id}`} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
                                         <Printer size={14} /> ??? / ?????
                                       </Link>
                                       <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
@@ -368,7 +368,7 @@ export default function FactoryDashboard() {
         </div>
       )}
 
-      <style jsx global>{
+      <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
           height: 14px;
@@ -393,7 +393,7 @@ export default function FactoryDashboard() {
           from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
         }
-      }</style>
+      `}</style>
     </div>
   );
 }
