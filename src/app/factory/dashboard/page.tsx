@@ -1,28 +1,28 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { Calculator, X, Printer, Copy, Trash2, MoreVertical } from "lucide-react";
+import { Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const STAGES = [
-  { id: 1, name: "قسم العينات", bg: "bg-blue-50", border: "border-blue-200" },
-  { id: 2, name: "اوردر قماش", bg: "bg-indigo-50", border: "border-indigo-200" },
-  { id: 3, name: "مخزن قماش", bg: "bg-cyan-50", border: "border-cyan-200" },
-  { id: 4, name: "قسم القص", bg: "bg-teal-50", border: "border-teal-200" },
-  { id: 5, name: "قسم الفرز", bg: "bg-emerald-50", border: "border-emerald-200" },
-  { id: 6, name: "قسم الطباعة - ليزر", bg: "bg-green-50", border: "border-green-200" },
-  { id: 7, name: "قسم القص والتفريغ", bg: "bg-lime-50", border: "border-lime-200" },
-  { id: 8, name: "قسم الكبس", bg: "bg-yellow-50", border: "border-yellow-200" },
-  { id: 9, name: "قسم التجويز", bg: "bg-amber-50", border: "border-amber-200" },
-  { id: 10, name: "قسم المكن", bg: "bg-orange-50", border: "border-orange-200" },
-  { id: 11, name: "قسم التشطيب", bg: "bg-red-50", border: "border-red-200" },
-  { id: 12, name: "قسم المكواة", bg: "bg-rose-50", border: "border-rose-200" },
-  { id: 13, name: "التعبئة والتكييس", bg: "bg-pink-50", border: "border-pink-200" },
-  { id: 14, name: "مخزن الموديلات", bg: "bg-purple-50", border: "border-purple-200" }
+  { id: 1, name: "??? ???????", bg: "bg-blue-50", border: "border-blue-200" },
+  { id: 2, name: "????? ????", bg: "bg-indigo-50", border: "border-indigo-200" },
+  { id: 3, name: "???? ????", bg: "bg-cyan-50", border: "border-cyan-200" },
+  { id: 4, name: "??? ????", bg: "bg-teal-50", border: "border-teal-200" },
+  { id: 5, name: "??? ?????", bg: "bg-emerald-50", border: "border-emerald-200" },
+  { id: 6, name: "??? ??????? - ????", bg: "bg-green-50", border: "border-green-200" },
+  { id: 7, name: "??? ???? ????????", bg: "bg-lime-50", border: "border-lime-200" },
+  { id: 8, name: "??? ?????", bg: "bg-yellow-50", border: "border-yellow-200" },
+  { id: 9, name: "??? ???????", bg: "bg-amber-50", border: "border-amber-200" },
+  { id: 10, name: "??? ?????", bg: "bg-orange-50", border: "border-orange-200" },
+  { id: 11, name: "??? ???????", bg: "bg-red-50", border: "border-red-200" },
+  { id: 12, name: "??? ???????", bg: "bg-rose-50", border: "border-rose-200" },
+  { id: 13, name: "??????? ????????", bg: "bg-pink-50", border: "border-pink-200" },
+  { id: 14, name: "???? ?????????", bg: "bg-purple-50", border: "border-purple-200" }
 ];
 
 export default function FactoryDashboard() {
@@ -33,6 +33,12 @@ export default function FactoryDashboard() {
   const [savingCosts, setSavingCosts] = useState(false);
   const [isBrowser, setIsBrowser] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  
+  // Split Feature State
+  const [splitOrder, setSplitOrder] = useState<any | null>(null);
+  const [splitRows, setSplitRows] = useState<{color: string, quantity: string}[]>([]);
+  const [splitting, setSplitting] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -40,7 +46,6 @@ export default function FactoryDashboard() {
     const q = query(collection(db, "factory_production_orders"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort by orderIndex to preserve ranking if we have one, otherwise fallback to createdAt
       data.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0));
       setOrders(data);
       setLoading(false);
@@ -50,27 +55,19 @@ export default function FactoryDashboard() {
 
   const onDragEnd = async (result: any) => {
     if (!result.destination) return;
-
     const { source, destination, draggableId } = result;
-
-    if (source.droppableId === destination.droppableId && source.index === destination.index) {
-      return;
-    }
-
-    const newStage = parseInt(destination.droppableId.replace('stage-', ''));
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
     
+    const newStage = parseInt(destination.droppableId.replace('stage-', ''));
     const movingOrder = orders.find(o => o.id === draggableId);
     if (!movingOrder) return;
 
     const newOrders = Array.from(orders);
-    
     const fromIndex = newOrders.findIndex(o => o.id === draggableId);
     newOrders.splice(fromIndex, 1);
-    
     movingOrder.currentStage = newStage;
     
     const destStageOrders = newOrders.filter(o => o.currentStage === newStage);
-    
     let insertIndex = 0;
     if (destStageOrders.length === 0) {
       insertIndex = newOrders.length;
@@ -85,9 +82,7 @@ export default function FactoryDashboard() {
     }
     
     newOrders.splice(insertIndex, 0, movingOrder);
-    
     const finalDestOrders = newOrders.filter(o => o.currentStage === newStage);
-    
     setOrders(newOrders);
     
     try {
@@ -95,7 +90,6 @@ export default function FactoryDashboard() {
         currentStage: newStage,
         orderIndex: destination.index
       });
-      
       finalDestOrders.forEach((o, idx) => {
         if (o.id !== draggableId && o.orderIndex !== idx) {
           updateDoc(doc(db, "factory_production_orders", o.id), { orderIndex: idx });
@@ -108,30 +102,29 @@ export default function FactoryDashboard() {
 
   const handleDuplicate = async (order: any) => {
     setActiveMenuId(null);
-    if (!confirm('هل تريد تكرار هذا الموديل بأمر تشغيل جديد (نسخة مطابقة)؟')) return;
-    
+    if (!confirm('?? ???? ????? ??? ??????? ???? ????? ???? (???? ??????)?')) return;
     try {
       const { id, createdAt, ...orderData } = order;
       await addDoc(collection(db, 'factory_production_orders'), {
         ...orderData,
-        modelName: order.modelName + ' (نسخة)',
+        modelName: order.modelName + ' (????)',
         currentStage: 1, 
         createdAt: serverTimestamp(),
       });
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء التكرار');
+      alert('??? ??? ????? ???????');
     }
   };
 
   const handleDelete = async (id: string) => {
     setActiveMenuId(null);
-    if (!confirm('هل أنت متأكد من حذف أمر التشغيل هذا نهائياً؟')) return;
+    if (!confirm('?? ??? ????? ?? ??? ??? ??????? ??? ????????')) return;
     try {
       await deleteDoc(doc(db, 'factory_production_orders', id));
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء الحذف');
+      alert('??? ??? ????? ?????');
     }
   };
 
@@ -149,20 +142,84 @@ export default function FactoryDashboard() {
     if (!selectedOrder) return;
     setSavingCosts(true);
     try {
-      await updateDoc(doc(db, "factory_production_orders", selectedOrder.id), {
-        costs: costs
-      });
+      await updateDoc(doc(db, "factory_production_orders", selectedOrder.id), { costs });
       setSelectedOrder(null);
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء الحفظ');
+      alert('??? ??? ????? ?????');
     } finally {
       setSavingCosts(false);
     }
   };
 
+  // --- Split Functions ---
+  const openSplitModal = (order: any) => {
+    setActiveMenuId(null);
+    setSplitOrder(order);
+    let colors = [''];
+    if (order.fabricColor) {
+      colors = order.fabricColor.split(/[?,-]/).map((c: string) => c.trim()).filter((c: string) => c);
+    }
+    if (colors.length > 0) {
+      setSplitRows(colors.map((c: string) => ({ color: c, quantity: '' })));
+    } else {
+      setSplitRows([{ color: '', quantity: '' }]);
+    }
+  };
+
+  const addSplitRow = () => {
+    setSplitRows([...splitRows, { color: '', quantity: '' }]);
+  };
+
+  const removeSplitRow = (idx: number) => {
+    const newRows = [...splitRows];
+    newRows.splice(idx, 1);
+    setSplitRows(newRows);
+  };
+
+  const handleSplitSubmit = async () => {
+    if (!splitOrder) return;
+    
+    const totalSplit = splitRows.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
+    if (totalSplit !== Number(splitOrder.totalQuantity)) {
+      alert(`?????? ??????? ??????? (${totalSplit}) ?? ????? ?????? ??????? ????? (${splitOrder.totalQuantity} ????). ?????? ?????? ???????.`);
+      return;
+    }
+
+    if (splitRows.some(r => !r.color.trim() || !r.quantity)) {
+      alert('?????? ????? ??? ????? ??????? ????? ??????');
+      return;
+    }
+
+    setSplitting(true);
+    try {
+      const { id, createdAt, ...originalData } = splitOrder;
+
+      // Create a new order for each color
+      for (const row of splitRows) {
+        await addDoc(collection(db, 'factory_production_orders'), {
+          ...originalData,
+          modelName: `${originalData.modelName} - ${row.color}`,
+          totalQuantity: Number(row.quantity),
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Delete the original
+      await deleteDoc(doc(db, 'factory_production_orders', splitOrder.id));
+
+      setSplitOrder(null);
+    } catch (err) {
+      console.error(err);
+      alert('??? ??? ????? ????? ??? ???????');
+    } finally {
+      setSplitting(false);
+    }
+  };
+  // ----------------------
+
   if (loading || !isBrowser) {
-    return <div className="p-20 text-center font-bold text-gray-500">جاري تحميل حركة المصنع...</div>;
+    return <div className="p-20 text-center font-bold text-gray-500">???? ????? ???? ??????...</div>;
   }
 
   const handleWrapperClick = () => {
@@ -173,14 +230,14 @@ export default function FactoryDashboard() {
     <div className="h-[calc(100vh-100px)] flex flex-col" dir="rtl" onClick={handleWrapperClick}>
       <div className="mb-4 shrink-0 flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
-          <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
+          <h2 className="text-2xl font-bold text-gray-800">???? ?????? (???? ???????) ??</h2>
+          <p className="text-gray-500 text-sm mt-1">???? ???? ?????????? ?? ???? ?????? ?????? (Drag & Drop) ??? ??????? ?? ??????? ??? ????.</p>
         </div>
         <Link 
           href="/factory/production/new" 
           className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition flex items-center gap-2"
         >
-          <span className="text-xl leading-none">+</span> إصدار أمر تشغيل
+          <span className="text-xl leading-none">+</span> ????? ??? ?????
         </Link>
       </div>
 
@@ -203,12 +260,12 @@ export default function FactoryDashboard() {
                         <span className="bg-gray-800 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{stage.id}</span>
                         <h3 className="font-bold text-gray-800 text-sm">{stage.name}</h3>
                       </div>
-                      <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full font-mono font-bold shadow-sm">{totalPieces} ق</span>
+                      <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full font-mono font-bold shadow-sm">{totalPieces} ?</span>
                     </div>
 
                     <div className="p-2 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2">
                       {stageOrders.length === 0 && !snapshot.isDraggingOver && (
-                        <div className="text-center p-4 text-xs text-gray-400 mt-4">لا يوجد شغل حالياً</div>
+                        <div className="text-center p-4 text-xs text-gray-400 mt-4">?? ???? ??? ??????</div>
                       )}
 
                       {stageOrders.map((order, index) => {
@@ -237,15 +294,21 @@ export default function FactoryDashboard() {
                                   </button>
                                   
                                   {activeMenuId === order.id && (
-                                    <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-36 overflow-hidden z-20 flex flex-col">
+                                    <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-44 overflow-hidden z-20 flex flex-col">
                                       <Link href={`/factory/production/print/${order.id}`} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
-                                        <Printer size={14} /> عرض / طباعة
+                                        <Printer size={14} /> ??? / ?????
                                       </Link>
-                                      <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
-                                        <Copy size={14} /> تكرار الموديل
+                                      
+                                      {/* Split Button */}
+                                      <button onClick={(e) => { e.stopPropagation(); openSplitModal(order); }} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
+                                        <SplitSquareHorizontal size={14} className="text-blue-600" /> ????? ??? ???????
                                       </button>
-                                      <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} className="text-right px-3 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2">
-                                        <Trash2 size={14} /> حذف نهائي
+
+                                      <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
+                                        <Copy size={14} /> ????? ???????
+                                      </button>
+                                      <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} className="text-right px-3 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 border-t mt-1">
+                                        <Trash2 size={14} /> ??? ?????
                                       </button>
                                     </div>
                                   )}
@@ -257,15 +320,15 @@ export default function FactoryDashboard() {
                                   )}
                                   <div className="flex-1 min-w-0 pr-1">
                                     <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
-                                    <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
+                                    <p className="text-xs text-gray-500 mb-1">??????: <strong>{order.totalQuantity}</strong></p>
                                     <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
                                   </div>
                                 </div>
 
                                 {totalCost > 0 && (
                                   <div className="mt-2 bg-green-50 text-green-800 text-xs p-1.5 rounded flex justify-between items-center border border-green-100">
-                                    <span>الإجمالي: {totalCost} ج</span>
-                                    <span className="font-bold">القطعة: {costPerPiece} ج</span>
+                                    <span>????????: {totalCost} ?</span>
+                                    <span className="font-bold">??????: {costPerPiece} ?</span>
                                   </div>
                                 )}
 
@@ -275,7 +338,7 @@ export default function FactoryDashboard() {
                                     className="w-full text-xs flex justify-center items-center gap-2 bg-blue-50 text-blue-700 px-2 py-1.5 rounded hover:bg-blue-100 transition font-bold"
                                   >
                                     <Calculator size={14} />
-                                    التكاليف
+                                    ????????
                                   </button>
                                 </div>
                               </div>
@@ -293,13 +356,111 @@ export default function FactoryDashboard() {
         </div>
       </DragDropContext>
 
+      {/* Split Modal */}
+      {splitOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" dir="rtl">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <SplitSquareHorizontal size={20} className="text-blue-600" />
+                ??? ??? ??????? ??? ???????
+              </h3>
+              <button onClick={() => setSplitOrder(null)} className="text-gray-400 hover:text-red-500 transition">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col gap-2">
+                <p className="font-bold text-gray-800">???????: {splitOrder.modelName}</p>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">??????? ???????? ??????:</span>
+                  <span className="font-bold text-gray-900">{splitOrder.fabricColor || '?? ????'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">?????? ????????? ?????:</span>
+                  <span className="font-bold text-blue-700 text-lg">{splitOrder.totalQuantity} ????</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-500">?? ?????? ?????? ????????? ??? ??????? ?????? ????? ????? ?????? ??? ?????? ??? ??? (?? ??? ??????? ??? ?????? ????????).</p>
+
+              <div className="space-y-3 mt-4">
+                {splitRows.map((row, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <div className="flex-1">
+                      <input 
+                        type="text" 
+                        placeholder="??? ????? (????: ????)" 
+                        value={row.color}
+                        onChange={(e) => {
+                          const newRows = [...splitRows];
+                          newRows[idx].color = e.target.value;
+                          setSplitRows(newRows);
+                        }}
+                        className="w-full p-2 border rounded outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="w-32">
+                      <input 
+                        type="number" 
+                        placeholder="??????" 
+                        value={row.quantity}
+                        onChange={(e) => {
+                          const newRows = [...splitRows];
+                          newRows[idx].quantity = e.target.value;
+                          setSplitRows(newRows);
+                        }}
+                        className="w-full p-2 border rounded outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    {splitRows.length > 1 && (
+                      <button onClick={() => removeSplitRow(idx)} className="p-2 text-red-500 hover:bg-red-50 rounded">
+                        <Minus size={20} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button onClick={addSplitRow} className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline mt-2">
+                  <Plus size={16} /> ????? ??? ???
+                </button>
+              </div>
+
+              {/* Status footer inside modal */}
+              {(() => {
+                const totalSplit = splitRows.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
+                const isMatch = totalSplit === Number(splitOrder.totalQuantity);
+                return (
+                  <div className={`mt-4 p-3 rounded text-sm font-bold flex justify-between ${isMatch ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                    <span>?????? ??????: {totalSplit}</span>
+                    <span>???????: {Number(splitOrder.totalQuantity) - totalSplit}</span>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="p-4 bg-gray-50 border-t flex gap-2">
+              <button 
+                onClick={handleSplitSubmit} 
+                disabled={splitting || splitRows.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0) !== Number(splitOrder.totalQuantity)} 
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+              >
+                {splitting ? '???? ???????...' : <><SplitSquareHorizontal size={18} /> ????? ????? ????</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cost Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" dir="rtl">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div className="p-4 border-b flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
                 <Calculator size={18} className="text-blue-600" />
-                حساب التكاليف
+                ???? ????????
               </h3>
               <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-red-500 transition">
                 <X size={20} />
@@ -309,43 +470,43 @@ export default function FactoryDashboard() {
             <div className="p-6 space-y-4">
               <div className="bg-gray-100 p-3 rounded-lg mb-4 text-center">
                 <p className="font-bold text-gray-700">{selectedOrder.modelName}</p>
-                <p className="text-sm text-gray-500">الكمية المستهدفة: {selectedOrder.totalQuantity} قطعة</p>
+                <p className="text-sm text-gray-500">?????? ?????????: {selectedOrder.totalQuantity} ????</p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">تكلفة القماش (بالكامل)</label>
+                  <label className="text-sm font-bold text-gray-700">????? ?????? (???????)</label>
                   <input type="number" value={costs.fabric || ''} onChange={(e) => setCosts({...costs, fabric: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">تكلفة الطباعة</label>
+                  <label className="text-sm font-bold text-gray-700">????? ???????</label>
                   <input type="number" value={costs.printing || ''} onChange={(e) => setCosts({...costs, printing: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">الإكسسوارات (سوست، كرتون..)</label>
+                  <label className="text-sm font-bold text-gray-700">??????????? (????? ?????..)</label>
                   <input type="number" value={costs.accessories || ''} onChange={(e) => setCosts({...costs, accessories: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">تكلفة العمالة (تقفيل)</label>
+                  <label className="text-sm font-bold text-gray-700">????? ??????? (?????)</label>
                   <input type="number" value={costs.labor || ''} onChange={(e) => setCosts({...costs, labor: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
               </div>
               
               <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg mt-4">
                 <div className="flex justify-between font-bold text-blue-900 mb-1">
-                  <span>الإجمالي:</span>
-                  <span>{costs.fabric + costs.printing + costs.accessories + costs.labor} ج</span>
+                  <span>????????:</span>
+                  <span>{costs.fabric + costs.printing + costs.accessories + costs.labor} ?</span>
                 </div>
                 <div className="flex justify-between text-sm text-blue-700">
-                  <span>تكلفة القطعة الواحدة:</span>
-                  <span>{((costs.fabric + costs.printing + costs.accessories + costs.labor) / selectedOrder.totalQuantity).toFixed(2)} ج</span>
+                  <span>????? ?????? ???????:</span>
+                  <span>{((costs.fabric + costs.printing + costs.accessories + costs.labor) / selectedOrder.totalQuantity).toFixed(2)} ?</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 bg-gray-50 border-t flex gap-2">
               <button onClick={saveCosts} disabled={savingCosts} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
-                {savingCosts ? 'جاري الحفظ...' : 'حفظ التكاليف'}
+                {savingCosts ? '???? ?????...' : '??? ????????'}
               </button>
             </div>
           </div>
