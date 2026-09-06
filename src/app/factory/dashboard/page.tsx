@@ -36,8 +36,8 @@ export default function FactoryDashboardPage() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
       
-      // Filter out old orders (before Sep 1, 2026) to keep the dashboard clean for the new season
-      const seasonStartDate = new Date("2026-09-01T00:00:00").getTime();
+      // Filter out old orders (before current moment) to keep the dashboard completely clean for the new season
+      const seasonStartDate = new Date("2026-09-06T11:55:00+03:00").getTime();
       
       const newSeasonOrders = fetched.filter(o => {
         const orderTime = o.createdAt?.toMillis ? o.createdAt.toMillis() : 0;
