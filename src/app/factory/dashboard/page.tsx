@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
@@ -9,20 +9,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const STAGES = [
-  { id: 1, name: "??? ???????", bg: "bg-blue-50", border: "border-blue-200" },
-  { id: 2, name: "????? ????", bg: "bg-indigo-50", border: "border-indigo-200" },
-  { id: 3, name: "???? ????", bg: "bg-cyan-50", border: "border-cyan-200" },
-  { id: 4, name: "??? ????", bg: "bg-teal-50", border: "border-teal-200" },
-  { id: 5, name: "??? ?????", bg: "bg-emerald-50", border: "border-emerald-200" },
-  { id: 6, name: "??? ??????? - ????", bg: "bg-green-50", border: "border-green-200" },
-  { id: 7, name: "??? ???? ????????", bg: "bg-lime-50", border: "border-lime-200" },
-  { id: 8, name: "??? ?????", bg: "bg-yellow-50", border: "border-yellow-200" },
-  { id: 9, name: "??? ???????", bg: "bg-amber-50", border: "border-amber-200" },
-  { id: 10, name: "??? ?????", bg: "bg-orange-50", border: "border-orange-200" },
-  { id: 11, name: "??? ???????", bg: "bg-red-50", border: "border-red-200" },
-  { id: 12, name: "??? ???????", bg: "bg-rose-50", border: "border-rose-200" },
-  { id: 13, name: "??????? ????????", bg: "bg-pink-50", border: "border-pink-200" },
-  { id: 14, name: "???? ?????????", bg: "bg-purple-50", border: "border-purple-200" }
+  { id: 1, name: "قسم العينات", bg: "bg-blue-50", border: "border-blue-200" },
+  { id: 2, name: "اوردر قماش", bg: "bg-indigo-50", border: "border-indigo-200" },
+  { id: 3, name: "مخزن قماش", bg: "bg-cyan-50", border: "border-cyan-200" },
+  { id: 4, name: "قسم القص", bg: "bg-teal-50", border: "border-teal-200" },
+  { id: 5, name: "قسم الفرز", bg: "bg-emerald-50", border: "border-emerald-200" },
+  { id: 6, name: "قسم الطباعة - ليزر", bg: "bg-green-50", border: "border-green-200" },
+  { id: 7, name: "قسم القص والتفريغ", bg: "bg-lime-50", border: "border-lime-200" },
+  { id: 8, name: "قسم الكبس", bg: "bg-yellow-50", border: "border-yellow-200" },
+  { id: 9, name: "قسم التجويز", bg: "bg-amber-50", border: "border-amber-200" },
+  { id: 10, name: "قسم المكن", bg: "bg-orange-50", border: "border-orange-200" },
+  { id: 11, name: "قسم التشطيب", bg: "bg-red-50", border: "border-red-200" },
+  { id: 12, name: "قسم المكواة", bg: "bg-rose-50", border: "border-rose-200" },
+  { id: 13, name: "التعبئة والتكييس", bg: "bg-pink-50", border: "border-pink-200" },
+  { id: 14, name: "مخزن الموديلات", bg: "bg-purple-50", border: "border-purple-200" }
 ];
 
 export default function FactoryDashboard() {
@@ -108,30 +108,30 @@ export default function FactoryDashboard() {
 
   const handleDuplicate = async (order: any) => {
     setActiveMenuId(null);
-    if (!confirm('?? ???? ????? ??? ??????? ???? ????? ???? (???? ??????)?')) return;
+    if (!confirm('هل تريد تكرار هذا الموديل بأمر تشغيل جديد (نسخة مطابقة)؟')) return;
     
     try {
       const { id, createdAt, ...orderData } = order;
       await addDoc(collection(db, 'factory_production_orders'), {
         ...orderData,
-        modelName: order.modelName + ' (????)',
+        modelName: order.modelName + ' (نسخة)',
         currentStage: 1, 
         createdAt: serverTimestamp(),
       });
     } catch (err) {
       console.error(err);
-      alert('??? ??? ????? ???????');
+      alert('حدث خطأ أثناء التكرار');
     }
   };
 
   const handleDelete = async (id: string) => {
     setActiveMenuId(null);
-    if (!confirm('?? ??? ????? ?? ??? ??? ??????? ??? ????????')) return;
+    if (!confirm('هل أنت متأكد من حذف أمر التشغيل هذا نهائياً؟')) return;
     try {
       await deleteDoc(doc(db, 'factory_production_orders', id));
     } catch (err) {
       console.error(err);
-      alert('??? ??? ????? ?????');
+      alert('حدث خطأ أثناء الحذف');
     }
   };
 
@@ -155,14 +155,14 @@ export default function FactoryDashboard() {
       setSelectedOrder(null);
     } catch (err) {
       console.error(err);
-      alert('??? ??? ????? ?????');
+      alert('حدث خطأ أثناء الحفظ');
     } finally {
       setSavingCosts(false);
     }
   };
 
   if (loading || !isBrowser) {
-    return <div className="p-20 text-center font-bold text-gray-500">???? ????? ???? ??????...</div>;
+    return <div className="p-20 text-center font-bold text-gray-500">جاري تحميل حركة المصنع...</div>;
   }
 
   const handleWrapperClick = () => {
@@ -172,8 +172,8 @@ export default function FactoryDashboard() {
   return (
     <div className="h-[calc(100vh-100px)] flex flex-col" dir="rtl" onClick={handleWrapperClick}>
       <div className="mb-4 shrink-0">
-        <h2 className="text-2xl font-bold text-gray-800">???? ?????? (???? ???????) ??</h2>
-        <p className="text-gray-500 text-sm mt-1">???? ???? ?????????? ?? ???? ?????? ?????? (Drag & Drop) ??? ??????? ?? ??????? ??? ????.</p>
+        <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
+        <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -195,12 +195,12 @@ export default function FactoryDashboard() {
                         <span className="bg-gray-800 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{stage.id}</span>
                         <h3 className="font-bold text-gray-800 text-sm">{stage.name}</h3>
                       </div>
-                      <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full font-mono font-bold shadow-sm">{totalPieces} ?</span>
+                      <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full font-mono font-bold shadow-sm">{totalPieces} ق</span>
                     </div>
 
                     <div className="p-2 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2">
                       {stageOrders.length === 0 && !snapshot.isDraggingOver && (
-                        <div className="text-center p-4 text-xs text-gray-400 mt-4">?? ???? ??? ??????</div>
+                        <div className="text-center p-4 text-xs text-gray-400 mt-4">لا يوجد شغل حالياً</div>
                       )}
 
                       {stageOrders.map((order, index) => {
@@ -231,13 +231,13 @@ export default function FactoryDashboard() {
                                   {activeMenuId === order.id && (
                                     <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-36 overflow-hidden z-20 flex flex-col">
                                       <Link href={`/factory/production/print/${order.id}`} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
-                                        <Printer size={14} /> ??? / ?????
+                                        <Printer size={14} /> عرض / طباعة
                                       </Link>
                                       <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
-                                        <Copy size={14} /> ????? ???????
+                                        <Copy size={14} /> تكرار الموديل
                                       </button>
                                       <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} className="text-right px-3 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2">
-                                        <Trash2 size={14} /> ??? ?????
+                                        <Trash2 size={14} /> حذف نهائي
                                       </button>
                                     </div>
                                   )}
@@ -249,15 +249,15 @@ export default function FactoryDashboard() {
                                   )}
                                   <div className="flex-1 min-w-0 pr-1">
                                     <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
-                                    <p className="text-xs text-gray-500 mb-1">??????: <strong>{order.totalQuantity}</strong></p>
+                                    <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
                                     <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
                                   </div>
                                 </div>
 
                                 {totalCost > 0 && (
                                   <div className="mt-2 bg-green-50 text-green-800 text-xs p-1.5 rounded flex justify-between items-center border border-green-100">
-                                    <span>????????: {totalCost} ?</span>
-                                    <span className="font-bold">??????: {costPerPiece} ?</span>
+                                    <span>الإجمالي: {totalCost} ج</span>
+                                    <span className="font-bold">القطعة: {costPerPiece} ج</span>
                                   </div>
                                 )}
 
@@ -267,7 +267,7 @@ export default function FactoryDashboard() {
                                     className="w-full text-xs flex justify-center items-center gap-2 bg-blue-50 text-blue-700 px-2 py-1.5 rounded hover:bg-blue-100 transition font-bold"
                                   >
                                     <Calculator size={14} />
-                                    ????????
+                                    التكاليف
                                   </button>
                                 </div>
                               </div>
@@ -291,7 +291,7 @@ export default function FactoryDashboard() {
             <div className="p-4 border-b flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
                 <Calculator size={18} className="text-blue-600" />
-                ???? ????????
+                حساب التكاليف
               </h3>
               <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-red-500 transition">
                 <X size={20} />
@@ -301,43 +301,43 @@ export default function FactoryDashboard() {
             <div className="p-6 space-y-4">
               <div className="bg-gray-100 p-3 rounded-lg mb-4 text-center">
                 <p className="font-bold text-gray-700">{selectedOrder.modelName}</p>
-                <p className="text-sm text-gray-500">?????? ?????????: {selectedOrder.totalQuantity} ????</p>
+                <p className="text-sm text-gray-500">الكمية المستهدفة: {selectedOrder.totalQuantity} قطعة</p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">????? ?????? (???????)</label>
+                  <label className="text-sm font-bold text-gray-700">تكلفة القماش (بالكامل)</label>
                   <input type="number" value={costs.fabric || ''} onChange={(e) => setCosts({...costs, fabric: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">????? ???????</label>
+                  <label className="text-sm font-bold text-gray-700">تكلفة الطباعة</label>
                   <input type="number" value={costs.printing || ''} onChange={(e) => setCosts({...costs, printing: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">??????????? (????? ?????..)</label>
+                  <label className="text-sm font-bold text-gray-700">الإكسسوارات (سوست، كرتون..)</label>
                   <input type="number" value={costs.accessories || ''} onChange={(e) => setCosts({...costs, accessories: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                  <label className="text-sm font-bold text-gray-700">????? ??????? (?????)</label>
+                  <label className="text-sm font-bold text-gray-700">تكلفة العمالة (تقفيل)</label>
                   <input type="number" value={costs.labor || ''} onChange={(e) => setCosts({...costs, labor: Number(e.target.value)})} className="w-32 p-1.5 border rounded text-left" />
                 </div>
               </div>
               
               <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg mt-4">
                 <div className="flex justify-between font-bold text-blue-900 mb-1">
-                  <span>????????:</span>
-                  <span>{costs.fabric + costs.printing + costs.accessories + costs.labor} ?</span>
+                  <span>الإجمالي:</span>
+                  <span>{costs.fabric + costs.printing + costs.accessories + costs.labor} ج</span>
                 </div>
                 <div className="flex justify-between text-sm text-blue-700">
-                  <span>????? ?????? ???????:</span>
-                  <span>{((costs.fabric + costs.printing + costs.accessories + costs.labor) / selectedOrder.totalQuantity).toFixed(2)} ?</span>
+                  <span>تكلفة القطعة الواحدة:</span>
+                  <span>{((costs.fabric + costs.printing + costs.accessories + costs.labor) / selectedOrder.totalQuantity).toFixed(2)} ج</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 bg-gray-50 border-t flex gap-2">
               <button onClick={saveCosts} disabled={savingCosts} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
-                {savingCosts ? '???? ?????...' : '??? ????????'}
+                {savingCosts ? 'جاري الحفظ...' : 'حفظ التكاليف'}
               </button>
             </div>
           </div>
