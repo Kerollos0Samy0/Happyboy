@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
@@ -125,7 +125,8 @@ export default function WorkerScannerPage() {
       }
 
       await updateDoc(doc(db, "factory_production_orders", orderData.id), {
-        currentStage: nextStage
+        currentStage: nextStage,
+        lastWorkerName: workerName
       });
 
       setSuccess(`تم نقل الموديل بنجاح إلى المرحلة التالية (${STAGES.find(s => s.id === nextStage)?.name}).`);

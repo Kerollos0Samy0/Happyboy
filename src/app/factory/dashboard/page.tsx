@@ -321,7 +321,12 @@ export default function FactoryDashboard() {
                                   <div className="flex-1 min-w-0 pr-1">
                                     <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
                                     <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
-                                    <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
+                                    <p className="text-[10px] text-gray-400 font-mono mb-1">#{order.id.slice(-6).toUpperCase()}</p>
+                                    {order.lastWorkerName && (
+                                      <p className="text-[11px] text-blue-600 font-bold truncate bg-blue-50 px-1 py-0.5 rounded w-fit" title={order.lastWorkerName}>
+                                        👤 العامل: {order.lastWorkerName}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 

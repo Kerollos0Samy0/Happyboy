@@ -24,16 +24,10 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <header className="app-header">
-            <div className="container">
+            <div className="container" style={{ justifyContent: 'center' }}>
               <div className="logo">
-                <img src="/logo.png" alt="HappyBoy Face Logo" width={40} height={40} style={{ objectFit: 'contain' }} />
-                <span>Happy Boy&Girl</span>
+                <img src="/ColoredLogo.png" alt="HappyBoy Face Logo" width={180} height={40} style={{ objectFit: 'contain' }} />
               </div>
-              <nav>
-                <a href="/price-check" className="btn btn-outline" style={{ borderColor: 'var(--primary)', color: 'var(--primary)', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>
-                  استعلام عن السعر 💰
-                </a>
-              </nav>
             </div>
           </header>
           <main className="container mt-6">{children}</main>

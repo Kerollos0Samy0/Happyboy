@@ -570,9 +570,21 @@ export default function AdminDashboardPage() {
               </div>
               
               <div className={styles.qrSection}>
-                <h3 className={styles.qrTitle}>بوابة مسح العملاء (QR)</h3>
-                <div className={styles.qrBox}>
-                  <QRCodeSVG value={`${websiteUrl}/customer`} size={140} level="H" />
+                <h3 className={styles.qrTitle}>بوابة مسح العملاء و الاستعلام</h3>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                  <div className={styles.qrBox}>
+                    <p style={{fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem'}}>العملاء / الاوردرات</p>
+                    <QRCodeSVG value={`${websiteUrl}/customer`} size={110} level="H" />
+                  </div>
+                  <div className={styles.qrBox}>
+                    <p style={{fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem'}}>استعلام عن السعر 💰</p>
+                    <QRCodeSVG value={`${websiteUrl}/price-check`} size={110} level="H" />
+                  </div>
+                </div>
+                <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                  <a href="/price-check" className={`${styles.linkItem} ${styles.blue}`} style={{ display: 'inline-flex', padding: '0.5rem 2rem' }}>
+                    استعلام عن السعر
+                  </a>
                 </div>
               </div>
             </div>
