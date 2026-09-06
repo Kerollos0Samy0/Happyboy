@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
@@ -53,43 +53,32 @@ export default function FactoryDashboard() {
 
     const { source, destination, draggableId } = result;
 
-    // Same position, no changes
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return;
     }
 
     const newStage = parseInt(destination.droppableId.replace('stage-', ''));
     
-    // Find moving order
     const movingOrder = orders.find(o => o.id === draggableId);
     if (!movingOrder) return;
 
-    // Optimistic UI update
     const newOrders = Array.from(orders);
     
-    // Remove from old array index
     const fromIndex = newOrders.findIndex(o => o.id === draggableId);
     newOrders.splice(fromIndex, 1);
     
-    // Modify stage
     movingOrder.currentStage = newStage;
     
-    // Find all orders in the destination stage to compute new index
     const destStageOrders = newOrders.filter(o => o.currentStage === newStage);
     
-    // Insert into destination at correct visual index
-    // destination.index gives the index relative to the droppable
     let insertIndex = 0;
     if (destStageOrders.length === 0) {
-      // First item
       insertIndex = newOrders.length;
     } else {
       if (destination.index >= destStageOrders.length) {
-        // Append at end of dest column
         const lastItem = destStageOrders[destStageOrders.length - 1];
         insertIndex = newOrders.findIndex(o => o.id === lastItem.id) + 1;
       } else {
-        // Insert before target item
         const targetItem = destStageOrders[destination.index];
         insertIndex = newOrders.findIndex(o => o.id === targetItem.id);
       }
@@ -97,20 +86,16 @@ export default function FactoryDashboard() {
     
     newOrders.splice(insertIndex, 0, movingOrder);
     
-    // Re-assign orderIndex for all items in that stage to ensure exact sorting
     const finalDestOrders = newOrders.filter(o => o.currentStage === newStage);
     
-    // Update local state immediately for snappy feel
     setOrders(newOrders);
     
     try {
-      // Update the moved document's stage and index
       await updateDoc(doc(db, "factory_production_orders", draggableId), {
         currentStage: newStage,
         orderIndex: destination.index
       });
       
-      // Update other documents in the same column to preserve order
       finalDestOrders.forEach((o, idx) => {
         if (o.id !== draggableId && o.orderIndex !== idx) {
           updateDoc(doc(db, "factory_production_orders", o.id), { orderIndex: idx });
@@ -130,7 +115,7 @@ export default function FactoryDashboard() {
       await addDoc(collection(db, 'factory_production_orders'), {
         ...orderData,
         modelName: order.modelName + ' (????)',
-        currentStage: 1, // Start from beginning
+        currentStage: 1, 
         createdAt: serverTimestamp(),
       });
     } catch (err) {
@@ -180,7 +165,6 @@ export default function FactoryDashboard() {
     return <div className="p-20 text-center font-bold text-gray-500">???? ????? ???? ??????...</div>;
   }
 
-  // Close menus when clicking outside
   const handleWrapperClick = () => {
     if (activeMenuId) setActiveMenuId(null);
   };
@@ -192,7 +176,6 @@ export default function FactoryDashboard() {
         <p className="text-gray-500 text-sm mt-1">???? ???? ?????????? ?? ???? ?????? ?????? (Drag & Drop) ??? ??????? ?? ??????? ??? ????.</p>
       </div>
 
-      {/* Kanban Board Container */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-gray-100 rounded-xl p-4 shadow-inner flex gap-4">
           {STAGES.map((stage) => {
@@ -207,7 +190,6 @@ export default function FactoryDashboard() {
                     {...provided.droppableProps}
                     className={`shrink-0 w-64 rounded-xl border flex flex-col h-full ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
                   >
-                    {/* Column Header */}
                     <div className="p-3 border-b border-black/5 flex justify-between items-center bg-black/5 rounded-t-xl shrink-0">
                       <div className="flex items-center gap-2">
                         <span className="bg-gray-800 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{stage.id}</span>
@@ -216,7 +198,6 @@ export default function FactoryDashboard() {
                       <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full font-mono font-bold shadow-sm">{totalPieces} ?</span>
                     </div>
 
-                    {/* Column Body - Cards */}
                     <div className="p-2 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2">
                       {stageOrders.length === 0 && !snapshot.isDraggingOver && (
                         <div className="text-center p-4 text-xs text-gray-400 mt-4">?? ???? ??? ??????</div>
@@ -236,7 +217,6 @@ export default function FactoryDashboard() {
                                 className={`bg-white p-3 rounded-lg border border-gray-200 relative group transition shadow-sm ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-500 rotate-2' : 'hover:shadow-md'}`}
                               >
                                 
-                                {/* Top Actions (3 dots menu) */}
                                 <div className="absolute top-2 left-2 z-10">
                                   <button 
                                     onClick={(e) => {
@@ -265,7 +245,6 @@ export default function FactoryDashboard() {
 
                                 <div className="flex gap-3 mt-1">
                                   {order.modelImage && (
-                                    // eslint-disable-next-line @next/next/no-img-element
                                     <img src={order.modelImage} alt="model" className="w-16 h-16 object-cover rounded border border-gray-100" />
                                   )}
                                   <div className="flex-1 min-w-0 pr-1">
@@ -275,7 +254,6 @@ export default function FactoryDashboard() {
                                   </div>
                                 </div>
 
-                                {/* Cost Info inside card */}
                                 {totalCost > 0 && (
                                   <div className="mt-2 bg-green-50 text-green-800 text-xs p-1.5 rounded flex justify-between items-center border border-green-100">
                                     <span>????????: {totalCost} ?</span>
@@ -283,7 +261,6 @@ export default function FactoryDashboard() {
                                   </div>
                                 )}
 
-                                {/* Bottom Cost Button */}
                                 <div className="mt-3 pt-3 border-t border-gray-100">
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); openCostModal(order); }}
@@ -308,7 +285,6 @@ export default function FactoryDashboard() {
         </div>
       </DragDropContext>
 
-      {/* Cost Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" dir="rtl">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
