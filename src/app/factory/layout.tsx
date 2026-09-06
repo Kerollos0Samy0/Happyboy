@@ -81,6 +81,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                 >
                   إدارة المصنع والإنتاج
                 </Link>
+                <Link 
+                  href="/factory/scanner" 
+                  className={`px-3 py-2 rounded-md transition-colors ${pathname === '/factory/scanner' ? 'bg-orange-50 text-orange-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+                >
+                  ماسح العمال
+                </Link>
               </nav>
             </div>
             <div className="flex items-center gap-4">
@@ -103,6 +109,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                 className={`px-3 py-2 whitespace-nowrap rounded-md text-sm transition-colors ${pathname === '/factory/production' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 المصنع
+              </Link>
+              <Link 
+                href="/factory/scanner" 
+                className={`px-3 py-2 whitespace-nowrap rounded-md text-sm transition-colors ${pathname === '/factory/scanner' ? 'bg-orange-50 text-orange-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                ماسح العمال
               </Link>
           </nav>
         </header>
