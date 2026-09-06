@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20" dir="rtl">
+    <div className="w-full mx-auto space-y-6 pb-20" dir="rtl">
       
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-2 overflow-x-auto scrollbar-hide">
         {tabs.map(tab => {

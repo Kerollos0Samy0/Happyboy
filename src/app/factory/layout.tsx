@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -57,7 +57,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
     <div className="min-h-screen bg-gray-50 flex flex-col" dir="rtl">
       {!(isLoginPage || isScannerPage) && (
         <header className="bg-white shadow-sm p-4 sticky top-0 z-10">
-          <div className={`${pathname?.includes('/factory/dashboard') ? 'w-full px-4' : 'max-w-7xl mx-auto'} flex justify-between items-center`}>
+          <div className="w-full px-4 lg:px-8 mx-auto flex justify-between items-center">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-black text-blue-900 tracking-tight">نظام مصنع HappyBoy</h1>
               <nav className="hidden lg:flex gap-2">
@@ -125,7 +125,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
         </header>
       )}
       
-      <main className={`flex-1 w-full mx-auto ${pathname?.includes('/factory/dashboard') ? 'max-w-none px-2' : 'max-w-7xl p-4 sm:p-6 lg:p-8'}`}>
+      <main className="flex-1 w-full mx-auto px-2 sm:px-4 lg:px-8 pt-4 pb-8">
         {children}
       </main>
     </div>
