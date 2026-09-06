@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -145,7 +145,7 @@ export default function NewProductionOrderPage() {
           </div>
         </div>
 
-        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-0 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
+        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-8 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
           
           <div className="border-4 border-gray-800 p-4 mb-6">
             <div className="flex justify-between items-start">
@@ -266,6 +266,7 @@ export default function NewProductionOrderPage() {
               left: 0;
               top: 0;
               width: 100%;
+              box-sizing: border-box;
             }
           }
         `}</style>

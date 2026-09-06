@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -71,7 +71,7 @@ export default function PrintProductionOrderPage() {
         </div>
       </div>
 
-      <div className="bg-white p-8 shadow-lg print:shadow-none print:p-0 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
+      <div className="bg-white p-8 shadow-lg print:shadow-none print:p-8 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
         
         <div className="border-4 border-gray-800 p-4 mb-6">
           <div className="flex justify-between items-start">
