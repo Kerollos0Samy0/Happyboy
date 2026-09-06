@@ -44,127 +44,49 @@ export default function FactoryProductionDashboard() {
     { id: 'models_warehouse', name: 'مخزن الموديلات', icon: Store, count: 450, color: 'bg-gray-100 text-gray-800' },
   ];
 
-  const activeOrders = [
-    { id: 'PO-1001', model: 'سويت شيرت ولادي شتوي', status: 'التقفيل', progress: 60, total: 1000, completed: 600 },
-    { id: 'PO-1002', model: 'بنطلون رياضي', status: 'القص', progress: 10, total: 2000, completed: 200 },
-    { id: 'PO-1003', model: 'تيشيرت صيفي', status: 'المكابس', progress: 45, total: 1500, completed: 675 },
-  ];
+  // لا نضع بيانات وهمية بناءً على طلبك - استعداداً للموسم الجديد
+  const activeOrders: any[] = [];
 
   return (
     <div className="space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border-b-4 border-blue-500">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">إدارة الإنتاج والمصنع 🏭</h1>
-          <p className="text-sm text-gray-500 mt-1">تتبع أوامر التشغيل، الأقسام، والتكاليف اليومية.</p>
+          <p className="text-sm text-gray-500 mt-1">النظام جاهز لاستقبال أوامر تشغيل الموسم الجديد بناءً على صور الموديلات.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-md">
           <Plus size={18} />
-          إصدار أمر تشغيل جديد
+          إصدار أمر تشغيل بصورة الموديل
         </button>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border-r-4 border-blue-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm text-gray-500">الإنتاج اليومي</p>
-              <h3 className="text-2xl font-bold mt-1">1,450 <span className="text-sm font-normal">قطعة</span></h3>
-            </div>
-            <TrendingUp className="text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border-r-4 border-green-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm text-gray-500">أوامر شغل نشطة</p>
-              <h3 className="text-2xl font-bold mt-1">12</h3>
-            </div>
-            <Play className="text-green-500" />
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border-r-4 border-orange-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm text-gray-500">متوسط التكلفة/القطعة</p>
-              <h3 className="text-2xl font-bold mt-1">45 <span className="text-sm font-normal">ج.م</span></h3>
-            </div>
-            <span className="text-orange-500 bg-orange-100 px-2 py-1 rounded text-xs">اليوم</span>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border-r-4 border-purple-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm text-gray-500">عمالة اليوم</p>
-              <h3 className="text-2xl font-bold mt-1">42 <span className="text-sm font-normal">عامل</span></h3>
-            </div>
-            <Clock className="text-purple-500" />
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Factory Flow - Left/Right Column */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-bold mb-4 border-b pb-2">خط سير العمليات (الأقسام)</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <h2 className="text-lg font-bold mb-4 border-b pb-2">خط سير العمليات (الأقسام 13)</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {departments.map((dept, index) => (
-                <div key={dept.id} className="border rounded-lg p-4 flex flex-col items-center justify-center text-center hover:shadow-md transition cursor-pointer relative">
-                  {index !== departments.length - 1 && (
-                    <div className="hidden md:block absolute left-[-15px] top-1/2 transform -translate-y-1/2 text-gray-300">
-                      ←
-                    </div>
-                  )}
-                  <div className={`p-3 rounded-full mb-3 ${dept.color}`}>
-                    <dept.icon size={24} />
+                <div key={dept.id} className="border rounded-lg p-3 flex flex-col items-center justify-center text-center opacity-80 hover:opacity-100 transition relative bg-gray-50">
+                  <div className={`p-2 rounded-full mb-2 ${dept.color}`}>
+                    <dept.icon size={20} />
                   </div>
-                  <h3 className="font-semibold text-gray-800">{dept.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{dept.count} أوامر قيد التنفيذ</p>
+                  <h3 className="font-semibold text-gray-700 text-sm">{dept.name}</h3>
+                  <p className="text-xs text-gray-400 mt-1">مستعد للموسم</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-bold mb-4 border-b pb-2">أوامر التشغيل الحالية</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-right">
-                <thead className="bg-gray-50 text-gray-600 text-sm">
-                  <tr>
-                    <th className="p-3 rounded-r-lg">رقم الأمر</th>
-                    <th className="p-3">الموديل</th>
-                    <th className="p-3">المرحلة الحالية</th>
-                    <th className="p-3">التقدم</th>
-                    <th className="p-3 rounded-l-lg">إجراء</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {activeOrders.map((order, i) => (
-                    <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                      <td className="p-3 font-semibold text-blue-600">{order.id}</td>
-                      <td className="p-3">{order.model}</td>
-                      <td className="p-3">
-                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-full bg-gray-200 rounded-full h-2 max-w-[100px]">
-                            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${order.progress}%` }}></div>
-                          </div>
-                          <span className="text-xs text-gray-500">{order.completed}/{order.total}</span>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <button className="text-blue-500 hover:underline text-xs">التفاصيل</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex justify-between items-center mb-4 border-b pb-2">
+              <h2 className="text-lg font-bold">أوامر التشغيل الحالية (الموسم الجديد)</h2>
+            </div>
+            <div className="overflow-x-auto text-center py-10 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+              <Layers size={48} className="mx-auto text-gray-300 mb-3" />
+              <h3 className="text-gray-500 font-semibold mb-1">لا يوجد أوامر تشغيل حتى الآن</h3>
+              <p className="text-gray-400 text-sm">اضغط على "إصدار أمر تشغيل بصورة الموديل" لبدء الموسم</p>
             </div>
           </div>
         </div>
