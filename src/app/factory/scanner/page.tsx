@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
@@ -119,7 +119,7 @@ export default function WorkerScannerPage() {
     
     setLoading(true);
     try {
-      const nextStage = orderData.currentStage + 1;
+      const nextStage = selectedStage;
       if (nextStage > 14) {
         throw new Error("لا يمكن تخطي المرحلة 14 (المخزن)");
       }
