@@ -118,7 +118,7 @@ export default function FactoryKanbanBoard() {
           const totalPieces = stageOrders.reduce((sum, o) => sum + (Number(o.totalQuantity) || 0), 0);
 
           return (
-            <div key={stageNumber} className="min-w-[300px] max-w-[300px] flex flex-col bg-gray-100 rounded-xl max-h-full border border-gray-200 shrink-0">
+            <div key={stageNumber} className="min-w-[240px] max-w-[240px] flex flex-col bg-gray-100 rounded-xl max-h-full border border-gray-200 shrink-0">
               {/* Column Header */}
               <div className="p-3 bg-gray-200 rounded-t-xl border-b border-gray-300 flex justify-between items-center sticky top-0">
                 <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">

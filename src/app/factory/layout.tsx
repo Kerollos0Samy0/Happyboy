@@ -96,7 +96,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
         </header>
       )}
       
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className={`flex-1 w-full mx-auto p-4 sm:p-6 lg:p-8 ${pathname === '/factory/dashboard' ? 'max-w-[100%]' : 'max-w-7xl'}`}>
         {children}
       </main>
     </div>
