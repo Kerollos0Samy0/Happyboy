@@ -41,7 +41,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {!isLoginPage && (
         <header className="bg-white shadow-sm p-4 sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className={`${pathname?.includes('/factory/dashboard') ? 'w-full px-4' : 'max-w-7xl mx-auto'} flex justify-between items-center`}>
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-bold text-gray-800">نظام المصنع 🏭</h1>
               <nav className="hidden md:flex gap-4">
@@ -84,7 +84,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
         </header>
       )}
       
-      <main className={`flex-1 w-full mx-auto ${pathname === '/factory/dashboard' ? 'max-w-none p-2' : 'max-w-7xl p-4 sm:p-6 lg:p-8'}`}>
+      <main className={`flex-1 w-full mx-auto ${pathname?.includes('/factory/dashboard') ? 'max-w-none px-2' : 'max-w-7xl p-4 sm:p-6 lg:p-8'}`}>
         {children}
       </main>
     </div>
