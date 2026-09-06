@@ -56,6 +56,7 @@ export default function PrintProductionOrderPage() {
 
   const tColors = order.tshirtColors || [];
   const pColors = order.pantsColors || [];
+  const colorPairs = order.colorPairs || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
@@ -102,18 +103,22 @@ export default function PrintProductionOrderPage() {
               <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
               
               <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
-                {[0, 1, 2].map((i) => (
-                  <React.Fragment key={i}>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                      <span className="text-[10px] font-bold text-gray-600">{tColors[i] ? `تيشيرت ${tColors[i]}` : 'تيشيرت'}</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                      <span className="text-[10px] font-bold text-gray-600">{pColors[i] ? `بنطلون ${pColors[i]}` : 'بنطلون'}</span>
-                    </div>
-                  </React.Fragment>
-                ))}
+                {[...Array(Math.max(tColors.length, pColors.length, 1))].map((_, i) => {
+                  const pair = colorPairs[i];
+                  const qtyText = pair?.quantity ? ` (${pair.quantity}ق)` : '';
+                  return (
+                    <React.Fragment key={i}>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                        <span className="text-[10px] font-bold text-gray-600 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                        <span className="text-[10px] font-bold text-gray-600 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </div>
           </div>

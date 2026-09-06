@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -15,8 +15,8 @@ export default function NewProductionOrderPage() {
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
   
-  // Dynamic color pairs array
-  const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '' }]);
+  // Dynamic color pairs array (now includes quantity)
+  const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '' }]);
   
   const [fabricSupplier, setFabricSupplier] = useState('');
   
@@ -32,6 +32,14 @@ export default function NewProductionOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
+
+  // Auto-calculate total quantity based on colors
+  useEffect(() => {
+    const calculatedTotal = colorPairs.reduce((sum, pair) => sum + (Number(pair.quantity) || 0), 0);
+    if (calculatedTotal > 0) {
+      setTotalQuantity(calculatedTotal.toString());
+    }
+  }, [colorPairs]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -75,8 +83,10 @@ export default function NewProductionOrderPage() {
       const pColors = validPairs.length > 0 ? validPairs.map(p => p.pants) : [''];
       
       const allColors = validPairs.map(p => {
-        if (p.tshirt && p.pants) return `${p.tshirt} مع ${p.pants}`;
-        return p.tshirt || p.pants;
+        let name = '';
+        if (p.tshirt && p.pants) name = `${p.tshirt} مع ${p.pants}`;
+        else name = p.tshirt || p.pants;
+        return p.quantity ? `${name} (${p.quantity}ق)` : name;
       }).filter(c => c).join('، ');
 
       const orderData = {
@@ -85,6 +95,7 @@ export default function NewProductionOrderPage() {
         fabricType,
         tshirtColors: tColors,
         pantsColors: pColors,
+        colorPairs: validPairs,
         fabricColor: allColors,
         fabricSupplier,
         cuttingNotes,
@@ -166,18 +177,22 @@ export default function NewProductionOrderPage() {
                 <p className="text-sm mb-2"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
                 
                 <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
-                  {[...Array(Math.max(tColors.length, pColors.length, 1))].map((_, i) => (
-                    <React.Fragment key={i}>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600">{tColors[i] ? `تيشيرت ${tColors[i]}` : 'تيشيرت'}</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600">{pColors[i] ? `بنطلون ${pColors[i]}` : 'بنطلون'}</span>
-                      </div>
-                    </React.Fragment>
-                  ))}
+                  {[...Array(Math.max(tColors.length, pColors.length, 1))].map((_, i) => {
+                    const pair = validPairs[i];
+                    const qtyText = pair?.quantity ? ` (${pair.quantity}ق)` : '';
+                    return (
+                      <React.Fragment key={i}>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                          <span className="text-[10px] font-bold text-gray-600 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                          <span className="text-[10px] font-bold text-gray-600 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -324,8 +339,8 @@ export default function NewProductionOrderPage() {
                   <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (قطعة) *</label>
-                  <input type="number" value={totalQuantity} onChange={(e) => setTotalQuantity(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required min="1" />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (تُحسب تلقائياً) *</label>
+                  <input type="number" value={totalQuantity} onChange={(e) => setTotalQuantity(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" required min="1" placeholder="مجموع الألوان" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>
@@ -338,12 +353,12 @@ export default function NewProductionOrderPage() {
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <h3 className="font-bold text-blue-900 mb-3 text-sm flex items-center gap-2">🎨 ألوان القطع والتنسيق (تكتب على المربعات في الطباعة)</h3>
+                <h3 className="font-bold text-blue-900 mb-3 text-sm flex items-center gap-2">🎨 ألوان القطع والتنسيق والكميات</h3>
                 
                 <div className="space-y-3">
                   {colorPairs.map((pair, idx) => (
                     <div key={idx} className="flex gap-2 items-center">
-                      <div className="flex-1">
+                      <div className="flex-[2]">
                         <input 
                           type="text" 
                           value={pair.tshirt} 
@@ -353,10 +368,10 @@ export default function NewProductionOrderPage() {
                             setColorPairs(newPairs);
                           }} 
                           className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                          placeholder={`لون التيشيرت (${idx + 1})`} 
+                          placeholder={`التيشيرت (${idx + 1})`} 
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-[2]">
                         <input 
                           type="text" 
                           value={pair.pants} 
@@ -366,7 +381,20 @@ export default function NewProductionOrderPage() {
                             setColorPairs(newPairs);
                           }} 
                           className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                          placeholder={`لون البنطلون (${idx + 1})`} 
+                          placeholder={`البنطلون (${idx + 1})`} 
+                        />
+                      </div>
+                      <div className="w-24 shrink-0">
+                        <input 
+                          type="number" 
+                          value={pair.quantity} 
+                          onChange={(e) => {
+                            const newPairs = [...colorPairs];
+                            newPairs[idx].quantity = e.target.value;
+                            setColorPairs(newPairs);
+                          }} 
+                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-blue-700" 
+                          placeholder="الكمية" 
                         />
                       </div>
                       {colorPairs.length > 1 && (
@@ -388,7 +416,7 @@ export default function NewProductionOrderPage() {
                 
                 <button 
                   type="button" 
-                  onClick={() => setColorPairs([...colorPairs, { tshirt: '', pants: '' }])} 
+                  onClick={() => setColorPairs([...colorPairs, { tshirt: '', pants: '', quantity: '' }])} 
                   className="text-blue-700 text-sm font-bold flex items-center gap-1 hover:bg-blue-100 p-2 rounded transition mt-2"
                 >
                   <Plus size={16} /> إضافة لون آخر
