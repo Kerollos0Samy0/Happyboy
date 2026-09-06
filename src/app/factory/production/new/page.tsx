@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -68,12 +68,18 @@ export default function NewProductionOrderPage() {
     setError('');
 
     try {
+      // Create fabricColor for backward compatibility in Kanban display, etc.
+      let combinedColor = '';
+      if (tshirtColor && pantsColor) combinedColor = `${tshirtColor}، ${pantsColor}`;
+      else combinedColor = tshirtColor || pantsColor;
+
       const orderData = {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
         tshirtColor,
         pantsColor,
+        fabricColor: combinedColor,
         fabricSupplier,
         cuttingNotes,
         printingType,
@@ -146,15 +152,22 @@ export default function NewProductionOrderPage() {
               </div>
               <div className="border border-gray-400 p-3 bg-gray-50 flex-1 flex flex-col">
                 <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
-                <p className="text-base mb-2"><strong>النوع:</strong> {fabricType || '---'}</p>
-                <p className="text-base mb-2"><strong>اللون:</strong> {fabricColor || '---'}</p>
-                <p className="text-base mb-2"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
+                <p className="text-sm mb-1"><strong>التيشيرت:</strong> {tshirtColor || '---'}</p>
+                <p className="text-sm mb-2"><strong>البنطلون:</strong> {pantsColor || '---'}</p>
+                <p className="text-sm mb-2"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
                 
-                <div className="mt-auto pt-4 pb-2 grid grid-cols-2 gap-4 justify-items-center">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1">
-                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                    </div>
+                <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
+                  {[...Array(3)].map((_, i) => (
+                    <React.Fragment key={i}>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                        <span className="text-[10px] font-bold text-gray-600">تيشيرت</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                        <span className="text-[10px] font-bold text-gray-600">بنطلون</span>
+                      </div>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
@@ -239,7 +252,7 @@ export default function NewProductionOrderPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-20 print:hidden" dir="rtl">
       <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border-r-4 border-blue-500">
-        <Link href="/factory/production" className="p-2 hover:bg-gray-100 rounded-full transition">
+        <Link href="/factory/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition">
           <ArrowRight size={24} className="text-gray-600" />
         </Link>
         <div>
@@ -309,8 +322,12 @@ export default function NewProductionOrderPage() {
                   <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">الألوان (ألوان القماش)</label>
-                  <input type="text" value={fabricColor} onChange={(e) => setFabricColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: أحمر، أسود، كحلي..." />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">ألوان التيشيرت</label>
+                  <input type="text" value={tshirtColor} onChange={(e) => setTshirtColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="أحمر، أسود..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">ألوان البنطلون</label>
+                  <input type="text" value={pantsColor} onChange={(e) => setPantsColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="رمادي، كحلي..." />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">المورد / ملاحظات المخزن</label>
