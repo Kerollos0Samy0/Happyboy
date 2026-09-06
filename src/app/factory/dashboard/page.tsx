@@ -171,9 +171,17 @@ export default function FactoryDashboard() {
 
   return (
     <div className="h-[calc(100vh-100px)] flex flex-col" dir="rtl" onClick={handleWrapperClick}>
-      <div className="mb-4 shrink-0">
-        <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
-        <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
+      <div className="mb-4 shrink-0 flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
+          <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
+        </div>
+        <Link 
+          href="/factory/production/new" 
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition flex items-center gap-2"
+        >
+          <span className="text-xl leading-none">+</span> إصدار أمر تشغيل
+        </Link>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
