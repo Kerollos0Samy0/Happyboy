@@ -23,6 +23,7 @@ import {
   Store,
   Wind
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function FactoryProductionDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -55,10 +56,10 @@ export default function FactoryProductionDashboard() {
           <h1 className="text-2xl font-bold text-gray-800">إدارة الإنتاج والمصنع 🏭</h1>
           <p className="text-sm text-gray-500 mt-1">النظام جاهز لاستقبال أوامر تشغيل الموسم الجديد بناءً على صور الموديلات.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-md">
+        <Link href="/factory/production/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-md">
           <Plus size={18} />
           إصدار أمر تشغيل بصورة الموديل
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
