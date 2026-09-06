@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
@@ -253,7 +253,7 @@ export default function FactoryDashboard() {
                   <div 
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`shrink-0 w-64 rounded-xl border flex flex-col h-full ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
+                    className={`shrink-0 w-64 rounded-xl border flex flex-col h-fit max-h-full ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
                   >
                     <div className="p-3 border-b border-black/5 flex justify-between items-center bg-black/5 rounded-t-xl shrink-0">
                       <div className="flex items-center gap-2">
