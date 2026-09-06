@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,7 +14,8 @@ export default function NewProductionOrderPage() {
   const [modelName, setModelName] = useState('');
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
-  const [fabricColor, setFabricColor] = useState('');
+  const [tshirtColor, setTshirtColor] = useState('');
+  const [pantsColor, setPantsColor] = useState('');
   const [fabricSupplier, setFabricSupplier] = useState('');
   
   const [cuttingNotes, setCuttingNotes] = useState('');
@@ -71,7 +72,8 @@ export default function NewProductionOrderPage() {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
-        fabricColor,
+        tshirtColor,
+        pantsColor,
         fabricSupplier,
         cuttingNotes,
         printingType,
