@@ -14,8 +14,16 @@ export default function NewProductionOrderPage() {
   const [modelName, setModelName] = useState('');
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
-  const [tshirtColor, setTshirtColor] = useState('');
-  const [pantsColor, setPantsColor] = useState('');
+  
+  // 3 Colors for Tshirt, 3 Colors for Pants
+  const [tc1, setTc1] = useState('');
+  const [tc2, setTc2] = useState('');
+  const [tc3, setTc3] = useState('');
+  
+  const [pc1, setPc1] = useState('');
+  const [pc2, setPc2] = useState('');
+  const [pc3, setPc3] = useState('');
+  
   const [fabricSupplier, setFabricSupplier] = useState('');
   
   const [cuttingNotes, setCuttingNotes] = useState('');
@@ -68,18 +76,19 @@ export default function NewProductionOrderPage() {
     setError('');
 
     try {
-      // Create fabricColor for backward compatibility in Kanban display, etc.
-      let combinedColor = '';
-      if (tshirtColor && pantsColor) combinedColor = `${tshirtColor}، ${pantsColor}`;
-      else combinedColor = tshirtColor || pantsColor;
+      const tColors = [tc1, tc2, tc3];
+      const pColors = [pc1, pc2, pc3];
+      
+      // For dashboard display compatibility
+      const allColors = [...tColors, ...pColors].filter(c => c).join('، ');
 
       const orderData = {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
-        tshirtColor,
-        pantsColor,
-        fabricColor: combinedColor,
+        tshirtColors: tColors,
+        pantsColors: pColors,
+        fabricColor: allColors,
         fabricSupplier,
         cuttingNotes,
         printingType,
@@ -110,6 +119,9 @@ export default function NewProductionOrderPage() {
   };
 
   if (generatedOrderId) {
+    const tColors = [tc1, tc2, tc3];
+    const pColors = [pc1, pc2, pc3];
+    
     return (
       <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
         <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm print:hidden">
@@ -152,20 +164,19 @@ export default function NewProductionOrderPage() {
               </div>
               <div className="border border-gray-400 p-3 bg-gray-50 flex-1 flex flex-col">
                 <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
-                <p className="text-sm mb-1"><strong>التيشيرت:</strong> {tshirtColor || '---'}</p>
-                <p className="text-sm mb-2"><strong>البنطلون:</strong> {pantsColor || '---'}</p>
+                <p className="text-sm mb-2"><strong>النوع:</strong> {fabricType || '---'}</p>
                 <p className="text-sm mb-2"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
                 
                 <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
-                  {[...Array(3)].map((_, i) => (
+                  {[0, 1, 2].map((i) => (
                     <React.Fragment key={i}>
                       <div className="flex flex-col items-center gap-1">
                         <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600">تيشيرت</span>
+                        <span className="text-[10px] font-bold text-gray-600">{tColors[i] ? `تيشيرت ${tColors[i]}` : 'تيشيرت'}</span>
                       </div>
                       <div className="flex flex-col items-center gap-1">
                         <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600">بنطلون</span>
+                        <span className="text-[10px] font-bold text-gray-600">{pColors[i] ? `بنطلون ${pColors[i]}` : 'بنطلون'}</span>
                       </div>
                     </React.Fragment>
                   ))}
@@ -308,7 +319,8 @@ export default function NewProductionOrderPage() {
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-sm space-y-4 border-t-4 border-gray-800">
               <h2 className="text-lg font-bold border-b pb-2 text-gray-800">1. البيانات الأساسية والمخزن</h2>
-              <div className="grid grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">اسم أو كود الموديل *</label>
                   <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
@@ -322,18 +334,38 @@ export default function NewProductionOrderPage() {
                   <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">ألوان التيشيرت</label>
-                  <input type="text" value={tshirtColor} onChange={(e) => setTshirtColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="أحمر، أسود..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">ألوان البنطلون</label>
-                  <input type="text" value={pantsColor} onChange={(e) => setPantsColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="رمادي، كحلي..." />
-                </div>
-                <div className="col-span-2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">المورد / ملاحظات المخزن</label>
                   <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="اسم المورد أو مكان القماش" />
                 </div>
               </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <h3 className="font-bold text-blue-900 mb-3 text-sm flex items-center gap-2">🎨 ألوان القطع والتنسيق (تكتب على المربعات في الطباعة)</h3>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <input type="text" value={tc1} onChange={(e) => setTc1(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون التيشيرت (1)" />
+                  </div>
+                  <div>
+                    <input type="text" value={pc1} onChange={(e) => setPc1(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون البنطلون (1)" />
+                  </div>
+
+                  <div>
+                    <input type="text" value={tc2} onChange={(e) => setTc2(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون التيشيرت (2)" />
+                  </div>
+                  <div>
+                    <input type="text" value={pc2} onChange={(e) => setPc2(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون البنطلون (2)" />
+                  </div>
+
+                  <div>
+                    <input type="text" value={tc3} onChange={(e) => setTc3(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون التيشيرت (3)" />
+                  </div>
+                  <div>
+                    <input type="text" value={pc3} onChange={(e) => setPc3(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="لون البنطلون (3)" />
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 border-t-4 border-gray-800">

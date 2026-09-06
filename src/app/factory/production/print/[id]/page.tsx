@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -54,6 +54,9 @@ export default function PrintProductionOrderPage() {
     );
   }
 
+  const tColors = order.tshirtColors || [];
+  const pColors = order.pantsColors || [];
+
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
       <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm print:hidden">
@@ -95,15 +98,21 @@ export default function PrintProductionOrderPage() {
             </div>
             <div className="border border-gray-400 p-3 bg-gray-50 flex-1 flex flex-col">
               <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
-              <p className="text-base mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
-              <p className="text-base mb-2"><strong>اللون:</strong> {order.fabricColor || '---'}</p>
-              <p className="text-base mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
+              <p className="text-sm mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
+              <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
               
-              <div className="mt-auto pt-4 pb-2 grid grid-cols-2 gap-4 justify-items-center">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                  </div>
+              <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
+                {[0, 1, 2].map((i) => (
+                  <React.Fragment key={i}>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                      <span className="text-[10px] font-bold text-gray-600">{tColors[i] ? `تيشيرت ${tColors[i]}` : 'تيشيرت'}</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                      <span className="text-[10px] font-bold text-gray-600">{pColors[i] ? `بنطلون ${pColors[i]}` : 'بنطلون'}</span>
+                    </div>
+                  </React.Fragment>
                 ))}
               </div>
             </div>
