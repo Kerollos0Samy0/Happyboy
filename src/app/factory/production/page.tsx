@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -8,7 +8,7 @@ import {
   Microscope, ScanBarcode, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '../../../../lib/firebase';
+import { db } from '@/lib/firebase';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 
 const STAGES = [
