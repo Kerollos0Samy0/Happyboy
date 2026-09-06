@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import Link from 'next/link';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function NewProductionOrderPage() {
   const router = useRouter();
@@ -14,20 +15,28 @@ export default function NewProductionOrderPage() {
   const [modelName, setModelName] = useState('');
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
+  const [fabricColor, setFabricColor] = useState('');
+  const [fabricSupplier, setFabricSupplier] = useState('');
   
   // Stages Info
   const [cuttingNotes, setCuttingNotes] = useState('');
   const [printingType, setPrintingType] = useState('');
+  const [printingDetails, setPrintingDetails] = useState('');
   const [pressingNotes, setPressingNotes] = useState('');
+  const [pairingNotes, setPairingNotes] = useState('');
   const [sewingNotes, setSewingNotes] = useState('');
+  const [finishingNotes, setFinishingNotes] = useState('');
+  const [packingNotes, setPackingNotes] = useState('');
 
   // Image
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Print View State
+  const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
 
-  // Resize and compress image to base64 to avoid Firebase Storage setup issues
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -45,8 +54,7 @@ export default function NewProductionOrderPage() {
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          // Compress to JPEG with 0.7 quality
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
           setImageBase64(dataUrl);
         };
         img.src = event.target?.result as string;
@@ -70,20 +78,26 @@ export default function NewProductionOrderPage() {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
+        fabricColor,
+        fabricSupplier,
         cuttingNotes,
         printingType,
+        printingDetails,
         pressingNotes,
+        pairingNotes,
         sewingNotes,
-        modelImage: imageBase64, // Stored directly as a compressed string
-        currentStage: 1, // Start at stage 1
-        status: 'قيد التنفيذ', // active
+        finishingNotes,
+        packingNotes,
+        modelImage: imageBase64,
+        currentStage: 1,
+        status: 'قيد التنفيذ',
         createdAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(collection(db, 'factory_production_orders'), orderData);
       
-      alert('تم إصدار أمر التشغيل بنجاح! رقم الأمر: ' + docRef.id);
-      router.push('/factory/production');
+      setGeneratedOrderId(docRef.id);
+      setLoading(false);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'حدث خطأ غير متوقع أثناء الحفظ.');
@@ -91,15 +105,151 @@ export default function NewProductionOrderPage() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  if (generatedOrderId) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
+        <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm print:hidden">
+          <p className="text-green-600 font-bold flex items-center gap-2"><CheckCircle /> تم الحفظ بنجاح!</p>
+          <div className="flex gap-2">
+            <button onClick={handlePrint} className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
+              <Printer size={18} /> طباعة أمر التشغيل
+            </button>
+            <Link href="/factory/production" className="bg-gray-200 text-gray-800 px-4 py-2 rounded">
+              العودة للوحة
+            </Link>
+          </div>
+        </div>
+
+        {/* A4 Print Ticket Container */}
+        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-0 w-full mx-auto" style={{ minHeight: '297mm' }}>
+          
+          {/* Header Ticket */}
+          <div className="border-4 border-gray-800 p-4 mb-6">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
+                <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
+                  <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{modelName}</span></div>
+                  <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{totalQuantity} قطعة</span></div>
+                  <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{new Date().toLocaleDateString('ar-EG')}</span></div>
+                </div>
+              </div>
+              
+              <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
+                <QRCodeSVG value={generatedOrderId} size={100} />
+                <span className="text-xs font-mono mt-2">{generatedOrderId.slice(-6).toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-6">
+            {/* Image Section */}
+            <div className="w-1/3">
+              <div className="border-2 border-gray-400 h-80 relative flex items-center justify-center p-2 mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageBase64!} alt="Model" className="w-full h-full object-contain" />
+              </div>
+              <div className="border border-gray-400 p-3 bg-gray-50">
+                <h3 className="font-bold border-b pb-1 mb-2">مخزن القماش</h3>
+                <p className="text-sm"><strong>النوع:</strong> {fabricType || '---'}</p>
+                <p className="text-sm"><strong>اللون:</strong> {fabricColor || '---'}</p>
+                <p className="text-sm"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
+              </div>
+            </div>
+
+            {/* Stages Grid */}
+            <div className="w-2/3 grid grid-cols-2 gap-4">
+              
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">✂️ قسم القص والفرز</h3>
+                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{cuttingNotes || 'لا توجد تعليمات خاصة.'}</p>
+              </div>
+              
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🖨️ قسم الطباعة والليزر</h3>
+                <p className="text-sm"><strong>نوع الطباعة:</strong> {printingType || 'بدون'}</p>
+                <p className="text-sm min-h-[25px] whitespace-pre-wrap">{printingDetails}</p>
+              </div>
+
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">♨️ قسم الكبس</h3>
+                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pressingNotes || '---'}</p>
+              </div>
+
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🤝 قسم التجويز</h3>
+                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pairingNotes || '---'}</p>
+              </div>
+
+              <div className="border border-gray-400 p-3 col-span-2">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🧵 قسم المكن (التقفيل)</h3>
+                <p className="text-sm min-h-[50px] whitespace-pre-wrap">{sewingNotes || '---'}</p>
+              </div>
+
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">✨ التشطيب والمكواة</h3>
+                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{finishingNotes || '---'}</p>
+              </div>
+
+              <div className="border border-gray-400 p-3">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">📦 التعبئة والتكييس</h3>
+                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{packingNotes || '---'}</p>
+              </div>
+
+            </div>
+          </div>
+          
+          {/* Signatures */}
+          <div className="mt-12 flex justify-between border-t-2 border-dashed border-gray-400 pt-6 px-10">
+            <div className="text-center"><p className="font-bold mb-6">توقيع مدير الإنتاج</p><p>.................................</p></div>
+            <div className="text-center"><p className="font-bold mb-6">توقيع أمين المخزن</p><p>.................................</p></div>
+            <div className="text-center"><p className="font-bold mb-6">توقيع مشرف الجودة</p><p>.................................</p></div>
+          </div>
+
+        </div>
+        
+        <style jsx global>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .print\\:shadow-none {
+              box-shadow: none !important;
+            }
+            .print\\:p-0 {
+              padding: 0 !important;
+            }
+            .print\\:hidden {
+              display: none !important;
+            }
+            .max-w-4xl > div:nth-child(2), .max-w-4xl > div:nth-child(2) * {
+              visibility: visible;
+            }
+            .max-w-4xl > div:nth-child(2) {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20" dir="rtl">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 print:hidden" dir="rtl">
       <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border-r-4 border-blue-500">
         <Link href="/factory/production" className="p-2 hover:bg-gray-100 rounded-full transition">
           <ArrowRight size={24} className="text-gray-600" />
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">إصدار أمر تشغيل جديد</h1>
-          <p className="text-sm text-gray-500 mt-1">أدخل بيانات الموديل وتعليمات الأقسام الـ 13 لفتح أمر الشغل.</p>
+          <p className="text-sm text-gray-500 mt-1">قم بتعبئة بيانات الأقسام لإصدار وطباعة ورقة أمر التشغيل (A4).</p>
         </div>
       </div>
 
@@ -115,7 +265,7 @@ export default function NewProductionOrderPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Right Column - Image Upload */}
-          <div className="md:col-span-1 bg-white p-6 rounded-lg shadow-sm h-fit">
+          <div className="md:col-span-1 bg-white p-6 rounded-lg shadow-sm h-fit sticky top-24">
             <label className="block text-sm font-bold text-gray-700 mb-2">صورة الموديل المرجعية *</label>
             <div className={`border-2 border-dashed rounded-xl h-72 flex flex-col items-center justify-center relative overflow-hidden transition ${imageBase64 ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
               
@@ -143,104 +293,97 @@ export default function NewProductionOrderPage() {
                 required={!imageBase64}
               />
             </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded text-sm text-blue-800 border border-blue-100">
+              💡 <strong>تلميح:</strong> بعد الضغط على إصدار، سيتم نقلك لشاشة (A4) جاهزة للطباعة فوراً لتحتوي على هذه الصورة والباركود.
+            </div>
           </div>
 
           {/* Left Column - Form Fields */}
           <div className="md:col-span-2 space-y-6">
             
-            {/* Basic Info */}
-            <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-              <h2 className="text-lg font-bold border-b pb-2 text-gray-800">1. البيانات الأساسية</h2>
+            {/* 1. Basic Info */}
+            <div className="bg-white p-6 rounded-lg shadow-sm space-y-4 border-t-4 border-gray-800">
+              <h2 className="text-lg font-bold border-b pb-2 text-gray-800">1. البيانات الأساسية والمخزن</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">اسم أو كود الموديل *</label>
-                  <input 
-                    type="text" 
-                    value={modelName}
-                    onChange={(e) => setModelName(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="مثال: سويت شيرت ولادي 105"
-                    required
-                  />
+                  <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (قطعة) *</label>
-                  <input 
-                    type="number" 
-                    value={totalQuantity}
-                    onChange={(e) => setTotalQuantity(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="مثال: 1000"
-                    required min="1"
-                  />
+                  <input type="number" value={totalQuantity} onChange={(e) => setTotalQuantity(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required min="1" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>
+                  <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">الألوان (ألوان القماش)</label>
+                  <input type="text" value={fabricColor} onChange={(e) => setFabricColor(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: أحمر، أسود، كحلي..." />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش (مخزن القماش)</label>
-                  <input 
-                    type="text" 
-                    value={fabricType}
-                    onChange={(e) => setFabricType(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="مثال: ميلتون مبطن، قطن 100%"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">المورد / ملاحظات المخزن</label>
+                  <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="اسم المورد أو مكان القماش" />
                 </div>
               </div>
             </div>
 
-            {/* Departments Instructions */}
-            <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-              <h2 className="text-lg font-bold border-b pb-2 text-gray-800">2. تعليمات الأقسام</h2>
+            {/* 2. Departments Instructions */}
+            <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 border-t-4 border-gray-800">
+              <h2 className="text-lg font-bold border-b pb-2 text-gray-800">2. تعليمات الأقسام (تظهر في الطباعة)</h2>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">تعليمات قسم القص</label>
-                  <textarea 
-                    value={cuttingNotes}
-                    onChange={(e) => setCuttingNotes(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="ملاحظات للباترون والقص..."
-                    rows={2}
-                  />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">✂️ قسم القص والفرز</label>
+                  <textarea value={cuttingNotes} onChange={(e) => setCuttingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="عدد الطبقات، اتجاه القماش، تعليمات الفرز..." rows={2} />
                 </div>
                 
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">نوع الطباعة (قسم الطباعة)</label>
-                  <select 
-                    value={printingType}
-                    onChange={(e) => setPrintingType(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value="">-- اختر نوع الطباعة --</option>
-                    <option value="بدون طباعة">بدون طباعة (سادة)</option>
-                    <option value="DTF">طباعة DTF</option>
-                    <option value="رابر">طباعة رابر / سيليكون</option>
-                    <option value="سلك سكرين">سلك سكرين</option>
-                    <option value="ليزر">تفريغ ليزر</option>
-                    <option value="تطريز">تطريز</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">🖨️ نوع الطباعة</label>
+                    <select value={printingType} onChange={(e) => setPrintingType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                      <option value="">-- اختر نوع الطباعة --</option>
+                      <option value="بدون طباعة">بدون طباعة (سادة)</option>
+                      <option value="DTF">طباعة DTF</option>
+                      <option value="رابر">طباعة رابر / سيليكون</option>
+                      <option value="سلك سكرين">سلك سكرين</option>
+                      <option value="ليزر">تفريغ ليزر</option>
+                      <option value="تطريز">تطريز</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">تفاصيل الطباعة / مقاسات</label>
+                    <input type="text" value={printingDetails} onChange={(e) => setPrintingDetails(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: مقاس 15x15 في الصدر" />
+                  </div>
                 </div>
 
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">تعليمات قسم الكبس</label>
-                  <textarea 
-                    value={pressingNotes}
-                    onChange={(e) => setPressingNotes(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="درجات الحرارة، أماكن الكبس..."
-                    rows={2}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">♨️ قسم الكبس</label>
+                    <input type="text" value={pressingNotes} onChange={(e) => setPressingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="الحرارة والوقت" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">🤝 قسم التجويز</label>
+                    <input type="text" value={pairingNotes} onChange={(e) => setPairingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ملاحظات تجميع القطع" />
+                  </div>
                 </div>
 
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">تعليمات قسم المكن (التقفيل)</label>
-                  <textarea 
-                    value={sewingNotes}
-                    onChange={(e) => setSewingNotes(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="نوع الخياطة، لون الخيط، تركيب تيكت..."
-                    rows={2}
-                  />
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">🧵 قسم المكن (التقفيل)</label>
+                  <textarea value={sewingNotes} onChange={(e) => setSewingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="طريقة الخياطة، لون الخيط، تركيب السوست والتيكت..." rows={3} />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">✨ التشطيب والمكواة</label>
+                    <input type="text" value={finishingNotes} onChange={(e) => setFinishingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="قص فتل، مكواة بخار..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">📦 التعبئة والتكييس</label>
+                    <input type="text" value={packingNotes} onChange={(e) => setPackingNotes(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="نوع الكيس، عدد القطع في الدستة" />
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -259,12 +402,12 @@ export default function NewProductionOrderPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                جاري الإصدار...
+                جاري التجهيز للطباعة...
               </>
             ) : (
               <>
                 <CheckCircle size={20} />
-                تأكيد وإصدار أمر التشغيل
+                إصدار أمر التشغيل وعرض للطباعة
               </>
             )}
           </button>

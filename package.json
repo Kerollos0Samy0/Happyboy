@@ -11,6 +11,8 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "firebase": "^12.17.1",
+    "firebase-admin": "^14.3.0",
+    "googleapis": "^178.0.0",
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.1",
