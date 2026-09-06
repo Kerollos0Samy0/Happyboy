@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -164,8 +164,8 @@ export default function ProductivityPage() {
       )}
 
       {/* Analytics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {MACHINE_TYPES.slice(0, 4).map(machine => {
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {MACHINE_TYPES.map(machine => {
           // Calculate total for this machine in the logs
           const total = logs.filter(l => l.type === machine.id).reduce((sum, l) => sum + l.amount, 0);
           return (
