@@ -125,7 +125,7 @@ export default function NewProductionOrderPage() {
         </div>
 
         {/* A4 Print Ticket Container */}
-        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-0 w-full mx-auto" style={{ minHeight: '297mm' }}>
+        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-0 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
           
           {/* Header Ticket */}
           <div className="border-4 border-gray-800 p-4 mb-6">
@@ -146,68 +146,68 @@ export default function NewProductionOrderPage() {
             </div>
           </div>
 
-          <div className="flex gap-6">
+          <div className="flex gap-6 flex-1">
             {/* Image Section */}
-            <div className="w-1/3">
+            <div className="w-1/3 flex flex-col">
               <div className="border-2 border-gray-400 h-80 relative flex items-center justify-center p-2 mb-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageBase64!} alt="Model" className="w-full h-full object-contain" />
               </div>
-              <div className="border border-gray-400 p-3 bg-gray-50">
-                <h3 className="font-bold border-b pb-1 mb-2">مخزن القماش</h3>
-                <p className="text-sm"><strong>النوع:</strong> {fabricType || '---'}</p>
-                <p className="text-sm"><strong>اللون:</strong> {fabricColor || '---'}</p>
-                <p className="text-sm"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
+              <div className="border border-gray-400 p-3 bg-gray-50 flex-1">
+                <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
+                <p className="text-base mb-2"><strong>النوع:</strong> {fabricType || '---'}</p>
+                <p className="text-base mb-2"><strong>اللون:</strong> {fabricColor || '---'}</p>
+                <p className="text-base mb-2"><strong>المورد:</strong> {fabricSupplier || '---'}</p>
               </div>
             </div>
 
             {/* Stages Grid */}
-            <div className="w-2/3 grid grid-cols-2 gap-4">
+            <div className="w-2/3 grid grid-cols-2 gap-4 h-fit">
               
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">✂️ قسم القص والفرز</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{cuttingNotes || 'لا توجد تعليمات خاصة.'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">✂️ قسم القص والفرز</h3>
+                <p className="text-base min-h-[90px] whitespace-pre-wrap">{cuttingNotes || 'لا توجد تعليمات خاصة.'}</p>
               </div>
               
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🖨️ قسم الطباعة والليزر</h3>
-                <p className="text-sm"><strong>نوع الطباعة:</strong> {printingType || 'بدون'}</p>
-                <p className="text-sm min-h-[25px] whitespace-pre-wrap">{printingDetails}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🖨️ قسم الطباعة والليزر</h3>
+                <p className="text-base mb-1"><strong>نوع الطباعة:</strong> {printingType || 'بدون'}</p>
+                <p className="text-base min-h-[60px] whitespace-pre-wrap">{printingDetails}</p>
               </div>
 
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">♨️ قسم الكبس</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pressingNotes || '---'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">♨️ قسم الكبس</h3>
+                <p className="text-base min-h-[90px] whitespace-pre-wrap">{pressingNotes || '---'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🤝 قسم التجويز</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pairingNotes || '---'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🤝 قسم التجويز</h3>
+                <p className="text-base min-h-[90px] whitespace-pre-wrap">{pairingNotes || '---'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3 col-span-2">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">🧵 قسم المكن (التقفيل)</h3>
-                <p className="text-sm min-h-[50px] whitespace-pre-wrap">{sewingNotes || '---'}</p>
+              <div className="border border-gray-400 p-3 col-span-2 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🧵 قسم المكن (التقفيل)</h3>
+                <p className="text-base min-h-[120px] whitespace-pre-wrap">{sewingNotes || '---'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">✨ التشطيب والمكواة</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{finishingNotes || '---'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">✨ التشطيب والمكواة</h3>
+                <p className="text-base min-h-[90px] whitespace-pre-wrap">{finishingNotes || '---'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">📦 التعبئة والتكييس</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{packingNotes || '---'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col">
+                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">📦 التعبئة والتكييس</h3>
+                <p className="text-base min-h-[90px] whitespace-pre-wrap">{packingNotes || '---'}</p>
               </div>
 
             </div>
           </div>
           
           {/* Signatures */}
-          <div className="mt-12 flex justify-between border-t-2 border-dashed border-gray-400 pt-6 px-10">
-            <div className="text-center"><p className="font-bold mb-6">توقيع مدير الإنتاج</p><p>.................................</p></div>
-            <div className="text-center"><p className="font-bold mb-6">توقيع أمين المخزن</p><p>.................................</p></div>
-            <div className="text-center"><p className="font-bold mb-6">توقيع مشرف الجودة</p><p>.................................</p></div>
+          <div className="mt-auto pt-8 flex justify-between border-t-2 border-dashed border-gray-400 px-10 pb-8">
+            <div className="text-center"><p className="font-bold text-lg mb-8">توقيع مدير الإنتاج</p><p>.................................</p></div>
+            <div className="text-center"><p className="font-bold text-lg mb-8">توقيع أمين المخزن</p><p>.................................</p></div>
+            <div className="text-center"><p className="font-bold text-lg mb-8">توقيع مشرف الجودة</p><p>.................................</p></div>
           </div>
 
         </div>
