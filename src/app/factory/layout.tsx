@@ -26,6 +26,30 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
     return () => unsubscribeAuth();
   }, [router, pathname]);
 
+  // Hack to remove root container constraint for the dashboard
+  useEffect(() => {
+    const rootMain = document.querySelector('body > main.container');
+    const rootMainAlt = document.querySelector('body > div > main.container') || document.querySelector('main.container');
+    const target = rootMain || rootMainAlt;
+    
+    if (target) {
+      if (pathname?.includes('/factory/dashboard')) {
+        target.classList.remove('container');
+        target.classList.add('w-full');
+      } else {
+        target.classList.add('container');
+        target.classList.remove('w-full');
+      }
+    }
+    
+    return () => {
+      if (target) {
+        target.classList.add('container');
+        target.classList.remove('w-full');
+      }
+    }
+  }, [pathname]);
+
   if (loading) {
     return <div className="p-10 text-center">جاري التحميل...</div>;
   }
