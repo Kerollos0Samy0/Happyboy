@@ -252,18 +252,21 @@ export default function FactoryKanbanBoard() {
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-          height: 8px;
+          width: 8px;
+          height: 14px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
+          background: #f1f5f9;
+          border-radius: 8px;
+          box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
+          background: #94a3b8;
           border-radius: 8px;
+          border: 3px solid #f1f5f9;
         }
         .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-          background: #94a3b8;
+          background: #64748b;
         }
         .animate-fade-in {
           animation: fadeIn 0.2s ease-out;
