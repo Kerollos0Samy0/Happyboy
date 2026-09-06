@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -60,10 +60,11 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
   };
 
   const isLoginPage = pathname === "/factory/login";
+  const isScannerPage = pathname === "/factory/scanner";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {!isLoginPage && (
+      {!(isLoginPage || isScannerPage) && (
         <header className="bg-white shadow-sm p-4 sticky top-0 z-10">
           <div className={`${pathname?.includes('/factory/dashboard') ? 'w-full px-4' : 'max-w-7xl mx-auto'} flex justify-between items-center`}>
             <div className="flex items-center gap-6">
