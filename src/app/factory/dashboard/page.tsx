@@ -30,13 +30,21 @@ export default function FactoryDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only fetch orders that are relevant to fulfillment (source: factory or any order really, let's fetch all active ones)
+    // Only fetch orders that are relevant to fulfillment
     const q = query(collection(db, "orders"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
-      // Filter out delivered if we don't want them cluttering, or just keep all and categorize
-      setOrders(fetched.sort((a, b) => {
+      
+      // Filter out old orders (before Sep 1, 2026) to keep the dashboard clean for the new season
+      const seasonStartDate = new Date("2026-09-01T00:00:00").getTime();
+      
+      const newSeasonOrders = fetched.filter(o => {
+        const orderTime = o.createdAt?.toMillis ? o.createdAt.toMillis() : 0;
+        return orderTime >= seasonStartDate;
+      });
+
+      setOrders(newSeasonOrders.sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
         return dateB - dateA; // Newest first
