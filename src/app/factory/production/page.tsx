@@ -6,27 +6,42 @@ import {
   Scissors, 
   Printer, 
   Pocket, 
-  Stitch, // Fallback to icons available in Lucide
+  Stitch, 
   Shirt, 
   CheckCircle,
   TrendingUp,
   Clock,
   Play,
   Settings,
-  Plus
+  Plus,
+  ShoppingCart,
+  Layers,
+  Wand2,
+  Copy,
+  AlignVerticalSpaceAround,
+  Archive,
+  Store,
+  Wind
 } from 'lucide-react';
 
 export default function FactoryProductionDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Dummy data to showcase the system
+  // Updated 13 stages of the factory
   const departments = [
-    { id: 'warehouse', name: 'المخزن (الخام)', icon: Package, count: 120, color: 'bg-blue-100 text-blue-700' },
+    { id: 'fabric_order', name: 'اوردر قماش', icon: ShoppingCart, count: 2, color: 'bg-blue-50 text-blue-600' },
+    { id: 'fabric_warehouse', name: 'مخزن قماش', icon: Package, count: 120, color: 'bg-blue-100 text-blue-700' },
     { id: 'cutting', name: 'قسم القص', icon: Scissors, count: 5, color: 'bg-orange-100 text-orange-700' },
-    { id: 'printing', name: 'قسم الطباعة/DTF', icon: Printer, count: 3, color: 'bg-purple-100 text-purple-700' },
-    { id: 'pressing', name: 'المكابس', icon: Settings, count: 2, color: 'bg-pink-100 text-pink-700' },
-    { id: 'sewing', name: 'التقفيل', icon: Shirt, count: 15, color: 'bg-green-100 text-green-700' },
-    { id: 'finishing', name: 'التشطيب والمكواة', icon: CheckCircle, count: 8, color: 'bg-teal-100 text-teal-700' },
+    { id: 'sorting', name: 'قسم الفرز', icon: Layers, count: 4, color: 'bg-yellow-100 text-yellow-700' },
+    { id: 'printing_laser', name: 'قسم الطباعة والليزر', icon: Printer, count: 3, color: 'bg-purple-100 text-purple-700' },
+    { id: 'peeling', name: 'قسم القص والتفريغ', icon: Wand2, count: 2, color: 'bg-indigo-100 text-indigo-700' },
+    { id: 'pressing', name: 'قسم الكبس', icon: Settings, count: 6, color: 'bg-pink-100 text-pink-700' },
+    { id: 'pairing', name: 'قسم التجويز', icon: Copy, count: 3, color: 'bg-rose-100 text-rose-700' },
+    { id: 'sewing', name: 'قسم المكن', icon: Shirt, count: 15, color: 'bg-green-100 text-green-700' },
+    { id: 'finishing', name: 'قسم التشطيب', icon: CheckCircle, count: 8, color: 'bg-teal-100 text-teal-700' },
+    { id: 'ironing', name: 'قسم المكواه', icon: Wind, count: 4, color: 'bg-cyan-100 text-cyan-700' },
+    { id: 'packing', name: 'قسم التعبئة والتكييس', icon: Archive, count: 10, color: 'bg-emerald-100 text-emerald-700' },
+    { id: 'models_warehouse', name: 'مخزن الموديلات', icon: Store, count: 450, color: 'bg-gray-100 text-gray-800' },
   ];
 
   const activeOrders = [
