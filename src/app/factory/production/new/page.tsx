@@ -201,7 +201,7 @@ export default function NewProductionOrderPage() {
             </div>
 
             <div className="w-2/3 grid grid-cols-2 gap-2 h-fit">
-            <div className="border border-gray-400 p-2 flex flex-col col-span-1">
+            <div className="border border-gray-400 p-2 flex flex-col col-span-2">
               <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️ قسم القص</h3>
               <div className="flex flex-col gap-1 mb-1 border-b border-dashed border-gray-300 pb-1">
                 <p className="text-sm font-bold text-red-700">المقاسات: {sizesSeries || '---'}</p>
@@ -215,11 +215,6 @@ export default function NewProductionOrderPage() {
                 ) : null)}
               </div>
               <p className="text-sm min-h-[30px] whitespace-pre-wrap">{cuttingNotes || '---'}</p>
-            </div>
-
-            <div className="border border-gray-400 p-2 flex flex-col col-span-1">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">🤝 قسم الفرز والتجويز</h3>
-              <p className="text-sm min-h-[30px] whitespace-pre-wrap">{pairingNotes || '---'}</p>
             </div>
 
 
