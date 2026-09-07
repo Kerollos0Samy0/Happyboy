@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { db } from '../../../../lib/firebase';
+import { db } from '../../../../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
