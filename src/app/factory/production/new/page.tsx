@@ -201,32 +201,32 @@ export default function NewProductionOrderPage() {
             </div>
 
             <div className="w-2/3 grid grid-cols-2 gap-2 h-fit">
-              <div className="border border-gray-400 p-2 flex flex-col col-span-1">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️ قسم القص والفرز</h3>
-                <div className="flex flex-col gap-1 mb-1 border-b border-dashed border-gray-300 pb-1">
-                   <p className="text-sm font-bold text-red-700">المقاسات: {sizesSeries || '---'}</p>
-                   <p className="text-sm font-bold text-blue-700">الكمية: {totalQuantity}</p>
+            <div className="border border-gray-400 p-2 flex flex-col col-span-2">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️🤝 قسم القص والفرز والتجويز</h3>
+              <div className="flex gap-4 mb-1 border-b border-dashed border-gray-300 pb-2">
+                <div className="flex flex-col gap-1 w-1/3">
+                  <p className="text-sm font-bold text-red-700">المقاسات: {sizesSeries || '---'}</p>
+                  <p className="text-sm font-bold text-blue-700">الكمية: {totalQuantity}</p>
                 </div>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{cuttingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+                <div className="flex-1 flex flex-col gap-1 text-xs">
+                  {colorPairs?.map((pair: any, idx: number) => pair.quantity ? (
+                     <p key={idx} className="font-bold text-gray-800">
+                       - لون {pair.tshirt} : {pair.quantity} قطعة (المقاس = {pair.quantity / 4})
+                     </p>
+                  ) : null)}
+                </div>
               </div>
-
-              <div className="border border-gray-400 p-2 flex flex-col col-span-1">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">🤝 قسم التجويز</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pairingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 mb-1">ملاحظات القص:</p>
+                  <p className="text-sm min-h-[30px] whitespace-pre-wrap">{cuttingNotes || '---'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 mb-1">ملاحظات التجويز:</p>
+                  <p className="text-sm min-h-[30px] whitespace-pre-wrap">{pairingNotes || '---'}</p>
+                </div>
               </div>
-              
-              <div className="border border-gray-400 p-2 flex flex-col">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">🖨️ قسم الطباعة والليزر</h3>
-                {printingType && (
-                  <p className="text-sm font-bold text-gray-700 mb-1">نوع الطباعة: {printingType}</p>
-                )}
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{printingDetails || '- تيشيرت:\n- بنطلون:'}</p>
-              </div>
-
-              <div className="border border-gray-400 p-2 flex flex-col">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">♨️ قسم الكبس</h3>
-                <p className="text-sm min-h-[40px] whitespace-pre-wrap">{pressingNotes || '- تيشيرت:\n- بنطلون:'}</p>
-              </div>
+            </div>
 
 
 
@@ -236,7 +236,7 @@ export default function NewProductionOrderPage() {
                 </div>
                 <p className="text-sm mb-2 whitespace-pre-wrap">{sewingNotes || 'ملاحظات المكن:'}</p>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   <table className="w-full text-center border-collapse border border-gray-400 text-xs">
                     <thead>
                       <tr className="bg-gray-100">
