@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db } from '../../../../../lib/firebase';
+import { db } from '../../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { AlertCircle } from 'lucide-react';
 
