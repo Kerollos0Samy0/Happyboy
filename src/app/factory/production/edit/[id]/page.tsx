@@ -212,7 +212,7 @@ export default function EditProductionOrderPage() {
               </div>
               
               <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-                <QRCodeSVG value={`الموديل: ${modelName || ''}\nالكمية: ${totalQuantity} ق\nالمقاسات: ${sizesSeries || ''}\nالألوان:\n${validPairs?.filter((p: any) => p.quantity).map((p: any) => `- تيشيرت (${p.tshirt}) / بنطلون (${p.pants}): ${p.quantity}ق`).join('\n') || ''}`} size={100} />
+                <QRCodeSVG value={`الموديل: ${modelName || ''}\nالكمية: ${totalQuantity} ق\nالمقاسات: ${sizesSeries || ''}\nالألوان:\n${validPairs?.filter((p: any) => p.quantity).map((p: any) => `- تيشيرت (${p.tshirt}) / بنطلون (${p.pants}): ${p.quantity}ق`).join('\n') || ''}\nID: ${generatedOrderId}`} size={100} />
                 <span className="text-xs font-mono mt-2">{generatedOrderId.slice(-6).toUpperCase()}</span>
               </div>
             </div>

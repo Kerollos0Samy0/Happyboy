@@ -100,7 +100,7 @@ export default function WorkerScannerPage() {
     setWorkerNote("");
   };
 
-  const fetchOrderDetails = async (orderId: string) => {
+  const fetchOrderDetails = async (scannedText: string) => {
     setLoading(true);
     setError("");
     setOrderData(null);
@@ -108,6 +108,11 @@ export default function WorkerScannerPage() {
     setSuccess("");
 
     try {
+      let orderId = scannedText;
+      const idMatch = scannedText.match(/ID:\s*([a-zA-Z0-9_-]+)/);
+      if (idMatch && idMatch[1]) {
+        orderId = idMatch[1];
+      }
       const docRef = doc(db, "factory_production_orders", orderId);
       const docSnap = await getDoc(docRef);
 
