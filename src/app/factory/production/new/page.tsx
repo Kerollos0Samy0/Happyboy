@@ -343,7 +343,12 @@ export default function NewProductionOrderPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">المرحلة / المقاسات *</label>
-                  <input type="text" value={sizesSeries} onChange={(e) => setSizesSeries(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: 2-4-6-8 أو S-M-L" required />
+                  <select value={sizesSeries} onChange={(e) => setSizesSeries(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <option value="">-- اختر المرحلة --</option>
+                    <option value="بيبي 2-3-4-5">بيبي 2-3-4-5</option>
+                    <option value="وسط 6-8-10-12">وسط 6-8-10-12</option>
+                    <option value="محير 14-16-18-20">محير 14-16-18-20</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (تُحسب تلقائياً) *</label>
