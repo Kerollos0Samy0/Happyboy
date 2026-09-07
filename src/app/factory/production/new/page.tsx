@@ -12,6 +12,7 @@ export default function NewProductionOrderPage() {
   const router = useRouter();
   
   const [modelName, setModelName] = useState('');
+  const [modelCategory, setModelCategory] = useState('');
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
   const [sizesSeries, setSizesSeries] = useState('');
@@ -92,6 +93,7 @@ export default function NewProductionOrderPage() {
 
       const orderData = {
         modelName,
+        modelCategory,
         totalQuantity: Number(totalQuantity),
         fabricType,
         sizesSeries,
@@ -155,6 +157,7 @@ export default function NewProductionOrderPage() {
                 <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
                 <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                   <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{modelName}</span></div>
+                  <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{modelCategory}</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{totalQuantity} قطعة</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{new Date().toLocaleDateString('ar-EG')}</span></div>
                 </div>
@@ -342,6 +345,10 @@ export default function NewProductionOrderPage() {
                   <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">تصنيف الموديل *</label>
+                  <input type="text" value={modelCategory} onChange={(e) => setModelCategory(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: ترنج ولادي، شتوي..." required />
+                </div>
+                <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">المرحلة / المقاسات *</label>
                   <select value={sizesSeries} onChange={(e) => setSizesSeries(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
                     <option value="">-- اختر المرحلة --</option>
@@ -358,9 +365,9 @@ export default function NewProductionOrderPage() {
                   <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>
                   <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">المورد / ملاحظات المخزن</label>
-                  <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="اسم المورد أو مكان القماش" />
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">المورد / المخزن</label>
+                  <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مكان القماش" />
                 </div>
               </div>
 

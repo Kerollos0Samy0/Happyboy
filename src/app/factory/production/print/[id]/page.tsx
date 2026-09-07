@@ -82,6 +82,7 @@ export default function PrintProductionOrderPage() {
               <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
               <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                 <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{order.modelName}</span></div>
+                <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{order.modelCategory || '---'}</span></div>
                 <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{order.totalQuantity} قطعة</span></div>
                 <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG')}</span></div>
               </div>
