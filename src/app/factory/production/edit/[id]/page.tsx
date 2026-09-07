@@ -283,10 +283,10 @@ export default function EditProductionOrderPage() {
                     <thead>
                       <tr className="bg-gray-100">
                         <th className="border border-gray-400 p-1 font-bold w-1/4">التيشيرت</th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[0] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[1] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[2] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[3] || ''}</th>
                         <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
                       </tr>
                     </thead>
@@ -305,10 +305,10 @@ export default function EditProductionOrderPage() {
                     <thead>
                       <tr className="bg-gray-100">
                         <th className="border border-gray-400 p-1 font-bold w-1/4">البنطلون</th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
-                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[0] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[1] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[2] || ''}</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8">{sizesSeries?.match(/[\d-]+/)?.[0]?.split('-')[3] || ''}</th>
                         <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
                       </tr>
                     </thead>
