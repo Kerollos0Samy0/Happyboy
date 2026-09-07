@@ -1,9 +1,9 @@
 "use client";
 
-import { Edit, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus } from "lucide-react";
+import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
