@@ -222,9 +222,57 @@ export default function NewProductionOrderPage() {
                 <p className="text-base min-h-[80px] whitespace-pre-wrap">{pairingNotes || '- تيشيرت:\n- بنطلون:'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3 flex flex-col">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🧵 قسم المكن (التقفيل)</h3>
-                <p className="text-base min-h-[80px] whitespace-pre-wrap">{sewingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+              <div className="border border-gray-400 p-3 flex flex-col col-span-2">
+                <div className="flex justify-between items-center border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">
+                  <h3 className="font-bold text-lg">🧵 قسم المكن (التقفيل)</h3>
+                </div>
+                <p className="text-sm mb-2 whitespace-pre-wrap">{sewingNotes || 'ملاحظات المكن:'}</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <table className="w-full text-center border-collapse border border-gray-400 text-xs">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-400 p-1 font-bold w-1/4">التيشيرت</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {colorPairs.map((p, i) => p.tshirt ? (
+                        <tr key={i}>
+                          <td className="border border-gray-400 p-1 font-bold bg-gray-50">{p.tshirt}</td>
+                          <td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td>
+                        </tr>
+                      ) : null)}
+                      <tr><td className="border border-gray-400 p-1 bg-gray-50 h-6"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td></tr>
+                    </tbody>
+                  </table>
+
+                  <table className="w-full text-center border-collapse border border-gray-400 text-xs">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-400 p-1 font-bold w-1/4">البنطلون</th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-8"></th>
+                        <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {colorPairs.map((p, i) => p.pants ? (
+                        <tr key={i}>
+                          <td className="border border-gray-400 p-1 font-bold bg-gray-50">{p.pants}</td>
+                          <td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td>
+                        </tr>
+                      ) : null)}
+                      <tr><td className="border border-gray-400 p-1 bg-gray-50 h-6"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td><td className="border border-gray-400 p-1"></td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               <div className="border border-gray-400 p-3 col-span-2 flex flex-col">
