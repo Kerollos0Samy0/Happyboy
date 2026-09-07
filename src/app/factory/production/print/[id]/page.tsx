@@ -89,7 +89,7 @@ export default function PrintProductionOrderPage() {
             </div>
             
             <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-              <QRCodeSVG value={order.id} size={100} />
+              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/factory/production/print/${order.id}` : order.id} size={100} />
               <span className="text-xs font-mono mt-2">{order.id.slice(-6).toUpperCase()}</span>
             </div>
           </div>
