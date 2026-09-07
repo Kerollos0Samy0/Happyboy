@@ -229,7 +229,7 @@ export default function FactoryDashboard() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] flex flex-col" dir="rtl" onClick={handleWrapperClick}>
+    <div className="h-[calc(100vh-150px)] flex flex-col" dir="rtl" onClick={handleWrapperClick}>
       <div className="mb-4 shrink-0 flex justify-between items-start">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
@@ -244,10 +244,11 @@ export default function FactoryDashboard() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-gray-100 rounded-xl p-4 shadow-inner flex gap-4">
-          {STAGES.map((stage) => {
-            const stageOrders = orders.filter(o => o.currentStage === stage.id);
-            const totalPieces = stageOrders.reduce((sum, o) => sum + (Number(o.totalQuantity) || 0), 0);
+        <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar pb-3">
+          <div className="bg-gray-100 rounded-xl p-4 shadow-inner flex gap-4 h-full min-w-max">
+            {STAGES.map((stage) => {
+              const stageOrders = orders.filter(o => o.currentStage === stage.id);
+              const totalPieces = stageOrders.reduce((sum, o) => sum + (Number(o.totalQuantity) || 0), 0);
 
             return (
               <Droppable key={stage.id} droppableId={`stage-${stage.id}`}>
@@ -374,6 +375,7 @@ export default function FactoryDashboard() {
               </Droppable>
             );
           })}
+          </div>
         </div>
       </DragDropContext>
 

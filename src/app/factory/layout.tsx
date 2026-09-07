@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -124,10 +124,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
           </nav>
         </header>
       )}
-      
-      <main className="flex-1 w-full mx-auto px-2 sm:px-4 lg:px-8 pt-4 pb-8">
-        {children}
-      </main>
+      {!(isLoginPage || isScannerPage) && (
+        <div className={`flex-1 w-full mx-auto mt-6 ${pathname?.includes('/factory/dashboard') ? 'px-2 pb-0' : 'px-4 lg:px-8'}`}>
+          {children}
+        </div>
+      )}
+      {(isLoginPage || isScannerPage) && children}
     </div>
   );
 }
