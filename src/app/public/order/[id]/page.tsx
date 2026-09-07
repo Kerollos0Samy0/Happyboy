@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { db } from '../../../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { AlertCircle } from 'lucide-react';
-import Link from 'next/link';
 
 export default function PublicOrderViewPage() {
   const params = useParams();
