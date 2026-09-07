@@ -186,11 +186,11 @@ export default function NewProductionOrderPage() {
                     return (
                       <React.Fragment key={i}>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                          <div className="w-[1.4cm] h-[1.4cm] border-2 border-gray-400 bg-white shadow-inner"></div>
                           <span className="text-[10px] font-bold text-gray-600 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[1.8cm] h-[1.8cm] border-2 border-gray-400 bg-white shadow-inner"></div>
+                          <div className="w-[1.4cm] h-[1.4cm] border-2 border-gray-400 bg-white shadow-inner"></div>
                           <span className="text-[10px] font-bold text-gray-600 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
                         </div>
                       </React.Fragment>
@@ -200,7 +200,7 @@ export default function NewProductionOrderPage() {
               </div>
             </div>
 
-            <div className="w-2/3 grid grid-cols-2 gap-4 h-fit">
+            <div className="w-2/3 grid grid-cols-2 gap-2 h-fit">
               <div className="border border-gray-400 p-2 flex flex-col col-span-1">
                 <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️ قسم القص والفرز</h3>
                 <div className="flex flex-col gap-1 mb-1 border-b border-dashed border-gray-300 pb-1">
