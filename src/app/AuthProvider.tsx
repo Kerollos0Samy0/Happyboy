@@ -20,7 +20,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(currentUser);
       setLoading(false);
 
-      if (!currentUser && pathname !== "/login") {
+      const isPublicPath = pathname === "/login" || pathname.startsWith("/public");
+      if (!currentUser && !isPublicPath) {
         router.push("/login");
       }
     });
@@ -39,7 +40,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }
 
   // If not logged in and trying to access a protected page, render nothing to avoid flicker
-  if (!user && pathname !== "/login") {
+  const isPublicPath = pathname === "/login" || pathname.startsWith("/public");
+  if (!user && !isPublicPath) {
     return null;
   }
 

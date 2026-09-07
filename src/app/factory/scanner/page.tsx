@@ -109,10 +109,17 @@ export default function WorkerScannerPage() {
 
     try {
       let orderId = scannedText;
-      const idMatch = scannedText.match(/ID:\s*([a-zA-Z0-9_-]+)/);
-      if (idMatch && idMatch[1]) {
-        orderId = idMatch[1];
+      
+      if (scannedText.includes('/public/order/')) {
+        const parts = scannedText.split('/public/order/');
+        orderId = parts[1].split(/[/?#]/)[0];
+      } else {
+        const idMatch = scannedText.match(/ID:\s*([a-zA-Z0-9_-]+)/);
+        if (idMatch && idMatch[1]) {
+          orderId = idMatch[1];
+        }
       }
+
       const docRef = doc(db, "factory_production_orders", orderId);
       const docSnap = await getDoc(docRef);
 

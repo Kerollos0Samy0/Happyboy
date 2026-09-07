@@ -4,11 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db } from '../../../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { CheckCircle, AlertCircle, ArrowRight, Printer } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { QRCodeSVG } from 'qrcode.react';
 
-export default function PrintProductionOrderPage() {
+export default function PublicOrderViewPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
@@ -36,10 +35,6 @@ export default function PrintProductionOrderPage() {
     if (id) fetchOrder();
   }, [id]);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   if (loading) {
     return <div className="p-20 text-center text-gray-500 font-bold">جاري تحميل أمر التشغيل...</div>;
   }
@@ -49,7 +44,6 @@ export default function PrintProductionOrderPage() {
       <div className="max-w-xl mx-auto p-10 bg-red-50 text-red-600 rounded-xl mt-10 text-center shadow">
         <AlertCircle size={48} className="mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-4">{error}</h2>
-        <Link href="/factory/dashboard" className="bg-white px-4 py-2 rounded shadow text-gray-800">العودة للوحة</Link>
       </div>
     );
   }
@@ -63,18 +57,7 @@ export default function PrintProductionOrderPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm print:hidden">
-        <Link href="/factory/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition text-gray-600">
-          <ArrowRight size={24} />
-        </Link>
-        <div className="flex gap-2">
-          <button onClick={handlePrint} className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
-            <Printer size={18} /> طباعة أمر التشغيل
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-white p-8 shadow-lg print:shadow-none print:p-4 w-full mx-auto flex flex-col" style={{ minHeight: '287mm' }}>
+      <div className="bg-white p-8 shadow-lg w-full mx-auto flex flex-col" style={{ minHeight: '287mm' }}>
         
         <div className="border-4 border-gray-800 p-4 mb-6">
           <div className="flex justify-between items-start">
@@ -86,11 +69,6 @@ export default function PrintProductionOrderPage() {
                 <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{order.totalQuantity} قطعة</span></div>
                 <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG')}</span></div>
               </div>
-            </div>
-            
-            <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={100} />
-              <span className="text-xs font-mono mt-2">{order.id.slice(-6).toUpperCase()}</span>
             </div>
           </div>
         </div>
