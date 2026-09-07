@@ -97,11 +97,11 @@ export default function PrintProductionOrderPage() {
 
         <div className="flex gap-6 flex-1">
           <div className="w-1/3 flex flex-col">
-            <div className="border-2 border-gray-400 h-80 relative flex items-center justify-center p-2 mb-4">
+            <div className="border-2 border-gray-400 h-64 relative flex items-center justify-center p-2 mb-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {order.modelImage ? <img src={order.modelImage} alt="Model" className="w-full h-full object-contain" /> : <div className="text-gray-400">لا توجد صورة</div>}
             </div>
-            <div className="border border-gray-400 p-3 bg-gray-50 flex-1 flex flex-col">
+            <div className="border border-gray-400 p-2 bg-gray-50 flex-1 flex flex-col">
               <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
               <p className="text-sm mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
               <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
@@ -186,8 +186,8 @@ export default function PrintProductionOrderPage() {
                       </tr>
                     ) : null) : null}
                     {/* Add empty rows */}
-                    <tr><td className="border border-gray-400 p-3"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                    <tr><td className="border border-gray-400 p-3"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
+                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
+                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
                   </tbody>
                 </table>
 
@@ -215,16 +215,16 @@ export default function PrintProductionOrderPage() {
                       </tr>
                     ) : null) : null}
                     {/* Add empty rows */}
-                    <tr><td className="border border-gray-400 p-3"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                    <tr><td className="border border-gray-400 p-3"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
+                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
+                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-            <div className="border border-gray-400 p-3 col-span-2 flex flex-col">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">📝 ملاحظات عامة (تشطيب، مكواة، تعبئة)</h3>
-              <p className="text-base min-h-[100px] whitespace-pre-wrap">{order.generalNotes || '---'}</p>
+            <div className="border border-gray-400 p-2 col-span-2 flex flex-col">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-1 bg-gray-100 px-1 text-md">📝 ملاحظات عامة (تشطيب، مكواة، تعبئة)</h3>
+              <p className="text-sm min-h-[50px] whitespace-pre-wrap">{order.generalNotes || '---'}</p>
             </div>
           </div>
         </div>
