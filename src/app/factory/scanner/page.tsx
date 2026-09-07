@@ -29,7 +29,8 @@ interface ProductionOrder {
   modelName: string;
   totalQuantity: number;
   modelImage?: string;
-  currentStage: number;
+  colorPairs?: any[];
+  workerNotes?: string;
 }
 
 export default function WorkerScannerPage() {
@@ -39,6 +40,9 @@ export default function WorkerScannerPage() {
   
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<ProductionOrder | null>(null);
+  const [editablePairs, setEditablePairs] = useState<any[]>([]);
+  const [editableTotalQty, setEditableTotalQty] = useState<number>(0);
+  const [workerNote, setWorkerNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -103,6 +107,9 @@ export default function WorkerScannerPage() {
         }
         
         setOrderData(data);
+        setEditablePairs(data.colorPairs || []);
+        setEditableTotalQty(data.totalQuantity || 0);
+        setWorkerNote("");
       } else {
         setError("لم يتم العثور على أمر تشغيل بهذا الرمز. تأكد من أن الرمز صحيح.");
       }
@@ -124,9 +131,23 @@ export default function WorkerScannerPage() {
         throw new Error("لا يمكن تخطي المرحلة 14 (المخزن)");
       }
 
+      let newTotal = editableTotalQty;
+      if (editablePairs && editablePairs.length > 0) {
+         newTotal = editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+      }
+
+      let newNotes = orderData.workerNotes || "";
+      if (workerNote.trim()) {
+         const stageName = STAGES.find(s => s.id === selectedStage)?.name;
+         newNotes += `\n[${workerName} - ${stageName}]: ${workerNote.trim()}`;
+      }
+
       await updateDoc(doc(db, "factory_production_orders", orderData.id), {
         currentStage: nextStage,
-        lastWorkerName: workerName
+        lastWorkerName: workerName,
+        totalQuantity: newTotal,
+        colorPairs: editablePairs,
+        workerNotes: newNotes.trim()
       });
 
       setSuccess(`تم نقل الموديل بنجاح إلى المرحلة التالية (${STAGES.find(s => s.id === nextStage)?.name}).`);
@@ -275,25 +296,82 @@ export default function WorkerScannerPage() {
         <div className="bg-white rounded-xl shadow-2xl border border-blue-100 overflow-hidden animate-fade-in">
           <div className="bg-blue-600 p-4 text-white text-center">
             <h3 className="font-bold text-xl mb-1">{orderData.modelName}</h3>
-            <p className="opacity-80">الكمية: {orderData.totalQuantity} قطعة</p>
+            <p className="opacity-80">الكمية الإجمالية: {orderData.totalQuantity} قطعة</p>
           </div>
           
-          <div className="p-6 text-center">
+          <div className="p-4 bg-gray-50">
             {orderData.modelImage && (
               // eslint-disable-next-line @next/next/no-img-element
               <img 
                 src={orderData.modelImage} 
                 alt="Model" 
-                className="w-48 h-48 object-cover rounded-lg border-2 border-gray-200 mx-auto mb-6 shadow-sm"
+                className="w-32 h-32 object-cover rounded-lg border border-gray-200 mx-auto mb-4 shadow-sm bg-white"
               />
             )}
             
-            <p className="text-gray-500 mb-6">لقد انتهيت من العمل على هذا الموديل؟</p>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4 text-right">
+              <h4 className="font-bold text-gray-800 mb-2">تأكيد / تعديل الكميات</h4>
+              {editablePairs && editablePairs.length > 0 ? (
+                <div className="space-y-2">
+                  {editablePairs.map((pair, idx) => (
+                    <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded border">
+                      <div className="flex-1 text-sm font-bold text-gray-700">
+                        {pair.tshirt && <span>{pair.tshirt}</span>}
+                        {pair.tshirt && pair.pants && <span> مع </span>}
+                        {pair.pants && <span>{pair.pants}</span>}
+                      </div>
+                      <div className="w-24 shrink-0">
+                        <input 
+                          type="number" 
+                          value={pair.quantity || ''} 
+                          onChange={(e) => {
+                            const newPairs = [...editablePairs];
+                            newPairs[idx].quantity = e.target.value;
+                            setEditablePairs(newPairs);
+                          }} 
+                          className="w-full p-1.5 border rounded text-center font-bold text-blue-700" 
+                          placeholder="الكمية" 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="text-left mt-2 font-bold text-gray-700">
+                    الإجمالي: {editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0)} قطعة
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-bold text-gray-700">إجمالي الكمية:</label>
+                  <input 
+                    type="number" 
+                    value={editableTotalQty || ''} 
+                    onChange={(e) => setEditableTotalQty(Number(e.target.value))} 
+                    className="flex-1 p-2 border rounded font-bold text-blue-700 text-center" 
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
+              <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
+              <textarea 
+                value={workerNote}
+                onChange={(e) => setWorkerNote(e.target.value)}
+                placeholder="أي ملاحظات حول الألوان، القص، التقفيل..."
+                className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm min-h-[80px]"
+              />
+              {orderData.workerNotes && (
+                <div className="mt-2 p-2 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-100 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                  <strong>ملاحظات سابقة:</strong><br/>
+                  {orderData.workerNotes}
+                </div>
+              )}
+            </div>
             
             <div className="flex gap-3">
               <button 
                 onClick={() => { setOrderData(null); setScannedData(null); setIsScannerActive(true); setError(""); }}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition"
+                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300 transition"
               >
                 إلغاء
               </button>
@@ -301,7 +379,7 @@ export default function WorkerScannerPage() {
                 onClick={handleCompleteStage}
                 className="flex-[2] bg-green-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2"
               >
-                تم الإنتهاء <CheckCircle size={20} />
+                تأكيد <CheckCircle size={20} />
               </button>
             </div>
           </div>

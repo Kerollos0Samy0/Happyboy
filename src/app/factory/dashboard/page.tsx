@@ -324,7 +324,7 @@ export default function FactoryDashboard() {
                                     <p className="text-[10px] text-gray-400 font-mono mb-1">#{order.id.slice(-6).toUpperCase()}</p>
                                     {order.lastWorkerName && (
                                       <p className="text-[11px] text-blue-600 font-bold truncate bg-blue-50 px-1 py-0.5 rounded w-fit" title={order.lastWorkerName}>
-                                        👤 العامل: {order.lastWorkerName}
+                                        👤 {order.lastWorkerName}
                                       </p>
                                     )}
                                   </div>
