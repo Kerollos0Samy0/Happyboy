@@ -352,7 +352,7 @@ export default function NewProductionOrderPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (تُحسب تلقائياً) *</label>
-                  <input type="number" value={totalQuantity} onChange={(e) => setTotalQuantity(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" required min="1" placeholder="مجموع الألوان" />
+                  <input type="number" value={totalQuantity} readOnly className="w-full p-2.5 border border-gray-300 rounded-lg outline-none bg-gray-200 cursor-not-allowed font-bold" required min="1" placeholder="أدخل كميات الألوان بالأسفل" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>

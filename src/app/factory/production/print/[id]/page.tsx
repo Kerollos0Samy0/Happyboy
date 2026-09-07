@@ -57,6 +57,9 @@ export default function PrintProductionOrderPage() {
   const tColors = order.tshirtColors || [];
   const pColors = order.pantsColors || [];
   const colorPairs = order.colorPairs || [];
+  const sizesMatch = order.sizesSeries?.match(/[\d-]+/);
+  const sizeHeaders = sizesMatch ? sizesMatch[0].split('-') : ['', '', '', ''];
+  while(sizeHeaders.length < 4) sizeHeaders.push('');
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-20" dir="rtl">
@@ -161,10 +164,10 @@ export default function PrintProductionOrderPage() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border border-gray-400 p-1 font-bold w-1/4">التيشيرت</th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[0]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[1]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[2]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[3]}</th>
                       <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
                     </tr>
                   </thead>
@@ -190,10 +193,10 @@ export default function PrintProductionOrderPage() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border border-gray-400 p-1 font-bold w-1/4">البنطلون</th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
-                      <th className="border border-gray-400 p-1 w-8"></th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[0]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[1]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[2]}</th>
+                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[3]}</th>
                       <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
                     </tr>
                   </thead>
