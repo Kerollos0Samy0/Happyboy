@@ -89,7 +89,7 @@ export default function PrintProductionOrderPage() {
             </div>
             
             <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/factory/production/print/${order.id}` : order.id} size={100} />
+              <QRCodeSVG value={`الموديل: ${order.modelName || ''}\nالكمية: ${order.totalQuantity} ق\nالمقاسات: ${order.sizesSeries || ''}\nالألوان:\n${colorPairs?.filter((p: any) => p.quantity).map((p: any) => `- ${p.tshirt}: ${p.quantity}ق`).join('\n') || ''}`} size={100} />
               <span className="text-xs font-mono mt-2">{order.id.slice(-6).toUpperCase()}</span>
             </div>
           </div>
