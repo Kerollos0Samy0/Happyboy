@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ export default function NewProductionOrderPage() {
   const [modelName, setModelName] = useState('');
   const [totalQuantity, setTotalQuantity] = useState('');
   const [fabricType, setFabricType] = useState('');
+  const [sizesSeries, setSizesSeries] = useState('');
   
   // Dynamic color pairs array (now includes quantity)
   const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '' }]);
@@ -93,6 +94,7 @@ export default function NewProductionOrderPage() {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
+        sizesSeries,
         tshirtColors: tColors,
         pantsColors: pColors,
         colorPairs: validPairs,
@@ -340,6 +342,10 @@ export default function NewProductionOrderPage() {
                   <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">المرحلة / المقاسات *</label>
+                  <input type="text" value={sizesSeries} onChange={(e) => setSizesSeries(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: 2-4-6-8 أو S-M-L" required />
+                </div>
+                <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">الكمية المستهدفة (تُحسب تلقائياً) *</label>
                   <input type="number" value={totalQuantity} onChange={(e) => setTotalQuantity(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" required min="1" placeholder="مجموع الألوان" />
                 </div>
@@ -347,7 +353,7 @@ export default function NewProductionOrderPage() {
                   <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>
                   <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">المورد / ملاحظات المخزن</label>
                   <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="اسم المورد أو مكان القماش" />
                 </div>

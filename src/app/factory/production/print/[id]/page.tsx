@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -71,7 +71,7 @@ export default function PrintProductionOrderPage() {
         </div>
       </div>
 
-      <div className="bg-white p-8 shadow-lg print:shadow-none print:p-8 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
+      <div className="bg-white p-8 shadow-lg print:shadow-none print:p-4 w-full mx-auto flex flex-col" style={{ minHeight: '287mm' }}>
         
         <div className="border-4 border-gray-800 p-4 mb-6">
           <div className="flex justify-between items-start">
@@ -126,7 +126,11 @@ export default function PrintProductionOrderPage() {
           <div className="w-2/3 grid grid-cols-2 gap-4 h-fit">
             <div className="border border-gray-400 p-3 flex flex-col col-span-2">
               <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">✂️ قسم القص والفرز</h3>
-              <p className="text-base min-h-[140px] whitespace-pre-wrap">{order.cuttingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+              <div className="flex gap-6 mb-2 border-b border-dashed border-gray-300 pb-2">
+                 <p className="text-base font-bold text-red-700">المرحلة / المقاسات: {order.sizesSeries || '---'}</p>
+                 <p className="text-base font-bold text-blue-700">الكمية الإجمالية: {order.totalQuantity} قطعة</p>
+              </div>
+              <p className="text-base min-h-[120px] whitespace-pre-wrap">{order.cuttingNotes || '- تيشيرت:\n- بنطلون:'}</p>
             </div>
             
             <div className="border border-gray-400 p-3 flex flex-col">
@@ -168,10 +172,13 @@ export default function PrintProductionOrderPage() {
       <style jsx global>{`
         @media print {
           @page {
-            margin: 0;
+            size: A4;
+            margin: 5mm;
           }
           body {
-            margin: 1cm;
+            margin: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           body * {
             visibility: hidden;
