@@ -89,7 +89,7 @@ export default function PrintProductionOrderPage() {
             </div>
             
             <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-              <QRCodeSVG value={`الموديل: ${order.modelName || ''}\nالكمية: ${order.totalQuantity} ق\nالمقاسات: ${order.sizesSeries || ''}\nالألوان:\n${colorPairs?.filter((p: any) => p.quantity).map((p: any) => `- ${p.tshirt}: ${p.quantity}ق`).join('\n') || ''}`} size={100} />
+              <QRCodeSVG value={`الموديل: ${order.modelName || ''}\nالكمية: ${order.totalQuantity} ق\nالمقاسات: ${order.sizesSeries || ''}\nالألوان:\n${colorPairs?.filter((p: any) => p.quantity).map((p: any) => `- تيشيرت (${p.tshirt}) / بنطلون (${p.pants}): ${p.quantity}ق`).join('\n') || ''}`} size={100} />
               <span className="text-xs font-mono mt-2">{order.id.slice(-6).toUpperCase()}</span>
             </div>
           </div>
@@ -137,9 +137,10 @@ export default function PrintProductionOrderPage() {
               <div className="flex flex-col gap-1 text-xs mb-1 border-b border-dashed border-gray-300 pb-1">
                 {colorPairs?.map((pair: any, idx: number) => pair.quantity ? (
                    <p key={idx} className="font-bold text-gray-800">
-                     - لون {pair.tshirt} : {pair.quantity} قطعة (المقاس = {pair.quantity / 4})
+                     - تيشيرت ({pair.tshirt}) / بنطلون ({pair.pants}) : {pair.quantity} قطعة (المقاس = {pair.quantity / 4})
                    </p>
                 ) : null)}
+                <p className="font-bold text-gray-900 border-t border-dashed border-gray-300 pt-1 mt-1">الإجمالي: {order.totalQuantity} قطعة</p>
               </div>
               <p className="text-sm min-h-[30px] whitespace-pre-wrap">{order.cuttingNotes || '---'}</p>
             </div>
