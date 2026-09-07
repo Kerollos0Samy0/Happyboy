@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Edit, useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus } from "lucide-react";
@@ -297,8 +297,22 @@ export default function FactoryDashboard() {
                                   
                                   {activeMenuId === order.id && (
                                     <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-44 overflow-hidden z-20 flex flex-col">
-                                      <Link href={`/factory/production/print/${order.id}`} className="text-right px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
-                                        <Printer size={14} /> عرض / طباعة
+                                      <Link
+                                        href={`/factory/production/print/${order.id}`}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        role="menuitem"
+                                      >
+                                        <Printer size={16} />
+                                        عرض / طباعة
+                                      </Link>
+                                      
+                                      <Link
+                                        href={`/factory/production/edit/${order.id}`}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
+                                        role="menuitem"
+                                      >
+                                        <Edit size={16} />
+                                        تعديل
                                       </Link>
                                       
                                       {/* Split Button */}
