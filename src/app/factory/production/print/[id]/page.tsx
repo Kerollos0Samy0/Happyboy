@@ -128,24 +128,31 @@ export default function PrintProductionOrderPage() {
           </div>
 
           <div className="w-2/3 grid grid-cols-2 gap-4 h-fit">
-            <div className="border border-gray-400 p-3 flex flex-col col-span-2">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">✂️ قسم القص والفرز</h3>
-              <div className="flex gap-6 mb-2 border-b border-dashed border-gray-300 pb-2">
-                 <p className="text-base font-bold text-red-700">المرحلة / المقاسات: {order.sizesSeries || '---'}</p>
-                 <p className="text-base font-bold text-blue-700">الكمية الإجمالية: {order.totalQuantity} قطعة</p>
+            <div className="border border-gray-400 p-2 flex flex-col col-span-1">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️ قسم القص والفرز</h3>
+              <div className="flex flex-col gap-1 mb-1 border-b border-dashed border-gray-300 pb-1">
+                 <p className="text-sm font-bold text-red-700">المقاسات: {order.sizesSeries || '---'}</p>
+                 <p className="text-sm font-bold text-blue-700">الكمية: {order.totalQuantity}</p>
               </div>
-              <p className="text-base min-h-[120px] whitespace-pre-wrap">{order.cuttingNotes || '- تيشيرت:\n- بنطلون:'}</p>
-            </div>
-            
-            <div className="border border-gray-400 p-3 flex flex-col">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🖨️ قسم الطباعة والليزر</h3>
-              <p className="text-base mb-1"><strong>نوع الطباعة:</strong> {order.printingType || 'بدون'}</p>
-              <p className="text-base min-h-[80px] whitespace-pre-wrap">{order.printingDetails || '- تيشيرت:\n- بنطلون:'}</p>
+              <p className="text-sm min-h-[40px] whitespace-pre-wrap">{order.cuttingNotes || '- تيشيرت:\n- بنطلون:'}</p>
             </div>
 
-            <div className="border border-gray-400 p-3 flex flex-col">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">♨️ قسم الكبس</h3>
-              <p className="text-base min-h-[80px] whitespace-pre-wrap">{order.pressingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+            <div className="border border-gray-400 p-2 flex flex-col col-span-1">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">🤝 قسم التجويز</h3>
+              <p className="text-sm min-h-[40px] whitespace-pre-wrap">{order.pairingNotes || '- تيشيرت:\n- بنطلون:'}</p>
+            </div>
+            
+            <div className="border border-gray-400 p-2 flex flex-col">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">🖨️ قسم الطباعة والليزر</h3>
+              {order.printingType && (
+                <p className="text-sm font-bold text-gray-700 mb-1">نوع الطباعة: {order.printingType}</p>
+              )}
+              <p className="text-sm min-h-[40px] whitespace-pre-wrap">{order.printingDetails || '- تيشيرت:\n- بنطلون:'}</p>
+            </div>
+
+            <div className="border border-gray-400 p-2 flex flex-col">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">♨️ قسم الكبس</h3>
+              <p className="text-sm min-h-[40px] whitespace-pre-wrap">{order.pressingNotes || '- تيشيرت:\n- بنطلون:'}</p>
             </div>
 
             <div className="border border-gray-400 p-3 flex flex-col col-span-2">
@@ -222,10 +229,10 @@ export default function PrintProductionOrderPage() {
           </div>
         </div>
         
-        <div className="mt-auto pt-8 flex justify-between border-t-2 border-dashed border-gray-400 px-10 pb-8">
-          <div className="text-center"><p className="font-bold text-lg mb-8">توقيع مدير الإنتاج</p><p>.................................</p></div>
-          <div className="text-center"><p className="font-bold text-lg mb-8">توقيع أمين المخزن</p><p>.................................</p></div>
-          <div className="text-center"><p className="font-bold text-lg mb-8">توقيع مشرف الجودة</p><p>.................................</p></div>
+        <div className="mt-auto pt-4 flex justify-between border-t-2 border-dashed border-gray-400 px-10 pb-4">
+          <div className="text-center"><p className="font-bold text-sm mb-4">توقيع مدير الإنتاج</p><p className="text-gray-400">.................................</p></div>
+          <div className="text-center"><p className="font-bold text-sm mb-4">توقيع أمين المخزن</p><p className="text-gray-400">.................................</p></div>
+          <div className="text-center"><p className="font-bold text-sm mb-4">توقيع مشرف الجودة</p><p className="text-gray-400">.................................</p></div>
         </div>
 
       </div>
