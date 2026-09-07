@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
 import Link from "next/link";
@@ -40,6 +40,7 @@ export default function WorkerScannerPage() {
   
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<ProductionOrder | null>(null);
+  const [splitOptions, setSplitOptions] = useState<ProductionOrder[]>([]);
   const [editablePairs, setEditablePairs] = useState<any[]>([]);
   const [editableTotalQty, setEditableTotalQty] = useState<number>(0);
   const [workerNote, setWorkerNote] = useState("");
@@ -85,10 +86,25 @@ export default function WorkerScannerPage() {
     }
   }, [scannedData]);
 
+  const selectSplitOption = (data: ProductionOrder) => {
+    setSplitOptions([]);
+    if (data.currentStage !== selectedStage) {
+      const currentStageName = STAGES.find(s => s.id === data.currentStage)?.name;
+      const myStageName = STAGES.find(s => s.id === selectedStage)?.name;
+      setError(`تنبيه: هذا الموديل متواجد حالياً في "${currentStageName}" وليس في قسمك (${myStageName}). تأكد من استلامه أولاً.`);
+    }
+    
+    setOrderData(data);
+    setEditablePairs(data.colorPairs || []);
+    setEditableTotalQty(data.totalQuantity || 0);
+    setWorkerNote("");
+  };
+
   const fetchOrderDetails = async (orderId: string) => {
     setLoading(true);
     setError("");
     setOrderData(null);
+    setSplitOptions([]);
     setSuccess("");
 
     try {
@@ -98,20 +114,17 @@ export default function WorkerScannerPage() {
       if (docSnap.exists()) {
         const data = docSnap.data() as ProductionOrder;
         data.id = docSnap.id;
-        
-        // Validation: Is the order actually in the worker's stage?
-        if (data.currentStage !== selectedStage) {
-          const currentStageName = STAGES.find(s => s.id === data.currentStage)?.name;
-          const myStageName = STAGES.find(s => s.id === selectedStage)?.name;
-          setError(`تنبيه: هذا الموديل متواجد حالياً في "${currentStageName}" وليس في قسمك (${myStageName}). تأكد من استلامه أولاً.`);
-        }
-        
-        setOrderData(data);
-        setEditablePairs(data.colorPairs || []);
-        setEditableTotalQty(data.totalQuantity || 0);
-        setWorkerNote("");
+        selectSplitOption(data);
       } else {
-        setError("لم يتم العثور على أمر تشغيل بهذا الرمز. تأكد من أن الرمز صحيح.");
+        const q = query(collection(db, "factory_production_orders"), where("originalOrderId", "==", orderId));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const splits = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as ProductionOrder));
+          setSplitOptions(splits);
+        } else {
+          setError("لم يتم العثور على أمر تشغيل بهذا الرمز. تأكد من أن الرمز صحيح (أو ربما تم حذفه).");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -269,10 +282,40 @@ export default function WorkerScannerPage() {
 
       {/* Success State */}
       {success && (
-        <div className="bg-green-50 border border-green-200 p-8 rounded-xl shadow-lg text-center animate-fade-in">
+        <div className="bg-green-50 border border-green-200 p-8 rounded-xl shadow-lg text-center animate-fade-in mb-6">
           <CheckCircle className="text-green-500 w-16 h-16 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-green-800 mb-2">{success}</h3>
           <p className="text-green-600">سيتم فتح الكاميرا للموديل التالي تلقائياً...</p>
+        </div>
+      )}
+
+      {/* Split Selection State */}
+      {splitOptions.length > 0 && !loading && (
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-blue-200 animate-fade-in text-right mb-6">
+          <div className="flex gap-3 text-blue-700 font-bold mb-4 items-center">
+            <AlertCircle /> <h3>لقد تم تقسيم هذا الأوردر مسبقاً. اختر الجزء الذي تعمل عليه حالياً:</h3>
+          </div>
+          <div className="space-y-3">
+            {splitOptions.map((opt) => (
+              <button 
+                key={opt.id}
+                onClick={() => selectSplitOption(opt)}
+                className="w-full text-right p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center group"
+              >
+                <div>
+                  <h4 className="font-bold text-gray-800">{opt.modelName}</h4>
+                  <p className="text-sm text-gray-500">الكمية: {opt.totalQuantity} قطعة | القسم الحالي: {STAGES.find(s => s.id === opt.currentStage)?.name}</p>
+                </div>
+                <ArrowRight className="text-gray-400 group-hover:text-blue-500 transition-transform group-hover:-translate-x-2" />
+              </button>
+            ))}
+          </div>
+          <button 
+            onClick={() => { setSplitOptions([]); setScannedData(null); setIsScannerActive(true); }}
+            className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-bold mt-6 hover:bg-gray-200"
+          >
+            إلغاء ومسح كود آخر
+          </button>
         </div>
       )}
 

@@ -201,6 +201,8 @@ export default function FactoryDashboard() {
           ...originalData,
           modelName: `${originalData.modelName} - ${row.color}`,
           totalQuantity: Number(row.quantity),
+          originalOrderId: originalData.originalOrderId || splitOrder.id,
+          isSplitChild: true,
           createdAt: serverTimestamp(),
         });
       }
