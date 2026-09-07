@@ -296,34 +296,34 @@ export default function FactoryDashboard() {
                                   </button>
                                   
                                   {activeMenuId === order.id && (
-                                    <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-36 overflow-hidden z-50 flex flex-col">
+                                    <div className="absolute top-6 left-0 bg-white border shadow-lg rounded-lg w-32 overflow-hidden z-50 flex flex-col">
                                       <Link
                                         href={`/factory/production/print/${order.id}`}
-                                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                                        className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100"
                                         role="menuitem"
                                       >
-                                        <Printer size={14} />
+                                        <Printer size={13} />
                                         عرض / طباعة
                                       </Link>
                                       
                                       <Link
                                         href={`/factory/production/edit/${order.id}`}
-                                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                                        className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50"
                                         role="menuitem"
                                       >
-                                        <Edit size={14} />
+                                        <Edit size={13} />
                                         تعديل
                                       </Link>
                                       
                                       {/* Split Button */}
-                                      <button onClick={(e) => { e.stopPropagation(); openSplitModal(order); }} className="text-right px-3 py-2 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
-                                        <SplitSquareHorizontal size={14} className="text-blue-600" /> تقسيم الألوان
+                                      <button onClick={(e) => { e.stopPropagation(); openSplitModal(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
+                                        <SplitSquareHorizontal size={13} className="text-blue-600" /> تقسيم الألوان
                                       </button>
 
-                                      <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-3 py-2 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2 border-t">
-                                        <Copy size={14} className="text-gray-600" /> تكرار الموديل
+                                      <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2 border-t">
+                                        <Copy size={13} className="text-gray-600" /> تكرار الموديل
                                       </button>
-                                      <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} className="text-right px-3 py-2 text-xs font-semibold hover:bg-red-50 text-red-600 flex items-center gap-2 border-t">
+                                      <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-red-50 text-red-600 flex items-center gap-2 border-t">
                                         <Trash2 size={14} /> حذف نهائي
                                       </button>
                                     </div>
