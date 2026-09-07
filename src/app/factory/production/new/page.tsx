@@ -217,10 +217,7 @@ export default function NewProductionOrderPage() {
                 <p className="text-base min-h-[80px] whitespace-pre-wrap">{pressingNotes || '- تيشيرت:\n- بنطلون:'}</p>
               </div>
 
-              <div className="border border-gray-400 p-3 flex flex-col">
-                <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-lg">🤝 قسم التجويز</h3>
-                <p className="text-base min-h-[80px] whitespace-pre-wrap">{pairingNotes || '- تيشيرت:\n- بنطلون:'}</p>
-              </div>
+
 
               <div className="border border-gray-400 p-3 flex flex-col col-span-2">
                 <div className="flex justify-between items-center border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">
