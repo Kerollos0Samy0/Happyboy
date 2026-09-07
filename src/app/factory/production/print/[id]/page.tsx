@@ -105,24 +105,21 @@ export default function PrintProductionOrderPage() {
               <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
               <p className="text-sm mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
               <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
-              
-              <div className="mt-auto pt-2 pb-2 grid grid-cols-2 gap-x-2 gap-y-3 justify-items-center">
-                {[...Array(Math.max(tColors.length, pColors.length, 1))].map((_, i) => {
-                  const pair = colorPairs[i];
-                  const qtyText = pair?.quantity ? ` (${pair.quantity}ق)` : '';
-                  return (
-                    <React.Fragment key={i}>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-[1.4cm] h-[1.4cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-[1.4cm] h-[1.4cm] border-2 border-gray-400 bg-white shadow-inner"></div>
-                        <span className="text-[10px] font-bold text-gray-600 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
-                      </div>
-                    </React.Fragment>
-                  );
-                })}
+              <p className="text-sm mb-2"><strong>الكمية (كجم/توب):</strong> .....................</p>
+              <p className="text-sm mb-2"><strong>استهلاك القطعة:</strong> .....................</p>
+              <div className="grid grid-cols-2 gap-4 mt-auto pt-4">
+                {colorPairs?.filter((pair: any) => pair.quantity).map((pair: any, idx: number) => (
+                  <React.Fragment key={idx}>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                      <p className="text-xs text-center font-bold">تيشيرت {pair.tshirt} ({pair.quantity}ق)</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                      <p className="text-xs text-center font-bold">بنطلون {pair.pants} ({pair.quantity}ق)</p>
+                    </div>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
           </div>
