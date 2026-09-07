@@ -284,11 +284,7 @@ export default function NewProductionOrderPage() {
             </div>
           </div>
           
-          <div className="mt-auto pt-4 flex justify-between border-t-2 border-dashed border-gray-400 px-10 pb-4">
-            <div className="text-center"><p className="font-bold text-sm mb-4">توقيع مدير الإنتاج</p><p className="text-gray-400">.................................</p></div>
-            <div className="text-center"><p className="font-bold text-sm mb-4">توقيع أمين المخزن</p><p className="text-gray-400">.................................</p></div>
-            <div className="text-center"><p className="font-bold text-sm mb-4">توقيع مشرف الجودة</p><p className="text-gray-400">.................................</p></div>
-          </div>
+
         </div>
         
         <style jsx global>{`
