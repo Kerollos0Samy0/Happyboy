@@ -257,13 +257,31 @@ export default function EditProductionOrderPage() {
                 <p className="text-sm font-bold text-red-700">المقاسات: {sizesSeries || '---'}</p>
                 <p className="text-sm font-bold text-blue-700">الكمية: {totalQuantity}</p>
               </div>
-              <div className="flex flex-col gap-1 text-xs mb-1 border-b border-dashed border-gray-300 pb-1">
-                {validPairs?.map((pair: any, idx: number) => pair.quantity ? (
-                   <p key={idx} className="font-bold text-gray-800">
-                     - تيشيرت ({pair.tshirt}) / بنطلون ({pair.pants}) : {pair.quantity} قطعة (المقاس = {pair.quantity / 4})
-                   </p>
-                ) : null)}
-                <p className="font-bold text-gray-900 border-t border-dashed border-gray-300 pt-1 mt-1">الإجمالي: {totalQuantity} قطعة</p>
+              <div className="mb-1 border-b border-dashed border-gray-300 pb-2 mt-2">
+                <table className="w-full text-center text-xs border-collapse border border-gray-400">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-400 p-1">التيشيرت</th>
+                      <th className="border border-gray-400 p-1">البنطلون</th>
+                      <th className="border border-gray-400 p-1">الكمية</th>
+                      <th className="border border-gray-400 p-1">المقاس الواحد</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {validPairs?.filter((p: any) => p.quantity).map((pair: any, idx: number) => (
+                      <tr key={idx}>
+                        <td className="border border-gray-400 p-1">{pair.tshirt}</td>
+                        <td className="border border-gray-400 p-1">{pair.pants}</td>
+                        <td className="border border-gray-400 p-1">{pair.quantity}</td>
+                        <td className="border border-gray-400 p-1">{pair.quantity / 4}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-gray-50 font-bold">
+                      <td className="border border-gray-400 p-1" colSpan={2}>الإجمالي</td>
+                      <td className="border border-gray-400 p-1 text-center" colSpan={2}>{totalQuantity} قطعة</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
               <p className="text-sm min-h-[30px] whitespace-pre-wrap">{cuttingNotes || '---'}</p>
             </div>
