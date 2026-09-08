@@ -1,0 +1,100 @@
+import json
+import os
+import re
+from barcode import Code128
+from barcode.writer import ImageWriter
+from PIL import Image, ImageDraw, ImageFont
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
+
+# Ensure output directory exists
+out_dir = "Barcodes_PDFs"
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+
+# Load JSON
+with open('models_data.json', 'r', encoding='utf-8') as f:
+    products = json.load(f)
+
+# Group products by category (name)
+grouped_products = {}
+for product in products:
+    name = product.get('name', 'بدون_اسم').strip()
+    # clean invalid characters for filename
+    safe_name = re.sub(r'[\\/*?:"<>|]', "", name)
+    if safe_name not in grouped_products:
+        grouped_products[safe_name] = []
+    grouped_products[safe_name].append(product)
+
+writer = ImageWriter()
+options = {
+    'module_width': 1.0,    
+    'module_height': 35,    
+    'write_text': False,
+    'quiet_zone': 2,
+    'background': 'white',
+    'foreground': 'black'
+}
+
+try:
+    font_large = ImageFont.truetype("C:\\Windows\\Fonts\\arialbd.ttf", 60)
+except IOError:
+    font_large = ImageFont.load_default()
+
+temp_barcode_path = "temp_barcode_raw"
+
+for category_name, prods in grouped_products.items():
+    pdf_path = os.path.join(out_dir, f"{category_name}.pdf")
+    c = canvas.Canvas(pdf_path, pagesize=(50*mm, 25*mm))
+    generated = set()
+    count = 0
+    
+    for product in prods:
+        model_num = product.get('modelNumber', '')
+        for color in product.get('colors', []):
+            barcode_str = str(color.get('barcode', '')).strip()
+            
+            if not barcode_str or barcode_str in generated:
+                continue
+                
+            generated.add(barcode_str)
+            
+            # 1. Generate Barcode PNG
+            barcode_obj = Code128(barcode_str, writer=writer)
+            barcode_obj.save(temp_barcode_path, options=options)
+            
+            # 2. Resize and paste to canvas
+            img = Image.open(temp_barcode_path + ".png")
+            img = img.resize((600, 240), Image.Resampling.LANCZOS)
+            
+            final_img = Image.new('RGB', (600, 300), color='white')
+            final_img.paste(img, (0, 0))
+            
+            # 3. Draw text
+            draw = ImageDraw.Draw(final_img)
+            text_to_draw = f"{model_num} - {barcode_str}"
+            bbox = draw.textbbox((0, 0), text_to_draw, font=font_large)
+            text_width = bbox[2] - bbox[0]
+            x = (600 - text_width) / 2
+            y = 230
+            draw.text((x, y), text_to_draw, font=font_large, fill="black")
+            
+            # 4. Draw to PDF
+            img_reader = ImageReader(final_img)
+            c.drawImage(img_reader, 0, 0, width=50*mm, height=25*mm)
+            c.showPage()
+            
+            count += 1
+            
+            img.close()
+            final_img.close()
+
+    c.save()
+    #print(f"Generated {count} stickers in {pdf_path}")
+
+# cleanup temp files
+if os.path.exists(temp_barcode_path + ".png"):
+    os.remove(temp_barcode_path + ".png")
+
+print("All categorized PDFs generated successfully in Barcodes_PDFs folder!")

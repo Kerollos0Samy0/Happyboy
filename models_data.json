@@ -35,16 +35,19 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "31"
+        "barcode": "31",
+        "quantity": 123,
+        "name": "اسود"
       },
       {
-        "name": "انديجو",
-        "barcode": "32"
+        "barcode": "32",
+        "quantity": 128,
+        "name": "انديجو"
       },
       {
-        "name": "منت",
-        "barcode": "33"
+        "quantity": 127,
+        "barcode": "33",
+        "name": "منت"
       }
     ],
     "barcodes": [
@@ -53,7 +56,7 @@
       "33"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 378
   },
   {
     "modelNumber": "15",
@@ -354,15 +357,18 @@
     "colors": [
       {
         "name": "اسود",
+        "quantity": 112,
         "barcode": "191"
       },
       {
-        "name": "زيتي",
-        "barcode": "192"
+        "barcode": "193",
+        "quantity": 132,
+        "name": "منت"
       },
       {
-        "name": "منت",
-        "barcode": "193"
+        "quantity": 112,
+        "name": "زيتي",
+        "barcode": "192"
       }
     ],
     "barcodes": [
@@ -371,7 +377,7 @@
       "193"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 356
   },
   {
     "modelNumber": "70",
@@ -409,16 +415,19 @@
     ],
     "colors": [
       {
-        "name": "انديجو",
-        "barcode": "234"
-      },
-      {
-        "name": "اورانج",
-        "barcode": "235"
-      },
-      {
         "name": "منت",
-        "barcode": "233"
+        "barcode": "233",
+        "quantity": 52
+      },
+      {
+        "barcode": "234",
+        "name": "انديجو",
+        "quantity": 60
+      },
+      {
+        "barcode": "235",
+        "quantity": 84,
+        "name": "اورانج"
       }
     ],
     "barcodes": [
@@ -427,7 +436,7 @@
       "235"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 196
   },
   {
     "modelNumber": "80",
@@ -437,16 +446,19 @@
     ],
     "colors": [
       {
-        "name": "زيتوني",
-        "barcode": "241"
-      },
-      {
-        "name": "طوبي",
-        "barcode": "239"
+        "barcode": "239",
+        "quantity": -16,
+        "name": "طوبي"
       },
       {
         "name": "كشمير",
+        "quantity": 20,
         "barcode": "240"
+      },
+      {
+        "name": "زيتوني",
+        "barcode": "241",
+        "quantity": -72
       }
     ],
     "barcodes": [
@@ -455,7 +467,7 @@
       "241"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -68
   },
   {
     "modelNumber": "85",
@@ -465,16 +477,19 @@
     ],
     "colors": [
       {
-        "name": "احمر",
-        "barcode": "243"
-      },
-      {
         "name": "اسود",
+        "quantity": 32,
         "barcode": "242"
       },
       {
+        "quantity": 56,
+        "barcode": "243",
+        "name": "احمر"
+      },
+      {
         "name": "منت",
-        "barcode": "244"
+        "barcode": "244",
+        "quantity": 28
       }
     ],
     "barcodes": [
@@ -483,7 +498,7 @@
       "244"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 116
   },
   {
     "modelNumber": "90",
@@ -494,15 +509,18 @@
     "colors": [
       {
         "name": "انديجو",
-        "barcode": "245"
-      },
-      {
-        "name": "زيتي",
-        "barcode": "247"
+        "barcode": "245",
+        "quantity": 96
       },
       {
         "name": "شانيه",
+        "quantity": 92,
         "barcode": "246"
+      },
+      {
+        "barcode": "247",
+        "name": "زيتي",
+        "quantity": 72
       }
     ],
     "barcodes": [
@@ -511,7 +529,7 @@
       "247"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 260
   },
   {
     "modelNumber": "100",
@@ -521,16 +539,19 @@
     ],
     "colors": [
       {
+        "barcode": "76",
+        "name": "انديجو",
+        "quantity": 28
+      },
+      {
         "name": "اسود",
+        "quantity": 23,
         "barcode": "77"
       },
       {
-        "name": "انديجو",
-        "barcode": "76"
-      },
-      {
         "name": "بني",
-        "barcode": "78"
+        "barcode": "78",
+        "quantity": -32
       }
     ],
     "barcodes": [
@@ -539,7 +560,7 @@
       "78"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 19
   },
   {
     "modelNumber": "105",
@@ -549,16 +570,19 @@
     ],
     "colors": [
       {
-        "name": "بطيخي",
-        "barcode": "81"
+        "name": "شانيه",
+        "quantity": 208,
+        "barcode": "79"
       },
       {
+        "quantity": 128,
         "name": "تفاحي",
         "barcode": "80"
       },
       {
-        "name": "شانيه",
-        "barcode": "79"
+        "quantity": 187,
+        "barcode": "81",
+        "name": "بطيخي"
       }
     ],
     "barcodes": [
@@ -567,7 +591,7 @@
       "81"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 523
   },
   {
     "modelNumber": "110",
@@ -605,15 +629,18 @@
     ],
     "colors": [
       {
+        "barcode": "159",
         "name": "اسود",
-        "barcode": "159"
+        "quantity": 92
       },
       {
         "name": "بيج",
-        "barcode": "160"
+        "barcode": "160",
+        "quantity": 0
       },
       {
         "name": "رمادي",
+        "quantity": 15,
         "barcode": "161"
       }
     ],
@@ -623,7 +650,7 @@
       "161"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 107
   },
   {
     "modelNumber": "120",
@@ -661,16 +688,19 @@
     ],
     "colors": [
       {
+        "barcode": "103",
         "name": "اخضر",
-        "barcode": "103"
+        "quantity": 152
       },
       {
+        "quantity": 148,
         "name": "بطيخي",
         "barcode": "104"
       },
       {
-        "name": "مسطردة",
-        "barcode": "105"
+        "quantity": 132,
+        "barcode": "105",
+        "name": "مسطرده"
       }
     ],
     "barcodes": [
@@ -679,7 +709,7 @@
       "105"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 432
   },
   {
     "modelNumber": "130",
@@ -689,16 +719,19 @@
     ],
     "colors": [
       {
-        "name": "اورانج",
-        "barcode": "142"
+        "barcode": "142",
+        "quantity": 116,
+        "name": "اورانج"
       },
       {
-        "name": "بيج",
-        "barcode": "144"
+        "name": "مسطرده",
+        "barcode": "143",
+        "quantity": 104
       },
       {
-        "name": "مسطردة",
-        "barcode": "143"
+        "quantity": 108,
+        "barcode": "144",
+        "name": "بيج"
       }
     ],
     "barcodes": [
@@ -707,7 +740,7 @@
       "144"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 328
   },
   {
     "modelNumber": "135",
@@ -717,16 +750,19 @@
     ],
     "colors": [
       {
-        "name": "اورانج",
-        "barcode": "185"
+        "barcode": "185",
+        "quantity": -32,
+        "name": "اورانج"
       },
       {
         "name": "زيتوني",
-        "barcode": "186"
+        "barcode": "186",
+        "quantity": 34
       },
       {
-        "name": "مسطردة",
-        "barcode": "187"
+        "barcode": "187",
+        "quantity": 48,
+        "name": "مسطرده"
       }
     ],
     "barcodes": [
@@ -735,7 +771,7 @@
       "187"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 50
   },
   {
     "modelNumber": "140",
@@ -746,13 +782,16 @@
     "colors": [
       {
         "name": "اورانج",
+        "quantity": 144,
         "barcode": "197"
       },
       {
         "name": "بيج",
+        "quantity": 116,
         "barcode": "198"
       },
       {
+        "quantity": 147,
         "name": "منت",
         "barcode": "199"
       }
@@ -763,7 +802,7 @@
       "199"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 407
   },
   {
     "modelNumber": "145",
@@ -773,16 +812,19 @@
     ],
     "colors": [
       {
+        "barcode": "194",
         "name": "احمر",
-        "barcode": "194"
+        "quantity": 71
       },
       {
+        "barcode": "195",
+        "name": "شانيه",
+        "quantity": 76
+      },
+      {
+        "quantity": 80,
         "name": "جيشي",
         "barcode": "196"
-      },
-      {
-        "name": "شانيه",
-        "barcode": "195"
       }
     ],
     "barcodes": [
@@ -791,7 +833,7 @@
       "196"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 227
   },
   {
     "modelNumber": "150",
@@ -801,16 +843,19 @@
     ],
     "colors": [
       {
-        "name": "شاركول",
+        "name": "شاركويل",
+        "quantity": 48,
         "barcode": "200"
       },
       {
-        "name": "كافية",
-        "barcode": "201"
+        "barcode": "201",
+        "quantity": -64,
+        "name": "كافيه"
       },
       {
         "name": "منت",
-        "barcode": "202"
+        "barcode": "202",
+        "quantity": 4
       }
     ],
     "barcodes": [
@@ -819,7 +864,7 @@
       "202"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -12
   },
   {
     "modelNumber": "155",
@@ -829,16 +874,19 @@
     ],
     "colors": [
       {
+        "barcode": "305",
         "name": "بيج",
-        "barcode": "305"
+        "quantity": -196
       },
       {
-        "name": "زيتي",
-        "barcode": "307"
-      },
-      {
-        "name": "شاركول",
+        "name": "شاركويل",
+        "quantity": -140,
         "barcode": "306"
+      },
+      {
+        "barcode": "307",
+        "name": "زيتي",
+        "quantity": -100
       }
     ],
     "barcodes": [
@@ -847,7 +895,7 @@
       "307"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -436
   },
   {
     "modelNumber": "160",
@@ -857,20 +905,24 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "311"
-      },
-      {
-        "name": "شاركول",
+        "name": "شاركويل",
+        "quantity": 72,
         "barcode": "308"
       },
       {
         "name": "شانيه",
-        "barcode": "309"
+        "barcode": "309",
+        "quantity": -28
       },
       {
-        "name": "منت",
-        "barcode": "310"
+        "quantity": -48,
+        "barcode": "310",
+        "name": "منت"
+      },
+      {
+        "name": "اسود",
+        "barcode": "311",
+        "quantity": -40
       }
     ],
     "barcodes": [
@@ -880,7 +932,7 @@
       "311"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -44
   },
   {
     "modelNumber": "165",
@@ -890,16 +942,19 @@
     ],
     "colors": [
       {
-        "name": "انديجو",
-        "barcode": "313"
+        "name": "فضي",
+        "barcode": "312",
+        "quantity": -220
+      },
+      {
+        "quantity": -292,
+        "barcode": "313",
+        "name": "انديجو"
       },
       {
         "name": "بني",
-        "barcode": "314"
-      },
-      {
-        "name": "فضي",
-        "barcode": "312"
+        "barcode": "314",
+        "quantity": -204
       }
     ],
     "barcodes": [
@@ -908,7 +963,7 @@
       "314"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -716
   },
   {
     "modelNumber": "170",
@@ -947,15 +1002,18 @@
     "colors": [
       {
         "name": "بني",
-        "barcode": "318"
+        "barcode": "318",
+        "quantity": -144
       },
       {
-        "name": "زيتوني",
-        "barcode": "320"
+        "barcode": "319",
+        "quantity": -128,
+        "name": "شانيه"
       },
       {
-        "name": "شانيه",
-        "barcode": "319"
+        "barcode": "320",
+        "quantity": -144,
+        "name": "زيتوني"
       }
     ],
     "barcodes": [
@@ -964,7 +1022,7 @@
       "320"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -416
   },
   {
     "modelNumber": "180",
@@ -974,16 +1032,19 @@
     ],
     "colors": [
       {
+        "barcode": "321",
         "name": "بني",
-        "barcode": "321"
+        "quantity": -152
       },
       {
         "name": "زيتوني",
-        "barcode": "322"
+        "barcode": "322",
+        "quantity": -112
       },
       {
-        "name": "فضي",
-        "barcode": "323"
+        "quantity": -160,
+        "barcode": "323",
+        "name": "فضي"
       }
     ],
     "barcodes": [
@@ -992,7 +1053,7 @@
       "323"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -424
   },
   {
     "modelNumber": "185",
@@ -1003,14 +1064,17 @@
     "colors": [
       {
         "name": "انديجو",
+        "quantity": -56,
         "barcode": "324"
       },
       {
         "name": "اورانج",
+        "quantity": -52,
         "barcode": "325"
       },
       {
         "name": "زيتوني",
+        "quantity": -68,
         "barcode": "326"
       }
     ],
@@ -1020,7 +1084,7 @@
       "326"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -176
   },
   {
     "modelNumber": "190",
@@ -1086,16 +1150,19 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "549"
-      },
-      {
-        "name": "برجاندي",
-        "barcode": "548"
-      },
-      {
+        "barcode": "547",
         "name": "زيتي",
-        "barcode": "547"
+        "quantity": -68
+      },
+      {
+        "quantity": -60,
+        "barcode": "548",
+        "name": "برجاندي"
+      },
+      {
+        "quantity": -72,
+        "barcode": "549",
+        "name": "اسود"
       }
     ],
     "barcodes": [
@@ -1104,7 +1171,7 @@
       "549"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -200
   },
   {
     "modelNumber": "205",
@@ -1114,16 +1181,24 @@
     ],
     "colors": [
       {
-        "name": "زهري",
-        "barcode": "552"
-      },
-      {
-        "name": "كافية",
-        "barcode": "551"
-      },
-      {
+        "barcode": "550",
         "name": "هافان",
-        "barcode": "550"
+        "quantity": -256
+      },
+      {
+        "name": "كافيه",
+        "barcode": "551",
+        "quantity": -184
+      },
+      {
+        "quantity": -140,
+        "barcode": "552",
+        "name": "زهري"
+      },
+      {
+        "barcode": "578",
+        "name": "بيج",
+        "quantity": -88
       }
     ],
     "barcodes": [
@@ -1132,7 +1207,7 @@
       "552"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -668
   },
   {
     "modelNumber": "300",
@@ -1143,15 +1218,18 @@
     "colors": [
       {
         "name": "اسود",
-        "barcode": "85"
+        "barcode": "85",
+        "quantity": 60
       },
       {
-        "name": "انديجو",
-        "barcode": "86"
+        "quantity": 76,
+        "barcode": "86",
+        "name": "انديجو"
       },
       {
+        "barcode": "87",
         "name": "رمادي",
-        "barcode": "87"
+        "quantity": 120
       }
     ],
     "barcodes": [
@@ -1160,7 +1238,7 @@
       "87"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 256
   },
   {
     "modelNumber": "305",
@@ -1198,15 +1276,18 @@
     ],
     "colors": [
       {
+        "barcode": "91",
         "name": "احمر",
-        "barcode": "91"
+        "quantity": 116
       },
       {
         "name": "بيج",
-        "barcode": "92"
+        "barcode": "92",
+        "quantity": 108
       },
       {
         "name": "جيشي",
+        "quantity": 132,
         "barcode": "93"
       }
     ],
@@ -1216,7 +1297,7 @@
       "93"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 356
   },
   {
     "modelNumber": "315",
@@ -1226,16 +1307,19 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "230"
+        "barcode": "230",
+        "quantity": 136,
+        "name": "اسود"
       },
       {
+        "barcode": "231",
         "name": "جيشي",
-        "barcode": "231"
+        "quantity": 116
       },
       {
         "name": "شانيه",
-        "barcode": "232"
+        "barcode": "232",
+        "quantity": 120
       }
     ],
     "barcodes": [
@@ -1244,7 +1328,7 @@
       "232"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 372
   },
   {
     "modelNumber": "320",
@@ -1282,15 +1366,18 @@
     ],
     "colors": [
       {
+        "quantity": 160,
         "name": "احمر",
         "barcode": "100"
       },
       {
-        "name": "انديجو",
-        "barcode": "101"
+        "barcode": "101",
+        "quantity": 148,
+        "name": "انديجو"
       },
       {
-        "name": "مسطردة",
+        "quantity": 152,
+        "name": "مسطرده",
         "barcode": "102"
       }
     ],
@@ -1300,7 +1387,7 @@
       "102"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 460
   },
   {
     "modelNumber": "330",
@@ -1310,16 +1397,19 @@
     ],
     "colors": [
       {
+        "quantity": 76,
         "name": "ابيض",
         "barcode": "145"
       },
       {
-        "name": "تفاحي",
-        "barcode": "146"
+        "barcode": "146",
+        "quantity": 116,
+        "name": "تفاحي"
       },
       {
-        "name": "منت",
-        "barcode": "147"
+        "barcode": "147",
+        "quantity": 32,
+        "name": "منت"
       }
     ],
     "barcodes": [
@@ -1328,7 +1418,7 @@
       "147"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 224
   },
   {
     "modelNumber": "335",
@@ -1338,16 +1428,19 @@
     ],
     "colors": [
       {
-        "name": "احمر",
-        "barcode": "182"
+        "quantity": 20,
+        "barcode": "182",
+        "name": "احمر"
       },
       {
         "name": "بيج",
-        "barcode": "183"
+        "barcode": "183",
+        "quantity": 18
       },
       {
-        "name": "هافان",
-        "barcode": "184"
+        "quantity": 28,
+        "barcode": "184",
+        "name": "هافان"
       }
     ],
     "barcodes": [
@@ -1356,7 +1449,7 @@
       "184"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 66
   },
   {
     "modelNumber": "340",
@@ -1366,16 +1459,19 @@
     ],
     "colors": [
       {
+        "barcode": "203",
         "name": "اسود",
-        "barcode": "203"
+        "quantity": 152
       },
       {
+        "barcode": "204",
         "name": "شانيه",
-        "barcode": "204"
+        "quantity": 132
       },
       {
-        "name": "كافية",
-        "barcode": "205"
+        "barcode": "205",
+        "quantity": 124,
+        "name": "كافيه"
       }
     ],
     "barcodes": [
@@ -1384,7 +1480,7 @@
       "205"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 408
   },
   {
     "modelNumber": "345",
@@ -1395,15 +1491,18 @@
     "colors": [
       {
         "name": "اسود",
+        "quantity": 76,
         "barcode": "206"
       },
       {
         "name": "منت",
-        "barcode": "207"
+        "barcode": "207",
+        "quantity": 100
       },
       {
+        "barcode": "208",
         "name": "هافان",
-        "barcode": "208"
+        "quantity": 68
       }
     ],
     "barcodes": [
@@ -1412,7 +1511,7 @@
       "208"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 244
   },
   {
     "modelNumber": "350",
@@ -1422,14 +1521,17 @@
     ],
     "colors": [
       {
+        "barcode": "209",
         "name": "اسود",
-        "barcode": "209"
+        "quantity": 28
       },
       {
-        "name": "بني",
-        "barcode": "210"
+        "barcode": "210",
+        "quantity": 0,
+        "name": "بني"
       },
       {
+        "quantity": -60,
         "name": "زيتي",
         "barcode": "211"
       }
@@ -1440,7 +1542,7 @@
       "211"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -32
   },
   {
     "modelNumber": "355",
@@ -1478,16 +1580,19 @@
     ],
     "colors": [
       {
-        "name": "بني",
-        "barcode": "336"
-      },
-      {
-        "name": "رمادي",
-        "barcode": "338"
+        "barcode": "336",
+        "quantity": -88,
+        "name": "بني"
       },
       {
         "name": "شانيه",
+        "quantity": -96,
         "barcode": "337"
+      },
+      {
+        "quantity": -128,
+        "name": "رمادي",
+        "barcode": "338"
       }
     ],
     "barcodes": [
@@ -1496,7 +1601,7 @@
       "338"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -312
   },
   {
     "modelNumber": "365",
@@ -1506,16 +1611,19 @@
     ],
     "colors": [
       {
+        "quantity": -268,
         "name": "رمادي",
         "barcode": "339"
       },
       {
         "name": "زيتوني",
+        "quantity": -212,
         "barcode": "340"
       },
       {
-        "name": "كافية",
-        "barcode": "341"
+        "barcode": "341",
+        "name": "كافيه",
+        "quantity": -268
       }
     ],
     "barcodes": [
@@ -1524,7 +1632,7 @@
       "341"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -748
   },
   {
     "modelNumber": "370",
@@ -1535,15 +1643,18 @@
     "colors": [
       {
         "name": "شانيه",
-        "barcode": "342"
+        "barcode": "342",
+        "quantity": -208
       },
       {
+        "quantity": -180,
+        "barcode": "343",
+        "name": "منت"
+      },
+      {
+        "barcode": "344",
         "name": "كافيه",
-        "barcode": "344"
-      },
-      {
-        "name": "منت",
-        "barcode": "343"
+        "quantity": -216
       }
     ],
     "barcodes": [
@@ -1552,7 +1663,7 @@
       "344"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -604
   },
   {
     "modelNumber": "375",
@@ -1926,20 +2037,24 @@
     ],
     "colors": [
       {
-        "name": "اصفر",
-        "barcode": "178"
+        "quantity": 106,
+        "barcode": "178",
+        "name": "اصفر"
       },
       {
+        "quantity": 76,
+        "barcode": "179",
+        "name": "سيمون"
+      },
+      {
+        "quantity": 8,
         "name": "روز",
         "barcode": "180"
       },
       {
-        "name": "سيمون",
-        "barcode": "179"
-      },
-      {
-        "name": "موف",
-        "barcode": "181"
+        "barcode": "181",
+        "quantity": -28,
+        "name": "موف"
       }
     ],
     "barcodes": [
@@ -1949,7 +2064,7 @@
       "181"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 162
   },
   {
     "modelNumber": "540",
@@ -1960,14 +2075,17 @@
     "colors": [
       {
         "name": "اصفر",
+        "quantity": 124,
         "barcode": "212"
       },
       {
         "name": "بيج",
-        "barcode": "213"
+        "barcode": "213",
+        "quantity": 104
       },
       {
         "name": "فوشيا",
+        "quantity": 88,
         "barcode": "214"
       }
     ],
@@ -1977,7 +2095,7 @@
       "214"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 316
   },
   {
     "modelNumber": "545",
@@ -1987,16 +2105,19 @@
     ],
     "colors": [
       {
+        "barcode": "215",
         "name": "اصفر",
-        "barcode": "215"
+        "quantity": 168
       },
       {
+        "barcode": "216",
         "name": "بدي روز",
-        "barcode": "216"
+        "quantity": 80
       },
       {
+        "barcode": "217",
         "name": "تفاحي",
-        "barcode": "217"
+        "quantity": 120
       }
     ],
     "barcodes": [
@@ -2005,7 +2126,7 @@
       "217"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 368
   },
   {
     "modelNumber": "550",
@@ -2155,20 +2276,24 @@
     ],
     "colors": [
       {
+        "barcode": "8",
         "name": "اسود",
-        "barcode": "8"
+        "quantity": -12
       },
       {
         "name": "انديجو",
-        "barcode": "9"
+        "barcode": "9",
+        "quantity": -24
       },
       {
-        "name": "بيج",
-        "barcode": "10"
+        "barcode": "10",
+        "quantity": -17,
+        "name": "بيج"
       },
       {
+        "barcode": "11",
         "name": "منت",
-        "barcode": "11"
+        "quantity": -72
       }
     ],
     "barcodes": [
@@ -2178,7 +2303,7 @@
       "11"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -125
   },
   {
     "modelNumber": "610",
@@ -2188,16 +2313,19 @@
     ],
     "colors": [
       {
-        "name": "انديجو",
-        "barcode": "12"
+        "quantity": 99,
+        "barcode": "12",
+        "name": "انديجو"
       },
       {
         "name": "كشمير",
-        "barcode": "13"
+        "barcode": "13",
+        "quantity": 60
       },
       {
-        "name": "كموني",
-        "barcode": "14"
+        "quantity": 112,
+        "barcode": "14",
+        "name": "كموني"
       }
     ],
     "barcodes": [
@@ -2206,7 +2334,7 @@
       "14"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 271
   },
   {
     "modelNumber": "615",
@@ -2217,15 +2345,18 @@
     "colors": [
       {
         "name": "اسود",
-        "barcode": "40"
+        "barcode": "40",
+        "quantity": 44
       },
       {
-        "name": "بيج",
-        "barcode": "41"
+        "barcode": "41",
+        "quantity": 35,
+        "name": "بيج"
       },
       {
-        "name": "كموني",
-        "barcode": "42"
+        "quantity": 75,
+        "barcode": "42",
+        "name": "كموني"
       }
     ],
     "barcodes": [
@@ -2234,7 +2365,7 @@
       "42"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 154
   },
   {
     "modelNumber": "620",
@@ -2244,16 +2375,19 @@
     ],
     "colors": [
       {
+        "barcode": "55",
+        "quantity": -8,
+        "name": "كشمير"
+      },
+      {
+        "quantity": 28,
+        "barcode": "56",
+        "name": "برجاندي"
+      },
+      {
+        "barcode": "57",
         "name": "ابيض",
-        "barcode": "57"
-      },
-      {
-        "name": "برجاندي",
-        "barcode": "56"
-      },
-      {
-        "name": "كشمير",
-        "barcode": "55"
+        "quantity": 123
       }
     ],
     "barcodes": [
@@ -2262,7 +2396,7 @@
       "57"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 143
   },
   {
     "modelNumber": "625",
@@ -2272,16 +2406,19 @@
     ],
     "colors": [
       {
+        "barcode": "52",
         "name": "كافيه",
-        "barcode": "52"
-      },
-      {
-        "name": "منت",
-        "barcode": "54"
+        "quantity": 140
       },
       {
         "name": "موف",
-        "barcode": "53"
+        "barcode": "53",
+        "quantity": 99
+      },
+      {
+        "name": "منت",
+        "barcode": "54",
+        "quantity": 100
       }
     ],
     "barcodes": [
@@ -2290,7 +2427,7 @@
       "54"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 339
   },
   {
     "modelNumber": "630",
@@ -2301,16 +2438,19 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "125"
-      },
-      {
-        "name": "بيج",
-        "barcode": "126"
-      },
-      {
         "name": "فوشيا",
-        "barcode": "124"
+        "barcode": "124",
+        "quantity": -65
+      },
+      {
+        "barcode": "125",
+        "name": "ابيض",
+        "quantity": 88
+      },
+      {
+        "quantity": -37,
+        "barcode": "126",
+        "name": "بيج"
       }
     ],
     "barcodes": [
@@ -2319,7 +2459,7 @@
       "126"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -14
   },
   {
     "modelNumber": "635",
@@ -2330,15 +2470,18 @@
     "colors": [
       {
         "name": "اكوا",
+        "quantity": 136,
         "barcode": "127"
       },
       {
-        "name": "بستاج",
-        "barcode": "129"
+        "barcode": "128",
+        "name": "روز",
+        "quantity": 136
       },
       {
-        "name": "روز",
-        "barcode": "128"
+        "quantity": 148,
+        "name": "بستاج",
+        "barcode": "129"
       }
     ],
     "barcodes": [
@@ -2347,7 +2490,7 @@
       "129"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 420
   },
   {
     "modelNumber": "640",
@@ -2358,15 +2501,18 @@
     "colors": [
       {
         "name": "اكوا",
-        "barcode": "136"
+        "barcode": "136",
+        "quantity": 91
       },
       {
         "name": "روز",
+        "quantity": 52,
         "barcode": "137"
       },
       {
-        "name": "سيمون",
-        "barcode": "138"
+        "barcode": "138",
+        "quantity": 96,
+        "name": "سيمون"
       }
     ],
     "barcodes": [
@@ -2375,7 +2521,7 @@
       "138"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 239
   },
   {
     "modelNumber": "645",
@@ -2386,15 +2532,18 @@
     "colors": [
       {
         "name": "برجاندي",
-        "barcode": "139"
+        "barcode": "139",
+        "quantity": -12
       },
       {
+        "quantity": 64,
         "name": "بستاج",
         "barcode": "140"
       },
       {
         "name": "سيمون",
-        "barcode": "141"
+        "barcode": "141",
+        "quantity": 44
       }
     ],
     "barcodes": [
@@ -2403,7 +2552,7 @@
       "141"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 96
   },
   {
     "modelNumber": "650",
@@ -2413,16 +2562,19 @@
     ],
     "colors": [
       {
-        "name": "بستاج",
-        "barcode": "170"
+        "barcode": "169",
+        "name": "بيج",
+        "quantity": -16
       },
       {
-        "name": "بيج",
-        "barcode": "169"
+        "barcode": "170",
+        "name": "بستاج",
+        "quantity": 71
       },
       {
         "name": "موف",
-        "barcode": "171"
+        "barcode": "171",
+        "quantity": -4
       }
     ],
     "barcodes": [
@@ -2431,7 +2583,7 @@
       "171"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 51
   },
   {
     "modelNumber": "655",
@@ -2441,15 +2593,18 @@
     ],
     "colors": [
       {
+        "quantity": -152,
         "name": "بدي روز",
         "barcode": "218"
       },
       {
+        "barcode": "219",
         "name": "برجاندي",
-        "barcode": "219"
+        "quantity": -156
       },
       {
         "name": "لبني",
+        "quantity": -88,
         "barcode": "220"
       }
     ],
@@ -2459,7 +2614,7 @@
       "220"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -396
   },
   {
     "modelNumber": "660",
@@ -2469,14 +2624,17 @@
     ],
     "colors": [
       {
-        "name": "اصفر",
-        "barcode": "221"
+        "quantity": 140,
+        "barcode": "221",
+        "name": "اصفر"
       },
       {
         "name": "روز",
+        "quantity": 64,
         "barcode": "222"
       },
       {
+        "quantity": 80,
         "name": "فوشيا",
         "barcode": "223"
       }
@@ -2487,7 +2645,7 @@
       "223"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 284
   },
   {
     "modelNumber": "665",
@@ -2497,16 +2655,19 @@
     ],
     "colors": [
       {
+        "barcode": "248",
         "name": "اسود",
-        "barcode": "248"
+        "quantity": -16
       },
       {
+        "barcode": "249",
+        "quantity": -68,
+        "name": "لبني"
+      },
+      {
+        "quantity": -168,
         "name": "برجاندي",
         "barcode": "250"
-      },
-      {
-        "name": "لبني",
-        "barcode": "249"
       }
     ],
     "barcodes": [
@@ -2515,7 +2676,7 @@
       "250"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -252
   },
   {
     "modelNumber": "670",
@@ -2525,14 +2686,17 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "251"
+        "barcode": "251",
+        "quantity": 116,
+        "name": "ابيض"
       },
       {
-        "name": "اكوا",
-        "barcode": "252"
+        "barcode": "252",
+        "quantity": 144,
+        "name": "اكوا"
       },
       {
+        "quantity": 120,
         "name": "بدي روز",
         "barcode": "253"
       }
@@ -2543,7 +2707,7 @@
       "253"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 380
   },
   {
     "modelNumber": "675",
@@ -2554,13 +2718,16 @@
     "colors": [
       {
         "name": "ابيض",
-        "barcode": "254"
+        "barcode": "254",
+        "quantity": -84
       },
       {
         "name": "برجاندي",
-        "barcode": "255"
+        "barcode": "255",
+        "quantity": -148
       },
       {
+        "quantity": -104,
         "name": "سيمون",
         "barcode": "256"
       }
@@ -2571,7 +2738,7 @@
       "256"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -336
   },
   {
     "modelNumber": "680",
@@ -2582,16 +2749,19 @@
     ],
     "colors": [
       {
+        "barcode": "257",
         "name": "اكوا",
-        "barcode": "257"
-      },
-      {
-        "name": "بدي روز",
-        "barcode": "259"
+        "quantity": -172
       },
       {
         "name": "كشمير",
+        "quantity": -196,
         "barcode": "258"
+      },
+      {
+        "barcode": "259",
+        "quantity": -164,
+        "name": "بدي روز"
       }
     ],
     "barcodes": [
@@ -2600,7 +2770,7 @@
       "259"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -532
   },
   {
     "modelNumber": "685",
@@ -2611,15 +2781,18 @@
     "colors": [
       {
         "name": "بيج",
+        "quantity": -104,
         "barcode": "287"
       },
       {
-        "name": "سيمون",
-        "barcode": "289"
-      },
-      {
+        "quantity": -80,
         "name": "لبني",
         "barcode": "288"
+      },
+      {
+        "barcode": "289",
+        "name": "سيمون",
+        "quantity": -60
       }
     ],
     "barcodes": [
@@ -2628,7 +2801,7 @@
       "289"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -244
   },
   {
     "modelNumber": "690",
@@ -2638,16 +2811,19 @@
     ],
     "colors": [
       {
-        "name": "برجاندي",
-        "barcode": "295"
-      },
-      {
+        "barcode": "293",
         "name": "بيج",
-        "barcode": "293"
+        "quantity": -160
       },
       {
-        "name": "موف",
-        "barcode": "294"
+        "quantity": -176,
+        "barcode": "294",
+        "name": "موف"
+      },
+      {
+        "quantity": -184,
+        "barcode": "295",
+        "name": "برجاندي"
       }
     ],
     "barcodes": [
@@ -2656,7 +2832,7 @@
       "295"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -520
   },
   {
     "modelNumber": "695",
@@ -2694,16 +2870,19 @@
     ],
     "colors": [
       {
+        "barcode": "562",
+        "quantity": -396,
+        "name": "موف"
+      },
+      {
         "name": "ابيض",
+        "quantity": -304,
         "barcode": "563"
       },
       {
+        "barcode": "564",
         "name": "اسود",
-        "barcode": "564"
-      },
-      {
-        "name": "موف",
-        "barcode": "562"
+        "quantity": -264
       }
     ],
     "barcodes": [
@@ -2712,7 +2891,7 @@
       "564"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -964
   },
   {
     "modelNumber": "705",
@@ -2722,16 +2901,19 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "567"
+        "quantity": -136,
+        "barcode": "565",
+        "name": "لبني"
       },
       {
-        "name": "بني",
-        "barcode": "565"
-      },
-      {
+        "quantity": -216,
         "name": "موف",
         "barcode": "566"
+      },
+      {
+        "quantity": -188,
+        "barcode": "567",
+        "name": "اسود"
       }
     ],
     "barcodes": [
@@ -2740,7 +2922,7 @@
       "567"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -540
   },
   {
     "modelNumber": "800",
@@ -2750,14 +2932,17 @@
     ],
     "colors": [
       {
-        "name": "كشمير",
-        "barcode": "6"
-      },
-      {
+        "quantity": 92,
         "name": "كموني",
         "barcode": "5"
       },
       {
+        "name": "كشمير",
+        "quantity": 44,
+        "barcode": "6"
+      },
+      {
+        "quantity": 84,
         "name": "منت",
         "barcode": "7"
       }
@@ -2768,7 +2953,7 @@
       "7"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 220
   },
   {
     "modelNumber": "805",
@@ -2811,15 +2996,18 @@
     ],
     "colors": [
       {
-        "name": "انديجو",
-        "barcode": "19"
+        "quantity": 128,
+        "barcode": "19",
+        "name": "انديجو"
       },
       {
         "name": "برجاندي",
+        "quantity": 120,
         "barcode": "20"
       },
       {
         "name": "موف",
+        "quantity": 116,
         "barcode": "21"
       }
     ],
@@ -2829,7 +3017,7 @@
       "21"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 364
   },
   {
     "modelNumber": "815",
@@ -2839,16 +3027,19 @@
     ],
     "colors": [
       {
+        "name": "كافيه",
+        "barcode": "37",
+        "quantity": 131
+      },
+      {
+        "quantity": 124,
         "name": "اسود",
         "barcode": "38"
       },
       {
-        "name": "كافيه",
-        "barcode": "37"
-      },
-      {
+        "barcode": "39",
         "name": "موف",
-        "barcode": "39"
+        "quantity": 126
       }
     ],
     "barcodes": [
@@ -2857,7 +3048,7 @@
       "39"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 381
   },
   {
     "modelNumber": "820",
@@ -2867,14 +3058,17 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "43"
+        "quantity": 140,
+        "barcode": "43",
+        "name": "ابيض"
       },
       {
+        "quantity": 119,
         "name": "انديجو",
         "barcode": "44"
       },
       {
+        "quantity": 100,
         "name": "كموني",
         "barcode": "45"
       }
@@ -2885,7 +3079,7 @@
       "45"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 359
   },
   {
     "modelNumber": "825",
@@ -2895,16 +3089,19 @@
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "48"
+        "barcode": "46",
+        "name": "كشمير",
+        "quantity": 4
       },
       {
+        "quantity": 84,
         "name": "بيج",
         "barcode": "47"
       },
       {
-        "name": "كشمير",
-        "barcode": "46"
+        "name": "اسود",
+        "quantity": 52,
+        "barcode": "48"
       }
     ],
     "barcodes": [
@@ -2913,7 +3110,7 @@
       "48"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 140
   },
   {
     "modelNumber": "830",
@@ -2923,16 +3120,19 @@
     ],
     "colors": [
       {
-        "name": "اكوا",
-        "barcode": "118"
+        "quantity": 24,
+        "barcode": "118",
+        "name": "اكوا"
       },
       {
-        "name": "برجاندي",
-        "barcode": "120"
-      },
-      {
+        "quantity": 16,
         "name": "روز",
         "barcode": "119"
+      },
+      {
+        "quantity": -52,
+        "name": "برجاندي",
+        "barcode": "120"
       }
     ],
     "barcodes": [
@@ -2941,7 +3141,7 @@
       "120"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -12
   },
   {
     "modelNumber": "835",
@@ -2951,16 +3151,19 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "123"
+        "barcode": "121",
+        "quantity": 147,
+        "name": "موف"
       },
       {
         "name": "سيمون",
+        "quantity": 156,
         "barcode": "122"
       },
       {
-        "name": "موف",
-        "barcode": "121"
+        "name": "ابيض",
+        "quantity": 156,
+        "barcode": "123"
       }
     ],
     "barcodes": [
@@ -2969,7 +3172,7 @@
       "123"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 459
   },
   {
     "modelNumber": "840",
@@ -2979,16 +3182,19 @@
     ],
     "colors": [
       {
-        "name": "اصفر",
-        "barcode": "131"
+        "barcode": "130",
+        "quantity": 92,
+        "name": "موف"
       },
       {
-        "name": "فوشيا",
-        "barcode": "132"
+        "quantity": 119,
+        "barcode": "131",
+        "name": "اصفر"
       },
       {
-        "name": "موف",
-        "barcode": "130"
+        "barcode": "132",
+        "quantity": 100,
+        "name": "فوشيا"
       }
     ],
     "barcodes": [
@@ -2997,7 +3203,7 @@
       "132"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 311
   },
   {
     "modelNumber": "845",
@@ -3007,16 +3213,19 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "134"
-      },
-      {
+        "quantity": 60,
         "name": "اكوا",
         "barcode": "133"
       },
       {
-        "name": "فوشيا",
-        "barcode": "135"
+        "barcode": "134",
+        "quantity": 108,
+        "name": "ابيض"
+      },
+      {
+        "quantity": 28,
+        "barcode": "135",
+        "name": "فوشيا"
       }
     ],
     "barcodes": [
@@ -3025,7 +3234,7 @@
       "135"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 196
   },
   {
     "modelNumber": "850",
@@ -3035,19 +3244,23 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "166"
+        "quantity": 20,
+        "barcode": "165",
+        "name": "اكوا"
       },
       {
-        "name": "اكوا",
-        "barcode": "165"
+        "quantity": 140,
+        "barcode": "166",
+        "name": "ابيض"
       },
       {
-        "name": "بستاج",
-        "barcode": "167"
+        "barcode": "167",
+        "quantity": -25,
+        "name": "بستاج"
       },
       {
         "name": "روز",
+        "quantity": 75,
         "barcode": "168"
       }
     ],
@@ -3058,7 +3271,7 @@
       "168"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 210
   },
   {
     "modelNumber": "855",
@@ -3069,15 +3282,18 @@
     "colors": [
       {
         "name": "اكوا",
+        "quantity": 72,
         "barcode": "224"
       },
       {
         "name": "بيج",
-        "barcode": "225"
+        "barcode": "225",
+        "quantity": -108
       },
       {
-        "name": "كشمير",
-        "barcode": "226"
+        "barcode": "226",
+        "quantity": 4,
+        "name": "كشمير"
       }
     ],
     "barcodes": [
@@ -3086,7 +3302,7 @@
       "226"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -32
   },
   {
     "modelNumber": "860",
@@ -3096,15 +3312,18 @@
     ],
     "colors": [
       {
+        "barcode": "227",
         "name": "اصفر",
-        "barcode": "227"
+        "quantity": 128
       },
       {
-        "name": "سيمون",
-        "barcode": "228"
+        "quantity": 80,
+        "barcode": "228",
+        "name": "سيمون"
       },
       {
         "name": "موف",
+        "quantity": 80,
         "barcode": "229"
       }
     ],
@@ -3114,7 +3333,7 @@
       "229"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 288
   },
   {
     "modelNumber": "865",
@@ -3125,15 +3344,18 @@
     "colors": [
       {
         "name": "اسود",
+        "quantity": -148,
         "barcode": "260"
       },
       {
-        "name": "بني",
-        "barcode": "261"
+        "barcode": "261",
+        "quantity": -112,
+        "name": "بني"
       },
       {
+        "barcode": "262",
         "name": "فوشيا",
-        "barcode": "262"
+        "quantity": -44
       }
     ],
     "barcodes": [
@@ -3142,7 +3364,7 @@
       "262"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -304
   },
   {
     "modelNumber": "870",
@@ -3152,15 +3374,18 @@
     ],
     "colors": [
       {
+        "quantity": 80,
         "name": "اصفر",
         "barcode": "263"
       },
       {
+        "quantity": 112,
         "name": "كشمير",
         "barcode": "264"
       },
       {
         "name": "لبني",
+        "quantity": 92,
         "barcode": "265"
       }
     ],
@@ -3170,7 +3395,7 @@
       "265"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": 284
   },
   {
     "modelNumber": "875",
@@ -3208,16 +3433,19 @@
     ],
     "colors": [
       {
-        "name": "اصفر",
-        "barcode": "269"
+        "quantity": -60,
+        "barcode": "269",
+        "name": "اصفر"
       },
       {
-        "name": "سيمون",
-        "barcode": "270"
+        "quantity": -72,
+        "barcode": "270",
+        "name": "سيمون"
       },
       {
-        "name": "موف",
-        "barcode": "271"
+        "barcode": "271",
+        "quantity": -176,
+        "name": "موف"
       }
     ],
     "barcodes": [
@@ -3226,7 +3454,7 @@
       "271"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -308
   },
   {
     "modelNumber": "885",
@@ -3236,16 +3464,19 @@
     ],
     "colors": [
       {
+        "barcode": "290",
         "name": "بيج",
-        "barcode": "290"
+        "quantity": -60
+      },
+      {
+        "barcode": "291",
+        "name": "لبني",
+        "quantity": -48
       },
       {
         "name": "سيمون",
+        "quantity": -44,
         "barcode": "292"
-      },
-      {
-        "name": "لبني",
-        "barcode": "291"
       }
     ],
     "barcodes": [
@@ -3254,7 +3485,7 @@
       "292"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -152
   },
   {
     "modelNumber": "890",
@@ -3292,16 +3523,19 @@
     ],
     "colors": [
       {
-        "name": "بيج",
-        "barcode": "302"
+        "barcode": "302",
+        "quantity": -92,
+        "name": "بيج"
       },
       {
+        "barcode": "303",
+        "name": "لبني",
+        "quantity": -120
+      },
+      {
+        "quantity": -120,
         "name": "كشمير",
         "barcode": "304"
-      },
-      {
-        "name": "لبني",
-        "barcode": "303"
       }
     ],
     "barcodes": [
@@ -3310,7 +3544,7 @@
       "304"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -332
   },
   {
     "modelNumber": "900",
@@ -3320,16 +3554,19 @@
     ],
     "colors": [
       {
-        "name": "ابيض",
-        "barcode": "569"
+        "quantity": -236,
+        "name": "لبني",
+        "barcode": "568"
+      },
+      {
+        "name": "بني",
+        "barcode": "569",
+        "quantity": -192
       },
       {
         "name": "اسود",
+        "quantity": -184,
         "barcode": "570"
-      },
-      {
-        "name": "موف",
-        "barcode": "568"
       }
     ],
     "barcodes": [
@@ -3338,7 +3575,7 @@
       "570"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -612
   },
   {
     "modelNumber": "905",
@@ -3348,15 +3585,18 @@
     ],
     "colors": [
       {
+        "quantity": -264,
         "name": "ابيض",
         "barcode": "571"
       },
       {
+        "quantity": -272,
         "name": "اسود",
         "barcode": "572"
       },
       {
         "name": "روز",
+        "quantity": -288,
         "barcode": "573"
       }
     ],
@@ -3366,22 +3606,27 @@
       "573"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -824
   },
   {
     "modelNumber": "1000",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "اسود",
-        "barcode": "360"
+        "barcode": "360",
+        "quantity": -36
       },
       {
         "name": "جيشي",
-        "barcode": "361"
+        "barcode": "361",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -3389,12 +3634,15 @@
       "361"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -56
   },
   {
     "modelNumber": "1005",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -3418,16 +3666,21 @@
     "modelNumber": "1010",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "اسود",
-        "barcode": "364"
+        "barcode": "364",
+        "quantity": -16
       },
       {
         "name": "كافيه",
-        "barcode": "365"
+        "barcode": "365",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -3435,22 +3688,27 @@
       "365"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -36
   },
   {
     "modelNumber": "1015",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "جيشي",
-        "barcode": "367"
+        "name": "رمادي",
+        "barcode": "366",
+        "quantity": -16
       },
       {
-        "name": "رمادي",
-        "barcode": "366"
+        "name": "جيشي",
+        "barcode": "367",
+        "quantity": -16
       }
     ],
     "barcodes": [
@@ -3458,22 +3716,27 @@
       "367"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -32
   },
   {
     "modelNumber": "1020",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "369"
+        "name": "شانيه",
+        "barcode": "368",
+        "quantity": -32
       },
       {
-        "name": "شانيه",
-        "barcode": "368"
+        "name": "اسود",
+        "barcode": "369",
+        "quantity": -40
       }
     ],
     "barcodes": [
@@ -3481,22 +3744,27 @@
       "369"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -72
   },
   {
     "modelNumber": "1025",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "رمادي",
-        "barcode": "370"
+        "quantity": -12,
+        "barcode": "370",
+        "name": "رمادي"
       },
       {
         "name": "شانيه",
-        "barcode": "371"
+        "barcode": "371",
+        "quantity": -12
       }
     ],
     "barcodes": [
@@ -3504,22 +3772,27 @@
       "371"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -24
   },
   {
     "modelNumber": "1030",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "جيشي",
-        "barcode": "372"
+        "barcode": "372",
+        "quantity": -8
       },
       {
         "name": "شانيه",
-        "barcode": "373"
+        "barcode": "373",
+        "quantity": -12
       }
     ],
     "barcodes": [
@@ -3527,22 +3800,27 @@
       "373"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -20
   },
   {
     "modelNumber": "1035",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "شانيه",
-        "barcode": "374"
+        "barcode": "374",
+        "quantity": -20
       },
       {
         "name": "كافيه",
-        "barcode": "375"
+        "barcode": "375",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -3550,22 +3828,27 @@
       "375"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -40
   },
   {
     "modelNumber": "1040",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "رمادي",
-        "barcode": "377"
+        "barcode": "376",
+        "quantity": -36,
+        "name": "كافيه"
       },
       {
-        "name": "كافية",
-        "barcode": "376"
+        "name": "رمادي",
+        "quantity": -36,
+        "barcode": "377"
       }
     ],
     "barcodes": [
@@ -3573,22 +3856,27 @@
       "377"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -72
   },
   {
     "modelNumber": "1045",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "379"
+        "name": "شاركويل",
+        "quantity": -28,
+        "barcode": "378"
       },
       {
-        "name": "شاركول",
-        "barcode": "378"
+        "barcode": "379",
+        "name": "اسود",
+        "quantity": -32
       }
     ],
     "barcodes": [
@@ -3596,22 +3884,27 @@
       "379"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -60
   },
   {
     "modelNumber": "1050",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "381"
+        "barcode": "380",
+        "quantity": -20,
+        "name": "شاركويل"
       },
       {
-        "name": "شاركول",
-        "barcode": "380"
+        "name": "اسود",
+        "barcode": "381",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -3619,22 +3912,27 @@
       "381"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -40
   },
   {
     "modelNumber": "1055",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "جيشي",
-        "barcode": "383"
+        "name": "رمادي",
+        "quantity": -28,
+        "barcode": "382"
       },
       {
-        "name": "رمادي",
-        "barcode": "382"
+        "barcode": "383",
+        "quantity": -28,
+        "name": "جيشي"
       }
     ],
     "barcodes": [
@@ -3642,22 +3940,27 @@
       "383"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -56
   },
   {
     "modelNumber": "1060",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "ابيض",
-        "barcode": "384"
+        "barcode": "384",
+        "quantity": -28
       },
       {
         "name": "اورانج",
-        "barcode": "385"
+        "barcode": "385",
+        "quantity": -36
       }
     ],
     "barcodes": [
@@ -3665,22 +3968,27 @@
       "385"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -64
   },
   {
     "modelNumber": "1065",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "387"
+        "name": "كافيه",
+        "quantity": -72,
+        "barcode": "386"
       },
       {
-        "name": "كافية",
-        "barcode": "386"
+        "name": "اسود",
+        "quantity": -48,
+        "barcode": "387"
       }
     ],
     "barcodes": [
@@ -3688,22 +3996,27 @@
       "387"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -120
   },
   {
     "modelNumber": "1070",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "ابيض",
-        "barcode": "388"
+        "barcode": "388",
+        "quantity": -48
       },
       {
-        "name": "بطيخي",
-        "barcode": "389"
+        "barcode": "389",
+        "quantity": -44,
+        "name": "بطيخي"
       }
     ],
     "barcodes": [
@@ -3711,22 +4024,27 @@
       "389"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -92
   },
   {
     "modelNumber": "1075",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
       {
         "name": "جيشي",
-        "barcode": "390"
+        "barcode": "390",
+        "quantity": -32
       },
       {
         "name": "شانيه",
-        "barcode": "391"
+        "barcode": "391",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -3734,22 +4052,27 @@
       "391"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -52
   },
   {
     "modelNumber": "2000",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "اسود",
-        "barcode": "392"
+        "barcode": "392",
+        "quantity": -36
       },
       {
         "name": "جيشي",
-        "barcode": "393"
+        "barcode": "393",
+        "quantity": -28
       }
     ],
     "barcodes": [
@@ -3757,13 +4080,16 @@
       "393"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -64
   },
   {
     "modelNumber": "2005",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -3786,16 +4112,21 @@
     "modelNumber": "2010",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "اسود",
-        "barcode": "396"
+        "barcode": "396",
+        "quantity": -20
       },
       {
         "name": "كافيه",
-        "barcode": "397"
+        "barcode": "397",
+        "quantity": -24
       }
     ],
     "barcodes": [
@@ -3803,22 +4134,27 @@
       "397"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -44
   },
   {
     "modelNumber": "2015",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "جيشي",
-        "barcode": "399"
+        "name": "رمادي",
+        "barcode": "398",
+        "quantity": -16
       },
       {
-        "name": "رمادي",
-        "barcode": "398"
+        "name": "جيشي",
+        "barcode": "399",
+        "quantity": -16
       }
     ],
     "barcodes": [
@@ -3826,22 +4162,27 @@
       "399"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -32
   },
   {
     "modelNumber": "2020",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "401"
+        "name": "شانيه",
+        "barcode": "400",
+        "quantity": -28
       },
       {
-        "name": "شانيه",
-        "barcode": "400"
+        "name": "اسود",
+        "barcode": "401",
+        "quantity": -36
       }
     ],
     "barcodes": [
@@ -3849,21 +4190,26 @@
       "401"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -64
   },
   {
     "modelNumber": "2025",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
+        "quantity": -4,
         "name": "رمادي",
         "barcode": "402"
       },
       {
         "name": "شانيه",
+        "quantity": -8,
         "barcode": "403"
       }
     ],
@@ -3872,22 +4218,27 @@
       "403"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -12
   },
   {
     "modelNumber": "2030",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "جيشي",
-        "barcode": "404"
+        "barcode": "404",
+        "quantity": -12
       },
       {
         "name": "شانيه",
-        "barcode": "405"
+        "barcode": "405",
+        "quantity": -16
       }
     ],
     "barcodes": [
@@ -3895,22 +4246,27 @@
       "405"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -28
   },
   {
     "modelNumber": "2035",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
+        "barcode": "406",
         "name": "شانيه",
-        "barcode": "406"
+        "quantity": -20
       },
       {
-        "name": "كافية",
-        "barcode": "407"
+        "quantity": -20,
+        "barcode": "407",
+        "name": "كافيه"
       }
     ],
     "barcodes": [
@@ -3918,40 +4274,54 @@
       "407"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -40
   },
   {
     "modelNumber": "2040",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "كافيه",
-        "barcode": "408"
+        "barcode": "408",
+        "quantity": -24
+      },
+      {
+        "name": "اسود",
+        "barcode": "409",
+        "quantity": -12
       }
     ],
     "barcodes": [
       "408"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -36
   },
   {
     "modelNumber": "2045",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "411"
+        "quantity": -20,
+        "name": "شاركويل",
+        "barcode": "410"
       },
       {
-        "name": "شاركول",
-        "barcode": "410"
+        "quantity": -20,
+        "barcode": "411",
+        "name": "اسود"
       }
     ],
     "barcodes": [
@@ -3959,22 +4329,27 @@
       "411"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -40
   },
   {
     "modelNumber": "2050",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "اسود",
-        "barcode": "413"
+        "barcode": "412",
+        "name": "شاركويل",
+        "quantity": -24
       },
       {
-        "name": "شاركول",
-        "barcode": "412"
+        "barcode": "413",
+        "name": "اسود",
+        "quantity": -24
       }
     ],
     "barcodes": [
@@ -3982,22 +4357,27 @@
       "413"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -48
   },
   {
     "modelNumber": "2055",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "جيشي",
-        "barcode": "415"
+        "name": "رمادي",
+        "barcode": "414",
+        "quantity": -28
       },
       {
-        "name": "رمادي",
-        "barcode": "414"
+        "name": "جيشي",
+        "barcode": "415",
+        "quantity": -32
       }
     ],
     "barcodes": [
@@ -4005,22 +4385,27 @@
       "415"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -60
   },
   {
     "modelNumber": "2060",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "ابيض",
-        "barcode": "416"
+        "barcode": "416",
+        "quantity": -28
       },
       {
         "name": "اورانج",
-        "barcode": "417"
+        "barcode": "417",
+        "quantity": -36
       }
     ],
     "barcodes": [
@@ -4028,22 +4413,27 @@
       "417"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -64
   },
   {
     "modelNumber": "2065",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "اسود",
-        "barcode": "418"
+        "barcode": "418",
+        "quantity": -36
       },
       {
         "name": "كافيه",
-        "barcode": "419"
+        "barcode": "419",
+        "quantity": -48
       }
     ],
     "barcodes": [
@@ -4051,22 +4441,27 @@
       "419"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -84
   },
   {
     "modelNumber": "2070",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
         "name": "ابيض",
-        "barcode": "420"
+        "barcode": "420",
+        "quantity": -40
       },
       {
         "name": "بطيخي",
-        "barcode": "421"
+        "barcode": "421",
+        "quantity": -36
       }
     ],
     "barcodes": [
@@ -4074,22 +4469,27 @@
       "421"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -76
   },
   {
     "modelNumber": "2075",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
-        "name": "جيشي",
-        "barcode": "423"
+        "name": "شانيه",
+        "barcode": "422",
+        "quantity": -16
       },
       {
-        "name": "شانيه",
-        "barcode": "422"
+        "name": "جيشي",
+        "barcode": "423",
+        "quantity": -20
       }
     ],
     "barcodes": [
@@ -4097,12 +4497,15 @@
       "423"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -36
   },
   {
     "modelNumber": "3000",
     "name": "سوت وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4131,6 +4534,9 @@
     "modelNumber": "3005",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4159,6 +4565,9 @@
     "modelNumber": "3010",
     "name": "ترينج وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4187,6 +4596,9 @@
     "modelNumber": "3015",
     "name": "ترينج وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4215,6 +4627,9 @@
     "modelNumber": "3020",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4243,6 +4658,9 @@
     "modelNumber": "3025",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4271,6 +4689,9 @@
     "modelNumber": "3030",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4299,6 +4720,9 @@
     "modelNumber": "3035",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4327,6 +4751,9 @@
     "modelNumber": "3040",
     "name": "ترينج وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4355,6 +4782,9 @@
     "modelNumber": "3045",
     "name": "سوت وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4383,7 +4813,10 @@
     "modelNumber": "4000",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4411,7 +4844,10 @@
     "modelNumber": "4005",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4439,7 +4875,10 @@
     "modelNumber": "4010",
     "name": "ترينج محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4467,7 +4906,10 @@
     "modelNumber": "4015",
     "name": "ترينج محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4495,7 +4937,10 @@
     "modelNumber": "4020",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4523,7 +4968,10 @@
     "modelNumber": "4025",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4551,7 +4999,10 @@
     "modelNumber": "4030",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4579,7 +5030,10 @@
     "modelNumber": "4035",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4607,7 +5061,10 @@
     "modelNumber": "4040",
     "name": "ترينج محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4635,7 +5092,10 @@
     "modelNumber": "4045",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4663,6 +5123,9 @@
     "modelNumber": "5000",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4691,6 +5154,9 @@
     "modelNumber": "5005",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4719,6 +5185,9 @@
     "modelNumber": "5010",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4747,6 +5216,9 @@
     "modelNumber": "5015",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4775,6 +5247,9 @@
     "modelNumber": "5020",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4803,6 +5278,9 @@
     "modelNumber": "5025",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4831,6 +5309,9 @@
     "modelNumber": "5030",
     "name": "سوت وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4859,6 +5340,9 @@
     "modelNumber": "5035",
     "name": "سوت وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4887,6 +5371,9 @@
     "modelNumber": "5040",
     "name": "سوت وسط كابيشو",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4915,6 +5402,9 @@
     "modelNumber": "5045",
     "name": "سوت وسط حوض",
     "sizes": [
+      "6",
+      "8",
+      "10",
       "12"
     ],
     "colors": [
@@ -4946,7 +5436,10 @@
     "modelNumber": "6000",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -4974,7 +5467,10 @@
     "modelNumber": "6005",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5002,7 +5498,10 @@
     "modelNumber": "6010",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5030,7 +5529,10 @@
     "modelNumber": "6015",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5058,7 +5560,10 @@
     "modelNumber": "6020",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5086,7 +5591,10 @@
     "modelNumber": "6025",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5114,7 +5622,10 @@
     "modelNumber": "6030",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5142,7 +5653,10 @@
     "modelNumber": "6035",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5170,7 +5684,10 @@
     "modelNumber": "6040",
     "name": "سوت محير كابيشو",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5198,7 +5715,10 @@
     "modelNumber": "6045",
     "name": "سوت محير حوض",
     "sizes": [
-      "16"
+      "14",
+      "16",
+      "18",
+      "20"
     ],
     "colors": [
       {
@@ -5258,16 +5778,19 @@
     ],
     "colors": [
       {
+        "quantity": -128,
         "name": "لبني",
         "barcode": "556"
       },
       {
-        "name": "اسود",
-        "barcode": "558"
+        "name": "روز",
+        "barcode": "557",
+        "quantity": -244
       },
       {
-        "name": "روز",
-        "barcode": "557"
+        "quantity": -128,
+        "barcode": "558",
+        "name": "اسود"
       }
     ],
     "barcodes": [
@@ -5276,6 +5799,6 @@
       "558"
     ],
     "price": 0,
-    "quantity": 0
+    "quantity": -500
   }
 ]

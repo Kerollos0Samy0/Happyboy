@@ -6,7 +6,6 @@ import { db } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, runTransaction } from "firebase/firestore";
 import { auth } from "../../lib/firebase";
 import { detectBranch } from "../../lib/location";
-import { deductInventory } from "../../lib/inventory";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -307,7 +306,7 @@ export default function CartPage() {
       const branchName = await detectBranch(auth.currentUser?.email);
       const empName = employeeName || auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
 
-      await addDoc(collection(db, "orders"), {
+      const orderDocRef = await addDoc(collection(db, "orders"), {
         orderNumber: formattedOrderNumber,
         customerName,
         customerPhone,
@@ -328,8 +327,22 @@ export default function CartPage() {
         createdAt: serverTimestamp()
       });
       
-      // Deduct inventory
-      await deductInventory(sortedCart, formattedOrderNumber, empName);
+      // Deduct inventory via server-side API (bypasses Firestore security rules)
+      const deductRes = await fetch("/api/deduct-inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: sortedCart,
+          orderNumber: formattedOrderNumber,
+          employeeName: empName,
+          orderDocId: orderDocRef.id,
+        }),
+      });
+      if (!deductRes.ok) {
+        const errBody = await deductRes.json().catch(() => ({}));
+        console.error("Inventory deduction failed:", errBody);
+        // Don't block the order — it's already saved. Log for follow-up.
+      }
 
       setOrderId(formattedOrderNumber);
       localStorage.removeItem("happyboy_cart");

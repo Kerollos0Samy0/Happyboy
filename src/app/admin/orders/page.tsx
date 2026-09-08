@@ -9,7 +9,7 @@ import {
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { WAREHOUSE_EMAILS } from "../../../lib/location";
-import { restoreInventory, deductInventory } from "../../../lib/inventory";
+import { deductInventory } from "../../../lib/inventory";
 import { Printer, Save, Trash2, X, ChevronDown, MessageCircle, Plus, Search, Minus, Download, Archive, Copy, Layers } from "lucide-react";
 
 const getCategoryName = (modelNumber: string) => {
@@ -137,8 +137,17 @@ export default function LiveOrdersPage() {
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
       await Promise.all(selectedOrderIds.map(async (id) => {
         const order = orders.find(o => o.id === id);
-        if (order && order.items && order.items.length > 0) {
-          await restoreInventory(order.items, order.orderNumber || order.id, empName);
+        // Only restore if the order actually had its inventory deducted
+        if (order && order.items && order.items.length > 0 && (order as any).inventoryDeducted === true) {
+          await fetch("/api/restore-inventory", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: order.items,
+              orderNumber: order.orderNumber || order.id,
+              employeeName: empName,
+            }),
+          });
         }
         return updateDoc(doc(db, "orders", id), { isDeleted: true });
       }));
@@ -380,9 +389,18 @@ export default function LiveOrdersPage() {
   const deleteOrder = async (orderId: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا الطلب وإرجاع الكميات للمخزن؟")) return;
     const order = orders.find(o => o.id === orderId);
-    if (order && order.items && order.items.length > 0) {
+    // Only restore if the order actually had its inventory deducted
+    if (order && order.items && order.items.length > 0 && (order as any).inventoryDeducted === true) {
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
-      await restoreInventory(order.items, order.orderNumber || order.id, empName);
+      await fetch("/api/restore-inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: order.items,
+          orderNumber: order.orderNumber || order.id,
+          employeeName: empName,
+        }),
+      });
     }
     await updateDoc(doc(db, "orders", orderId), { isDeleted: true });
     if (selectedOrder?.id === orderId) closeModal();

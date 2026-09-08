@@ -99,7 +99,14 @@ export default function InventoryPage() {
       const newTotal = updatedColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
       
-      await addDoc(collection(db, "inventory_logs"), {
+      // ✅ Update product FIRST — this is the critical operation
+      await updateDoc(doc(db, "products", product.id), {
+        colors: updatedColors,
+        quantity: newTotal
+      });
+      
+      // Log the change — failure here does NOT affect the quantity update
+      addDoc(collection(db, "inventory_logs"), {
         productId: product.id,
         modelNumber: product.modelNumber,
         productName: product.name,
@@ -109,12 +116,7 @@ export default function InventoryPage() {
         reason: "تزويد سريع للكمية",
         employeeName: empName,
         createdAt: serverTimestamp()
-      });
-      
-      await updateDoc(doc(db, "products", product.id), {
-        colors: updatedColors,
-        quantity: newTotal
-      });
+      }).catch(e => console.warn("inventory_logs write failed (non-critical):", e));
       
       const newProducts = products.map(p => p.id === product.id ? { ...p, colors: updatedColors, quantity: newTotal } : p);
       setProducts(newProducts);
@@ -213,6 +215,10 @@ export default function InventoryPage() {
       const oldProduct = products.find(p => p.id === id);
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
 
+      // ✅ Update product FIRST — this is the critical operation
+      await updateDoc(doc(db, "products", id), updatedData);
+
+      // Log quantity changes — fire-and-forget, failure here does NOT affect the save
       if (oldProduct && editForm.colors) {
         for (const newColor of editForm.colors) {
           const oldColor = oldProduct.colors?.find(c => c.name === newColor.name);
@@ -221,7 +227,7 @@ export default function InventoryPage() {
           const change = newQty - oldQty;
           
           if (change !== 0) {
-            await addDoc(collection(db, "inventory_logs"), {
+            addDoc(collection(db, "inventory_logs"), {
               productId: id,
               modelNumber: editForm.modelNumber,
               productName: editForm.name,
@@ -231,12 +237,10 @@ export default function InventoryPage() {
               reason: "تعديل يدوي",
               employeeName: empName,
               createdAt: serverTimestamp()
-            });
+            }).catch(e => console.warn("inventory_logs write failed (non-critical):", e));
           }
         }
       }
-
-      await updateDoc(doc(db, "products", id), updatedData);
 
       // Check if price changed to update pending orders
       if (oldProduct && Number(oldProduct.price) !== Number(editForm.price)) {

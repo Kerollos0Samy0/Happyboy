@@ -1,4 +1,4 @@
-﻿﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -8,7 +8,8 @@ import { BarChart3, PlusCircle, Calendar, Save, Trash2 } from 'lucide-react';
 type ProductivityLog = {
   id: string;
   date: string;
-  type: 'dtf' | 'laser' | 'sewing_1' | 'sewing_2' | 'sewing_3' | 'sewing_4';
+  type: string;
+  modelNumber?: string;
   amount: number;
   unit: string;
   notes: string;
@@ -16,12 +17,18 @@ type ProductivityLog = {
 };
 
 const MACHINE_TYPES = [
-  { id: 'dtf', name: 'ماكينة DTF', unit: 'متر', icon: '🖨️' },
-  { id: 'laser', name: 'ماكينة ليزر', unit: 'متر', icon: '✂️' },
-  { id: 'sewing_1', name: 'خط تقفيل (1)', unit: 'قطعة', icon: '🧵' },
-  { id: 'sewing_2', name: 'خط تقفيل (2)', unit: 'قطعة', icon: '🧵' },
-  { id: 'sewing_3', name: 'خط تقفيل (3)', unit: 'قطعة', icon: '🧵' },
-  { id: 'sewing_4', name: 'خط تقفيل (4)', unit: 'قطعة', icon: '🧵' },
+  { id: 'cutting', name: 'قسم القص', unit: 'قطعة', icon: '✂️' },
+  { id: 'sorting', name: 'قسم الفرز', unit: 'قطعة', icon: '🔍' },
+  { id: 'dtf', name: 'قسم الـ DTF', unit: 'متر', icon: '🖨️' },
+  { id: 'laser', name: 'قسم الـ Lazer', unit: 'متر', icon: '⚡' },
+  { id: 'cutting_out', name: 'قسم القص والتفريغ', unit: 'قطعة', icon: '🔪' },
+  { id: 'pressing', name: 'قسم الكبس', unit: 'قطعة', icon: '🔥' },
+  { id: 'pairing', name: 'قسم التجويز', unit: 'قطعة', icon: '🔗' },
+  { id: 'sewing', name: 'قسم المكن', unit: 'قطعة', icon: '🧵' },
+  { id: 'finishing', name: 'قسم التشطيب', unit: 'قطعة', icon: '✨' },
+  { id: 'ironing', name: 'قسم المكواة', unit: 'قطعة', icon: '💨' },
+  { id: 'packaging', name: 'التعبئة والتكييس', unit: 'قطعة', icon: '📦' },
+  { id: 'warehouse', name: 'مخزن الموديلات', unit: 'قطعة', icon: '🏭' },
 ];
 
 export default function ProductivityPage() {
@@ -31,7 +38,8 @@ export default function ProductivityPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split('T')[0],
-    type: 'dtf',
+    type: 'cutting',
+    modelNumber: '',
     amount: '',
     notes: ''
   });
@@ -64,6 +72,7 @@ export default function ProductivityPage() {
       await addDoc(collection(db, 'factory_productivity_logs'), {
         date: newLog.date,
         type: newLog.type,
+        modelNumber: newLog.modelNumber,
         amount: Number(newLog.amount),
         unit: selectedMachine.unit,
         notes: newLog.notes,
@@ -71,7 +80,7 @@ export default function ProductivityPage() {
       });
       
       setShowAddForm(false);
-      setNewLog({ ...newLog, amount: '', notes: '' });
+      setNewLog({ ...newLog, modelNumber: '', amount: '', notes: '' });
       fetchLogs();
     } catch (err) {
       console.error("Error adding log:", err);
@@ -100,7 +109,7 @@ export default function ProductivityPage() {
       {showAddForm && (
         <div className="bg-white p-6 rounded-xl shadow-lg border border-purple-100 animate-fade-in">
           <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">تسجيل إنتاجية يومية</h2>
-          <form onSubmit={handleAddLog} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+          <form onSubmit={handleAddLog} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
             
             <div className="lg:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">التاريخ</label>
@@ -127,6 +136,18 @@ export default function ProductivityPage() {
             </div>
 
             <div className="lg:col-span-1">
+              <label className="block text-sm font-bold text-gray-700 mb-2">رقم الموديل</label>
+              <input 
+                type="text" 
+                required
+                placeholder="رقم الموديل"
+                value={newLog.modelNumber} 
+                onChange={(e) => setNewLog({...newLog, modelNumber: e.target.value})}
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+              />
+            </div>
+
+            <div className="lg:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 الكمية ({MACHINE_TYPES.find(m => m.id === newLog.type)?.unit})
               </label>
@@ -146,7 +167,7 @@ export default function ProductivityPage() {
               <label className="block text-sm font-bold text-gray-700 mb-2">ملاحظات (اختياري)</label>
               <input 
                 type="text" 
-                placeholder="وردية صباحية، أعطال..."
+                placeholder="أعطال..."
                 value={newLog.notes} 
                 onChange={(e) => setNewLog({...newLog, notes: e.target.value})}
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
@@ -200,6 +221,7 @@ export default function ProductivityPage() {
                 <tr>
                   <th className="p-4 font-bold">التاريخ</th>
                   <th className="p-4 font-bold">الماكينة / الخط</th>
+                  <th className="p-4 font-bold">الموديل</th>
                   <th className="p-4 font-bold">الإنتاجية</th>
                   <th className="p-4 font-bold">ملاحظات</th>
                 </tr>
@@ -213,6 +235,7 @@ export default function ProductivityPage() {
                       <td className="p-4 text-gray-800 flex items-center gap-2">
                         <span>{machine?.icon}</span> {machine?.name}
                       </td>
+                      <td className="p-4 text-blue-700 font-bold">{log.modelNumber || '---'}</td>
                       <td className="p-4 text-purple-700 font-bold">
                         {log.amount.toLocaleString()} {log.unit}
                       </td>

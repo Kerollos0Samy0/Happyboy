@@ -30,5 +30,10 @@ service cloud.firestore {
     match /customers/{customerId} {
       allow read, write: if isAuthenticated();
     }
+
+    // Inventory logs: Only authenticated users can create logs (no edit/delete)
+    match /inventory_logs/{logId} {
+      allow read, write: if isAuthenticated();
+    }
   }
 }
