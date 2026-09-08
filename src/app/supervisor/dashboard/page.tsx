@@ -206,7 +206,12 @@ export default function SupervisorDashboard() {
 
   const getAvailableColors = (order: any) => {
     if (order.colorPairs && order.colorPairs.length > 0) {
-      return order.colorPairs.filter((p:any) => p.quantity).map((p:any) => `تيشيرت ${p.tshirt} / بنطلون ${p.pants} (${p.quantity} قطعة)`);
+      const options: string[] = [];
+      order.colorPairs.filter((p:any) => p.quantity).forEach((p:any) => {
+        if (p.tshirt) options.push(`تيشيرت ${p.tshirt} (${p.quantity} قطعة)`);
+        if (p.pants) options.push(`بنطلون ${p.pants} (${p.quantity} قطعة)`);
+      });
+      return options;
     }
     if (order.color && order.color !== 'متعدد') return [order.color];
     return [];
