@@ -140,10 +140,11 @@ export default function SupervisorDashboard() {
 
   const handleReceiveScannedBasket = async (bundleCode: string) => {
     try {
-      const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', bundleCode));
+      const cleanCode = bundleCode.trim();
+      const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
       const snapshot = await getDocs(q);
       if (snapshot.empty) {
-        alert('لم يتم العثور على أمر الشغل!');
+        alert(`لم يتم العثور على أمر الشغل! (الكود: ${cleanCode})`);
         return;
       }
       
