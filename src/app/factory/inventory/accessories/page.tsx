@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { Search, PlusCircle, Box, Trash2 } from 'lucide-react';
+import { Search, PlusCircle, Box, Trash2, Camera, Image as ImageIcon } from 'lucide-react';
 
 type AccessoryStock = {
   id: string;
@@ -12,6 +12,8 @@ type AccessoryStock = {
   quantity: number;
   unit: string;
   supplier: string;
+  details?: string;
+  image?: string;
   createdAt: any;
 };
 
@@ -26,7 +28,9 @@ export default function AccessoriesInventoryPage() {
     type: '',
     quantity: '',
     unit: 'قطعة',
-    supplier: ''
+    supplier: '',
+    details: '',
+    image: ''
   });
 
   const fetchAccessories = async () => {
@@ -58,11 +62,22 @@ export default function AccessoriesInventoryPage() {
       });
       
       setShowAddForm(false);
-      setNewItem({ name: '', type: '', quantity: '', unit: 'قطعة', supplier: '' });
+      setNewItem({ name: '', type: '', quantity: '', unit: 'قطعة', supplier: '', details: '', image: '' });
       fetchAccessories();
     } catch (err) {
       console.error(err);
       alert("حدث خطأ أثناء الحفظ.");
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewItem({ ...newItem, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -142,7 +157,29 @@ export default function AccessoriesInventoryPage() {
               <input type="text" value={newItem.supplier} onChange={(e) => setNewItem({...newItem, supplier: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" placeholder="اسم المورد" />
             </div>
 
-            <div className="lg:col-span-3 flex justify-end">
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2">التفاصيل والأبعاد (الطول، المقاس، اللون)</label>
+              <input type="text" value={newItem.details} onChange={(e) => setNewItem({...newItem, details: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" placeholder="مثال: طول الكرتونة 50سم، سوستة 20سم، إلخ..." />
+            </div>
+
+            <div className="lg:col-span-3 border-t pt-4 mt-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2">صورة الصنف (اختياري)</label>
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-bold flex items-center gap-2 border-2 border-dashed border-gray-300 transition w-full md:w-auto justify-center">
+                  <Camera size={20} />
+                  التقط أو اختر صورة
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} />
+                </label>
+                {newItem.image && (
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-orange-500 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={newItem.image} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-3 flex justify-end mt-4">
               <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-8 rounded-lg flex items-center justify-center gap-2 transition shadow">
                 إضافة للمخزن
               </button>
@@ -176,11 +213,30 @@ export default function AccessoriesInventoryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
             {filteredAccessories.map(item => (
               <div key={item.id} className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg text-gray-800">{item.name}</h3>
-                  {item.type && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-mono">{item.type}</span>}
+                <div className="flex gap-4 mb-3 border-b pb-3">
+                  {item.image ? (
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden shadow-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-gray-50 border border-gray-100 flex-shrink-0 flex items-center justify-center text-gray-300">
+                      <ImageIcon size={24} />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-lg text-gray-800">{item.name}</h3>
+                      {item.type && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-mono">{item.type}</span>}
+                    </div>
+                    <p className="text-sm text-gray-500">{item.supplier || 'بدون مورد'}</p>
+                    {item.details && (
+                      <p className="text-xs text-orange-600 mt-1 font-medium bg-orange-50 inline-block px-2 py-0.5 rounded">
+                        تفاصيل: {item.details}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500 mb-4">{item.supplier || 'بدون مورد'}</p>
                 
                 <div className="bg-orange-50 rounded-lg p-3 flex justify-between items-center">
                   <span className="text-orange-800 font-bold text-sm">الرصيد:</span>
