@@ -179,6 +179,7 @@ export default function SupervisorDashboard() {
       
       await updateDoc(docRefToUpdate, {
         currentLocation: selectedLine,
+        currentStage: 10, // 10 is 'قسم المكن'
         stageEnteredAt: new Date().toISOString(),
         history: arrayUnion({
           stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
@@ -291,7 +292,8 @@ export default function SupervisorDashboard() {
     if(!confirm("هل أنت متأكد من إنهاء هذا الموديل بالكامل من خطك وإخفائه من صندوق الوارد؟")) return;
     try {
       await updateDoc(doc(db, 'factory_production_orders', orderId), {
-        currentLocation: 'done'
+        currentLocation: 'done',
+        currentStage: 11 // 11 is 'قسم التشطيب'
       });
       fetchInbox(selectedLine);
     } catch(err) {
