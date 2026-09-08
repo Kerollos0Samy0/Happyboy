@@ -40,10 +40,10 @@ export default function SupervisorDashboard() {
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedLine && supervisorName.trim() && pin === '1234') { // PIN تجريبي
+    if (selectedLine && supervisorName.trim() && pin === '0258') { // PIN
       setIsAuthenticated(true);
       fetchInbox();
-    } else if (pin !== '1234') {
+    } else if (pin !== '0258') {
       alert('الرقم السري غير صحيح');
     } else {
       alert('يرجى اختيار الخط وكتابة الاسم');
