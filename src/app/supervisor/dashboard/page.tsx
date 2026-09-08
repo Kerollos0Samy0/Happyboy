@@ -26,6 +26,7 @@ const MOCK_WORKERS = [
 
 export default function SupervisorDashboard() {
   const [selectedLine, setSelectedLine] = useState('');
+  const [supervisorName, setSupervisorName] = useState('');
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -39,11 +40,13 @@ export default function SupervisorDashboard() {
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedLine && pin === '1234') { // PIN تجريبي
+    if (selectedLine && supervisorName.trim() && pin === '1234') { // PIN تجريبي
       setIsAuthenticated(true);
       fetchInbox();
-    } else {
+    } else if (pin !== '1234') {
       alert('الرقم السري غير صحيح');
+    } else {
+      alert('يرجى اختيار الخط وكتابة الاسم');
     }
   };
 
@@ -113,7 +116,7 @@ export default function SupervisorDashboard() {
         assignedWorker: null, // Clear worker assignment if it had one
         stageEnteredAt: new Date().toISOString(),
         history: arrayUnion({
-          stageName: `استلام المشرف - ${selectedLine}`,
+          stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
           timestamp: new Date().toISOString()
         })
       });
@@ -159,6 +162,16 @@ export default function SupervisorDashboard() {
           </div>
           <div>
             <input 
+              type="text" 
+              required
+              placeholder="اسم المشرف"
+              className="w-full p-3 border border-gray-300 rounded-lg text-right"
+              value={supervisorName}
+              onChange={e => setSupervisorName(e.target.value)}
+            />
+          </div>
+          <div>
+            <input 
               type="password" 
               required
               placeholder="الرقم السري (PIN)"
@@ -182,7 +195,7 @@ export default function SupervisorDashboard() {
       <div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-gray-800">
         <div className="flex justify-between items-center mb-4 border-b pb-4">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-             لوحة تحكم {LINES.find(l => l.id === selectedLine)?.name}
+             لوحة تحكم {LINES.find(l => l.id === selectedLine)?.name} <span className="text-sm text-gray-500 font-normal mr-2">(إشراف: {supervisorName})</span>
           </h1>
           <button 
             onClick={() => setIsScannerOpen(!isScannerOpen)}
