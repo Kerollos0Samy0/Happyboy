@@ -138,20 +138,42 @@ export default function SupervisorDashboard() {
     }
   }, [isScannerOpen]);
 
-  const handleReceiveScannedBasket = async (bundleCode: string) => {
+  const handleReceiveScannedBasket = async (decodedText: string) => {
     try {
-      const cleanCode = bundleCode.trim();
-      const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        alert(`لم يتم العثور على أمر الشغل! (الكود: ${cleanCode})`);
+      const cleanCode = decodedText.trim();
+      let docRefToUpdate = null;
+      let docData: any = null;
+
+      // Check if it's a URL (from Master Order)
+      if (cleanCode.includes('/public/order/')) {
+        const urlParts = cleanCode.split('/public/order/');
+        const docId = urlParts[urlParts.length - 1];
+        
+        const docRef = doc(db, 'factory_production_orders', docId);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+           docRefToUpdate = docRef;
+           docData = snap.data();
+           // Map fields if it's a master order instead of a bundle
+           if (!docData.bundleCode) docData.bundleCode = `أمر كامل-${docId.slice(-4)}`;
+           if (!docData.modelNumber) docData.modelNumber = docData.modelName; 
+        }
+      } else {
+        // It's a bundle code
+        const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          docRefToUpdate = snapshot.docs[0].ref;
+          docData = snapshot.docs[0].data();
+        }
+      }
+
+      if (!docRefToUpdate || !docData) {
+        alert(`لم يتم العثور على أمر الشغل! (المقروء: ${cleanCode})`);
         return;
       }
       
-      const docRef = snapshot.docs[0].ref;
-      const docData = snapshot.docs[0].data();
-
-      await updateDoc(docRef, {
+      await updateDoc(docRefToUpdate, {
         currentLocation: selectedLine,
         assignedWorker: null,
         stageEnteredAt: new Date().toISOString(),
