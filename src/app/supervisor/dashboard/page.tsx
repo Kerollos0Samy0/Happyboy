@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { Users, Camera, ArrowDown, Clock, Edit2, Check, ArrowUp, ArrowDown as ArrowDownIcon, Trash2, Plus } from 'lucide-react';
+import { Users, Camera, ArrowDown, Clock, Edit2, Check, ArrowUp, ArrowDown as ArrowDownIcon, Trash2, Plus, X } from 'lucide-react';
 
 const LINES = [
   { id: 'line_1', name: 'خط تقفيل 1' },
@@ -22,11 +22,21 @@ const MACHINE_COLORS: Record<string, string> = {
 };
 const MACHINE_TYPES = Object.keys(MACHINE_COLORS);
 
+type WorkerTask = {
+  orderId: string;
+  modelNumber: string;
+  color: string;
+  operation: string;
+  quantity: number;
+  assignedAt: string;
+};
+
 type Worker = {
   id: string;
   name: string;
   machine: string;
   order: number;
+  activeTask?: WorkerTask | null;
 };
 
 export default function SupervisorDashboard() {
@@ -39,11 +49,16 @@ export default function SupervisorDashboard() {
   const [isEditingLine, setIsEditingLine] = useState(false);
 
   const [inboxBaskets, setInboxBaskets] = useState<any[]>([]);
-  const [workerBaskets, setWorkerBaskets] = useState<Record<string, any>>({});
   
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [scannedData, setScannedData] = useState<string | null>(null);
+  
+  // Modal State
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedOrderForAssign, setSelectedOrderForAssign] = useState<any>(null);
+  const [assignWorkerId, setAssignWorkerId] = useState('');
+  const [assignColor, setAssignColor] = useState('');
+  const [assignOperation, setAssignOperation] = useState('');
+  const [assignQuantity, setAssignQuantity] = useState(0);
 
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
@@ -84,7 +99,7 @@ export default function SupervisorDashboard() {
   };
 
   const handleAddWorker = () => {
-    const newWorker = { id: `w_${Date.now()}`, name: 'اسم العامل', machine: 'سنجر', order: workers.length };
+    const newWorker = { id: `w_${Date.now()}`, name: 'اسم العامل', machine: 'سنجر', order: workers.length, activeTask: null };
     saveLineConfig([...workers, newWorker]);
   };
 
@@ -108,14 +123,7 @@ export default function SupervisorDashboard() {
       const q = query(collection(db, 'factory_production_orders'), where('currentLocation', '==', lineId));
       const snapshot = await getDocs(q);
       const baskets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setInboxBaskets(baskets.filter(b => !b.assignedWorker)); 
-      
-      const assigned = baskets.filter(b => b.assignedWorker);
-      const workerMap: Record<string, any> = {};
-      assigned.forEach(b => {
-        workerMap[b.assignedWorker] = b;
-      });
-      setWorkerBaskets(workerMap);
+      setInboxBaskets(baskets); 
     } catch (err) {
       console.error(err);
     }
@@ -126,7 +134,6 @@ export default function SupervisorDashboard() {
       const scanner = new Html5QrcodeScanner("supervisor-reader", { fps: 10, qrbox: { width: 250, height: 250 }, supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA] }, false);
       scanner.render(
         (decodedText) => {
-          setScannedData(decodedText);
           scanner.clear();
           setIsScannerOpen(false);
           handleReceiveScannedBasket(decodedText);
@@ -144,7 +151,6 @@ export default function SupervisorDashboard() {
       let docRefToUpdate = null;
       let docData: any = null;
 
-      // Check if it's a URL (from Master Order)
       if (cleanCode.includes('/public/order/')) {
         const urlParts = cleanCode.split('/public/order/');
         const docId = urlParts[urlParts.length - 1];
@@ -154,12 +160,10 @@ export default function SupervisorDashboard() {
         if (snap.exists()) {
            docRefToUpdate = docRef;
            docData = snap.data();
-           // Map fields if it's a master order instead of a bundle
            if (!docData.bundleCode) docData.bundleCode = `أمر كامل-${docId.slice(-4)}`;
            if (!docData.modelNumber) docData.modelNumber = docData.modelName; 
         }
       } else {
-        // It's a bundle code
         const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
@@ -175,7 +179,6 @@ export default function SupervisorDashboard() {
       
       await updateDoc(docRefToUpdate, {
         currentLocation: selectedLine,
-        assignedWorker: null,
         stageEnteredAt: new Date().toISOString(),
         history: arrayUnion({
           stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
@@ -183,66 +186,115 @@ export default function SupervisorDashboard() {
         })
       });
 
-      alert(`تم استلام سلة الموديل ${docData.modelNumber} بنجاح!`);
+      alert(`تم استلام الموديل ${docData.modelNumber} بنجاح!`);
       fetchInbox(selectedLine);
-      setScannedData(null);
     } catch (err) {
       console.error(err);
       alert('حدث خطأ أثناء الاستلام.');
     }
   };
 
-  const handleAssignToWorker = async (basketId: string, workerId: string, basketData: any) => {
-    const qtyStr = prompt(`أدخل الكمية التي سيعمل عليها العامل (المتاح في السلة ${basketData.totalQuantity}):`, basketData.totalQuantity);
-    if (!qtyStr) return;
-    const qty = Number(qtyStr);
+  const openAssignModal = (order: any) => {
+    setSelectedOrderForAssign(order);
+    setAssignColor('');
+    setAssignOperation('');
+    setAssignQuantity(order.totalQuantity || 0);
+    setAssignWorkerId('');
+    setIsAssignModalOpen(true);
+  };
+
+  const getAvailableColors = (order: any) => {
+    if (order.colorPairs && order.colorPairs.length > 0) {
+      return order.colorPairs.filter((p:any) => p.quantity).map((p:any) => `تيشيرت ${p.tshirt} / بنطلون ${p.pants} (${p.quantity} قطعة)`);
+    }
+    if (order.color && order.color !== 'متعدد') return [order.color];
+    return [];
+  };
+
+  const handleColorChange = (val: string) => {
+    setAssignColor(val);
+    const match = val.match(/\\((\\d+)\\s*قطعة\\)/);
+    if (match && match[1]) {
+      setAssignQuantity(parseInt(match[1]));
+    }
+  };
+
+  const confirmAssignment = async () => {
+    if (!assignWorkerId || !assignOperation || !assignQuantity) {
+      alert("يرجى إكمال البيانات (العامل، العملية، الكمية)");
+      return;
+    }
+    const workerIndex = workers.findIndex(w => w.id === assignWorkerId);
+    if (workerIndex === -1) return;
+
+    if (workers[workerIndex].activeTask) {
+      if (!confirm("هذا العامل لديه مهمة حالية، هل تريد استبدالها؟")) return;
+    }
+
+    const newWorkers = [...workers];
+    newWorkers[workerIndex].activeTask = {
+      orderId: selectedOrderForAssign.id,
+      modelNumber: selectedOrderForAssign.modelNumber || selectedOrderForAssign.modelName,
+      color: assignColor || 'بدون تحديد',
+      operation: assignOperation,
+      quantity: Number(assignQuantity),
+      assignedAt: new Date().toISOString()
+    };
+
+    await saveLineConfig(newWorkers);
+    setIsAssignModalOpen(false);
+  };
+
+  const handleEndTask = async (workerId: string) => {
+    const workerIndex = workers.findIndex(w => w.id === workerId);
+    const worker = workers[workerIndex];
+    if (!worker || !worker.activeTask) return;
+
+    if(!confirm("تأكيد انتهاء العامل من هذه المهمة؟")) return;
 
     try {
-      await updateDoc(doc(db, 'factory_production_orders', basketId), {
-        assignedWorker: workerId,
-        assignedQuantity: qty,
-        assignedAt: new Date().toISOString()
+      const task = worker.activeTask;
+      
+      // 1. Update the order history
+      await updateDoc(doc(db, 'factory_production_orders', task.orderId), {
+        history: arrayUnion({
+          stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}`,
+          quantity: task.quantity,
+          startTime: task.assignedAt,
+          endTime: new Date().toISOString()
+        })
       });
-      fetchInbox(selectedLine);
+
+      // 2. Automatically log productivity
+      await setDoc(doc(collection(db, 'factory_productivity_logs')), {
+        date: new Date().toISOString().split('T')[0],
+        type: 'sewing',
+        modelNumber: task.modelNumber,
+        lineId: selectedLine,
+        amount: task.quantity,
+        unit: 'قطعة',
+        notes: `تسجيل آلي: ${worker.name} (${worker.machine}) - ${task.operation}`,
+        createdAt: new Date().toISOString()
+      });
+
+      // 3. Clear activeTask
+      const newWorkers = [...workers];
+      newWorkers[workerIndex].activeTask = null;
+      await saveLineConfig(newWorkers);
+
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleEndTask = async (basketId: string, workerId: string) => {
-    const worker = workers.find(w => w.id === workerId);
-    const basket = workerBaskets[workerId];
-    
-    if(!confirm("تأكيد انتهاء العامل من هذه السلة؟")) return;
-
+  const handleArchiveOrder = async (orderId: string) => {
+    if(!confirm("هل أنت متأكد من إنهاء هذا الموديل بالكامل من خطك وإخفائه من صندوق الوارد؟")) return;
     try {
-      const finishedQuantity = Number(basket.assignedQuantity || basket.totalQuantity);
-      
-      // 1. Update the order history
-      await updateDoc(doc(db, 'factory_production_orders', basketId), {
-        assignedWorker: null,
-        history: arrayUnion({
-          stageName: `تشغيل: ${worker?.machine} (${worker?.name})`,
-          quantity: finishedQuantity,
-          startTime: basket.assignedAt,
-          endTime: new Date().toISOString()
-        })
+      await updateDoc(doc(db, 'factory_production_orders', orderId), {
+        currentLocation: 'done'
       });
-
-      // 2. Automatically log the productivity to the Productivity Dashboard
-      await setDoc(doc(collection(db, 'factory_productivity_logs')), {
-        date: new Date().toISOString().split('T')[0],
-        type: 'sewing',
-        modelNumber: basket.modelNumber || '',
-        lineId: selectedLine,
-        amount: finishedQuantity,
-        unit: 'قطعة',
-        notes: `تسجيل آلي: ${worker?.name} (${worker?.machine})`,
-        createdAt: new Date().toISOString()
-      });
-
       fetchInbox(selectedLine);
-    } catch (err) {
+    } catch(err) {
       console.error(err);
     }
   };
@@ -274,16 +326,60 @@ export default function SupervisorDashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 relative">
       
+      {/* Assign Modal */}
+      {isAssignModalOpen && selectedOrderForAssign && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
+            <button onClick={() => setIsAssignModalOpen(false)} className="absolute top-4 left-4 text-gray-400 hover:text-gray-800">
+              <X size={24} />
+            </button>
+            <h2 className="text-xl font-bold mb-4 border-b pb-2">توزيع مهمة للموديل: {selectedOrderForAssign.modelNumber || selectedOrderForAssign.modelName}</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">اختيار الماكينة/العامل *</label>
+                <select className="w-full p-2 border border-gray-300 rounded-lg" value={assignWorkerId} onChange={e => setAssignWorkerId(e.target.value)}>
+                  <option value="" disabled>-- اختر العامل --</option>
+                  {workers.map(w => <option key={w.id} value={w.id}>{w.name} ({w.machine})</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">اللون / الصنف (اختياري)</label>
+                <select className="w-full p-2 border border-gray-300 rounded-lg" value={assignColor} onChange={e => handleColorChange(e.target.value)}>
+                  <option value="">بدون تحديد</option>
+                  {getAvailableColors(selectedOrderForAssign).map((c: string) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">العملية المطلوبة (مثل: تركيب كم، أوفر جيوب) *</label>
+                <input type="text" className="w-full p-2 border border-gray-300 rounded-lg" placeholder="اكتب العملية..." value={assignOperation} onChange={e => setAssignOperation(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">الكمية *</label>
+                <input type="number" className="w-full p-2 border border-gray-300 rounded-lg font-bold text-blue-700" value={assignQuantity} onChange={e => setAssignQuantity(Number(e.target.value))} />
+              </div>
+
+              <button onClick={confirmAssignment} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 mt-4">
+                تأكيد التوزيع وإرسال المهمة للعامل
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header & Inbox */}
       <div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-gray-800">
         <div className="flex justify-between items-center mb-4 border-b pb-4">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
              لوحة تحكم {LINES.find(l => l.id === selectedLine)?.name} <span className="text-sm text-gray-500 font-normal mr-2">(إشراف: {supervisorName})</span>
           </h1>
-          <button onClick={() => setIsScannerOpen(!isScannerOpen)} className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-            <Camera size={20} /> استلام شغل جديد (Scan)
+          <button onClick={() => setIsScannerOpen(!isScannerOpen)} className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gray-900 transition shadow">
+            <Camera size={20} /> استلام موديل جديد للمكن (Scan)
           </button>
         </div>
 
@@ -294,23 +390,25 @@ export default function SupervisorDashboard() {
         )}
 
         <h3 className="font-bold text-gray-600 mb-3 flex items-center gap-2">
-          <ArrowDown /> صندوق الوارد (قيد التوزيع)
+          <ArrowDown /> الموديلات المفتوحة على الخط (صندوق الوارد)
         </h3>
         
-        <div className="flex flex-wrap gap-3 min-h-[80px] bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
+        <div className="flex flex-wrap gap-4 min-h-[80px] bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
           {inboxBaskets.length === 0 ? (
-            <p className="text-gray-400 w-full text-center py-4 font-medium">لا توجد سلات في الانتظار</p>
+            <p className="text-gray-400 w-full text-center py-4 font-medium">لا يوجد موديلات في الانتظار</p>
           ) : (
             inboxBaskets.map(basket => (
-              <div key={basket.id} className="bg-white border-2 border-gray-300 p-3 rounded-lg shadow-sm w-40 text-center relative hover:border-blue-500 transition">
+              <div key={basket.id} className="bg-white border-2 border-gray-300 p-4 rounded-lg shadow-sm w-56 text-center relative hover:border-blue-500 transition">
+                <button onClick={() => handleArchiveOrder(basket.id)} className="absolute top-2 left-2 text-red-400 hover:text-red-600 bg-red-50 rounded-full p-1" title="إنهاء الموديل بالكامل">
+                  <X size={16} />
+                </button>
                 <div className="text-xs text-gray-500 mb-1">{basket.bundleCode}</div>
-                <div className="font-black text-lg text-blue-700">{basket.modelNumber}</div>
-                <div className="text-sm font-bold mt-1 bg-gray-100 rounded-full">{basket.totalQuantity} قطعة</div>
+                <div className="font-black text-xl text-blue-800 mb-1">{basket.modelNumber || basket.modelName}</div>
+                <div className="text-sm font-bold bg-gray-100 rounded-full py-1 border shadow-inner mb-3">{basket.totalQuantity} قطعة كلياً</div>
                 
-                <select className="mt-2 text-xs w-full p-1 border rounded" onChange={(e) => handleAssignToWorker(basket.id, e.target.value, basket)} value="">
-                  <option value="" disabled>توزيع لـ...</option>
-                  {workers.map(w => <option key={w.id} value={w.id}>{w.name} ({w.machine})</option>)}
-                </select>
+                <button onClick={() => openAssignModal(basket)} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg text-sm hover:bg-gray-900 shadow">
+                  توزيع مهمة لـ عامل...
+                </button>
               </div>
             ))
           )}
@@ -323,25 +421,24 @@ export default function SupervisorDashboard() {
           <Users className="text-blue-600" /> شبكة المكن والعمال (عمودين)
         </h3>
         <div className="flex gap-2">
-          <button onClick={() => setIsEditingLine(!isEditingLine)} className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm ${isEditingLine ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-            {isEditingLine ? <><Check size={16}/> إنهاء التعديل</> : <><Edit2 size={16}/> تعديل ترتيب المكن</>}
+          <button onClick={() => setIsEditingLine(!isEditingLine)} className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm ${isEditingLine ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 border border-gray-300'}`}>
+            {isEditingLine ? <><Check size={16}/> إنهاء التعديل والحفظ</> : <><Edit2 size={16}/> تعديل ترتيب المكن</>}
           </button>
           {isEditingLine && (
-            <button onClick={handleAddWorker} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm">
+            <button onClick={handleAddWorker} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm shadow">
               <Plus size={16}/> إضافة ماكينة
             </button>
           )}
         </div>
       </div>
       
-      {/* 2 columns ONLY as requested */}
       <div className="grid grid-cols-2 gap-4">
         {workers.length === 0 ? (
           <div className="col-span-2 text-center text-gray-500 py-10 bg-white rounded-xl border-2 border-dashed">
             لا توجد ماكينات على هذا الخط. اضغط على (تعديل ترتيب المكن) لإضافة العمال.
           </div>
         ) : workers.map((worker, index) => {
-          const activeBasket = workerBaskets[worker.id];
+          const activeTask = worker.activeTask;
 
           return (
             <div key={worker.id} className={`relative border-2 rounded-xl p-4 flex flex-col transition-all duration-300 ${MACHINE_COLORS[worker.machine] ? MACHINE_COLORS[worker.machine].replace('text-', 'text-opacity-0 ').replace('bg-', 'bg-opacity-20 bg-') : 'bg-white'} border-gray-300 shadow-sm`}>
@@ -359,7 +456,7 @@ export default function SupervisorDashboard() {
                 </div>
               )}
 
-              <div className="flex justify-between items-start mb-2 border-b border-gray-200 pb-2">
+              <div className="flex justify-between items-start mb-2 border-b border-gray-300 pb-2">
                 {isEditingLine ? (
                   <input type="text" value={worker.name} onChange={e => {
                     const newW = [...workers]; newW[index].name = e.target.value; saveLineConfig(newW);
@@ -379,28 +476,39 @@ export default function SupervisorDashboard() {
                 )}
               </div>
 
-              {activeBasket ? (
-                <div className="bg-blue-50 p-3 rounded-lg flex-1 border border-blue-100 flex flex-col justify-center items-center relative">
-                   <div className="text-xs text-blue-500 font-bold mb-1">جاري العمل على</div>
-                   <div className="font-black text-2xl text-blue-800">{activeBasket.modelNumber}</div>
-                   <div className="font-bold text-blue-700 bg-white px-3 py-1 rounded-full mt-2 border border-blue-200 shadow-sm">
-                     الكمية: {activeBasket.assignedQuantity || activeBasket.totalQuantity} قطعة
+              {activeTask ? (
+                <div className="bg-blue-50 p-3 rounded-lg flex-1 border border-blue-200 flex flex-col justify-center items-center relative shadow-inner">
+                   <div className="text-xs text-blue-500 font-bold mb-1 border-b border-blue-200 w-full text-center pb-1">جاري العمل على</div>
+                   
+                   <div className="font-black text-2xl text-blue-900 leading-none mb-1">{activeTask.modelNumber}</div>
+                   <div className="text-sm font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full mb-1 border border-indigo-200">
+                     {activeTask.operation}
                    </div>
                    
-                   <div className="mt-3 text-xs font-bold flex items-center gap-1 text-gray-500 bg-white px-2 py-1 rounded">
+                   {activeTask.color && activeTask.color !== 'بدون تحديد' && (
+                     <div className="text-xs font-bold text-gray-600 bg-white px-2 py-1 rounded border shadow-sm mb-1 max-w-[90%] text-center truncate">
+                       {activeTask.color}
+                     </div>
+                   )}
+                   
+                   <div className="font-black text-blue-700 bg-white px-4 py-1.5 rounded-lg mt-1 border border-blue-300 shadow-sm">
+                     {activeTask.quantity} قطعة
+                   </div>
+                   
+                   <div className="mt-3 text-xs font-bold flex items-center gap-1 text-gray-500 bg-white px-2 py-1 rounded shadow-sm">
                      <Clock size={12} className="text-orange-500" />
-                     بدأ: {new Date(activeBasket.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                     بدأ: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
                    </div>
                    
                    {!isEditingLine && (
-                     <button onClick={() => handleEndTask(activeBasket.id, worker.id)} className="mt-3 w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-bold transition shadow-sm">
-                       نهاية القماش (إنهاء)
+                     <button onClick={() => handleEndTask(worker.id)} className="mt-3 w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
+                       نهاية القماش (إنهاء المهمة)
                      </button>
                    )}
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center min-h-[120px] bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                  <span className="text-gray-400 font-bold">الماكينة فارغة</span>
+                <div className="flex-1 flex items-center justify-center min-h-[120px] bg-white rounded-lg border border-dashed border-gray-300 shadow-inner">
+                  <span className="text-gray-400 font-bold">الماكينة فارغة (بانتظار مهمة)</span>
                 </div>
               )}
               
