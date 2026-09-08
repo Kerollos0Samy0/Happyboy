@@ -10,6 +10,7 @@ type ProductivityLog = {
   date: string;
   type: string;
   modelNumber?: string;
+  lineId?: string;
   amount: number;
   unit: string;
   notes: string;
@@ -40,6 +41,7 @@ export default function ProductivityPage() {
     date: new Date().toISOString().split('T')[0],
     type: 'cutting',
     modelNumber: '',
+    lineId: '',
     amount: '',
     notes: ''
   });
@@ -73,6 +75,7 @@ export default function ProductivityPage() {
         date: newLog.date,
         type: newLog.type,
         modelNumber: newLog.modelNumber,
+        lineId: newLog.type === 'sewing' ? newLog.lineId : null,
         amount: Number(newLog.amount),
         unit: selectedMachine.unit,
         notes: newLog.notes,
@@ -80,7 +83,7 @@ export default function ProductivityPage() {
       });
       
       setShowAddForm(false);
-      setNewLog({ ...newLog, modelNumber: '', amount: '', notes: '' });
+      setNewLog({ ...newLog, modelNumber: '', amount: '', notes: '', lineId: '' });
       fetchLogs();
     } catch (err) {
       console.error("Error adding log:", err);
@@ -135,6 +138,23 @@ export default function ProductivityPage() {
               </select>
             </div>
 
+            {newLog.type === 'sewing' && (
+              <div className="lg:col-span-1">
+                <label className="block text-sm font-bold text-gray-700 mb-2">رقم الخط</label>
+                <select 
+                  value={newLog.lineId || ''} 
+                  onChange={(e) => setNewLog({...newLog, lineId: e.target.value})}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                >
+                  <option value="">-- عام --</option>
+                  <option value="line_1">خط تقفيل 1</option>
+                  <option value="line_2">خط تقفيل 2</option>
+                  <option value="line_3">خط تقفيل 3</option>
+                  <option value="line_4">خط تقفيل 4</option>
+                </select>
+              </div>
+            )}
+
             <div className="lg:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">رقم الموديل</label>
               <input 
@@ -188,7 +208,9 @@ export default function ProductivityPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {MACHINE_TYPES.map(machine => {
           // Calculate total for this machine in the logs
-          const total = logs.filter(l => l.type === machine.id).reduce((sum, l) => sum + l.amount, 0);
+          const machineLogs = logs.filter(l => l.type === machine.id);
+          const total = machineLogs.reduce((sum, l) => sum + l.amount, 0);
+          
           return (
             <div key={machine.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-4">
@@ -199,6 +221,15 @@ export default function ProductivityPage() {
                 <p className="text-gray-500 text-sm font-bold">{machine.name}</p>
                 <p className="text-3xl font-black text-gray-800 mt-1">{total.toLocaleString()} <span className="text-sm text-gray-400 font-normal">{machine.unit}</span></p>
               </div>
+              
+              {machine.id === 'sewing' && (
+                <div className="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+                  <div className="flex justify-between text-gray-500"><span>خط 1:</span> <span className="font-bold text-gray-800">{machineLogs.filter(l => l.lineId === 'line_1').reduce((s, l) => s + l.amount, 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between text-gray-500"><span>خط 2:</span> <span className="font-bold text-gray-800">{machineLogs.filter(l => l.lineId === 'line_2').reduce((s, l) => s + l.amount, 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between text-gray-500"><span>خط 3:</span> <span className="font-bold text-gray-800">{machineLogs.filter(l => l.lineId === 'line_3').reduce((s, l) => s + l.amount, 0).toLocaleString()}</span></div>
+                  <div className="flex justify-between text-gray-500"><span>خط 4:</span> <span className="font-bold text-gray-800">{machineLogs.filter(l => l.lineId === 'line_4').reduce((s, l) => s + l.amount, 0).toLocaleString()}</span></div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -233,7 +264,13 @@ export default function ProductivityPage() {
                     <tr key={log.id} className="hover:bg-gray-50 transition">
                       <td className="p-4 text-gray-800 font-medium">{log.date}</td>
                       <td className="p-4 text-gray-800 flex items-center gap-2">
-                        <span>{machine?.icon}</span> {machine?.name}
+                        <span>{machine?.icon}</span> 
+                        {machine?.name}
+                        {log.lineId && (
+                          <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-2">
+                            {log.lineId.replace('line_', 'خط ')}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 text-blue-700 font-bold">{log.modelNumber || '---'}</td>
                       <td className="p-4 text-purple-700 font-bold">
