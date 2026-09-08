@@ -13,6 +13,18 @@ const LINES = [
   { id: 'line_4', name: 'خط تقفيل 4' },
 ];
 
+const MACHINE_COLORS: Record<string, string> = {
+  'سنجر': 'bg-purple-100 text-purple-800 border-purple-200',
+  'أوفر': 'bg-blue-100 text-blue-800 border-blue-200',
+  'أورليه': 'bg-green-100 text-green-800 border-green-200',
+  'عراوي': 'bg-orange-100 text-orange-800 border-orange-200',
+  'زراير': 'bg-pink-100 text-pink-800 border-pink-200',
+  'فرز': 'bg-teal-100 text-teal-800 border-teal-200',
+  'مكواة': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'أخرى': 'bg-gray-100 text-gray-800 border-gray-200',
+};
+const MACHINE_TYPES = Object.keys(MACHINE_COLORS);
+
 type Worker = {
   id: string;
   name: string;
@@ -312,7 +324,7 @@ export default function SupervisorDashboard() {
           const activeBasket = workerBaskets[worker.id];
 
           return (
-            <div key={worker.id} className={`relative border-2 rounded-xl p-4 flex flex-col transition-all duration-300 bg-white border-gray-300 shadow-sm`}>
+            <div key={worker.id} className={`relative border-2 rounded-xl p-4 flex flex-col transition-all duration-300 ${MACHINE_COLORS[worker.machine] ? MACHINE_COLORS[worker.machine].replace('text-', 'text-opacity-0 ').replace('bg-', 'bg-opacity-20 bg-') : 'bg-white'} border-gray-300 shadow-sm`}>
               
               {isEditingLine && (
                 <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-10">
@@ -337,11 +349,13 @@ export default function SupervisorDashboard() {
                 )}
 
                 {isEditingLine ? (
-                  <input type="text" value={worker.machine} onChange={e => {
+                  <select value={worker.machine} onChange={e => {
                     const newW = [...workers]; newW[index].machine = e.target.value; saveLineConfig(newW);
-                  }} className="text-xs font-bold bg-gray-50 border border-gray-300 px-2 py-1 rounded-full text-gray-700 outline-none w-1/3 text-center" placeholder="سنجر/أوفر" />
+                  }} className={`text-xs font-bold border px-2 py-1 rounded-full outline-none w-1/3 text-center appearance-none cursor-pointer ${MACHINE_COLORS[worker.machine] || MACHINE_COLORS['أخرى']}`}>
+                    {MACHINE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                  </select>
                 ) : (
-                  <span className="text-xs font-bold bg-gray-100 border border-gray-200 shadow-sm px-2 py-1 rounded-full text-gray-700">{worker.machine}</span>
+                  <span className={`text-xs font-bold border shadow-sm px-2 py-1 rounded-full ${MACHINE_COLORS[worker.machine] || MACHINE_COLORS['أخرى']}`}>{worker.machine}</span>
                 )}
               </div>
 
