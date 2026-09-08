@@ -184,15 +184,31 @@ export default function SupervisorDashboard() {
     if(!confirm("تأكيد انتهاء العامل من هذه السلة؟")) return;
 
     try {
+      const finishedQuantity = Number(basket.assignedQuantity || basket.totalQuantity);
+      
+      // 1. Update the order history
       await updateDoc(doc(db, 'factory_production_orders', basketId), {
         assignedWorker: null,
         history: arrayUnion({
           stageName: `تشغيل: ${worker?.machine} (${worker?.name})`,
-          quantity: basket.assignedQuantity || basket.totalQuantity,
+          quantity: finishedQuantity,
           startTime: basket.assignedAt,
           endTime: new Date().toISOString()
         })
       });
+
+      // 2. Automatically log the productivity to the Productivity Dashboard
+      await setDoc(doc(collection(db, 'factory_productivity_logs')), {
+        date: new Date().toISOString().split('T')[0],
+        type: 'sewing',
+        modelNumber: basket.modelNumber || '',
+        lineId: selectedLine,
+        amount: finishedQuantity,
+        unit: 'قطعة',
+        notes: `تسجيل آلي: ${worker?.name} (${worker?.machine})`,
+        createdAt: new Date().toISOString()
+      });
+
       fetchInbox(selectedLine);
     } catch (err) {
       console.error(err);
