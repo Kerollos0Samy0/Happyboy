@@ -531,9 +531,9 @@ export default function SupervisorDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-xl shadow-lg text-center">
+      <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg text-center">
         <Users className="mx-auto text-blue-600 mb-4" size={48} />
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">بوابة الدخول للمشرفين</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">بوابة دخول المشرفين</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <select required className="w-full p-3 border border-gray-300 rounded-lg text-right" value={selectedLine} onChange={e => setSelectedLine(e.target.value)}>
@@ -551,6 +551,27 @@ export default function SupervisorDashboard() {
             دخول للوحة التوزيع
           </button>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <h3 className="text-sm font-bold text-gray-500 mb-4">دخول الإدارة (عرض مباشر بدون باسورد)</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {LINES.map(l => (
+              <button 
+                key={l.id}
+                onClick={() => {
+                  setSelectedLine(l.id);
+                  setSupervisorName('الإدارة (مراقبة)');
+                  setIsAuthenticated(true);
+                  fetchLineConfig(l.id);
+                  fetchInbox(l.id);
+                }}
+                className="bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 text-gray-700 font-bold py-2 rounded border border-gray-200 transition text-sm"
+              >
+                {l.name}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
