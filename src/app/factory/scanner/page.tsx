@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +37,9 @@ interface ProductionOrder {
   fabricSentAmount?: number;
   fabricSentUnit?: 'توب' | 'كيلو';
   fabricSentColors?: string;
+  stageStatus?: 'idle' | 'running';
+  stageStartedAt?: string;
+  stageWorkerName?: string;
 }
 
 export default function WorkerScannerPage() {
@@ -163,6 +166,30 @@ export default function WorkerScannerPage() {
     }
   };
 
+  const handleStartStage = async () => {
+    if (!orderData || !workerName) return;
+    setLoading(true);
+    try {
+      const now = new Date().toISOString();
+      await updateDoc(doc(db, "factory_production_orders", orderData.id), {
+        stageStatus: 'running',
+        stageStartedAt: now,
+        stageWorkerName: workerName
+      });
+      setOrderData({
+        ...orderData,
+        stageStatus: 'running',
+        stageStartedAt: now,
+        stageWorkerName: workerName
+      });
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ أثناء بدء العمل.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCompleteStage = async () => {
     if (!orderData || !workerName) return;
     
@@ -206,8 +233,30 @@ export default function WorkerScannerPage() {
       }
       
       updateData.workerNotes = newNotes.trim();
+      updateData.stageStatus = 'idle';
 
       await updateDoc(doc(db, "factory_production_orders", orderData.id), updateData);
+
+      // Log productivity if stage was running
+      if (orderData.stageStatus === 'running' && orderData.stageStartedAt) {
+        const start = new Date(orderData.stageStartedAt);
+        const end = new Date();
+        const durationSecs = Math.floor((end.getTime() - start.getTime()) / 1000);
+        
+        await addDoc(collection(db, 'factory_productivity_logs'), {
+          date: new Date().toISOString().split('T')[0],
+          type: 'department',
+          modelNumber: orderData.modelName,
+          lineId: stageName || 'حركة المصنع', // Shows as department name
+          amount: newTotal,
+          workerName: workerName,
+          machine: 'إسكانر (حركة المصنع)', 
+          operation: 'إنهاء المرحلة وتسليم',
+          effectiveDurationSeconds: durationSecs,
+          totalPausedSeconds: 0,
+          timestamp: serverTimestamp()
+        });
+      }
 
       setSuccess(`تم نقل الموديل بنجاح إلى المرحلة التالية (${STAGES.find(s => s.id === nextStage)?.name}).`);
       setOrderData(null);
@@ -429,129 +478,155 @@ export default function WorkerScannerPage() {
               )}
             </div>
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4 text-right">
-              <h4 className="font-bold text-gray-800 mb-2">تأكيد / تعديل الكميات</h4>
-              {editablePairs && editablePairs.length > 0 ? (
-                <div className="space-y-2">
-                  {editablePairs.map((pair, idx) => (
-                    <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded border">
-                      <div className="flex-1 text-sm font-bold text-gray-700">
-                        {pair.tshirt && <span>{pair.tshirt}</span>}
-                        {pair.tshirt && pair.pants && <span> مع </span>}
-                        {pair.pants && <span>{pair.pants}</span>}
+            {orderData.stageStatus === 'running' ? (
+              <>
+                <div className="bg-indigo-50 border-r-4 border-indigo-500 p-3 mb-4 rounded flex items-center justify-between">
+                  <div>
+                     <p className="font-bold text-indigo-800">جاري العمل على هذا الموديل ⏱️</p>
+                     <p className="text-xs text-indigo-600">بدأ: {new Date(orderData.stageStartedAt!).toLocaleTimeString('ar-EG')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4 text-right">
+                  <h4 className="font-bold text-gray-800 mb-2">تأكيد / تعديل الكميات</h4>
+                  {editablePairs && editablePairs.length > 0 ? (
+                    <div className="space-y-2">
+                      {editablePairs.map((pair, idx) => (
+                        <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded border">
+                          <div className="flex-1 text-sm font-bold text-gray-700">
+                            {pair.tshirt && <span>{pair.tshirt}</span>}
+                            {pair.tshirt && pair.pants && <span> مع </span>}
+                            {pair.pants && <span>{pair.pants}</span>}
+                          </div>
+                          <div className="w-24 shrink-0">
+                            <input 
+                              type="number" 
+                              value={pair.quantity || ''} 
+                              onChange={(e) => {
+                                const newPairs = [...editablePairs];
+                                newPairs[idx].quantity = e.target.value;
+                                setEditablePairs(newPairs);
+                              }} 
+                              className="w-full p-1.5 border rounded text-center font-bold text-blue-700" 
+                              placeholder="الكمية" 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <div className="text-left mt-2 font-bold text-gray-700">
+                        الإجمالي: {editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0)} قطعة
                       </div>
-                      <div className="w-24 shrink-0">
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-bold text-gray-700">إجمالي الكمية:</label>
+                      <input 
+                        type="number" 
+                        value={editableTotalQty || ''} 
+                        onChange={(e) => setEditableTotalQty(Number(e.target.value))} 
+                        className="flex-1 p-2 border rounded font-bold text-blue-700 text-center" 
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {(selectedStage === 3 || selectedStage === 4) && (
+                  <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 mb-6 text-right animate-fade-in">
+                    <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                      <CheckCircle size={18} />
+                      {selectedStage === 3 ? 'تسجيل صرف القماش (مخزن القماش)' : 'تأكيد استلام القماش (قسم القص)'}
+                    </h4>
+                    {selectedStage === 4 && orderData?.fabricSentAmount ? (
+                      <div className="mb-3 p-2 bg-white rounded border border-blue-100 text-sm">
+                        <span className="text-gray-500 font-bold">المرسل من المخزن:</span>
+                        <div className="font-black text-blue-700">{orderData.fabricSentAmount} {orderData.fabricSentUnit} (الألوان: {orderData.fabricSentColors})</div>
+                      </div>
+                    ) : null}
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'الكمية المنصرفة' : 'الكمية المستلمة فعلياً'}</label>
+                          <input 
+                            type="number" 
+                            value={fabricAmount}
+                            onChange={(e) => setFabricAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                            className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="مثال: 5"
+                          />
+                        </div>
+                        <div className="w-24">
+                          <label className="block text-sm font-bold text-blue-700 mb-1">الوحدة</label>
+                          <select 
+                            value={fabricUnit}
+                            onChange={(e) => setFabricUnit(e.target.value as 'توب' | 'كيلو')}
+                            className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="توب">توب</option>
+                            <option value="كيلو">كيلو</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'ألوان القماش المنصرف' : 'ألوان القماش المستلم فعلياً'}</label>
                         <input 
-                          type="number" 
-                          value={pair.quantity || ''} 
-                          onChange={(e) => {
-                            const newPairs = [...editablePairs];
-                            newPairs[idx].quantity = e.target.value;
-                            setEditablePairs(newPairs);
-                          }} 
-                          className="w-full p-1.5 border rounded text-center font-bold text-blue-700" 
-                          placeholder="الكمية" 
+                          type="text" 
+                          value={fabricColors}
+                          onChange={(e) => setFabricColors(e.target.value)}
+                          className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="مثال: أحمر، أزرق، أسود..."
                         />
                       </div>
                     </div>
-                  ))}
-                  <div className="text-left mt-2 font-bold text-gray-700">
-                    الإجمالي: {editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0)} قطعة
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-bold text-gray-700">إجمالي الكمية:</label>
-                  <input 
-                    type="number" 
-                    value={editableTotalQty || ''} 
-                    onChange={(e) => setEditableTotalQty(Number(e.target.value))} 
-                    className="flex-1 p-2 border rounded font-bold text-blue-700 text-center" 
-                  />
-                </div>
-              )}
-            </div>
+                )}
 
-            {(selectedStage === 3 || selectedStage === 4) && (
-              <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 mb-6 text-right animate-fade-in">
-                <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                  <CheckCircle size={18} />
-                  {selectedStage === 3 ? 'تسجيل صرف القماش (مخزن القماش)' : 'تأكيد استلام القماش (قسم القص)'}
-                </h4>
-                {selectedStage === 4 && orderData?.fabricSentAmount ? (
-                  <div className="mb-3 p-2 bg-white rounded border border-blue-100 text-sm">
-                    <span className="text-gray-500 font-bold">المرسل من المخزن:</span>
-                    <div className="font-black text-blue-700">{orderData.fabricSentAmount} {orderData.fabricSentUnit} (الألوان: {orderData.fabricSentColors})</div>
-                  </div>
-                ) : null}
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'الكمية المنصرفة' : 'الكمية المستلمة فعلياً'}</label>
-                      <input 
-                        type="number" 
-                        value={fabricAmount}
-                        onChange={(e) => setFabricAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="مثال: 5"
-                      />
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
+                  <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
+                  <textarea 
+                    value={workerNote}
+                    onChange={(e) => setWorkerNote(e.target.value)}
+                    placeholder="أي ملاحظات حول الألوان، القص، التقفيل..."
+                    className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm min-h-[80px]"
+                  />
+                  {orderData.workerNotes && (
+                    <div className="mt-2 p-2 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-100 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                      <strong>ملاحظات سابقة:</strong><br/>
+                      {orderData.workerNotes}
                     </div>
-                    <div className="w-24">
-                      <label className="block text-sm font-bold text-blue-700 mb-1">الوحدة</label>
-                      <select 
-                        value={fabricUnit}
-                        onChange={(e) => setFabricUnit(e.target.value as 'توب' | 'كيلو')}
-                        className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="توب">توب</option>
-                        <option value="كيلو">كيلو</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'ألوان القماش المنصرف' : 'ألوان القماش المستلم فعلياً'}</label>
-                    <input 
-                      type="text" 
-                      value={fabricColors}
-                      onChange={(e) => setFabricColors(e.target.value)}
-                      className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="مثال: أحمر، أزرق، أسود..."
-                    />
-                  </div>
+                  )}
                 </div>
+                
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => { setOrderData(null); setScannedData(null); setIsScannerActive(true); setError(""); }}
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300 transition"
+                  >
+                    تأجيل
+                  </button>
+                  <button 
+                    onClick={handleCompleteStage}
+                    className="flex-[2] bg-green-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2"
+                  >
+                    إنهاء المرحلة <CheckCircle size={20} />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="mt-4">
+                <button 
+                  onClick={handleStartStage}
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-blue-700 transition shadow-md flex justify-center items-center gap-2 mb-3"
+                >
+                  بدء العمل ⏱️
+                </button>
+                <button 
+                  onClick={() => { setOrderData(null); setScannedData(null); setIsScannerActive(true); setError(""); }}
+                  className="w-full bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300 transition"
+                >
+                  إلغاء
+                </button>
               </div>
             )}
-
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
-              <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
-              <textarea 
-                value={workerNote}
-                onChange={(e) => setWorkerNote(e.target.value)}
-                placeholder="أي ملاحظات حول الألوان، القص، التقفيل..."
-                className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm min-h-[80px]"
-              />
-              {orderData.workerNotes && (
-                <div className="mt-2 p-2 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-100 whitespace-pre-wrap max-h-24 overflow-y-auto">
-                  <strong>ملاحظات سابقة:</strong><br/>
-                  {orderData.workerNotes}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={() => { setOrderData(null); setScannedData(null); setIsScannerActive(true); setError(""); }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300 transition"
-              >
-                إلغاء
-              </button>
-              <button 
-                onClick={handleCompleteStage}
-                className="flex-[2] bg-green-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2"
-              >
-                تأكيد <CheckCircle size={20} />
-              </button>
-            </div>
           </div>
         </div>
       )}
