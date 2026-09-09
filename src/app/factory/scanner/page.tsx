@@ -31,6 +31,12 @@ interface ProductionOrder {
   modelImage?: string;
   colorPairs?: any[];
   workerNotes?: string;
+  currentStage?: number;
+  splitChildren?: any[];
+  isSplit?: boolean;
+  fabricSentAmount?: number;
+  fabricSentUnit?: 'توب' | 'كيلو';
+  fabricSentColors?: string;
 }
 
 export default function WorkerScannerPage() {
@@ -104,8 +110,9 @@ export default function WorkerScannerPage() {
     setEditablePairs(data.colorPairs || []);
     setEditableTotalQty(data.totalQuantity || 0);
     setWorkerNote("");
-    setFabricAmount('');
-    setFabricColors('');
+    setFabricAmount(data.fabricSentAmount || '');
+    setFabricUnit(data.fabricSentUnit || 'توب');
+    setFabricColors(data.fabricSentColors || '');
   };
 
   const fetchOrderDetails = async (scannedText: string) => {
@@ -174,22 +181,33 @@ export default function WorkerScannerPage() {
       let newNotes = orderData.workerNotes || "";
       const stageName = STAGES.find(s => s.id === selectedStage)?.name;
       
-      // Add cutting department info to notes if applicable
+      const updateData: any = {
+        currentStage: nextStage,
+        lastWorkerName: workerName,
+        totalQuantity: newTotal,
+        colorPairs: editablePairs,
+      };
+
+      // Stage 3 (Warehouse) sending fabric
+      if (selectedStage === 3 && fabricAmount && fabricColors) {
+         newNotes += `\n[${workerName} - ${stageName} (صرف قماش)]: تم صرف ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
+         updateData.fabricSentAmount = fabricAmount;
+         updateData.fabricSentUnit = fabricUnit;
+         updateData.fabricSentColors = fabricColors;
+      }
+      
+      // Stage 4 (Cutting) receiving fabric
       if (selectedStage === 4 && fabricAmount && fabricColors) {
-         newNotes += `\n[${workerName} - ${stageName} (استلام القماش)]: استلمت ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
+         newNotes += `\n[${workerName} - ${stageName} (استلام قماش)]: استلمت ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
       }
 
       if (workerNote.trim()) {
          newNotes += `\n[${workerName} - ${stageName}]: ${workerNote.trim()}`;
       }
+      
+      updateData.workerNotes = newNotes.trim();
 
-      await updateDoc(doc(db, "factory_production_orders", orderData.id), {
-        currentStage: nextStage,
-        lastWorkerName: workerName,
-        totalQuantity: newTotal,
-        colorPairs: editablePairs,
-        workerNotes: newNotes.trim()
-      });
+      await updateDoc(doc(db, "factory_production_orders", orderData.id), updateData);
 
       setSuccess(`تم نقل الموديل بنجاح إلى المرحلة التالية (${STAGES.find(s => s.id === nextStage)?.name}).`);
       setOrderData(null);
@@ -423,16 +441,22 @@ export default function WorkerScannerPage() {
               )}
             </div>
 
-            {selectedStage === 4 && (
+            {(selectedStage === 3 || selectedStage === 4) && (
               <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 mb-6 text-right animate-fade-in">
                 <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
                   <CheckCircle size={18} />
-                  تسجيل استلام القماش (قسم القص)
+                  {selectedStage === 3 ? 'تسجيل صرف القماش (مخزن القماش)' : 'تأكيد استلام القماش (قسم القص)'}
                 </h4>
+                {selectedStage === 4 && orderData?.fabricSentAmount ? (
+                  <div className="mb-3 p-2 bg-white rounded border border-blue-100 text-sm">
+                    <span className="text-gray-500 font-bold">المرسل من المخزن:</span>
+                    <div className="font-black text-blue-700">{orderData.fabricSentAmount} {orderData.fabricSentUnit} (الألوان: {orderData.fabricSentColors})</div>
+                  </div>
+                ) : null}
                 <div className="space-y-3">
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="block text-sm font-bold text-blue-700 mb-1">الكمية المستلمة</label>
+                      <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'الكمية المنصرفة' : 'الكمية المستلمة فعلياً'}</label>
                       <input 
                         type="number" 
                         value={fabricAmount}
@@ -454,7 +478,7 @@ export default function WorkerScannerPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-blue-700 mb-1">ألوان القماش المستلم</label>
+                    <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'ألوان القماش المنصرف' : 'ألوان القماش المستلم فعلياً'}</label>
                     <input 
                       type="text" 
                       value={fabricColors}
