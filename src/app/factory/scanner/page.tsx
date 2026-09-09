@@ -397,6 +397,37 @@ export default function WorkerScannerPage() {
                 className="w-32 h-32 object-cover rounded-lg border border-gray-200 mx-auto mb-4 shadow-sm bg-white"
               />
             )}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-indigo-100 mb-4 text-right">
+              <h4 className="font-bold text-indigo-800 mb-3 border-b pb-2">مكونات وألوان الموديل:</h4>
+              
+              {selectedStage === 3 && orderData.colorPairs && (
+                <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <span className="font-bold text-yellow-800 block mb-1">الألوان المطلوبة لتحضير القماش:</span>
+                  <span className="text-yellow-700 font-black text-lg">
+                    {Array.from(new Set(
+                      orderData.colorPairs.flatMap(p => [p.tshirt, p.pants]).filter(c => c && c !== 'بدون تحديد' && c.trim() !== '')
+                    )).join('، ') || 'غير محدد'}
+                  </span>
+                </div>
+              )}
+
+              {orderData.colorPairs && orderData.colorPairs.length > 0 ? (
+                <ul className="space-y-2">
+                  {orderData.colorPairs.map((pair, idx) => (
+                    <li key={idx} className="flex justify-between items-center bg-indigo-50 p-2 rounded text-indigo-900 font-bold text-sm border border-indigo-100">
+                      <span>
+                        {pair.tshirt && <span>{pair.tshirt}</span>}
+                        {pair.tshirt && pair.pants && <span className="text-indigo-400 mx-2"> مع </span>}
+                        {pair.pants && <span>{pair.pants}</span>}
+                      </span>
+                      <span className="bg-white px-2 py-1 rounded shadow-sm text-blue-700">{pair.quantity} قطعة</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm font-bold">لا توجد تفاصيل (إجمالي: {orderData.totalQuantity} قطعة)</p>
+              )}
+            </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4 text-right">
               <h4 className="font-bold text-gray-800 mb-2">تأكيد / تعديل الكميات</h4>
