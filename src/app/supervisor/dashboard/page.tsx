@@ -79,9 +79,9 @@ const LiveTimer = ({ task }: { task: WorkerTask }) => {
 
   const hours = Math.floor(elapsed / 3600);
   const minutes = Math.floor((elapsed % 3600) / 60);
-  const seconds = elapsed % 60;
+  const seconds = Math.floor(elapsed % 60);
   
-  const formatted = `${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const formatted = `${hours > 0 ? hours.toString().padStart(2, '0') + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
   return (
     <div className={`font-mono font-bold text-2xl ${task.status === 'paused' ? 'text-orange-500' : 'text-green-600'} transition-colors`}>
