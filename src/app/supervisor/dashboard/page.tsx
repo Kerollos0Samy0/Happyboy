@@ -40,7 +40,8 @@ type Worker = {
   name: string;
   machine: string;
   order: number;
-  activeTask?: WorkerTask | null;
+  activeTask?: WorkerTask | null; // Legacy
+  tasks?: WorkerTask[]; // New task queue
 };
 
 const LiveTimer = ({ task }: { task: WorkerTask }) => {
@@ -141,7 +142,15 @@ export default function SupervisorDashboard() {
       const docRef = doc(db, 'factory_line_configs', lineId);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        setWorkers(snap.data().workers || []);
+        let loadedWorkers = snap.data().workers || [];
+        // Migration: ensure tasks array exists, migrate activeTask to it
+        loadedWorkers = loadedWorkers.map((w: any) => {
+          if (!w.tasks) {
+            w.tasks = w.activeTask ? [w.activeTask] : [];
+          }
+          return w;
+        });
+        setWorkers(loadedWorkers);
       } else {
         setWorkers([]);
       }
@@ -358,53 +367,56 @@ export default function SupervisorDashboard() {
     const workerIndex = workers.findIndex(w => w.id === assignWorkerId);
     if (workerIndex === -1) return;
 
-    if (workers[workerIndex].activeTask) {
-      if (!confirm("هذا العامل لديه مهمة حالية، هل تريد استبدالها؟")) return;
-    }
-
     const newWorkers = [...workers];
-    newWorkers[workerIndex].activeTask = {
+    if (!newWorkers[workerIndex].tasks) newWorkers[workerIndex].tasks = [];
+    
+    newWorkers[workerIndex].tasks!.push({
       orderId: selectedOrderForAssign.id,
       modelNumber: selectedOrderForAssign.modelNumber || selectedOrderForAssign.modelName,
       color: assignColor || 'بدون تحديد',
       operation: assignOperation,
-      quantity: Number(assignQuantity),
+      quantity: assignQuantity,
       assignedAt: new Date().toISOString(),
-      status: 'assigned',
-      totalPausedSeconds: 0
-    };
+      status: 'assigned'
+    });
 
     await saveLineConfig(newWorkers);
+    
     setIsAssignModalOpen(false);
+    setSelectedOrderForAssign(null);
+    setAssignOperation('');
+    setAssignQuantity(0);
+    setAssignColor('');
+    alert('تم إضافة المهمة لطابور العامل بنجاح!');
   };
 
   const handleStartTask = async (workerId: string) => {
     const workerIndex = workers.findIndex(w => w.id === workerId);
-    if (workerIndex === -1 || !workers[workerIndex].activeTask) return;
+    if (workerIndex === -1 || !workers[workerIndex].tasks || workers[workerIndex].tasks!.length === 0) return;
     
-    const task = workers[workerIndex].activeTask!;
+    const task = workers[workerIndex].tasks![0];
     const newWorkers = [...workers];
     
     if (task.status === 'paused' && task.lastPauseTime) {
       const pauseDuration = (new Date().getTime() - new Date(task.lastPauseTime).getTime()) / 1000;
-      newWorkers[workerIndex].activeTask!.totalPausedSeconds = (task.totalPausedSeconds || 0) + pauseDuration;
+      newWorkers[workerIndex].tasks![0].totalPausedSeconds = (task.totalPausedSeconds || 0) + pauseDuration;
     } else if (task.status === 'assigned' || !task.status) {
-      newWorkers[workerIndex].activeTask!.startedAt = new Date().toISOString();
+      newWorkers[workerIndex].tasks![0].startedAt = new Date().toISOString();
     }
     
-    newWorkers[workerIndex].activeTask!.status = 'running';
-    newWorkers[workerIndex].activeTask!.lastPauseTime = null;
+    newWorkers[workerIndex].tasks![0].status = 'running';
+    newWorkers[workerIndex].tasks![0].lastPauseTime = null;
     
     await saveLineConfig(newWorkers);
   };
 
   const handlePauseTask = async (workerId: string) => {
     const workerIndex = workers.findIndex(w => w.id === workerId);
-    if (workerIndex === -1 || !workers[workerIndex].activeTask) return;
+    if (workerIndex === -1 || !workers[workerIndex].tasks || workers[workerIndex].tasks!.length === 0) return;
     
     const newWorkers = [...workers];
-    newWorkers[workerIndex].activeTask!.status = 'paused';
-    newWorkers[workerIndex].activeTask!.lastPauseTime = new Date().toISOString();
+    newWorkers[workerIndex].tasks![0].status = 'paused';
+    newWorkers[workerIndex].tasks![0].lastPauseTime = new Date().toISOString();
     
     await saveLineConfig(newWorkers);
   };
@@ -412,12 +424,12 @@ export default function SupervisorDashboard() {
   const handleEndTask = async (workerId: string) => {
     const workerIndex = workers.findIndex(w => w.id === workerId);
     const worker = workers[workerIndex];
-    if (!worker || !worker.activeTask) return;
+    if (!worker || !worker.tasks || worker.tasks.length === 0) return;
 
-    if(!confirm("تأكيد انتهاء العامل من هذه المهمة؟")) return;
+    if(!confirm("تأكيد إنهاء العمل من هذه المهمة؟")) return;
 
     try {
-      const task = worker.activeTask;
+      const task = worker.tasks[0];
       
       // Calculate effective duration if it was started
       let totalPausedStr = "";
@@ -465,14 +477,28 @@ export default function SupervisorDashboard() {
         effectiveDurationSeconds: effectiveDurationSeconds
       });
 
-      // 3. Clear activeTask
+      // 3. Remove the task from the queue
       const newWorkers = [...workers];
-      newWorkers[workerIndex].activeTask = null;
+      newWorkers[workerIndex].tasks!.shift(); // Remove the completed task
+      
       await saveLineConfig(newWorkers);
-
-    } catch (err) {
+      alert('تم إنهاء المهمة وتسجيل الإنتاجية!');
+    } catch(err) {
       console.error(err);
+      alert('حدث خطأ أثناء إنهاء المهمة');
     }
+  };
+
+  const handleCancelPendingTask = async (workerId: string, taskIndex: number) => {
+    if (!confirm("هل أنت متأكد من إلغاء هذه المهمة من الطابور؟")) return;
+    
+    const workerIndex = workers.findIndex(w => w.id === workerId);
+    if (workerIndex === -1 || !workers[workerIndex].tasks) return;
+    
+    const newWorkers = [...workers];
+    newWorkers[workerIndex].tasks!.splice(taskIndex, 1);
+    
+    await saveLineConfig(newWorkers);
   };
 
   const handleArchiveOrder = async (orderId: string) => {
@@ -711,7 +737,8 @@ export default function SupervisorDashboard() {
             لا توجد ماكينات على هذا الخط. اضغط على (تعديل ترتيب المكن) لإضافة العمال.
           </div>
         ) : workers.map((worker, index) => {
-          const activeTask = worker.activeTask;
+          const activeTask = (worker.tasks && worker.tasks.length > 0) ? worker.tasks[0] : null;
+          const pendingTasks = (worker.tasks && worker.tasks.length > 1) ? worker.tasks.slice(1) : [];
 
           return (
             <div key={worker.id} className={`relative border-2 rounded-xl p-4 flex flex-col transition-all duration-300 ${MACHINE_COLORS[worker.machine] ? MACHINE_COLORS[worker.machine].replace('text-', 'text-opacity-0 ').replace('bg-', 'bg-opacity-20 bg-') : 'bg-white'} border-gray-300 shadow-sm`}>
@@ -822,7 +849,7 @@ export default function SupervisorDashboard() {
                            </button>
                          )}
 
-                         <button onClick={() => handleEndTask(worker.id)} className="flex-1 bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-xs font-black transition shadow-sm">
+                         <button onClick={() => handleEndTask(worker.id)} className="flex-1 bg-white border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg text-xs font-black transition shadow-sm flex items-center justify-center">
                            إنهاء المهمة
                          </button>
                        </div>
@@ -830,8 +857,41 @@ export default function SupervisorDashboard() {
                    </div>
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center min-h-[120px] bg-white rounded-lg border border-dashed border-gray-300 shadow-inner">
-                  <span className="text-gray-400 font-bold">الماكينة فارغة (بانتظار مهمة)</span>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex-1 flex flex-col justify-center items-center py-6 text-gray-400 shadow-inner">
+                  <Clock size={24} className="mb-2 opacity-50" />
+                  <span className="font-bold text-sm">العامل في انتظار العمل...</span>
+                </div>
+              )}
+              
+              {/* Pending Tasks Queue */}
+              {pendingTasks.length > 0 && (
+                <div className="mt-3 bg-gray-50 rounded-lg p-2 border border-gray-200 shadow-inner">
+                  <h4 className="text-[10px] font-bold text-gray-500 mb-1 flex items-center gap-1 border-b pb-1">
+                    <Clock size={10} /> مهام في الانتظار ({pendingTasks.length})
+                  </h4>
+                  <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar">
+                    {pendingTasks.map((t, pIdx) => (
+                      <div key={pIdx} className="bg-white rounded border border-gray-200 p-1.5 flex justify-between items-center text-xs shadow-sm">
+                        <div className="flex flex-col flex-1 truncate ml-2">
+                          <div className="font-bold text-indigo-700 flex justify-between w-full">
+                            <span className="truncate">{t.operation}</span>
+                            <span className="text-gray-500 ml-1">#{t.modelNumber}</span>
+                          </div>
+                          <div className="text-[10px] text-gray-500 flex justify-between">
+                            <span>{t.color === 'بدون تحديد' ? '' : t.color}</span>
+                            <span className="font-black text-blue-600">{t.quantity} ق</span>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => handleCancelPendingTask(worker.id, pIdx + 1)} 
+                          className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-1.5 rounded transition shrink-0"
+                          title="إلغاء المهمة"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               
