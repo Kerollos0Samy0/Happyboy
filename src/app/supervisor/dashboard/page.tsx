@@ -89,6 +89,11 @@ const LiveTimer = ({ task }: { task: WorkerTask }) => {
   );
 };
 
+const DEFAULT_OPERATIONS = [
+  "أوفر كتف", "تركيب كم", "تقفيل جنب", "تركيب كولا", "تركيب كابيشو", "شريط نظافة (للياقة)", "أورليه ديل", "أورليه كم", "تركيب أساور", "أوفر جيوب (تجهيز الجيب)", "تركيب جيب", "تركيب سوستة", "بنط عرض (سنجر)",
+  "أوفر حجر", "تقفيل جنب (داخلي / خارجي)", "تركيب كمر", "تركيب أستك", "تركيب رباط", "أورليه رجل", "تجهيز جيوب جانبية", "تركيب جيب خلفي", "عراوي", "زراير", "فارماتورة", "كشكشة", "تركيب شريط زينة", "تنظيف خيوط سريعة على المكنة"
+];
+
 export default function SupervisorDashboard() {
   const [selectedLine, setSelectedLine] = useState('');
   const [supervisorName, setSupervisorName] = useState('');
@@ -108,6 +113,8 @@ export default function SupervisorDashboard() {
   const [assignColor, setAssignColor] = useState('');
   const [assignOperation, setAssignOperation] = useState('');
   const [assignQuantity, setAssignQuantity] = useState(0);
+
+  const [savedOperations, setSavedOperations] = useState<string[]>(DEFAULT_OPERATIONS);
 
   // Receive Modal State
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
@@ -182,6 +189,21 @@ export default function SupervisorDashboard() {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    const fetchOperations = async () => {
+       try {
+         const docRef = doc(db, 'factory_settings', 'operations_list');
+         const snap = await getDoc(docRef);
+         if (snap.exists()) {
+            setSavedOperations(snap.data().operations || DEFAULT_OPERATIONS);
+         }
+       } catch (e) {
+         console.error(e);
+       }
+    };
+    fetchOperations();
+  }, []);
 
   useEffect(() => {
     if (isScannerOpen) {
@@ -324,6 +346,14 @@ export default function SupervisorDashboard() {
       alert("يرجى إكمال البيانات (العامل، العملية، الكمية)");
       return;
     }
+
+    const opName = assignOperation.trim();
+    if (!savedOperations.includes(opName)) {
+      const newOps = [...savedOperations, opName];
+      setSavedOperations(newOps);
+      setDoc(doc(db, 'factory_settings', 'operations_list'), { operations: newOps }, { merge: true }).catch(console.error);
+    }
+
     const workerIndex = workers.findIndex(w => w.id === assignWorkerId);
     if (workerIndex === -1) return;
 
@@ -545,7 +575,17 @@ export default function SupervisorDashboard() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">العملية المطلوبة (مثل: تركيب كم، أوفر جيوب) *</label>
-                <input type="text" className="w-full p-2 border border-gray-300 rounded-lg" placeholder="اكتب العملية..." value={assignOperation} onChange={e => setAssignOperation(e.target.value)} />
+                <input 
+                  type="text" 
+                  list="operations-list"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                  placeholder="ابحث أو اكتب عملية جديدة..." 
+                  value={assignOperation} 
+                  onChange={e => setAssignOperation(e.target.value)} 
+                />
+                <datalist id="operations-list">
+                  {savedOperations.map((op, idx) => <option key={idx} value={op} />)}
+                </datalist>
               </div>
 
               <div>
