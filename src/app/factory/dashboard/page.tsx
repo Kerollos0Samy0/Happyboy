@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus, History, Clock } from "lucide-react";
+import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus, History, Clock, Layers } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -261,6 +261,45 @@ export default function FactoryDashboard() {
       alert('حدث خطأ أثناء فصل الموديل');
     }
   };
+
+  const handleCreateParallelTask = async (order: any) => {
+    setActiveMenuId(null);
+    if (!confirm('هل تريد إنشاء مهمة (تجهيز طباعة) موازية؟ سيتم فصل الموديل إلى "الأساسي" ومهمة مخصصة لـ "الطباعة" تعمل بالتوازي.')) return;
+    
+    try {
+      const { id, createdAt, ...originalData } = order;
+
+      // Create main order duplicate (stays in current stage)
+      await addDoc(collection(db, 'factory_production_orders'), {
+        ...originalData,
+        modelName: `${originalData.modelName} (الأساسي)`,
+        originalOrderId: originalData.originalOrderId || order.id,
+        isSplitChild: true,
+        createdAt: serverTimestamp(),
+      });
+
+      // Create Parallel Print Prep order (goes directly to Printing stage 6)
+      await addDoc(collection(db, 'factory_production_orders'), {
+        ...originalData,
+        modelName: `${originalData.modelName} (تجهيز طباعة)`,
+        currentStage: 6, // 6 is Printing
+        originalOrderId: originalData.originalOrderId || order.id,
+        isSplitChild: true,
+        createdAt: serverTimestamp(),
+      });
+
+      // Archive original
+      await updateDoc(doc(db, 'factory_production_orders', order.id), {
+        isArchived: true,
+        splitStatus: 'split_parent'
+      });
+      
+      alert('تم إنشاء المهمة الموازية بنجاح! ظهرت الآن في قسم الطباعة.');
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء إنشاء المهمة الموازية');
+    }
+  };
   // ----------------------
 
   if (loading || !isBrowser) {
@@ -390,6 +429,10 @@ export default function FactoryDashboard() {
                                       {/* Split Item Button */}
                                       <button onClick={(e) => { e.stopPropagation(); handleSplitByItem(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
                                         <SplitSquareHorizontal size={13} className="text-orange-600" /> فصل (تيشيرت/بنطلون)
+                                      </button>
+
+                                      <button onClick={(e) => { e.stopPropagation(); handleCreateParallelTask(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-blue-50 text-blue-700 flex items-center gap-2 border-t">
+                                        <Layers size={13} className="text-blue-600" /> تجهيز طباعة (مهمة موازية)
                                       </button>
 
                                       <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2 border-t">
