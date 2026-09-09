@@ -276,9 +276,17 @@ export default function FactoryDashboard() {
       <div className="mb-4 shrink-0 flex justify-between items-start">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
-          <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
+          <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإفلات البطاقات (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
+            <span className="text-xs font-bold text-gray-500 my-auto ml-3 mr-2">عرض حي للخطوط:</span>
+            <Link href="/supervisor/dashboard?adminView=true&lineId=line_1" target="_blank" className="text-sm px-3 py-1.5 font-bold hover:bg-white hover:shadow-sm rounded transition text-blue-700">خط هبة</Link>
+            <Link href="/supervisor/dashboard?adminView=true&lineId=line_2" target="_blank" className="text-sm px-3 py-1.5 font-bold hover:bg-white hover:shadow-sm rounded transition text-indigo-700">خط فرج</Link>
+            <Link href="/supervisor/dashboard?adminView=true&lineId=line_3" target="_blank" className="text-sm px-3 py-1.5 font-bold hover:bg-white hover:shadow-sm rounded transition text-purple-700">خط كريم</Link>
+            <Link href="/supervisor/dashboard?adminView=true&lineId=line_4" target="_blank" className="text-sm px-3 py-1.5 font-bold hover:bg-white hover:shadow-sm rounded transition text-teal-700">خط عبده</Link>
+          </div>
+          
           <Link 
             href="/reports/productivity" 
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-indigo-700 transition flex items-center gap-2"

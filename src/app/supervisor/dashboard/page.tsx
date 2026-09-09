@@ -551,27 +551,6 @@ export default function SupervisorDashboard() {
             دخول للوحة التوزيع
           </button>
         </form>
-
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-bold text-gray-500 mb-4">دخول الإدارة (عرض مباشر بدون باسورد)</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {LINES.map(l => (
-              <button 
-                key={l.id}
-                onClick={() => {
-                  setSelectedLine(l.id);
-                  setSupervisorName('الإدارة (مراقبة)');
-                  setIsAuthenticated(true);
-                  fetchLineConfig(l.id);
-                  fetchInbox(l.id);
-                }}
-                className="bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 text-gray-700 font-bold py-2 rounded border border-gray-200 transition text-sm"
-              >
-                {l.name}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
