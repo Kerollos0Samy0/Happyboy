@@ -713,19 +713,26 @@ export default function SupervisorDashboard() {
                      {!activeTask.status || activeTask.status === 'assigned' ? 'مهمة قيد الانتظار' : activeTask.status === 'paused' ? 'مهمة متوقفة مؤقتاً' : 'جاري العمل الآن'}
                    </div>
                    
-                   <div className="font-black text-2xl text-blue-900 leading-none mb-1">{activeTask.modelNumber}</div>
-                   <div className="text-sm font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full mb-1 border border-indigo-200">
-                     {activeTask.operation}
+                   <div className="flex justify-between items-center w-full px-2 mb-2">
+                      <div className="flex flex-col items-start">
+                        <span className="text-[10px] text-gray-500 font-bold">الموديل</span>
+                        <span className="font-black text-xl text-blue-900 leading-none">{activeTask.modelNumber}</span>
+                      </div>
+                      <div className="text-sm font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                        {activeTask.operation}
+                      </div>
                    </div>
                    
-                   {activeTask.color && activeTask.color !== 'بدون تحديد' && (
-                     <div className="text-xs font-bold text-gray-600 bg-white px-2 py-1 rounded border shadow-sm mb-1 max-w-[90%] text-center truncate">
-                       {activeTask.color}
-                     </div>
-                   )}
-                   
-                   <div className="font-black text-blue-700 bg-white px-4 py-1.5 rounded-lg mt-1 border border-blue-300 shadow-sm">
-                     {activeTask.quantity} قطعة
+                   <div className="flex justify-between items-center w-full px-2 mb-2 gap-2">
+                      {activeTask.color && activeTask.color !== 'بدون تحديد' ? (
+                        <div className="flex-1 text-xs font-bold text-gray-700 bg-white px-2 py-1.5 rounded border border-gray-200 shadow-sm text-right truncate" title={activeTask.color}>
+                          {activeTask.color}
+                        </div>
+                      ) : <div className="flex-1"></div>}
+                      
+                      <div className="font-black text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm whitespace-nowrap">
+                        {activeTask.quantity} قطعة
+                      </div>
                    </div>
                    
                    <div className="mt-2 w-full">
