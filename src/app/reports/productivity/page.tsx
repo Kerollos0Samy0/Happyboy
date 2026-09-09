@@ -64,24 +64,24 @@ export default function ProductivityReports() {
 
   // Worker Aggregation
   const workerStats = filteredLogs.reduce((acc, log) => {
-    const key = `${log.workerName}_${log.lineId}`;
+    const op = log.operation || 'غير محدد';
+    const key = `${log.workerName}_${log.lineId}_${op}`;
     if (!acc[key]) {
       acc[key] = {
         name: log.workerName,
         lineId: log.lineId,
         machine: log.machine,
+        operation: op,
         totalAmount: 0,
         totalDurationSecs: 0,
-        operations: new Set<string>()
       };
     }
     acc[key].totalAmount += log.amount;
     if (log.effectiveDurationSeconds) {
       acc[key].totalDurationSecs += log.effectiveDurationSeconds;
     }
-    if (log.operation) acc[key].operations.add(log.operation);
     return acc;
-  }, {} as Record<string, {name: string, lineId: string, machine: string, totalAmount: number, totalDurationSecs: number, operations: Set<string>}>);
+  }, {} as Record<string, {name: string, lineId: string, machine: string, operation: string, totalAmount: number, totalDurationSecs: number}>);
 
   const formatDuration = (secs: number) => {
     if (!secs) return 'غير مسجل';
@@ -151,7 +151,7 @@ export default function ProductivityReports() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-4 bg-gray-50 border-b flex items-center gap-2">
               <Users className="text-indigo-600" size={20} />
-              <h2 className="font-bold text-gray-800 text-lg">أداء العمال المفصل</h2>
+              <h2 className="font-bold text-gray-800 text-lg">أداء العمال المفصل (حسب العملية)</h2>
             </div>
             
             <div className="overflow-x-auto">
@@ -160,7 +160,7 @@ export default function ProductivityReports() {
                   <tr className="bg-gray-100 text-gray-600 text-sm">
                     <th className="p-3 whitespace-nowrap">العامل / الماكينة</th>
                     <th className="p-3 whitespace-nowrap">الخط</th>
-                    <th className="p-3 whitespace-nowrap">العمليات المنفذة</th>
+                    <th className="p-3 whitespace-nowrap">العملية المنفذة</th>
                     <th className="p-3 whitespace-nowrap">إجمالي الإنتاج</th>
                     <th className="p-3 whitespace-nowrap">الوقت الفعلي للعمل</th>
                     <th className="p-3 whitespace-nowrap">معدل السرعة (بالساعة)</th>
@@ -176,8 +176,8 @@ export default function ProductivityReports() {
                         <div className="text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded w-fit mt-1">{worker.machine || 'غير محدد'}</div>
                       </td>
                       <td className="p-3 text-sm font-bold text-gray-600">{LINES[worker.lineId] || worker.lineId}</td>
-                      <td className="p-3 text-xs text-gray-500 max-w-[200px] truncate" title={Array.from(worker.operations).join('، ')}>
-                        {Array.from(worker.operations).join('، ')}
+                      <td className="p-3 font-bold text-indigo-800">
+                        {worker.operation}
                       </td>
                       <td className="p-3">
                         <span className="font-black text-lg text-blue-700">{worker.totalAmount}</span>
