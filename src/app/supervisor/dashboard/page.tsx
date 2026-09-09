@@ -56,13 +56,17 @@ export default function SupervisorDashboard() {
   
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   
-  // Modal State
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedOrderForAssign, setSelectedOrderForAssign] = useState<any>(null);
   const [assignWorkerId, setAssignWorkerId] = useState('');
   const [assignColor, setAssignColor] = useState('');
   const [assignOperation, setAssignOperation] = useState('');
   const [assignQuantity, setAssignQuantity] = useState(0);
+
+  // Receive Modal State
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+  const [ordersToReceive, setOrdersToReceive] = useState<any[]>([]);
+  const [receiveSelections, setReceiveSelections] = useState<Record<string, { selected: boolean, qty: number }>>({});
 
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
@@ -152,8 +156,7 @@ export default function SupervisorDashboard() {
   const handleReceiveScannedBasket = async (decodedText: string) => {
     try {
       const cleanCode = decodedText.trim();
-      let docRefToUpdate = null;
-      let docData: any = null;
+      let toReceive: any[] = [];
 
       if (cleanCode.includes('/public/order/')) {
         const urlParts = cleanCode.split('/public/order/');
@@ -165,66 +168,78 @@ export default function SupervisorDashboard() {
            const data = snap.data();
            
            if (data.isArchived && data.splitStatus === 'split_parent') {
-             // It's a split parent, fetch the children
              const qChildren = query(collection(db, 'factory_production_orders'), where('originalOrderId', '==', docId));
              const childSnaps = await getDocs(qChildren);
-             
              if (!childSnaps.empty) {
-               // Update all children to move to this line
-               const promises = childSnaps.docs.map(childDoc => {
-                 // only move children that are not already "done"
-                 if (childDoc.data().currentLocation === 'done') return Promise.resolve();
-                 return updateDoc(childDoc.ref, {
-                   currentLocation: selectedLine,
-                   currentStage: 10,
-                   stageEnteredAt: new Date().toISOString(),
-                   history: arrayUnion({
-                     stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
-                     timestamp: new Date().toISOString()
-                   })
-                 });
-               });
-               await Promise.all(promises);
-               alert(`تم استلام الموديل المقسم (${childSnaps.docs.length} أجزاء) بنجاح!`);
-               fetchInbox(selectedLine);
-               return;
+                // filter out ones that are already done
+                toReceive = childSnaps.docs.filter(d => d.data().currentLocation !== 'done').map(d => ({id: d.id, ...d.data()}));
+             }
+           } else {
+             if (data.currentLocation !== 'done') {
+                toReceive.push({id: docRef.id, ...data});
              }
            }
-           
-           docRefToUpdate = docRef;
-           docData = data;
-           if (!docData.bundleCode) docData.bundleCode = `أمر كامل-${docId.slice(-4)}`;
-           if (!docData.modelNumber) docData.modelNumber = docData.modelName; 
         }
       } else {
         const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
-          docRefToUpdate = snapshot.docs[0].ref;
-          docData = snapshot.docs[0].data();
+          const data = snapshot.docs[0].data();
+          if (data.currentLocation !== 'done') {
+             toReceive.push({id: snapshot.docs[0].id, ...data});
+          }
         }
       }
 
-      if (!docRefToUpdate || !docData) {
-        alert(`لم يتم العثور على أمر الشغل! (المقروء: ${cleanCode})`);
+      if (toReceive.length === 0) {
+        alert(`لم يتم العثور على أوامر متاحة للاستلام! قد يكون تم إنهاء الموديل. (المقروء: ${cleanCode})`);
         return;
       }
       
-      await updateDoc(docRefToUpdate, {
-        currentLocation: selectedLine,
-        currentStage: 10, // 10 is 'قسم المكن'
-        stageEnteredAt: new Date().toISOString(),
-        history: arrayUnion({
-          stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
-          timestamp: new Date().toISOString()
-        })
+      const initialSelections: Record<string, {selected: boolean, qty: number}> = {};
+      toReceive.forEach(o => {
+         initialSelections[o.id] = { selected: true, qty: o.totalQuantity || 0 };
+         if (!o.bundleCode) o.bundleCode = `أمر كامل-${o.id.slice(-4)}`;
+         if (!o.modelNumber) o.modelNumber = o.modelName; 
       });
 
-      alert(`تم استلام الموديل ${docData.modelNumber} بنجاح!`);
-      fetchInbox(selectedLine);
+      setOrdersToReceive(toReceive);
+      setReceiveSelections(initialSelections);
+      setIsReceiveModalOpen(true);
+      
     } catch (err) {
       console.error(err);
       alert('حدث خطأ أثناء الاستلام.');
+    }
+  };
+
+  const handleConfirmReceive = async () => {
+    try {
+      const promises = ordersToReceive.map(async (order) => {
+         const sel = receiveSelections[order.id];
+         if (sel && sel.selected) {
+             return updateDoc(doc(db, 'factory_production_orders', order.id), {
+               currentLocation: selectedLine,
+               currentStage: 10,
+               receivedQuantity: sel.qty,
+               stageEnteredAt: new Date().toISOString(),
+               history: arrayUnion({
+                 stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
+                 quantity: sel.qty,
+                 timestamp: new Date().toISOString()
+               })
+             });
+         }
+         return Promise.resolve();
+      });
+      await Promise.all(promises);
+      setIsReceiveModalOpen(false);
+      setOrdersToReceive([]);
+      alert('تم الاستلام وتحديث حركة المصنع بنجاح!');
+      fetchInbox(selectedLine);
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء تأكيد الاستلام.');
     }
   };
 
@@ -406,6 +421,56 @@ export default function SupervisorDashboard() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 relative">
       
+      {/* Receive Modal */}
+      {isReceiveModalOpen && ordersToReceive.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
+            <button onClick={() => setIsReceiveModalOpen(false)} className="absolute top-4 left-4 text-gray-400 hover:text-gray-800">
+              <X size={24} />
+            </button>
+            <h2 className="text-xl font-bold mb-4 border-b pb-2">تأكيد استلام الموديل</h2>
+            
+            <p className="text-sm text-gray-500 mb-4">اختر الأجزاء التي استلمتها فعلياً وعدل الكميات إذا لزم الأمر:</p>
+
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {ordersToReceive.map(order => (
+                <div key={order.id} className={`flex flex-col gap-2 p-3 border-2 rounded-lg transition-all ${receiveSelections[order.id]?.selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
+                   <label className="flex items-center gap-3 font-bold text-gray-800 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={receiveSelections[order.id]?.selected} 
+                        onChange={(e) => setReceiveSelections({...receiveSelections, [order.id]: {...receiveSelections[order.id], selected: e.target.checked}})} 
+                        className="w-5 h-5 accent-blue-600" 
+                      />
+                      {order.modelName}
+                   </label>
+                   {receiveSelections[order.id]?.selected && (
+                     <div className="flex items-center gap-2 pr-8 mt-1">
+                       <span className="text-sm font-bold text-gray-600">الكمية المستلمة:</span>
+                       <input 
+                         type="number" 
+                         value={receiveSelections[order.id]?.qty} 
+                         onChange={(e) => setReceiveSelections({...receiveSelections, [order.id]: {...receiveSelections[order.id], qty: Number(e.target.value)}})} 
+                         className="w-24 p-1.5 border border-blue-300 rounded text-blue-900 font-bold bg-white text-center focus:ring-2 focus:ring-blue-500 outline-none" 
+                       />
+                       <span className="text-xs text-gray-400 font-normal">من أصل {order.totalQuantity}</span>
+                     </div>
+                   )}
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={handleConfirmReceive} 
+              disabled={Object.values(receiveSelections).filter(s => s.selected).length === 0}
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              تأكيد الاستلام
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Assign Modal */}
       {isAssignModalOpen && selectedOrderForAssign && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
@@ -482,7 +547,9 @@ export default function SupervisorDashboard() {
                 </button>
                 <div className="text-xs text-gray-500 mb-1">{basket.bundleCode}</div>
                 <div className="font-black text-xl text-blue-800 mb-1">{basket.modelNumber || basket.modelName}</div>
-                <div className="text-sm font-bold bg-gray-100 rounded-full py-1 border shadow-inner mb-3">{basket.totalQuantity} قطعة كلياً</div>
+                <div className="text-sm font-bold bg-gray-100 rounded-full py-1 border shadow-inner mb-3">
+                  {basket.receivedQuantity !== undefined ? `${basket.receivedQuantity} قطعة (مستلمة)` : `${basket.totalQuantity} قطعة كلياً`}
+                </div>
                 
                 <button onClick={() => openAssignModal(basket)} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg text-sm hover:bg-gray-900 shadow">
                   توزيع مهمة لـ عامل...
