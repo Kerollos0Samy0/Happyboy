@@ -45,7 +45,8 @@ export default function FactoryDashboard() {
     setIsBrowser(true);
     const q = query(collection(db, "factory_production_orders"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data = data.filter((doc: any) => !doc.isArchived);
       data.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0));
       setOrders(data);
       setLoading(false);
@@ -207,8 +208,11 @@ export default function FactoryDashboard() {
         });
       }
 
-      // Delete the original
-      await deleteDoc(doc(db, 'factory_production_orders', splitOrder.id));
+      // Archive the original so QR code still works
+      await updateDoc(doc(db, 'factory_production_orders', splitOrder.id), {
+        isArchived: true,
+        splitStatus: 'split_parent'
+      });
 
       setSplitOrder(null);
     } catch (err) {
@@ -216,6 +220,43 @@ export default function FactoryDashboard() {
       alert('حدث خطأ أثناء تقسيم أمر التشغيل');
     } finally {
       setSplitting(false);
+    }
+  };
+  const handleSplitByItem = async (order: any) => {
+    setActiveMenuId(null);
+    if (!confirm('هل تريد فصل هذا الموديل إلى (تيشيرت) و (بنطلون) لتتمكن من تحريكهم في الأقسام بشكل مستقل؟')) return;
+    
+    try {
+      const { id, createdAt, ...originalData } = order;
+
+      // Create T-shirt order
+      await addDoc(collection(db, 'factory_production_orders'), {
+        ...originalData,
+        modelName: `${originalData.modelName} (تيشيرت)`,
+        originalOrderId: originalData.originalOrderId || order.id,
+        isSplitChild: true,
+        createdAt: serverTimestamp(),
+      });
+
+      // Create Pants order
+      await addDoc(collection(db, 'factory_production_orders'), {
+        ...originalData,
+        modelName: `${originalData.modelName} (بنطلون)`,
+        originalOrderId: originalData.originalOrderId || order.id,
+        isSplitChild: true,
+        createdAt: serverTimestamp(),
+      });
+
+      // Archive original
+      await updateDoc(doc(db, 'factory_production_orders', order.id), {
+        isArchived: true,
+        splitStatus: 'split_parent'
+      });
+      
+      alert('تم فصل الموديل بنجاح!');
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء فصل الموديل');
     }
   };
   // ----------------------
@@ -316,9 +357,14 @@ export default function FactoryDashboard() {
                                         تعديل
                                       </Link>
                                       
-                                      {/* Split Button */}
+                                      {/* Split Color Button */}
                                       <button onClick={(e) => { e.stopPropagation(); openSplitModal(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
                                         <SplitSquareHorizontal size={13} className="text-blue-600" /> تقسيم الألوان
+                                      </button>
+
+                                      {/* Split Item Button */}
+                                      <button onClick={(e) => { e.stopPropagation(); handleSplitByItem(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
+                                        <SplitSquareHorizontal size={13} className="text-orange-600" /> فصل (تيشيرت/بنطلون)
                                       </button>
 
                                       <button onClick={(e) => { e.stopPropagation(); handleDuplicate(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2 border-t">

@@ -162,8 +162,37 @@ export default function SupervisorDashboard() {
         const docRef = doc(db, 'factory_production_orders', docId);
         const snap = await getDoc(docRef);
         if (snap.exists()) {
+           const data = snap.data();
+           
+           if (data.isArchived && data.splitStatus === 'split_parent') {
+             // It's a split parent, fetch the children
+             const qChildren = query(collection(db, 'factory_production_orders'), where('originalOrderId', '==', docId));
+             const childSnaps = await getDocs(qChildren);
+             
+             if (!childSnaps.empty) {
+               // Update all children to move to this line
+               const promises = childSnaps.docs.map(childDoc => {
+                 // only move children that are not already "done"
+                 if (childDoc.data().currentLocation === 'done') return Promise.resolve();
+                 return updateDoc(childDoc.ref, {
+                   currentLocation: selectedLine,
+                   currentStage: 10,
+                   stageEnteredAt: new Date().toISOString(),
+                   history: arrayUnion({
+                     stageName: `استلام المشرف (${supervisorName}) - ${LINES.find(l => l.id === selectedLine)?.name || selectedLine}`,
+                     timestamp: new Date().toISOString()
+                   })
+                 });
+               });
+               await Promise.all(promises);
+               alert(`تم استلام الموديل المقسم (${childSnaps.docs.length} أجزاء) بنجاح!`);
+               fetchInbox(selectedLine);
+               return;
+             }
+           }
+           
            docRefToUpdate = docRef;
-           docData = snap.data();
+           docData = data;
            if (!docData.bundleCode) docData.bundleCode = `أمر كامل-${docId.slice(-4)}`;
            if (!docData.modelNumber) docData.modelNumber = docData.modelName; 
         }
