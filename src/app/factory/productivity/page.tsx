@@ -147,10 +147,10 @@ export default function ProductivityPage() {
                   className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                 >
                   <option value="">-- عام --</option>
-                  <option value="line_1">خط تقفيل 1</option>
-                  <option value="line_2">خط تقفيل 2</option>
-                  <option value="line_3">خط تقفيل 3</option>
-                  <option value="line_4">خط تقفيل 4</option>
+                  <option value="line_1">خط هبة</option>
+                  <option value="line_2">خط فرج</option>
+                  <option value="line_3">خط كريم</option>
+                  <option value="line_4">خط عبده</option>
                 </select>
               </div>
             )}

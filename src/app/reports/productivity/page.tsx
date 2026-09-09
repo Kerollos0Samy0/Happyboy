@@ -22,10 +22,10 @@ type ProductivityLog = {
 };
 
 const LINES: Record<string, string> = {
-  'line_1': 'خط تقفيل 1',
-  'line_2': 'خط تقفيل 2',
-  'line_3': 'خط تقفيل 3',
-  'line_4': 'خط تقفيل 4',
+  'line_1': 'خط هبة',
+  'line_2': 'خط فرج',
+  'line_3': 'خط كريم',
+  'line_4': 'خط عبده',
 };
 
 export default function ProductivityReports() {

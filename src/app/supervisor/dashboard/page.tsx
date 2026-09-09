@@ -7,10 +7,10 @@ import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
 import { Users, Camera, ArrowDown, Clock, Edit2, Check, ArrowUp, ArrowDown as ArrowDownIcon, Trash2, Plus, X, Play, Pause } from 'lucide-react';
 
 const LINES = [
-  { id: 'line_1', name: 'خط تقفيل 1' },
-  { id: 'line_2', name: 'خط تقفيل 2' },
-  { id: 'line_3', name: 'خط تقفيل 3' },
-  { id: 'line_4', name: 'خط تقفيل 4' },
+  { id: 'line_1', name: 'خط هبة' },
+  { id: 'line_2', name: 'خط فرج' },
+  { id: 'line_3', name: 'خط كريم' },
+  { id: 'line_4', name: 'خط عبده' },
 ];
 
 const MACHINE_COLORS: Record<string, string> = {
