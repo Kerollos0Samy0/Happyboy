@@ -44,6 +44,12 @@ export default function WorkerScannerPage() {
   const [editablePairs, setEditablePairs] = useState<any[]>([]);
   const [editableTotalQty, setEditableTotalQty] = useState<number>(0);
   const [workerNote, setWorkerNote] = useState("");
+  
+  // Custom states for Cutting Department (Stage 4)
+  const [fabricUnit, setFabricUnit] = useState<'توب' | 'كيلو'>('توب');
+  const [fabricAmount, setFabricAmount] = useState<number | ''>('');
+  const [fabricColors, setFabricColors] = useState<string>('');
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -98,6 +104,8 @@ export default function WorkerScannerPage() {
     setEditablePairs(data.colorPairs || []);
     setEditableTotalQty(data.totalQuantity || 0);
     setWorkerNote("");
+    setFabricAmount('');
+    setFabricColors('');
   };
 
   const fetchOrderDetails = async (scannedText: string) => {
@@ -106,6 +114,8 @@ export default function WorkerScannerPage() {
     setOrderData(null);
     setSplitOptions([]);
     setSuccess("");
+    setFabricAmount('');
+    setFabricColors('');
 
     try {
       let orderId = scannedText;
@@ -162,8 +172,14 @@ export default function WorkerScannerPage() {
       }
 
       let newNotes = orderData.workerNotes || "";
+      const stageName = STAGES.find(s => s.id === selectedStage)?.name;
+      
+      // Add cutting department info to notes if applicable
+      if (selectedStage === 4 && fabricAmount && fabricColors) {
+         newNotes += `\n[${workerName} - ${stageName} (استلام القماش)]: استلمت ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
+      }
+
       if (workerNote.trim()) {
-         const stageName = STAGES.find(s => s.id === selectedStage)?.name;
          newNotes += `\n[${workerName} - ${stageName}]: ${workerNote.trim()}`;
       }
 
@@ -406,6 +422,50 @@ export default function WorkerScannerPage() {
                 </div>
               )}
             </div>
+
+            {selectedStage === 4 && (
+              <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 mb-6 text-right animate-fade-in">
+                <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                  <CheckCircle size={18} />
+                  تسجيل استلام القماش (قسم القص)
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="block text-sm font-bold text-blue-700 mb-1">الكمية المستلمة</label>
+                      <input 
+                        type="number" 
+                        value={fabricAmount}
+                        onChange={(e) => setFabricAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="مثال: 5"
+                      />
+                    </div>
+                    <div className="w-24">
+                      <label className="block text-sm font-bold text-blue-700 mb-1">الوحدة</label>
+                      <select 
+                        value={fabricUnit}
+                        onChange={(e) => setFabricUnit(e.target.value as 'توب' | 'كيلو')}
+                        className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="توب">توب</option>
+                        <option value="كيلو">كيلو</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-blue-700 mb-1">ألوان القماش المستلم</label>
+                    <input 
+                      type="text" 
+                      value={fabricColors}
+                      onChange={(e) => setFabricColors(e.target.value)}
+                      className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="مثال: أحمر، أزرق، أسود..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
               <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
