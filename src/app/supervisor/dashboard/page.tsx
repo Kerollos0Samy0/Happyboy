@@ -761,21 +761,21 @@ export default function SupervisorDashboard() {
                      </div>
                      
                      {!isEditingLine && (
-                       <div className="w-full flex flex-col gap-2">
+                       <div className="w-full flex flex-row gap-2 mt-1">
                          {(!activeTask.status || activeTask.status === 'assigned' || activeTask.status === 'paused') && (
-                           <button onClick={() => handleStartTask(worker.id)} className="w-full bg-green-600 text-white hover:bg-green-700 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
-                             <Play size={16} /> {activeTask.status === 'paused' ? 'استئناف العمل' : 'بدء العمل'}
+                           <button onClick={() => handleStartTask(worker.id)} className="flex-1 bg-green-600 text-white hover:bg-green-700 py-2 rounded-lg text-xs font-black transition shadow-sm flex items-center justify-center gap-1">
+                             <Play size={14} /> {activeTask.status === 'paused' ? 'استئناف' : 'بدء العمل'}
                            </button>
                          )}
                          
                          {activeTask.status === 'running' && (
-                           <button onClick={() => handlePauseTask(worker.id)} className="w-full bg-orange-500 text-white hover:bg-orange-600 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
-                             <Pause size={16} /> إيقاف مؤقت (بريك)
+                           <button onClick={() => handlePauseTask(worker.id)} className="flex-1 bg-orange-500 text-white hover:bg-orange-600 py-2 rounded-lg text-xs font-black transition shadow-sm flex items-center justify-center gap-1">
+                             <Pause size={14} /> بريك مؤقت
                            </button>
                          )}
 
-                         <button onClick={() => handleEndTask(worker.id)} className="w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
-                           نهاية القماش (إنهاء المهمة)
+                         <button onClick={() => handleEndTask(worker.id)} className="flex-1 bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-xs font-black transition shadow-sm">
+                           إنهاء المهمة
                          </button>
                        </div>
                      )}
