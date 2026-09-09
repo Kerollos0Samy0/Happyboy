@@ -424,12 +424,21 @@ export default function SupervisorDashboard() {
          totalPausedStr = ` (توقف: ${Math.floor(task.totalPausedSeconds/60)} دقيقة)`;
       }
 
+      const endTime = new Date().toISOString();
+      let effectiveDurationSeconds = 0;
+      if (task.startedAt) {
+         const startMs = new Date(task.startedAt).getTime();
+         const endMs = new Date(endTime).getTime();
+         effectiveDurationSeconds = Math.floor((endMs - startMs) / 1000) - (task.totalPausedSeconds || 0);
+         if (effectiveDurationSeconds < 0) effectiveDurationSeconds = 0;
+      }
+
       await updateDoc(doc(db, 'factory_production_orders', task.orderId), {
         history: arrayUnion({
           stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}${totalPausedStr}`,
           quantity: task.quantity,
           startTime: task.startedAt || task.assignedAt,
-          endTime: new Date().toISOString()
+          endTime: endTime
         })
       });
 
@@ -442,7 +451,17 @@ export default function SupervisorDashboard() {
         amount: task.quantity,
         unit: 'قطعة',
         notes: `تسجيل آلي: ${worker.name} (${worker.machine}) - ${task.operation}`,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // New details for reports
+        workerId: worker.id,
+        workerName: worker.name,
+        machine: worker.machine,
+        operation: task.operation,
+        color: task.color,
+        startTime: task.startedAt || task.assignedAt,
+        endTime: endTime,
+        totalPausedSeconds: task.totalPausedSeconds || 0,
+        effectiveDurationSeconds: effectiveDurationSeconds
       });
 
       // 3. Clear activeTask

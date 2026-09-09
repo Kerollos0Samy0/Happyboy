@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus } from "lucide-react";
+import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus, History, Clock } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -33,6 +33,8 @@ export default function FactoryDashboard() {
   const [savingCosts, setSavingCosts] = useState(false);
   const [isBrowser, setIsBrowser] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  const [historyOrder, setHistoryOrder] = useState<any | null>(null);
   
   // Split Feature State
   const [splitOrder, setSplitOrder] = useState<any | null>(null);
@@ -276,12 +278,20 @@ export default function FactoryDashboard() {
           <h2 className="text-2xl font-bold text-gray-800">حركة المصنع (لوحة الإنتاج) 🏭</h2>
           <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإسقاط الكروت (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
         </div>
-        <Link 
-          href="/factory/production/new" 
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition flex items-center gap-2"
-        >
-          <span className="text-xl leading-none">+</span> إصدار أمر تشغيل
-        </Link>
+        <div className="flex gap-2">
+          <Link 
+            href="/reports/productivity" 
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-indigo-700 transition flex items-center gap-2"
+          >
+            تقارير الإنتاجية 📊
+          </Link>
+          <Link 
+            href="/factory/production/new" 
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <span className="text-xl leading-none">+</span> إصدار أمر تشغيل
+          </Link>
+        </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -356,6 +366,13 @@ export default function FactoryDashboard() {
                                         <Edit size={13} />
                                         تعديل
                                       </Link>
+
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); setHistoryOrder(order); setActiveMenuId(null); }} 
+                                        className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2 text-purple-700 border-t"
+                                      >
+                                        <History size={13} /> سجل الحركة (History)
+                                      </button>
                                       
                                       {/* Split Color Button */}
                                       <button onClick={(e) => { e.stopPropagation(); openSplitModal(order); }} className="text-right px-2 py-1.5 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
@@ -424,6 +441,59 @@ export default function FactoryDashboard() {
           </div>
         </div>
       </DragDropContext>
+
+      {/* History Modal */}
+      {historyOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" dir="rtl">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <History size={20} className="text-purple-600" />
+                سجل حركة الموديل: {historyOrder.modelName}
+              </h3>
+              <button onClick={() => setHistoryOrder(null)} className="text-gray-400 hover:text-red-500 transition">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar bg-gray-50">
+              {(!historyOrder.history || historyOrder.history.length === 0) ? (
+                <div className="text-center text-gray-500 py-10 font-bold">لا توجد حركات مسجلة لهذا الموديل حتى الآن.</div>
+              ) : (
+                <div className="space-y-4">
+                  {historyOrder.history.map((event: any, idx: number) => (
+                    <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex gap-4 relative">
+                       <div className="flex flex-col items-center">
+                         <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                           {idx + 1}
+                         </div>
+                         {idx !== historyOrder.history.length - 1 && <div className="w-0.5 h-full bg-gray-200 mt-2"></div>}
+                       </div>
+                       
+                       <div className="flex-1 pb-4">
+                         <h4 className="font-black text-gray-800 mb-1">{event.stageName}</h4>
+                         {event.quantity && <p className="text-sm text-gray-600"><strong>الكمية:</strong> {event.quantity} قطعة</p>}
+                         
+                         <div className="flex gap-4 mt-2 text-xs text-gray-500 font-bold">
+                           {event.timestamp && (
+                             <span className="flex items-center gap-1"><Clock size={12}/> {new Date(event.timestamp).toLocaleString('ar-EG')}</span>
+                           )}
+                           {event.startTime && (
+                             <span className="flex items-center gap-1 text-green-600"><Clock size={12}/> بدأ: {new Date(event.startTime).toLocaleTimeString('ar-EG')}</span>
+                           )}
+                           {event.endTime && (
+                             <span className="flex items-center gap-1 text-red-600"><Clock size={12}/> انتهى: {new Date(event.endTime).toLocaleTimeString('ar-EG')}</span>
+                           )}
+                         </div>
+                       </div>
+                    </div>
+                  )).reverse()}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Split Modal */}
       {splitOrder && (
