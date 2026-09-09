@@ -123,6 +123,21 @@ export default function SupervisorDashboard() {
   const [ordersToReceive, setOrdersToReceive] = useState<any[]>([]);
   const [receiveSelections, setReceiveSelections] = useState<Record<string, { selected: boolean, qty: number }>>({});
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const adminView = urlParams.get('adminView');
+      const lineParam = urlParams.get('lineId');
+      if (adminView === 'true' && lineParam) {
+        setSelectedLine(lineParam);
+        setSupervisorName('الإدارة (مراقبة)');
+        setIsAuthenticated(true);
+        fetchLineConfig(lineParam);
+        fetchInbox(lineParam);
+      }
+    }
+  }, []);
+
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

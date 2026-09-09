@@ -138,11 +138,20 @@ export default function ProductivityReports() {
           {/* Line Totals Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(LINES).filter(([id]) => !lineFilter || id === lineFilter).map(([id, name]) => (
-              <div key={id} className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100 shadow-sm relative overflow-hidden">
-                <div className="absolute -left-4 -bottom-4 opacity-5"><BarChart3 size={100} /></div>
-                <h3 className="font-bold text-indigo-900 text-lg mb-2">{name}</h3>
-                <div className="text-3xl font-black text-indigo-600 mb-1">{lineStats[id] || 0} <span className="text-sm font-bold text-gray-500">قطعة</span></div>
-                <p className="text-xs text-indigo-400 font-bold">إجمالي إنتاج اليوم المنتهي</p>
+              <div key={id} className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div>
+                  <div className="absolute -left-4 -bottom-4 opacity-5"><BarChart3 size={100} /></div>
+                  <h3 className="font-bold text-indigo-900 text-lg mb-2">{name}</h3>
+                  <div className="text-3xl font-black text-indigo-600 mb-1">{lineStats[id] || 0} <span className="text-sm font-bold text-gray-500">قطعة</span></div>
+                  <p className="text-xs text-indigo-400 font-bold mb-4">إجمالي إنتاج اليوم المنتهي</p>
+                </div>
+                <Link 
+                  href={`/supervisor/dashboard?adminView=true&lineId=${id}`}
+                  target="_blank"
+                  className="bg-indigo-600 text-white font-bold text-sm py-2 px-4 rounded hover:bg-indigo-700 transition shadow-sm text-center w-full z-10 block"
+                >
+                  عرض اللوحة الحية 🔴
+                </Link>
               </div>
             ))}
           </div>
