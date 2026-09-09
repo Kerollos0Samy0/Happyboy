@@ -43,6 +43,52 @@ type Worker = {
   activeTask?: WorkerTask | null;
 };
 
+const LiveTimer = ({ task }: { task: WorkerTask }) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!task.startedAt) return;
+    
+    // Initial calculation to prevent 1-sec delay
+    const calculateElapsed = () => {
+      const startMs = new Date(task.startedAt!).getTime();
+      let currentElapsed = 0;
+      if (task.status === 'paused' && task.lastPauseTime) {
+         const pauseMs = new Date(task.lastPauseTime).getTime();
+         currentElapsed = Math.floor((pauseMs - startMs) / 1000) - (task.totalPausedSeconds || 0);
+      } else {
+         const nowMs = new Date().getTime();
+         currentElapsed = Math.floor((nowMs - startMs) / 1000) - (task.totalPausedSeconds || 0);
+      }
+      return currentElapsed > 0 ? currentElapsed : 0;
+    };
+
+    setElapsed(calculateElapsed());
+
+    if (task.status === 'paused') return;
+
+    const interval = setInterval(() => {
+      setElapsed(calculateElapsed());
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [task.startedAt, task.status, task.lastPauseTime, task.totalPausedSeconds]);
+
+  if (!task.startedAt) return null;
+
+  const hours = Math.floor(elapsed / 3600);
+  const minutes = Math.floor((elapsed % 3600) / 60);
+  const seconds = elapsed % 60;
+  
+  const formatted = `${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  return (
+    <div className={`font-mono font-bold text-2xl ${task.status === 'paused' ? 'text-orange-500' : 'text-green-600'} transition-colors`}>
+      {formatted} {task.status === 'paused' ? <span className="text-sm">⏸</span> : ''}
+    </div>
+  );
+};
+
 export default function SupervisorDashboard() {
   const [selectedLine, setSelectedLine] = useState('');
   const [supervisorName, setSupervisorName] = useState('');
@@ -642,38 +688,51 @@ export default function SupervisorDashboard() {
                      {activeTask.quantity} قطعة
                    </div>
                    
-                   <div className="mt-2 text-xs font-bold flex flex-col items-center gap-1 text-gray-500 bg-white px-3 py-1.5 rounded shadow-sm w-full">
-                     <div className="flex items-center gap-1">
-                       <Clock size={12} className="text-orange-500" />
-                       توزيع: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                   <div className="mt-2 w-full">
+                     <div className="text-xs font-bold flex flex-col items-center gap-1 text-gray-500 bg-white px-3 py-2 rounded shadow-sm w-full border border-gray-100 mb-2">
+                       <div className="flex justify-between w-full border-b pb-1 mb-1">
+                         <div className="flex items-center gap-1">
+                           <Clock size={12} className="text-orange-500" />
+                           توزيع: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                         </div>
+                         {activeTask.startedAt && (
+                           <div className="flex items-center gap-1 text-green-600">
+                             <Play size={12} />
+                             بدء: {new Date(activeTask.startedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                           </div>
+                         )}
+                       </div>
+                       
+                       {activeTask.startedAt ? (
+                         <div className="flex flex-col items-center justify-center w-full pt-1">
+                           <span className="text-[10px] text-gray-400 mb-1">وقت التشغيل الفعلي</span>
+                           <LiveTimer task={activeTask} />
+                         </div>
+                       ) : (
+                         <div className="text-gray-400 py-1">في انتظار بدء العمل...</div>
+                       )}
                      </div>
-                     {activeTask.startedAt && (
-                       <div className="flex items-center gap-1 text-green-600">
-                         <Play size={12} />
-                         بدء: {new Date(activeTask.startedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                     
+                     {!isEditingLine && (
+                       <div className="w-full flex flex-col gap-2">
+                         {(!activeTask.status || activeTask.status === 'assigned' || activeTask.status === 'paused') && (
+                           <button onClick={() => handleStartTask(worker.id)} className="w-full bg-green-600 text-white hover:bg-green-700 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
+                             <Play size={16} /> {activeTask.status === 'paused' ? 'استئناف العمل' : 'بدء العمل'}
+                           </button>
+                         )}
+                         
+                         {activeTask.status === 'running' && (
+                           <button onClick={() => handlePauseTask(worker.id)} className="w-full bg-orange-500 text-white hover:bg-orange-600 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
+                             <Pause size={16} /> إيقاف مؤقت (بريك)
+                           </button>
+                         )}
+
+                         <button onClick={() => handleEndTask(worker.id)} className="w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
+                           نهاية القماش (إنهاء المهمة)
+                         </button>
                        </div>
                      )}
                    </div>
-                   
-                   {!isEditingLine && (
-                     <div className="w-full mt-3 flex flex-col gap-2">
-                       {(!activeTask.status || activeTask.status === 'assigned' || activeTask.status === 'paused') && (
-                         <button onClick={() => handleStartTask(worker.id)} className="w-full bg-green-600 text-white hover:bg-green-700 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
-                           <Play size={16} /> {activeTask.status === 'paused' ? 'استئناف العمل' : 'بدء العمل'}
-                         </button>
-                       )}
-                       
-                       {activeTask.status === 'running' && (
-                         <button onClick={() => handlePauseTask(worker.id)} className="w-full bg-orange-500 text-white hover:bg-orange-600 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
-                           <Pause size={16} /> إيقاف مؤقت (بريك)
-                         </button>
-                       )}
-
-                       <button onClick={() => handleEndTask(worker.id)} className="w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
-                         نهاية القماش (إنهاء المهمة)
-                       </button>
-                     </div>
-                   )}
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center min-h-[120px] bg-white rounded-lg border border-dashed border-gray-300 shadow-inner">
