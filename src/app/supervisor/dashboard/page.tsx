@@ -504,6 +504,18 @@ export default function SupervisorDashboard() {
     }
   };
 
+  const handleCancelActiveTask = async (workerId: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذه المهمة نهائياً بدون تسجيل إنتاجية؟ (تستخدم فقط في حالة الخطأ أو المسح)")) return;
+    
+    const workerIndex = workers.findIndex(w => w.id === workerId);
+    if (workerIndex === -1 || !workers[workerIndex].tasks || workers[workerIndex].tasks!.length === 0) return;
+    
+    const newWorkers = [...workers];
+    newWorkers[workerIndex].tasks!.shift(); // Remove the active task (index 0)
+    
+    await saveLineConfig(newWorkers);
+  };
+
   const handleCancelPendingTask = async (workerId: string, taskIndex: number) => {
     if (!confirm("هل أنت متأكد من إلغاء هذه المهمة من الطابور؟")) return;
     
@@ -866,6 +878,9 @@ export default function SupervisorDashboard() {
 
                          <button onClick={() => handleEndTask(worker.id)} className="flex-1 bg-white border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg text-xs font-black transition shadow-sm flex items-center justify-center">
                            إنهاء المهمة
+                         </button>
+                         <button onClick={() => handleCancelActiveTask(worker.id)} className="bg-red-50 border border-red-100 text-red-500 hover:bg-red-100 hover:text-red-700 py-2 px-3 rounded-lg transition shadow-sm flex items-center justify-center shrink-0" title="مسح وإلغاء المهمة">
+                           <Trash2 size={16} />
                          </button>
                        </div>
                      )}
