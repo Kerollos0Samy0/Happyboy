@@ -202,7 +202,13 @@ export default function WorkerScannerPage() {
 
       let newTotal = editableTotalQty;
       if (editablePairs && editablePairs.length > 0) {
-         newTotal = editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+         newTotal = editablePairs.reduce((sum, p) => {
+           let multiplier = 0;
+           if (p.tshirt && p.tshirt.trim() !== '') multiplier++;
+           if (p.pants && p.pants.trim() !== '') multiplier++;
+           if (multiplier === 0) multiplier = 1;
+           return sum + ((Number(p.quantity) || 0) * multiplier);
+         }, 0);
       }
 
       let newNotes = orderData.workerNotes || "";
@@ -514,7 +520,13 @@ export default function WorkerScannerPage() {
                         </div>
                       ))}
                       <div className="text-left mt-2 font-bold text-gray-700">
-                        الإجمالي: {editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0)} قطعة
+                        الإجمالي: {editablePairs.reduce((sum, p) => {
+                          let multiplier = 0;
+                          if (p.tshirt && p.tshirt.trim() !== '') multiplier++;
+                          if (p.pants && p.pants.trim() !== '') multiplier++;
+                          if (multiplier === 0) multiplier = 1;
+                          return sum + ((Number(p.quantity) || 0) * multiplier);
+                        }, 0)} قطعة
                       </div>
                     </div>
                   ) : (

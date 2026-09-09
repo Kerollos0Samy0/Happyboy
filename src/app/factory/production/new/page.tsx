@@ -36,8 +36,15 @@ export default function NewProductionOrderPage() {
 
   // Auto-calculate total quantity based on colors
   useEffect(() => {
-    const calculatedTotal = colorPairs.reduce((sum, pair) => sum + (Number(pair.quantity) || 0), 0);
-    if (calculatedTotal > 0) {
+    const calculatedTotal = colorPairs.reduce((sum, pair) => {
+      let multiplier = 0;
+      if (pair.tshirt && pair.tshirt.trim() !== '') multiplier++;
+      if (pair.pants && pair.pants.trim() !== '') multiplier++;
+      if (multiplier === 0) multiplier = 1;
+      return sum + ((Number(pair.quantity) || 0) * multiplier);
+    }, 0);
+    
+    if (calculatedTotal > 0 || colorPairs.length > 0) {
       setTotalQuantity(calculatedTotal.toString());
     }
   }, [colorPairs]);
