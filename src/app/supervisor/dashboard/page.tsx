@@ -112,6 +112,7 @@ export default function SupervisorDashboard() {
   const [assignWorkerId, setAssignWorkerId] = useState('');
   const [assignColor, setAssignColor] = useState('');
   const [assignOperation, setAssignOperation] = useState('');
+  const [showOpSuggestions, setShowOpSuggestions] = useState(false);
   const [assignQuantity, setAssignQuantity] = useState(0);
 
   const [savedOperations, setSavedOperations] = useState<string[]>(DEFAULT_OPERATIONS);
@@ -592,19 +593,41 @@ export default function SupervisorDashboard() {
                 </select>
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-bold text-gray-700 mb-1">العملية المطلوبة (مثل: تركيب كم، أوفر جيوب) *</label>
                 <input 
                   type="text" 
-                  list="operations-list"
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
                   placeholder="ابحث أو اكتب عملية جديدة..." 
                   value={assignOperation} 
-                  onChange={e => setAssignOperation(e.target.value)} 
+                  onChange={e => {
+                     setAssignOperation(e.target.value);
+                     setShowOpSuggestions(true);
+                  }}
+                  onFocus={() => setShowOpSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowOpSuggestions(false), 200)}
                 />
-                <datalist id="operations-list">
-                  {savedOperations.map((op, idx) => <option key={idx} value={op} />)}
-                </datalist>
+                {showOpSuggestions && (
+                  <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                    {savedOperations
+                      .filter(op => op.replace(/[أإآا]/g, '').includes(assignOperation.replace(/[أإآا]/g, '')))
+                      .map((op, idx) => (
+                      <li 
+                        key={idx} 
+                        className="p-2 hover:bg-blue-50 cursor-pointer font-bold text-sm text-gray-800 border-b last:border-b-0"
+                        onMouseDown={() => {
+                          setAssignOperation(op);
+                          setShowOpSuggestions(false);
+                        }}
+                      >
+                        {op}
+                      </li>
+                    ))}
+                    {assignOperation && savedOperations.filter(op => op.replace(/[أإآا]/g, '').includes(assignOperation.replace(/[أإآا]/g, ''))).length === 0 && (
+                       <li className="p-2 text-gray-500 text-xs bg-gray-50 italic">سيتم إضافة "{assignOperation}" كعملية جديدة في القائمة</li>
+                    )}
+                  </ul>
+                )}
               </div>
 
               <div>
