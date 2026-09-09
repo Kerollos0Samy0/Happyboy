@@ -803,38 +803,38 @@ export default function SupervisorDashboard() {
                      {!activeTask.status || activeTask.status === 'assigned' ? 'في الانتظار (لم يبدأ)' : activeTask.status === 'paused' ? 'متوقف مؤقتاً' : 'جاري العمل الآن'}
                    </div>
                    
-                   <div className="flex justify-between items-center w-full px-2 mb-2">
-                      <div className="flex flex-col items-start">
+                   <div className="flex flex-col xl:flex-row justify-between items-center w-full px-1 mb-2 gap-2 text-center">
+                      <div className="flex flex-col items-center xl:items-start shrink-0">
                         <span className="text-[10px] text-gray-500 font-bold">الموديل</span>
                         <span className="font-black text-xl text-blue-900 leading-none">{activeTask.modelNumber}</span>
                       </div>
-                      <div className="text-sm font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                      <div className="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-1.5 rounded-lg border border-indigo-200 shadow-sm whitespace-normal leading-tight w-full xl:w-auto">
                         {activeTask.operation}
                       </div>
                    </div>
                    
-                   <div className="flex justify-between items-center w-full px-2 mb-2 gap-2">
+                   <div className="flex flex-col xl:flex-row justify-between items-center w-full px-1 mb-2 gap-2">
                       {activeTask.color && activeTask.color !== 'بدون تحديد' ? (
-                        <div className="flex-1 text-xs font-bold text-gray-700 bg-white px-2 py-1.5 rounded border border-gray-200 shadow-sm text-right truncate" title={activeTask.color}>
+                        <div className="w-full xl:flex-1 text-[10px] font-bold text-gray-700 bg-white px-2 py-1.5 rounded border border-gray-200 shadow-sm text-center truncate" title={activeTask.color}>
                           {activeTask.color}
                         </div>
-                      ) : <div className="flex-1"></div>}
+                      ) : <div className="hidden xl:block flex-1"></div>}
                       
-                      <div className="font-black text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm whitespace-nowrap">
+                      <div className="w-full xl:w-auto font-black text-blue-800 bg-blue-50 px-2 py-1.5 rounded-lg border border-blue-200 shadow-sm text-center text-xs shrink-0">
                         {activeTask.quantity} قطعة
                       </div>
                    </div>
                    
                    <div className="mt-2 w-full">
                      <div className="text-xs font-bold flex flex-col items-center gap-1 text-gray-500 bg-white px-3 py-2 rounded shadow-sm w-full border border-gray-100 mb-2">
-                       <div className="flex justify-between w-full border-b pb-1 mb-1">
-                         <div className="flex items-center gap-1">
-                           <Clock size={12} className="text-orange-500" />
+                       <div className="flex flex-col lg:flex-row justify-between w-full border-b pb-1 mb-1 text-[9px] gap-1">
+                         <div className="flex items-center justify-center lg:justify-start gap-1">
+                           <Clock size={10} className="text-orange-500 shrink-0" />
                            توزيع: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
                          </div>
                          {activeTask.startedAt && (
-                           <div className="flex items-center gap-1 text-green-600">
-                             <Play size={12} />
+                           <div className="flex items-center justify-center lg:justify-end gap-1 text-green-600">
+                             <Play size={10} className="shrink-0" />
                              بدء: {new Date(activeTask.startedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
                            </div>
                          )}
