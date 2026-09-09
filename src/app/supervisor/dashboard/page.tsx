@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { Users, Camera, ArrowDown, Clock, Edit2, Check, ArrowUp, ArrowDown as ArrowDownIcon, Trash2, Plus, X } from 'lucide-react';
+import { Users, Camera, ArrowDown, Clock, Edit2, Check, ArrowUp, ArrowDown as ArrowDownIcon, Trash2, Plus, X, Play, Pause } from 'lucide-react';
 
 const LINES = [
   { id: 'line_1', name: 'خط تقفيل 1' },
@@ -29,6 +29,10 @@ type WorkerTask = {
   operation: string;
   quantity: number;
   assignedAt: string;
+  status?: 'assigned' | 'running' | 'paused';
+  startedAt?: string | null;
+  lastPauseTime?: string | null;
+  totalPausedSeconds?: number;
 };
 
 type Worker = {
@@ -244,11 +248,44 @@ export default function SupervisorDashboard() {
       color: assignColor || 'بدون تحديد',
       operation: assignOperation,
       quantity: Number(assignQuantity),
-      assignedAt: new Date().toISOString()
+      assignedAt: new Date().toISOString(),
+      status: 'assigned',
+      totalPausedSeconds: 0
     };
 
     await saveLineConfig(newWorkers);
     setIsAssignModalOpen(false);
+  };
+
+  const handleStartTask = async (workerId: string) => {
+    const workerIndex = workers.findIndex(w => w.id === workerId);
+    if (workerIndex === -1 || !workers[workerIndex].activeTask) return;
+    
+    const task = workers[workerIndex].activeTask!;
+    const newWorkers = [...workers];
+    
+    if (task.status === 'paused' && task.lastPauseTime) {
+      const pauseDuration = (new Date().getTime() - new Date(task.lastPauseTime).getTime()) / 1000;
+      newWorkers[workerIndex].activeTask!.totalPausedSeconds = (task.totalPausedSeconds || 0) + pauseDuration;
+    } else if (task.status === 'assigned' || !task.status) {
+      newWorkers[workerIndex].activeTask!.startedAt = new Date().toISOString();
+    }
+    
+    newWorkers[workerIndex].activeTask!.status = 'running';
+    newWorkers[workerIndex].activeTask!.lastPauseTime = null;
+    
+    await saveLineConfig(newWorkers);
+  };
+
+  const handlePauseTask = async (workerId: string) => {
+    const workerIndex = workers.findIndex(w => w.id === workerId);
+    if (workerIndex === -1 || !workers[workerIndex].activeTask) return;
+    
+    const newWorkers = [...workers];
+    newWorkers[workerIndex].activeTask!.status = 'paused';
+    newWorkers[workerIndex].activeTask!.lastPauseTime = new Date().toISOString();
+    
+    await saveLineConfig(newWorkers);
   };
 
   const handleEndTask = async (workerId: string) => {
@@ -261,12 +298,17 @@ export default function SupervisorDashboard() {
     try {
       const task = worker.activeTask;
       
-      // 1. Update the order history
+      // Calculate effective duration if it was started
+      let totalPausedStr = "";
+      if (task.totalPausedSeconds && task.totalPausedSeconds > 60) {
+         totalPausedStr = ` (توقف: ${Math.floor(task.totalPausedSeconds/60)} دقيقة)`;
+      }
+
       await updateDoc(doc(db, 'factory_production_orders', task.orderId), {
         history: arrayUnion({
-          stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}`,
+          stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}${totalPausedStr}`,
           quantity: task.quantity,
-          startTime: task.assignedAt,
+          startTime: task.startedAt || task.assignedAt,
           endTime: new Date().toISOString()
         })
       });
@@ -485,7 +527,9 @@ export default function SupervisorDashboard() {
 
               {activeTask ? (
                 <div className="bg-blue-50 p-3 rounded-lg flex-1 border border-blue-200 flex flex-col justify-center items-center relative shadow-inner">
-                   <div className="text-xs text-blue-500 font-bold mb-1 border-b border-blue-200 w-full text-center pb-1">جاري العمل على</div>
+                   <div className="text-xs text-blue-500 font-bold mb-1 border-b border-blue-200 w-full text-center pb-1">
+                     {!activeTask.status || activeTask.status === 'assigned' ? 'مهمة قيد الانتظار' : activeTask.status === 'paused' ? 'مهمة متوقفة مؤقتاً' : 'جاري العمل الآن'}
+                   </div>
                    
                    <div className="font-black text-2xl text-blue-900 leading-none mb-1">{activeTask.modelNumber}</div>
                    <div className="text-sm font-bold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full mb-1 border border-indigo-200">
@@ -502,15 +546,37 @@ export default function SupervisorDashboard() {
                      {activeTask.quantity} قطعة
                    </div>
                    
-                   <div className="mt-3 text-xs font-bold flex items-center gap-1 text-gray-500 bg-white px-2 py-1 rounded shadow-sm">
-                     <Clock size={12} className="text-orange-500" />
-                     بدأ: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                   <div className="mt-2 text-xs font-bold flex flex-col items-center gap-1 text-gray-500 bg-white px-3 py-1.5 rounded shadow-sm w-full">
+                     <div className="flex items-center gap-1">
+                       <Clock size={12} className="text-orange-500" />
+                       توزيع: {new Date(activeTask.assignedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                     </div>
+                     {activeTask.startedAt && (
+                       <div className="flex items-center gap-1 text-green-600">
+                         <Play size={12} />
+                         بدء: {new Date(activeTask.startedAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                       </div>
+                     )}
                    </div>
                    
                    {!isEditingLine && (
-                     <button onClick={() => handleEndTask(worker.id)} className="mt-3 w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
-                       نهاية القماش (إنهاء المهمة)
-                     </button>
+                     <div className="w-full mt-3 flex flex-col gap-2">
+                       {(!activeTask.status || activeTask.status === 'assigned' || activeTask.status === 'paused') && (
+                         <button onClick={() => handleStartTask(worker.id)} className="w-full bg-green-600 text-white hover:bg-green-700 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
+                           <Play size={16} /> {activeTask.status === 'paused' ? 'استئناف العمل' : 'بدء العمل'}
+                         </button>
+                       )}
+                       
+                       {activeTask.status === 'running' && (
+                         <button onClick={() => handlePauseTask(worker.id)} className="w-full bg-orange-500 text-white hover:bg-orange-600 py-2 rounded-lg text-sm font-black transition shadow-sm flex items-center justify-center gap-2">
+                           <Pause size={16} /> إيقاف مؤقت (بريك)
+                         </button>
+                       )}
+
+                       <button onClick={() => handleEndTask(worker.id)} className="w-full bg-white text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 py-2 rounded-lg text-sm font-black transition shadow-sm">
+                         نهاية القماش (إنهاء المهمة)
+                       </button>
+                     </div>
                    )}
                 </div>
               ) : (
