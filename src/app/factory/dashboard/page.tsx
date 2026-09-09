@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus, History, Clock, Layers } from "lucide-react";
+import { Edit, Calculator, X, Printer, Copy, Trash2, MoreVertical, SplitSquareHorizontal, Plus, Minus, History, Clock, Layers, ArrowRight } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -342,6 +342,12 @@ export default function FactoryDashboard() {
           <p className="text-gray-500 text-sm mt-1">تتبع مسار الموديلات، قم بسحب وإفلات البطاقات (Drag & Drop) بين الأقسام أو ترتيبها كما تشاء.</p>
         </div>
         <div className="flex gap-2 items-center">
+          <Link 
+            href="/factory" 
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-200 border border-gray-200 transition flex items-center gap-2"
+          >
+            <ArrowRight size={18} /> عودة للرئيسية
+          </Link>
           <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
             <span className="text-xs font-bold text-gray-500 my-auto ml-3 mr-2">عرض حي للخطوط:</span>
             <Link href="/supervisor/dashboard?adminView=true&lineId=line_1" target="_blank" className="text-sm px-3 py-1.5 font-bold hover:bg-white hover:shadow-sm rounded transition text-blue-700">خط هبة</Link>
