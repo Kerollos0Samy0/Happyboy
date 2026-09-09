@@ -25,6 +25,30 @@ const STAGES = [
   { id: 14, name: "مخزن الموديلات", bg: "bg-purple-50", border: "border-purple-200" }
 ];
 
+const LiveTimer = ({ startedAt }: { startedAt: string }) => {
+  const [elapsed, setElapsed] = useState('');
+
+  useEffect(() => {
+    if (!startedAt) return;
+    const start = new Date(startedAt).getTime();
+    
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const diff = Math.floor((now - start) / 1000);
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      setElapsed(`${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
+
+  return <span className="font-mono text-indigo-700 bg-indigo-100 px-1 rounded inline-flex items-center gap-1 text-[10px]"><Clock size={10} /> {elapsed}</span>;
+};
+
 export default function FactoryDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -450,10 +474,15 @@ export default function FactoryDashboard() {
                                     <img src={order.modelImage} alt="model" className="w-16 h-16 object-cover rounded border border-gray-100" />
                                   )}
                                   <div className="flex-1 min-w-0 pr-1">
-                                    <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
-                                    <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
-                                    <p className="text-[10px] text-gray-400 font-mono mb-1">#{order.id.slice(-6).toUpperCase()}</p>
-                                    {order.lastWorkerName && (
+                                      <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
+                                      <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
+                                      <div className="flex items-center gap-1 mb-1">
+                                        <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
+                                        {order.stageStatus === 'running' && order.stageStartedAt && (
+                                          <LiveTimer startedAt={order.stageStartedAt} />
+                                        )}
+                                      </div>
+                                      {order.lastWorkerName && (
                                       <p className="text-[11px] text-blue-600 font-bold truncate bg-blue-50 px-1 py-0.5 rounded w-fit" title={order.lastWorkerName}>
                                         👤 {order.lastWorkerName}
                                       </p>

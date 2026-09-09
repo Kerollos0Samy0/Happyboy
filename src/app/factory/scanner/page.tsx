@@ -58,6 +58,7 @@ export default function WorkerScannerPage() {
   const [fabricUnit, setFabricUnit] = useState<'توب' | 'كيلو'>('توب');
   const [fabricAmount, setFabricAmount] = useState<number | ''>('');
   const [fabricColors, setFabricColors] = useState<string>('');
+  const [receivedParts, setReceivedParts] = useState<'both' | 'tshirt' | 'pants'>('both');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -174,13 +175,15 @@ export default function WorkerScannerPage() {
       await updateDoc(doc(db, "factory_production_orders", orderData.id), {
         stageStatus: 'running',
         stageStartedAt: now,
-        stageWorkerName: workerName
+        stageWorkerName: workerName,
+        currentStage: selectedStage // Move model immediately to this stage
       });
       setOrderData({
         ...orderData,
         stageStatus: 'running',
         stageStartedAt: now,
-        stageWorkerName: workerName
+        stageWorkerName: workerName,
+        currentStage: selectedStage
       });
     } catch (err) {
       console.error(err);
@@ -204,9 +207,15 @@ export default function WorkerScannerPage() {
       if (editablePairs && editablePairs.length > 0) {
          newTotal = editablePairs.reduce((sum, p) => {
            let multiplier = 0;
-           if (p.tshirt && p.tshirt.trim() !== '') multiplier++;
-           if (p.pants && p.pants.trim() !== '') multiplier++;
-           if (multiplier === 0) multiplier = 1;
+           if (receivedParts === 'both') {
+             if (p.tshirt && p.tshirt.trim() !== '') multiplier++;
+             if (p.pants && p.pants.trim() !== '') multiplier++;
+             if (multiplier === 0) multiplier = 1;
+           } else if (receivedParts === 'tshirt') {
+             if (p.tshirt && p.tshirt.trim() !== '') multiplier = 1;
+           } else if (receivedParts === 'pants') {
+             if (p.pants && p.pants.trim() !== '') multiplier = 1;
+           }
            return sum + ((Number(p.quantity) || 0) * multiplier);
          }, 0);
       }
@@ -220,6 +229,11 @@ export default function WorkerScannerPage() {
         totalQuantity: newTotal,
         colorPairs: editablePairs,
       };
+
+      if (receivedParts !== 'both') {
+        const partName = receivedParts === 'tshirt' ? 'تيشيرت فقط' : 'بنطلون فقط';
+        newNotes += `\n[${workerName} - ${stageName}]: استلم ${partName}`;
+      }
 
       // Stage 3 (Warehouse) sending fabric
       if (selectedStage === 3 && fabricAmount && fabricColors) {
@@ -593,6 +607,20 @@ export default function WorkerScannerPage() {
                 )}
 
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
+                  <h4 className="font-bold text-gray-800 mb-2">نوع القطع المستلمة</h4>
+                  <div className="mb-4">
+                    <select 
+                      value={receivedParts}
+                      onChange={(e) => setReceivedParts(e.target.value as any)}
+                      className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold text-blue-800"
+                    >
+                      <option value="both">استلمت الاثنين معاً (طقم كامل)</option>
+                      <option value="tshirt">استلمت تيشيرت فقط</option>
+                      <option value="pants">استلمت بنطلون فقط</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">يؤثر هذا الخيار على حساب القطع المنتجة في قسمك</p>
+                  </div>
+
                   <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
                   <textarea 
                     value={workerNote}
