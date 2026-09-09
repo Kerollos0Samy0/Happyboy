@@ -711,10 +711,10 @@ export default function SupervisorDashboard() {
                 <div className="bg-blue-50 p-3 rounded-lg flex-1 border border-blue-200 flex flex-col justify-center items-center relative shadow-inner">
                    <div className={`text-xs font-bold mb-2 border-b w-full pb-1.5 flex items-center justify-center gap-2 
                      ${activeTask.status === 'running' ? 'text-green-600 border-green-200' : 
-                       activeTask.status === 'paused' ? 'text-red-500 border-red-200' : 'text-gray-500 border-gray-200'}`}>
+                       activeTask.status === 'paused' ? 'text-red-500 border-red-200' : 'text-yellow-600 border-yellow-200'}`}>
                      <span className="relative flex h-3 w-3">
                        {activeTask.status === 'running' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>}
-                       <span className={`relative inline-flex rounded-full h-3 w-3 ${activeTask.status === 'running' ? 'bg-green-500' : activeTask.status === 'paused' ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+                       <span className={`relative inline-flex rounded-full h-3 w-3 ${activeTask.status === 'running' ? 'bg-green-500' : activeTask.status === 'paused' ? 'bg-red-500' : 'bg-yellow-400'}`}></span>
                      </span>
                      {!activeTask.status || activeTask.status === 'assigned' ? 'في الانتظار (لم يبدأ)' : activeTask.status === 'paused' ? 'متوقف مؤقتاً' : 'جاري العمل الآن'}
                    </div>
