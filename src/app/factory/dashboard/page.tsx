@@ -366,8 +366,8 @@ export default function FactoryDashboard() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar pb-3">
-          <div className="bg-gray-100 rounded-xl p-4 shadow-inner flex gap-4 h-full min-w-max">
+        <div className="flex-1 overflow-x-auto overflow-y-auto pb-3 custom-scrollbar">
+          <div className="bg-gray-100 rounded-xl p-4 shadow-inner grid grid-cols-7 gap-x-3 gap-y-6 min-h-full min-w-[1200px]">
             {STAGES.map((stage) => {
               const stageOrders = orders.filter(o => o.currentStage === stage.id);
               const totalPieces = stageOrders.reduce((sum, o) => sum + (Number(o.totalQuantity) || 0), 0);
@@ -378,7 +378,7 @@ export default function FactoryDashboard() {
                   <div 
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`shrink-0 w-64 rounded-xl border flex flex-col h-fit max-h-full ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
+                    className={`w-full rounded-xl border flex flex-col h-[40vh] ${stage.bg} ${stage.border} ${snapshot.isDraggingOver ? 'ring-2 ring-blue-400' : ''}`}
                   >
                     <div className="p-3 border-b border-black/5 flex justify-between items-center bg-black/5 rounded-t-xl shrink-0">
                       <div className="flex items-center gap-2">
