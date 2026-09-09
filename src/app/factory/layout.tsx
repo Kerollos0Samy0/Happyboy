@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -65,7 +65,7 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                   href="/factory/dashboard" 
                   className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
                 >
-                  <Monitor size={18} /> لوحة الإنتاج
+                  <Monitor size={18} /> حركة المصنع
                 </Link>
                 <Link 
                   href="/factory/productivity" 
@@ -103,11 +103,11 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
           
           {/* Mobile Navigation */}
           <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
-             <Link 
+              <Link 
                 href="/factory/dashboard" 
                 className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
               >
-                <Monitor size={16} /> لوحة الإنتاج
+                <Monitor size={16} /> حركة المصنع
               </Link>
               <Link 
                 href="/factory/productivity" 
