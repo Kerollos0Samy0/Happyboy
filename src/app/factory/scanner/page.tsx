@@ -119,6 +119,17 @@ export default function WorkerScannerPage() {
     setFabricAmount(data.fabricSentAmount || '');
     setFabricUnit(data.fabricSentUnit || 'توب');
     setFabricColors(data.fabricSentColors || '');
+
+    // Initialize Fabric Rolls automatically based on colorPairs
+    const uniqueColors = Array.from(new Set(
+      (data.colorPairs || []).flatMap(p => [p.tshirt, p.pants]).filter(c => c && c !== 'بدون تحديد' && c.trim() !== '')
+    ));
+    let initialRolls = uniqueColors.map(c => ({ color: c, amount: '' as number | '' }));
+    
+    // If we are in stage 4, we might want to show what the warehouse sent, but the user requested automatic colors.
+    // We will just populate the colors.
+    if (initialRolls.length === 0) initialRolls = [{ color: '', amount: '' }];
+    setFabricRolls(initialRolls);
   };
 
   const fetchOrderDetails = async (scannedText: string) => {
