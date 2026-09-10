@@ -476,10 +476,17 @@ export default function FactoryDashboard() {
                                   <div className="flex-1 min-w-0 pr-1">
                                       <h4 className="font-bold text-sm text-gray-800 truncate" title={order.modelName}>{order.modelName}</h4>
                                       <p className="text-xs text-gray-500 mb-1">الكمية: <strong>{order.totalQuantity}</strong></p>
-                                      <div className="flex items-center gap-1 mb-1">
-                                        <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
-                                        {order.stageStatus === 'running' && order.stageStartedAt && (
-                                          <LiveTimer startedAt={order.stageStartedAt} />
+                                      <div className="flex flex-col gap-1 mb-1">
+                                        <div className="flex items-center gap-1">
+                                          <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-6).toUpperCase()}</p>
+                                          {order.stageStatus === 'running' && order.stageStartedAt && (
+                                            <LiveTimer startedAt={order.stageStartedAt} />
+                                          )}
+                                        </div>
+                                        {order.createdAt && (
+                                          <p className="text-[10px] text-gray-500">
+                                            دخول: {new Date(order.createdAt?.toDate ? order.createdAt.toDate() : order.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
+                                          </p>
                                         )}
                                       </div>
                                       {order.lastWorkerName && (
