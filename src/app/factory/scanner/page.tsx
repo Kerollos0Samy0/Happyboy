@@ -255,11 +255,22 @@ export default function WorkerScannerPage() {
       let prodAmount = basePieces; 
       let prodUnit = 'قطعة';
 
+      // Calculate final fabric amounts and colors
+      let finalFabricAmount = Number(fabricAmount) || 0;
+      let finalFabricColors = fabricColors;
+      if (selectedStage === 3 || selectedStage === 4) {
+         const validRolls = fabricRolls.filter(r => r.amount !== '' && Number(r.amount) > 0);
+         if (validRolls.length > 0) {
+            finalFabricAmount = validRolls.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+            finalFabricColors = validRolls.map(r => `${r.color} (${r.amount})`).join('، ');
+         }
+      }
+
       if (selectedStage === 1) {
         prodAmount = 1; 
         prodUnit = 'عينة';
       } else if (selectedStage === 2 || selectedStage === 3) {
-        prodAmount = Number(fabricAmount) || 0;
+        prodAmount = finalFabricAmount;
         prodUnit = fabricUnit;
       } else if (selectedStage === 6) {
         prodAmount = Number(printedMeters) || 0;
@@ -309,16 +320,16 @@ export default function WorkerScannerPage() {
       }
 
       // Stage 3 (Warehouse) sending fabric
-      if (selectedStage === 3 && fabricAmount && fabricColors) {
-         newNotes += `\n[${workerName} - ${stageName} (صرف قماش)]: تم صرف ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
-         updateData.fabricSentAmount = fabricAmount;
+      if (selectedStage === 3 && finalFabricAmount && finalFabricColors) {
+         newNotes += `\n[${workerName} - ${stageName} (صرف قماش)]: تم صرف ${finalFabricAmount} ${fabricUnit}، الألوان: ${finalFabricColors}`;
+         updateData.fabricSentAmount = finalFabricAmount;
          updateData.fabricSentUnit = fabricUnit;
-         updateData.fabricSentColors = fabricColors;
+         updateData.fabricSentColors = finalFabricColors;
       }
       
       // Stage 4 (Cutting) receiving fabric
-      if (selectedStage === 4 && fabricAmount && fabricColors) {
-         newNotes += `\n[${workerName} - ${stageName} (استلام قماش)]: استلمت ${fabricAmount} ${fabricUnit}، الألوان: ${fabricColors}`;
+      if (selectedStage === 4 && finalFabricAmount && finalFabricColors) {
+         newNotes += `\n[${workerName} - ${stageName} (استلام قماش)]: استلمت ${finalFabricAmount} ${fabricUnit}، الألوان: ${finalFabricColors}`;
       }
 
       if (workerNote.trim()) {
