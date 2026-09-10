@@ -343,7 +343,7 @@ export default function FactoryDashboard() {
         </div>
         <div className="flex gap-2 items-center">
           <Link 
-            href="/factory" 
+            href="/admin/dashboard" 
             className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-200 border border-gray-200 transition flex items-center gap-2"
           >
             <ArrowRight size={18} /> عودة للرئيسية
