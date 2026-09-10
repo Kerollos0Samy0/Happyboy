@@ -206,7 +206,7 @@ export default function SupervisorDashboard() {
 
   const fetchInbox = async (lineId: string) => {
     try {
-      const q = query(collection(db, 'factory_production_orders'), where('currentLocation', '==', lineId));
+      const q = query(collection(db, 'factory_production_orders'), where('currentStage', '==', 10));
       const snapshot = await getDocs(q);
       const baskets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setInboxBaskets(baskets); 

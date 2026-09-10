@@ -58,7 +58,8 @@ export default function WorkerScannerPage() {
   const [fabricUnit, setFabricUnit] = useState<'توب' | 'كيلو'>('توب');
   const [fabricAmount, setFabricAmount] = useState<number | ''>('');
   const [fabricColors, setFabricColors] = useState<string>('');
-  const [receivedParts, setReceivedParts] = useState<'both' | 'tshirt' | 'pants'>('both');
+  const [receivedParts, setReceivedParts] = useState<'both' | 'tshirt' | 'pants' | 'tshirt_front' | 'tshirt_front_back' | 'set_front' | 'set_front_back'>('both');
+  const [printedMeters, setPrintedMeters] = useState<number | ''>('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -172,6 +173,29 @@ export default function WorkerScannerPage() {
     setLoading(true);
     try {
       const now = new Date().toISOString();
+      
+      // Auto-end previous stage if it was left running
+      if (orderData.stageStatus === 'running' && orderData.stageStartedAt && orderData.currentStage !== selectedStage) {
+        const start = new Date(orderData.stageStartedAt);
+        const end = new Date(now);
+        const durationSecs = Math.floor((end.getTime() - start.getTime()) / 1000);
+        const prevStageName = STAGES.find(s => s.id === orderData.currentStage)?.name || 'مرحلة سابقة';
+        
+        await addDoc(collection(db, 'factory_productivity_logs'), {
+          date: new Date().toISOString().split('T')[0],
+          type: 'department',
+          modelNumber: orderData.modelName,
+          lineId: prevStageName,
+          amount: orderData.totalQuantity, // Fallback to base quantity
+          workerName: orderData.stageWorkerName || 'غير معروف',
+          machine: 'إسكانر (إغلاق تلقائي)',
+          operation: 'إنهاء تلقائي',
+          effectiveDurationSeconds: durationSecs > 0 ? durationSecs : 0,
+          totalPausedSeconds: 0,
+          timestamp: serverTimestamp()
+        });
+      }
+
       await updateDoc(doc(db, "factory_production_orders", orderData.id), {
         stageStatus: 'running',
         stageStartedAt: now,
@@ -203,21 +227,49 @@ export default function WorkerScannerPage() {
         throw new Error("لا يمكن تخطي المرحلة 14 (المخزن)");
       }
 
-      let newTotal = editableTotalQty;
+      let basePieces = editableTotalQty;
       if (editablePairs && editablePairs.length > 0) {
-         newTotal = editablePairs.reduce((sum, p) => {
-           let multiplier = 0;
-           if (receivedParts === 'both') {
-             if (p.tshirt && p.tshirt.trim() !== '') multiplier++;
-             if (p.pants && p.pants.trim() !== '') multiplier++;
-             if (multiplier === 0) multiplier = 1;
-           } else if (receivedParts === 'tshirt') {
-             if (p.tshirt && p.tshirt.trim() !== '') multiplier = 1;
-           } else if (receivedParts === 'pants') {
-             if (p.pants && p.pants.trim() !== '') multiplier = 1;
-           }
-           return sum + ((Number(p.quantity) || 0) * multiplier);
+         basePieces = editablePairs.reduce((sum, p) => {
+           let mult = 0;
+           if (p.tshirt && p.tshirt.trim() !== '') mult++;
+           if (p.pants && p.pants.trim() !== '') mult++;
+           if (mult === 0) mult = 1;
+           return sum + ((Number(p.quantity) || 0) * mult);
          }, 0);
+      }
+
+      // Calculate Productivity Amount based on Stage
+      let prodAmount = basePieces; 
+      let prodUnit = 'قطعة';
+
+      if (selectedStage === 1) {
+        prodAmount = 1; 
+        prodUnit = 'عينة';
+      } else if (selectedStage === 2 || selectedStage === 3) {
+        prodAmount = Number(fabricAmount) || 0;
+        prodUnit = fabricUnit;
+      } else if (selectedStage === 6) {
+        prodAmount = Number(printedMeters) || 0;
+        prodUnit = 'متر';
+      } else if (selectedStage === 7 || selectedStage === 8) {
+         prodAmount = editablePairs.reduce((sum, p) => {
+           let m = 0;
+           if (receivedParts === 'tshirt_front') m = 1;
+           else if (receivedParts === 'tshirt_front_back') m = 2;
+           else if (receivedParts === 'pants') m = 1;
+           else if (receivedParts === 'set_front') m = 2;
+           else if (receivedParts === 'set_front_back') m = 3;
+           else if (receivedParts === 'tshirt') m = 1;
+           else {
+             if (p.tshirt && p.tshirt.trim() !== '') m++;
+             if (p.pants && p.pants.trim() !== '') m++;
+             if (m === 0) m = 1;
+           }
+           return sum + ((Number(p.quantity) || 0) * m);
+         }, 0);
+      } else if (selectedStage === 13 || selectedStage === 14) {
+        prodAmount = editablePairs.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+        prodUnit = 'طقم';
       }
 
       let newNotes = orderData.workerNotes || "";
@@ -226,12 +278,20 @@ export default function WorkerScannerPage() {
       const updateData: any = {
         currentStage: nextStage,
         lastWorkerName: workerName,
-        totalQuantity: newTotal,
+        totalQuantity: basePieces, // Keep order total as pieces count
         colorPairs: editablePairs,
       };
 
       if (receivedParts !== 'both') {
-        const partName = receivedParts === 'tshirt' ? 'تيشيرت فقط' : 'بنطلون فقط';
+        const partNames: Record<string, string> = {
+          'tshirt': 'تيشيرت فقط',
+          'pants': 'بنطلون فقط',
+          'tshirt_front': 'تيشيرت وجه واحد',
+          'tshirt_front_back': 'تيشيرت وجهين',
+          'set_front': 'طقم (صدر وبنطلون)',
+          'set_front_back': 'طقم (صدر وظهر وبنطلون)'
+        };
+        const partName = partNames[receivedParts as string] || receivedParts;
         newNotes += `\n[${workerName} - ${stageName}]: استلم ${partName}`;
       }
 
@@ -268,7 +328,8 @@ export default function WorkerScannerPage() {
           type: 'department',
           modelNumber: orderData.modelName,
           lineId: stageName || 'حركة المصنع', // Shows as department name
-          amount: newTotal,
+          amount: prodAmount,
+          unit: prodUnit,
           workerName: workerName,
           machine: 'إسكانر (حركة المصنع)', 
           operation: 'إنهاء المرحلة وتسليم',
@@ -607,18 +668,40 @@ export default function WorkerScannerPage() {
                 )}
 
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 text-right">
-                  <h4 className="font-bold text-gray-800 mb-2">نوع القطع المستلمة</h4>
+                  {selectedStage === 6 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold text-gray-800 mb-2">عدد الأمتار (قسم الطباعة)</h4>
+                      <input 
+                        type="number"
+                        min="0"
+                        value={printedMeters}
+                        onChange={(e) => setPrintedMeters(Number(e.target.value))}
+                        placeholder="أدخل عدد الأمتار هنا"
+                        className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold text-blue-800"
+                      />
+                    </div>
+                  )}
+
+                  <h4 className="font-bold text-gray-800 mb-2">تفاصيل القطع المستلمة</h4>
                   <div className="mb-4">
                     <select 
                       value={receivedParts}
                       onChange={(e) => setReceivedParts(e.target.value as any)}
                       className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold text-blue-800"
                     >
-                      <option value="both">استلمت الاثنين معاً (طقم كامل)</option>
-                      <option value="tshirt">استلمت تيشيرت فقط</option>
-                      <option value="pants">استلمت بنطلون فقط</option>
+                      <option value="both">إفتراضي (حسب الموديل - تيشيرت وبنطلون)</option>
+                      <option value="tshirt">تيشيرت فقط</option>
+                      <option value="pants">بنطلون فقط</option>
+                      {(selectedStage === 7 || selectedStage === 8) && (
+                        <>
+                          <option value="tshirt_front">تيشيرت وجه واحد (صدر فقط)</option>
+                          <option value="tshirt_front_back">تيشيرت وجهين (صدر وظهر)</option>
+                          <option value="set_front">طقم (صدر تيشيرت + بنطلون)</option>
+                          <option value="set_front_back">طقم كامل (صدر وظهر + بنطلون)</option>
+                        </>
+                      )}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">يؤثر هذا الخيار على حساب القطع المنتجة في قسمك</p>
+                    <p className="text-xs text-gray-500 mt-1">يؤثر هذا الخيار على حساب القطع المنتجة في تقرير إنتاجيتك</p>
                   </div>
 
                   <h4 className="font-bold text-gray-800 mb-2">إضافة ملاحظات (اختياري)</h4>
