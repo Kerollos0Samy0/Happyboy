@@ -39,6 +39,9 @@ const getColorCode = (colorName: string) => {
   if (name.includes('بيج')) return '#F5F5DC';
   if (name.includes('شاركول')) return '#36454F';
   if (name.includes('رمادي') || name.includes('رصاصي')) return '#808080';
+  if (name.includes('سيمون')) return '#FA8072';
+  if (name.includes('كافيه')) return '#D2B48C';
+  if (name.includes('زيتوني')) return '#808000';
   return '#ffffff';
 };
 
@@ -144,11 +147,11 @@ export default function PrintProductionOrderPage() {
                 {colorPairs?.filter((pair: any) => pair.quantity).map((pair: any, idx: number) => (
                   <React.Fragment key={idx}>
                     <div className="flex flex-col items-center gap-1">
-                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.tshirt) }}></div>
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.tshirt), WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' } as React.CSSProperties}></div>
                       <p className="text-xs text-center font-bold">تيشيرت {pair.tshirt} ({pair.quantity}ق)</p>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.pants) }}></div>
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.pants), WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' } as React.CSSProperties}></div>
                       <p className="text-xs text-center font-bold">بنطلون {pair.pants} ({pair.quantity}ق)</p>
                     </div>
                   </React.Fragment>
