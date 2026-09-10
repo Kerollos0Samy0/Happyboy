@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -22,6 +22,8 @@ export default function FabricInventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const [showAddForm, setShowAddForm] = useState(false);
+  const [rollsCount, setRollsCount] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [newRoll, setNewRoll] = useState({
     code: '',
     color: '',
@@ -51,20 +53,37 @@ export default function FabricInventoryPage() {
   const handleAddRoll = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoll.code || !newRoll.color || !newRoll.amount) return;
-
+    setIsSaving(true);
     try {
-      await addDoc(collection(db, 'factory_fabric_rolls'), {
-        ...newRoll,
-        amount: Number(newRoll.amount),
-        createdAt: serverTimestamp()
-      });
+      if (rollsCount > 1) {
+        const promises = [];
+        for (let i = 1; i <= rollsCount; i++) {
+          const paddedNum = i.toString().padStart(2, '0');
+          promises.push(addDoc(collection(db, 'factory_fabric_rolls'), {
+            ...newRoll,
+            code: `${newRoll.code}-${paddedNum}`,
+            amount: Number(newRoll.amount),
+            createdAt: serverTimestamp()
+          }));
+        }
+        await Promise.all(promises);
+      } else {
+        await addDoc(collection(db, 'factory_fabric_rolls'), {
+          ...newRoll,
+          amount: Number(newRoll.amount),
+          createdAt: serverTimestamp()
+        });
+      }
       
       setShowAddForm(false);
       setNewRoll({ code: '', color: '', type: '', amount: '', unit: 'كجم', supplier: '' });
+      setRollsCount(1);
       fetchRolls();
     } catch (err) {
       console.error(err);
       alert("حدث خطأ أثناء الحفظ.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -136,10 +155,23 @@ export default function FabricInventoryPage() {
               <input type="text" value={newRoll.supplier} onChange={(e) => setNewRoll({...newRoll, supplier: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="اسم المورد أو المصنع" />
             </div>
 
-            <div className="lg:col-span-3 flex justify-end">
-              <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-8 rounded-lg flex items-center justify-center gap-2 transition shadow">
-                حفظ التوب بالمخزن
-              </button>
+            <div className="lg:col-span-3">
+              <div className="mb-4">
+                <label className="block text-sm font-bold text-gray-700 mb-1">عدد الأثواب المراد إضافتها (بنفس المواصفات)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  value={rollsCount}
+                  onChange={(e) => setRollsCount(Number(e.target.value) || 1)}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">إذا اخترت أكثر من 1، سيتم إضافة ترقيم تلقائي للكود الأساسي (مثال: Code-01، Code-02).</p>
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" disabled={isSaving} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-8 rounded-lg flex items-center justify-center gap-2 transition shadow disabled:opacity-50">
+                  {isSaving ? 'جاري الحفظ...' : 'حفظ التوب بالمخزن'}
+                </button>
+              </div>
             </div>
           </form>
         </div>

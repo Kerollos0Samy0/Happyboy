@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
 import Link from "next/link";
@@ -57,7 +57,9 @@ export default function WorkerScannerPage() {
   // Custom states for Cutting Department (Stage 4)
   const [fabricUnit, setFabricUnit] = useState<'توب' | 'كيلو'>('توب');
   const [fabricAmount, setFabricAmount] = useState<number | ''>('');
-  const [fabricRolls, setFabricRolls] = useState<{color: string, amount: number | ''}[]>([]);
+  const [fabricRolls, setFabricRolls] = useState<{id?: string, code?: string, color: string, amount: number | '', unit?: string}[]>([]);
+  const [rollScanCode, setRollScanCode] = useState('');
+  const [isScanningRoll, setIsScanningRoll] = useState(false);
   const [fabricColors, setFabricColors] = useState<string>('');
   const [receivedParts, setReceivedParts] = useState<'both' | 'tshirt' | 'pants' | 'tshirt_front' | 'tshirt_front_back' | 'set_front' | 'set_front_back'>('both');
   const [printedMeters, setPrintedMeters] = useState<number | ''>('');
@@ -103,6 +105,43 @@ export default function WorkerScannerPage() {
       fetchOrderDetails(scannedData);
     }
   }, [scannedData]);
+
+  const handleScanRoll = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!rollScanCode.trim()) return;
+      setIsScanningRoll(true);
+      try {
+        const q = query(collection(db, 'factory_fabric_rolls'), where('code', '==', rollScanCode.trim()));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          alert('هذا التوب غير مسجل في المخزن أو كود غير صحيح.');
+        } else {
+          const rollDoc = snap.docs[0];
+          const rollData = rollDoc.data();
+          const newRoll = {
+            id: rollDoc.id,
+            code: rollData.code,
+            color: rollData.color,
+            amount: rollData.amount,
+            unit: rollData.unit || 'كيلو'
+          };
+          
+          if (fabricRolls.some(r => r.id === newRoll.id)) {
+             alert('تم إضافة هذا التوب مسبقاً للقائمة.');
+          } else {
+             const filtered = fabricRolls.filter(r => r.amount !== '');
+             setFabricRolls([...filtered, newRoll]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setRollScanCode('');
+        setIsScanningRoll(false);
+      }
+    }
+  };
 
   const selectSplitOption = (data: ProductionOrder) => {
     setSplitOptions([]);
@@ -325,6 +364,14 @@ export default function WorkerScannerPage() {
          updateData.fabricSentAmount = finalFabricAmount;
          updateData.fabricSentUnit = fabricUnit;
          updateData.fabricSentColors = finalFabricColors;
+
+         // Deduct from inventory (delete scanned rolls)
+         const validRolls = fabricRolls.filter(r => r.amount !== '' && Number(r.amount) > 0);
+         const promises = validRolls.map(r => {
+           if (r.id) return deleteDoc(doc(db, 'factory_fabric_rolls', r.id));
+           return Promise.resolve();
+         });
+         await Promise.all(promises);
       }
       
       // Stage 4 (Cutting) receiving fabric
@@ -665,33 +712,50 @@ export default function WorkerScannerPage() {
                           <option value="كيلو">كيلو</option>
                         </select>
                       </div>
+                      {selectedStage === 3 && (
+                        <div className="mb-3">
+                          <input 
+                            type="text" 
+                            value={rollScanCode}
+                            onChange={(e) => setRollScanCode(e.target.value)}
+                            onKeyDown={handleScanRoll}
+                            disabled={isScanningRoll}
+                            className="w-full p-3 border-2 border-dashed border-indigo-400 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-indigo-50/50 text-indigo-900 font-bold placeholder-indigo-300 text-center"
+                            placeholder={isScanningRoll ? "جاري البحث..." : "اكتب كود التوب واضغط Enter (أو استخدم جهاز الباركود)"}
+                          />
+                        </div>
+                      )}
                       {fabricRolls.map((roll, idx) => (
                         <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded border border-blue-100">
-                           <div className="flex-1">
+                           <div className="flex-1 flex flex-col">
                               <input 
                                 type="text" 
                                 value={roll.color}
+                                readOnly={!!roll.id}
                                 onChange={(e) => {
                                   const newRolls = [...fabricRolls];
                                   newRolls[idx].color = e.target.value;
                                   setFabricRolls(newRolls);
                                 }}
-                                className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full p-2 border rounded outline-none ${roll.id ? 'bg-gray-100 text-gray-600 border-gray-200' : 'border-blue-200 focus:ring-2 focus:ring-blue-500'}`}
                                 placeholder="اسم اللون..."
                               />
+                              {roll.code && <span className="text-[10px] text-gray-500 mt-1 mr-1 font-mono">الكود: {roll.code}</span>}
                            </div>
-                           <div className="w-24 shrink-0">
+                           <div className="w-28 shrink-0 flex items-center gap-1">
                               <input 
                                 type="number" 
                                 value={roll.amount}
+                                readOnly={!!roll.id}
                                 onChange={(e) => {
                                   const newRolls = [...fabricRolls];
                                   newRolls[idx].amount = e.target.value === '' ? '' : Number(e.target.value);
                                   setFabricRolls(newRolls);
                                 }}
-                                className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
+                                className={`w-full p-2 border rounded outline-none text-center font-bold ${roll.id ? 'bg-gray-100 text-gray-600 border-gray-200' : 'border-blue-200 focus:ring-2 focus:ring-blue-500'}`}
                                 placeholder="الكمية"
                               />
+                              {roll.unit && <span className="text-xs text-gray-500">{roll.unit}</span>}
                            </div>
                            <button
                              onClick={() => {
