@@ -57,6 +57,7 @@ export default function WorkerScannerPage() {
   // Custom states for Cutting Department (Stage 4)
   const [fabricUnit, setFabricUnit] = useState<'توب' | 'كيلو'>('توب');
   const [fabricAmount, setFabricAmount] = useState<number | ''>('');
+  const [fabricRolls, setFabricRolls] = useState<{color: string, amount: number | ''}[]>([]);
   const [fabricColors, setFabricColors] = useState<string>('');
   const [receivedParts, setReceivedParts] = useState<'both' | 'tshirt' | 'pants' | 'tshirt_front' | 'tshirt_front_back' | 'set_front' | 'set_front_back'>('both');
   const [printedMeters, setPrintedMeters] = useState<number | ''>('');
@@ -128,6 +129,7 @@ export default function WorkerScannerPage() {
     setSuccess("");
     setFabricAmount('');
     setFabricColors('');
+    setFabricRolls([]);
 
     try {
       let orderId = scannedText;
@@ -630,39 +632,62 @@ export default function WorkerScannerPage() {
                       </div>
                     ) : null}
                     <div className="space-y-3">
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'الكمية المنصرفة' : 'الكمية المستلمة فعلياً'}</label>
-                          <input 
-                            type="number" 
-                            value={fabricAmount}
-                            onChange={(e) => setFabricAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                            className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="مثال: 5"
-                          />
-                        </div>
-                        <div className="w-24">
-                          <label className="block text-sm font-bold text-blue-700 mb-1">الوحدة</label>
-                          <select 
-                            value={fabricUnit}
-                            onChange={(e) => setFabricUnit(e.target.value as 'توب' | 'كيلو')}
-                            className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="توب">توب</option>
-                            <option value="كيلو">كيلو</option>
-                          </select>
-                        </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-bold text-blue-700">{selectedStage === 3 ? 'الألوان والكميات المنصرفة' : 'الألوان والكميات المستلمة'}</label>
+                        <select 
+                          value={fabricUnit}
+                          onChange={(e) => setFabricUnit(e.target.value as 'توب' | 'كيلو')}
+                          className="w-24 p-1 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-blue-700 bg-white"
+                        >
+                          <option value="توب">توب</option>
+                          <option value="كيلو">كيلو</option>
+                        </select>
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-blue-700 mb-1">{selectedStage === 3 ? 'ألوان القماش المنصرف' : 'ألوان القماش المستلم فعلياً'}</label>
-                        <input 
-                          type="text" 
-                          value={fabricColors}
-                          onChange={(e) => setFabricColors(e.target.value)}
-                          className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="مثال: أحمر، أزرق، أسود..."
-                        />
-                      </div>
+                      {fabricRolls.map((roll, idx) => (
+                        <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded border border-blue-100">
+                           <div className="flex-1">
+                              <input 
+                                type="text" 
+                                value={roll.color}
+                                onChange={(e) => {
+                                  const newRolls = [...fabricRolls];
+                                  newRolls[idx].color = e.target.value;
+                                  setFabricRolls(newRolls);
+                                }}
+                                className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="اسم اللون..."
+                              />
+                           </div>
+                           <div className="w-24 shrink-0">
+                              <input 
+                                type="number" 
+                                value={roll.amount}
+                                onChange={(e) => {
+                                  const newRolls = [...fabricRolls];
+                                  newRolls[idx].amount = e.target.value === '' ? '' : Number(e.target.value);
+                                  setFabricRolls(newRolls);
+                                }}
+                                className="w-full p-2 border border-blue-200 rounded outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
+                                placeholder="الكمية"
+                              />
+                           </div>
+                           <button
+                             onClick={() => {
+                               const newRolls = fabricRolls.filter((_, i) => i !== idx);
+                               setFabricRolls(newRolls);
+                             }}
+                             className="text-red-500 hover:bg-red-50 p-2 rounded"
+                           >
+                             ✕
+                           </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => setFabricRolls([...fabricRolls, { color: '', amount: '' }])}
+                        className="w-full p-2 border-2 border-dashed border-blue-300 rounded text-blue-600 font-bold hover:bg-blue-50 transition"
+                      >
+                        + إضافة لون آخر
+                      </button>
                     </div>
                   </div>
                 )}
