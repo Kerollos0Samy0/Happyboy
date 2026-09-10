@@ -93,31 +93,48 @@ export default function EditProductionOrderPage() {
     }
   }, [colorPairs]);
 
+  const processImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 600;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setImageBase64(dataUrl);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 600;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-          
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          setImageBase64(dataUrl);
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+      processImageFile(e.target.files[0]);
     }
   };
+
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+        const file = e.clipboardData.files[0];
+        if (file.type.startsWith('image/')) {
+          e.preventDefault();
+          processImageFile(file);
+        }
+      }
+    };
+    
+    document.addEventListener('paste', handleGlobalPaste);
+    return () => document.removeEventListener('paste', handleGlobalPaste);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,7 +451,7 @@ export default function EditProductionOrderPage() {
               ) : (
                 <div className="text-center p-6">
                   <ImageIcon size={48} className="mx-auto text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-600">اضغط لرفع صورة الموديل</p>
+                  <p className="text-sm font-medium text-gray-600">اضغط لرفع صورة الموديل أو قم بلصقها (Ctrl+V)</p>
                   <p className="text-xs text-gray-400 mt-1">PNG, JPG</p>
                 </div>
               )}
