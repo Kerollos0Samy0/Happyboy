@@ -8,6 +8,40 @@ import { CheckCircle, AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 
+const getColorCode = (colorName: string) => {
+  if (!colorName) return '#ffffff';
+  const name = colorName.toLowerCase();
+  if (name.includes('اسود') || name.includes('أسود')) return '#000000';
+  if (name.includes('ابيض') || name.includes('أبيض')) return '#ffffff';
+  if (name.includes('احمر') || name.includes('أحمر')) return '#ff0000';
+  if (name.includes('نبيتي')) return '#800000';
+  if (name.includes('طوبي')) return '#B22222';
+  if (name.includes('بطيخي')) return '#FC6C85';
+  if (name.includes('فوشيا')) return '#FF00FF';
+  if (name.includes('كشمير')) return '#D1B399';
+  if (name.includes('بمبي') || name.includes('روز') || name.includes('بينك')) return '#FFC0CB';
+  if (name.includes('موف')) return '#E0B0FF';
+  if (name.includes('بنفسجي')) return '#800080';
+  if (name.includes('كحلي')) return '#000080';
+  if (name.includes('ازرق') || name.includes('أزرق') || name.includes('زهري')) return '#0000FF';
+  if (name.includes('لبني') || name.includes('سماوي')) return '#ADD8E6';
+  if (name.includes('فيروزي')) return '#40E0D0';
+  if (name.includes('جنزاري')) return '#008B8B';
+  if (name.includes('زيتي')) return '#4B5320';
+  if (name.includes('مينت') || name.includes('منت')) return '#3EB489';
+  if (name.includes('اخضر') || name.includes('أخضر')) return '#008000';
+  if (name.includes('مستردة') || name.includes('مسطردة')) return '#E3A857';
+  if (name.includes('اصفر') || name.includes('أصفر')) return '#FFFF00';
+  if (name.includes('برتقالي') || name.includes('اورانج')) return '#FFA500';
+  if (name.includes('هافان')) return '#B5651D';
+  if (name.includes('جملي')) return '#C19A6B';
+  if (name.includes('بني')) return '#8B4513';
+  if (name.includes('بيج')) return '#F5F5DC';
+  if (name.includes('شاركول')) return '#36454F';
+  if (name.includes('رمادي') || name.includes('رصاصي')) return '#808080';
+  return '#ffffff';
+};
+
 export default function PrintProductionOrderPage() {
   const params = useParams();
   const id = params.id as string;
@@ -111,11 +145,11 @@ export default function PrintProductionOrderPage() {
                 {colorPairs?.filter((pair: any) => pair.quantity).map((pair: any, idx: number) => (
                   <React.Fragment key={idx}>
                     <div className="flex flex-col items-center gap-1">
-                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.tshirt) }}></div>
                       <p className="text-xs text-center font-bold">تيشيرت {pair.tshirt} ({pair.quantity}ق)</p>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                      <div className="w-[2cm] h-[2cm] border-2 border-gray-400 shadow-sm" style={{ backgroundColor: getColorCode(pair.pants) }}></div>
                       <p className="text-xs text-center font-bold">بنطلون {pair.pants} ({pair.quantity}ق)</p>
                     </div>
                   </React.Fragment>
