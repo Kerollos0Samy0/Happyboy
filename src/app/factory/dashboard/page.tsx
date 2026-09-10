@@ -86,6 +86,8 @@ export default function FactoryDashboard() {
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
     
     const newStage = parseInt(destination.droppableId.replace('stage-', ''));
+    const oldStage = parseInt(source.droppableId.replace('stage-', ''));
+    
     const movingOrder = orders.find(o => o.id === draggableId);
     if (!movingOrder) return;
 
@@ -122,6 +124,37 @@ export default function FactoryDashboard() {
           updateDoc(doc(db, "factory_production_orders", o.id), { orderIndex: idx });
         }
       });
+
+      // Add Productivity Log for the Old Stage when moving to a new stage
+      if (oldStage !== newStage) {
+        const STAGE_TO_MACHINE: Record<number, { id: string, unit: string }> = {
+          4: { id: 'cutting', unit: 'قطعة' },
+          5: { id: 'sorting', unit: 'قطعة' },
+          6: { id: 'laser', unit: 'متر' },
+          7: { id: 'cutting_out', unit: 'قطعة' },
+          8: { id: 'pressing', unit: 'قطعة' },
+          9: { id: 'pairing', unit: 'قطعة' },
+          10: { id: 'sewing', unit: 'قطعة' },
+          11: { id: 'finishing', unit: 'قطعة' },
+          12: { id: 'ironing', unit: 'قطعة' },
+          13: { id: 'packaging', unit: 'قطعة' },
+          14: { id: 'warehouse', unit: 'قطعة' }
+        };
+        const machine = STAGE_TO_MACHINE[oldStage];
+        if (machine) {
+           await addDoc(collection(db, 'factory_productivity_logs'), {
+              date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD
+              type: machine.id,
+              modelNumber: movingOrder.modelName,
+              lineId: null,
+              amount: Number(movingOrder.totalQuantity) || 0,
+              unit: machine.unit,
+              notes: 'انتقال تلقائي من لوحة التحكم',
+              createdAt: serverTimestamp()
+           });
+        }
+      }
+
     } catch (err) {
       console.error("Error moving order: ", err);
     }
