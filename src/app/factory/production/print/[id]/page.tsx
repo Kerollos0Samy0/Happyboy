@@ -190,7 +190,7 @@ export default function PrintProductionOrderPage() {
                   </tbody>
                 </table>
               </div>
-              <p className="text-sm min-h-[30px] whitespace-pre-wrap">{order.cuttingNotes || '---'}</p>
+
             </div>
 
             <div className="border border-gray-400 p-3 flex flex-col col-span-2">
@@ -260,9 +260,9 @@ export default function PrintProductionOrderPage() {
               </div>
             </div>
 
-            <div className="border border-gray-400 p-2 col-span-2 flex flex-col">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-1 bg-gray-100 px-1 text-md">📝 ملاحظات عامة (تشطيب، مكواة، تعبئة)</h3>
-              <p className="text-sm min-h-[50px] whitespace-pre-wrap">{order.generalNotes || '---'}</p>
+            <div className="border border-gray-400 p-2 col-span-2 flex flex-col flex-1">
+              <h3 className="font-bold border-b border-gray-300 pb-1 mb-1 bg-gray-100 px-1 text-md">📝 ملاحظات عامة</h3>
+              <p className="text-sm min-h-[80px] whitespace-pre-wrap">{order.generalNotes || '---'}</p>
             </div>
           </div>
         </div>
