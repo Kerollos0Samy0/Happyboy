@@ -113,7 +113,7 @@ export default function PrintProductionOrderPage() {
         <div className="border-4 border-gray-800 p-4 mb-6">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
+              <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل</h1>
               <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                 <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{order.modelName}</span></div>
                 <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{order.sizesSeries || '---'}</span></div>
