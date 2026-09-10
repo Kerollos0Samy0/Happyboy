@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { auth } from "../../lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
-import { BarChart3, PackageOpen, Monitor, LogOut } from "lucide-react";
+import { BarChart3, PackageOpen, Monitor, ArrowRight } from "lucide-react";
 
 export default function FactoryLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -44,11 +44,6 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
   if (loading) {
     return <div className="p-10 text-center font-bold text-gray-500">جاري التحميل...</div>;
   }
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push("/factory/login");
-  };
 
   const isLoginPage = pathname === "/factory/login";
   const isScannerPage = pathname === "/factory/scanner";
@@ -95,9 +90,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-bold text-gray-500 hidden sm:inline-block bg-gray-100 px-3 py-1 rounded-full">{userEmail}</span>
-              <button onClick={handleLogout} className="text-sm font-bold text-red-600 hover:bg-red-50 px-4 py-2 flex items-center gap-2 rounded-lg transition-colors">
-                <LogOut size={16} /> خروج
-              </button>
+              <Link 
+                href="/admin/dashboard" 
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-200 border border-gray-200 transition flex items-center gap-2"
+              >
+                <ArrowRight size={18} /> عودة للرئيسية
+              </Link>
             </div>
           </div>
           
