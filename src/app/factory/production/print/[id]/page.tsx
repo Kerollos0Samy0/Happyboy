@@ -139,8 +139,7 @@ export default function PrintProductionOrderPage() {
               <h3 className="font-bold border-b pb-1 mb-2 text-lg">مخزن القماش</h3>
               <p className="text-sm mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
               <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
-              <p className="text-sm mb-2"><strong>الكمية (كجم/توب):</strong> .....................</p>
-              <p className="text-sm mb-2"><strong>استهلاك القطعة:</strong> .....................</p>
+
               <div className="grid grid-cols-2 gap-4 mt-auto pt-4">
                 {colorPairs?.filter((pair: any) => pair.quantity).map((pair: any, idx: number) => (
                   <React.Fragment key={idx}>
