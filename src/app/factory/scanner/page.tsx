@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "../../../lib/firebase";
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
@@ -48,6 +48,9 @@ export default function WorkerScannerPage() {
   const [isScannerActive, setIsScannerActive] = useState(false);
   
   const [scannedData, setScannedData] = useState<string | null>(null);
+  const [externalScanInput, setExternalScanInput] = useState("");
+  const externalInputRef = useRef<HTMLInputElement>(null);
+
   const [orderData, setOrderData] = useState<ProductionOrder | null>(null);
   const [splitOptions, setSplitOptions] = useState<ProductionOrder[]>([]);
   const [editablePairs, setEditablePairs] = useState<any[]>([]);
@@ -105,6 +108,24 @@ export default function WorkerScannerPage() {
       fetchOrderDetails(scannedData);
     }
   }, [scannedData]);
+
+  // Auto-focus external scanner input when ready to scan
+  useEffect(() => {
+    if (!scannedData && !loading && !success && selectedStage && workerName) {
+      setTimeout(() => {
+        externalInputRef.current?.focus();
+      }, 300);
+    }
+  }, [scannedData, loading, success, selectedStage, workerName]);
+
+  const handleExternalScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const value = externalScanInput.trim();
+      if (!value) return;
+      setExternalScanInput("");
+      setScannedData(value);
+    }
+  };
 
   const handleScanRoll = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -496,12 +517,32 @@ export default function WorkerScannerPage() {
         </button>
       </div>
 
+      {/* External Scanner Input - always visible when ready to scan */}
+      {!scannedData && !loading && !success && (
+        <div className="bg-green-50 border-2 border-green-400 p-4 rounded-xl shadow-lg mb-4">
+          <h3 className="font-bold text-green-800 mb-2 text-center flex items-center justify-center gap-2">
+            🔫 جهاز Scanner خارجي
+          </h3>
+          <p className="text-xs text-green-600 text-center mb-3">وجّه جهاز الـ Scanner على الـ QR Code وسيتم القراءة تلقائياً</p>
+          <input
+            ref={externalInputRef}
+            type="text"
+            value={externalScanInput}
+            onChange={(e) => setExternalScanInput(e.target.value)}
+            onKeyDown={handleExternalScan}
+            className="w-full p-3 border-2 border-green-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500 bg-white text-center font-bold text-lg"
+            placeholder="في انتظار المسح..."
+            autoComplete="off"
+          />
+        </div>
+      )}
+
       {/* Camera Area */}
       {!scannedData && !loading && !success && (
         <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 mb-6 overflow-hidden">
           <div className="text-center mb-4">
             <h3 className="font-bold text-gray-800 flex justify-center items-center gap-2">
-              <Camera size={20} className="text-blue-600" /> مسح الباركود
+              <Camera size={20} className="text-blue-600" /> أو مسح بالكاميرا
             </h3>
             <p className="text-sm text-gray-500">قم بتوجيه الكاميرا نحو المربع (QR Code) الموجود على ورقة أمر التشغيل</p>
           </div>
@@ -513,7 +554,7 @@ export default function WorkerScannerPage() {
               onClick={() => setIsScannerActive(true)}
               className="w-full bg-blue-100 text-blue-700 font-bold py-3 rounded-lg mt-4"
             >
-              إعادة فتح الكاميرا
+              فتح الكاميرا
             </button>
           )}
         </div>
