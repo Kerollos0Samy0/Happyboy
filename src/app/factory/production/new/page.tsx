@@ -252,12 +252,7 @@ export default function NewProductionOrderPage() {
           <div className="border-4 border-gray-800 p-4 mb-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
-                  <div className="flex flex-col items-center justify-center bg-white px-2 rounded">
-                    <Barcode value={generatedOrderId.slice(-6).toUpperCase()} width={1.2} height={35} displayValue={true} fontSize={14} margin={0} />
-                  </div>
-                </div>
+                <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
                 <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                   <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{modelName}</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{sizesSeries}</span></div>
@@ -266,9 +261,9 @@ export default function NewProductionOrderPage() {
                 </div>
               </div>
               
-              <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${generatedOrderId}` : ''} size={100} />
-                <span className="text-xs font-mono mt-2">{generatedOrderId.slice(-6).toUpperCase()}</span>
+              <div className="w-48 flex flex-col items-center justify-center border-r-2 pr-4 ml-4 gap-2">
+                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${generatedOrderId}` : ''} size={70} />
+                <Barcode value={generatedOrderId.slice(-6).toUpperCase()} width={1.2} height={30} displayValue={true} fontSize={14} margin={0} background="#ffffff" />
               </div>
             </div>
           </div>
