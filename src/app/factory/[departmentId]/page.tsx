@@ -53,7 +53,10 @@ export default function DepartmentDashboardPage() {
             <p className="text-gray-500 mb-4">
               استخدم الماسح لقراءة الباركود الخاص بأتواب القماش ومطابقتها مع أمر الشغل.
             </p>
-            <button className="btn btn-primary w-full py-3">
+            <button 
+              onClick={() => router.push("/factory/fabric_scanner")}
+              className="btn btn-primary w-full py-3"
+            >
               فتح شاشة الإسكان
             </button>
           </div>
