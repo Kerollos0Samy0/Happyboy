@@ -274,6 +274,19 @@ export default function WorkerScannerPage() {
           querySnapshot = await getDocs(q);
         }
         
+        // Fallback: If it's a product barcode, find its modelNumber first
+        if (querySnapshot.empty) {
+          const productQ = query(collection(db, "products"), where("barcodes", "array-contains", orderId));
+          const productSnap = await getDocs(productQ);
+          if (!productSnap.empty) {
+            const prodData = productSnap.docs[0].data();
+            if (prodData.modelNumber) {
+              q = query(collection(db, "factory_production_orders"), where("modelName", "==", prodData.modelNumber));
+              querySnapshot = await getDocs(q);
+            }
+          }
+        }
+        
         if (!querySnapshot.empty) {
           const splits = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as ProductionOrder));
           setSplitOptions(splits);
