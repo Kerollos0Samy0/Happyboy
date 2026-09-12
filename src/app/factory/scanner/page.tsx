@@ -72,30 +72,17 @@ export default function WorkerScannerPage() {
     if (!isScannerActive) return;
 
     let scanner: any = null;
+    let stopped = false;
 
     const initScanner = async () => {
       const { Html5Qrcode } = await import("html5-qrcode");
+      const readerEl = document.getElementById("reader");
+      if (!readerEl || stopped) return;
+
       scanner = new Html5Qrcode("reader");
 
-      // Prefer back camera to avoid mirror issue on front camera
-      let cameraId: string | { facingMode: string } = { facingMode: "environment" };
-
-      try {
-        const devices = await Html5Qrcode.getCameras();
-        if (devices && devices.length > 0) {
-          const backCamera = devices.find((d: any) =>
-            d.label.toLowerCase().includes("back") ||
-            d.label.toLowerCase().includes("rear") ||
-            d.label.toLowerCase().includes("environment")
-          );
-          cameraId = backCamera ? backCamera.id : devices[0].id;
-        }
-      } catch {
-        // Keep default facingMode: environment
-      }
-
       await scanner.start(
-        cameraId,
+        { facingMode: { ideal: "environment" } }, // prefer back camera, fall back to front
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText: string) => {
           setScannedData(decodedText);
@@ -108,9 +95,12 @@ export default function WorkerScannerPage() {
       );
     };
 
-    initScanner().catch(console.error);
+    initScanner().catch((err) => {
+      console.error("Scanner init error:", err);
+    });
 
     return () => {
+      stopped = true;
       if (scanner) {
         scanner.stop().catch((e: any) => console.error("Failed to stop scanner", e));
       }
