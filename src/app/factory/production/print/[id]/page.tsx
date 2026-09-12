@@ -125,13 +125,9 @@ export default function PrintProductionOrderPage() {
                 <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG')}</span></div>
               </div>
             </div>
-            
-            <div className="flex flex-col items-center border-r-2 pr-4 ml-4 gap-2">
-              <div className="flex gap-4">
-                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={64} />
-              </div>
-              <Barcode value={order.id} format="CODE128B" width={2} height={40} fontSize={12} displayValue={false} margin={0} />
-              <span className="text-[10px] font-mono mt-1 text-gray-500">{order.id}</span>
+            <div className="w-48 flex flex-col items-center justify-center border-r-2 pr-4 ml-4 gap-2">
+              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={70} />
+              <Barcode value={order.id.slice(-6).toUpperCase()} width={1.2} height={30} displayValue={true} fontSize={14} margin={0} background="#ffffff" />
             </div>
           </div>
         </div>
