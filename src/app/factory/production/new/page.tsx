@@ -254,8 +254,8 @@ export default function NewProductionOrderPage() {
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
-                  <div className="flex flex-col items-center justify-center">
-                    <Barcode value={generatedOrderId} width={1.5} height={40} displayValue={true} fontSize={12} margin={0} />
+                  <div className="flex flex-col items-center justify-center bg-white px-2 rounded">
+                    <Barcode value={generatedOrderId.slice(-6).toUpperCase()} width={1.2} height={35} displayValue={true} fontSize={14} margin={0} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
