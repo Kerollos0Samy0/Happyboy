@@ -55,71 +55,86 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
           <div className="w-full px-4 lg:px-8 mx-auto flex justify-between items-center">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-black text-blue-900 tracking-tight">نظام مصنع HappyBoy</h1>
-              <nav className="hidden lg:flex gap-2">
-                <Link 
-                  href="/factory/dashboard" 
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-                >
-                  <Monitor size={18} /> حركة المصنع
-                </Link>
-                <Link 
-                  href="/factory/productivity" 
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname?.includes('/factory/productivity') ? 'bg-purple-100 text-purple-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-                >
-                  <BarChart3 size={18} /> الإنتاجيات
-                </Link>
-                <Link 
-                  href="/factory/inventory" 
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname?.includes('/factory/inventory') ? 'bg-green-100 text-green-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-                >
-                  <PackageOpen size={18} /> المخازن
-                </Link>
-                <Link 
-                  href="/factory/production" 
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/production' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  إدارة الموديلات والأوامر
-                </Link>
-                <Link 
-                  href="/factory/scanner" 
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/scanner' ? 'bg-orange-50 text-orange-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  الماسح الضوئي للعمال
-                </Link>
-              </nav>
+              {!userEmail?.startsWith("dept_") && (
+                <nav className="hidden lg:flex gap-2">
+                  <Link 
+                    href="/factory/dashboard" 
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                  >
+                    <Monitor size={18} /> حركة المصنع
+                  </Link>
+                  <Link 
+                    href="/factory/productivity" 
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname?.includes('/factory/productivity') ? 'bg-purple-100 text-purple-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                  >
+                    <BarChart3 size={18} /> الإنتاجيات
+                  </Link>
+                  <Link 
+                    href="/factory/inventory" 
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname?.includes('/factory/inventory') ? 'bg-green-100 text-green-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                  >
+                    <PackageOpen size={18} /> المخازن
+                  </Link>
+                  <Link 
+                    href="/factory/production" 
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/production' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    إدارة الموديلات والأوامر
+                  </Link>
+                  <Link 
+                    href="/factory/scanner" 
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/scanner' ? 'bg-orange-50 text-orange-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    الماسح الضوئي للعمال
+                  </Link>
+                </nav>
+              )}
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-bold text-gray-500 hidden sm:inline-block bg-gray-100 px-3 py-1 rounded-full">{userEmail}</span>
-              <Link 
-                href="/admin/dashboard" 
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-200 border border-gray-200 transition flex items-center gap-2"
-              >
-                <ArrowRight size={18} /> عودة للرئيسية
-              </Link>
+              {!userEmail?.startsWith("dept_") ? (
+                <Link 
+                  href="/admin/dashboard" 
+                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-200 border border-gray-200 transition flex items-center gap-2"
+                >
+                  <ArrowRight size={18} /> عودة للرئيسية
+                </Link>
+              ) : (
+                <button 
+                  onClick={() => {
+                    import("firebase/auth").then(({ signOut }) => signOut(auth));
+                  }}
+                  className="bg-red-50 text-red-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-red-100 border border-red-200 transition flex items-center gap-2"
+                >
+                  تسجيل خروج
+                </button>
+              )}
             </div>
           </div>
           
           {/* Mobile Navigation */}
-          <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
-              <Link 
-                href="/factory/dashboard" 
-                className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-              >
-                <Monitor size={16} /> حركة المصنع
-              </Link>
-              <Link 
-                href="/factory/productivity" 
-                className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname?.includes('/factory/productivity') ? 'bg-purple-100 text-purple-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-              >
-                <BarChart3 size={16} /> الإنتاجيات
-              </Link>
-              <Link 
-                href="/factory/inventory" 
-                className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname?.includes('/factory/inventory') ? 'bg-green-100 text-green-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-              >
-                <PackageOpen size={16} /> المخازن
-              </Link>
-          </nav>
+          {!userEmail?.startsWith("dept_") && (
+            <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
+                <Link 
+                  href="/factory/dashboard" 
+                  className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                >
+                  <Monitor size={16} /> حركة المصنع
+                </Link>
+                <Link 
+                  href="/factory/productivity" 
+                  className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname?.includes('/factory/productivity') ? 'bg-purple-100 text-purple-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                >
+                  <BarChart3 size={16} /> الإنتاجيات
+                </Link>
+                <Link 
+                  href="/factory/inventory" 
+                  className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname?.includes('/factory/inventory') ? 'bg-green-100 text-green-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                >
+                  <PackageOpen size={16} /> المخازن
+                </Link>
+            </nav>
+          )}
         </header>
       )}
       {!(isLoginPage || isScannerPage) && (
