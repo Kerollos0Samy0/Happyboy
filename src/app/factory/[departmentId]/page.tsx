@@ -46,37 +46,20 @@ export default function DepartmentDashboardPage() {
 
         {/* If it's the warehouse, show the scanner shortcut */}
         {department.id === "fabric_warehouse" && (
-          <>
-            <div className="card p-6 bg-white shadow-sm rounded-xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                📦 ماسح الأتواب (Scanner)
-              </h2>
-              <p className="text-gray-500 mb-4">
-                استخدم الماسح لقراءة الباركود الخاص بأتواب القماش ومطابقتها مع أمر الشغل للخصم.
-              </p>
-              <button 
-                onClick={() => router.push("/factory/fabric_scanner")}
-                className="btn btn-primary w-full py-3"
-              >
-                فتح شاشة صرف الأتواب
-              </button>
-            </div>
-
-            <div className="card p-6 bg-white shadow-sm rounded-xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                ➕ إضافة أتواب للمخزن
-              </h2>
-              <p className="text-gray-500 mb-4">
-                سجل أتواب القماش الجديدة في المخزن، حدد الألوان والأوزان، واطبع الباركود الخاص بها.
-              </p>
-              <button 
-                onClick={() => router.push("/factory/fabric_inventory")}
-                className="btn bg-green-600 text-white hover:bg-green-700 font-bold w-full py-3 rounded-lg transition"
-              >
-                إدارة وإضافة الأتواب
-              </button>
-            </div>
-          </>
+          <div className="card p-6 bg-white shadow-sm rounded-xl border border-gray-100">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              📦 ماسح الأتواب (Scanner)
+            </h2>
+            <p className="text-gray-500 mb-4">
+              استخدم الماسح لقراءة الباركود الخاص بأتواب القماش ومطابقتها مع أمر الشغل للخصم.
+            </p>
+            <button 
+              onClick={() => router.push("/factory/fabric_scanner")}
+              className="btn btn-primary w-full py-3"
+            >
+              فتح شاشة صرف الأتواب
+            </button>
+          </div>
         )}
       </div>
     </div>
