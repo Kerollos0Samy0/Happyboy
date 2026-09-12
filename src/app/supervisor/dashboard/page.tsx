@@ -245,6 +245,67 @@ export default function SupervisorDashboard() {
       return () => { scanner.clear().catch(console.error); };
     }
   }, [isScannerOpen]);
+  const [externalScanInput, setExternalScanInput] = useState("");
+
+  // Global keyboard listener for external scanner
+  useEffect(() => {
+    let buffer = "";
+    let lastKeyTime = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input (except if we had a dedicated hidden input, but we don't need one)
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      const now = Date.now();
+      const timeSinceLast = now - lastKeyTime;
+      lastKeyTime = now;
+
+      if (e.key === "Enter") {
+        if (buffer.trim().length > 3) {
+          let scanned = buffer.trim();
+          buffer = "";
+          setExternalScanInput("");
+          
+          // Arabic keyboard mapping
+          const arabicToEnglishMap: Record<string, string> = {
+            'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+            'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'أ': 'h', 'إ': 'h', 'آ': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': '\'',
+            'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/'
+          };
+          
+          scanned = scanned.split('').map(char => arabicToEnglishMap[char] || char).join('');
+          
+          if (scanned.includes('/public/order/')) {
+            const parts = scanned.split('/public/order/');
+            scanned = parts[1].split(/[/?#]/)[0];
+          } else {
+            const idMatch = scanned.match(/ID:\s*([a-zA-Z0-9_-]+)/);
+            if (idMatch && idMatch[1]) {
+              scanned = idMatch[1];
+            }
+          }
+          
+          handleReceiveScannedBasket(scanned);
+        } else {
+          buffer = "";
+        }
+        return;
+      }
+
+      if (timeSinceLast > 500 && buffer.length > 0) {
+        buffer = "";
+      }
+
+      if (e.key.length === 1) {
+        buffer += e.key;
+        setExternalScanInput(buffer);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleReceiveScannedBasket = async (decodedText: string) => {
     try {
@@ -712,6 +773,21 @@ export default function SupervisorDashboard() {
             <div id="supervisor-reader" width="100%"></div>
           </div>
         )}
+
+        <div className="bg-green-50 border-2 border-green-400 p-3 rounded-xl shadow-sm mb-6 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔫</span>
+            <div>
+              <h3 className="font-bold text-green-800">Scanner خارجي جاهز</h3>
+              <p className="text-xs text-green-600">وجّه الـ Scanner على أمر التشغيل للاستلام المباشر (تأكد أن الماوس خارج أي خانة بحث)</p>
+            </div>
+          </div>
+          {externalScanInput && (
+            <div className="px-4 py-2 bg-white border border-green-300 rounded font-bold text-green-700">
+              {externalScanInput}
+            </div>
+          )}
+        </div>
 
         <h3 className="font-bold text-gray-600 mb-3 flex items-center gap-2">
           <ArrowDown /> الموديلات المفتوحة على الخط (صندوق الوارد)
