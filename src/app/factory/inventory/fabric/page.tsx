@@ -24,7 +24,12 @@ export default function FabricInventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [printRoll, setPrintRoll] = useState<FabricRoll | null>(null);
+  const [printRolls, setPrintRolls] = useState<FabricRoll[]>([]);
+  const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
+  
+  const [filterColor, setFilterColor] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('newest');
+  
   const [rollsCount, setRollsCount] = useState(1);
   const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
@@ -140,10 +145,38 @@ export default function FabricInventoryPage() {
     }
   };
 
-  const filteredRolls = rolls.filter(r => 
-    r.code?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    r.color?.toLowerCase().includes(searchTerm.toLowerCase())
+  let processedRolls = rolls.filter(r => 
+    (r.code?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterColor ? r.color === filterColor : true)
   );
+
+  processedRolls.sort((a, b) => {
+    if (sortBy === 'heaviest') return Number(b.amount) - Number(a.amount);
+    if (sortBy === 'lightest') return Number(a.amount) - Number(b.amount);
+    
+    const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
+    const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
+    
+    if (sortBy === 'oldest') return timeA - timeB;
+    return timeB - timeA; // newest (default)
+  });
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedRolls(processedRolls.map(r => r.id));
+    } else {
+      setSelectedRolls([]);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    if (selectedRolls.includes(id)) {
+      setSelectedRolls(selectedRolls.filter(r => r !== id));
+    } else {
+      setSelectedRolls([...selectedRolls, id]);
+    }
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -272,53 +305,101 @@ export default function FabricInventoryPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-            <input 
-              type="text" 
-              placeholder="ابحث بالكود أو اللون..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm"
-            />
+        <div className="p-4 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4 flex-1">
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+              <input 
+                type="text" 
+                placeholder="ابحث بالكود أو اللون..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm"
+              />
+            </div>
+            
+            <select 
+              value={filterColor} 
+              onChange={(e) => setFilterColor(e.target.value)} 
+              className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
+            >
+              <option value="">كل الألوان</option>
+              {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)} 
+              className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
+            >
+              <option value="newest">الأحدث إضافة</option>
+              <option value="oldest">الأقدم إضافة</option>
+              <option value="heaviest">الأعلى وزناً</option>
+              <option value="lightest">الأقل وزناً</option>
+            </select>
           </div>
-          <div className="text-sm font-bold text-gray-500">
-            الإجمالي: {rolls.length} توب
+
+          <div className="flex items-center gap-4">
+            <div className="text-sm font-bold text-gray-500">
+              الإجمالي: {processedRolls.length} توب
+            </div>
+            {selectedRolls.length > 0 && (
+              <button 
+                onClick={() => setPrintRolls(rolls.filter(r => selectedRolls.includes(r.id)))}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition text-sm shadow"
+              >
+                <Printer size={16} /> طباعة {selectedRolls.length} تيكت
+              </button>
+            )}
           </div>
         </div>
-        
         {errorMsg ? (
           <div className="p-10 text-center text-red-500 font-bold bg-red-50 m-4 rounded-lg">
             حدث خطأ أثناء تحميل الأتواب: {errorMsg}
           </div>
         ) : loading ? (
           <div className="p-10 text-center text-gray-500 font-bold">جاري تحميل الأتواب...</div>
-        ) : filteredRolls.length === 0 ? (
+        ) : processedRolls.length === 0 ? (
           <div className="p-10 text-center text-gray-400">لا توجد نتائج مطابقة.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-right">
               <thead className="bg-gray-100 text-gray-600 text-sm">
                 <tr>
+                  <th className="p-4 w-12">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 cursor-pointer"
+                      checked={selectedRolls.length === processedRolls.length && processedRolls.length > 0}
+                      onChange={handleSelectAll}
+                    />
+                  </th>
                   <th className="p-4 font-bold">كود التوب</th>
                   <th className="p-4 font-bold">اللون</th>
                   <th className="p-4 font-bold">النوع</th>
                   <th className="p-4 font-bold">الكمية/الوزن</th>
                   <th className="p-4 font-bold">المورد</th>
-                  <th className="p-4 font-bold">إجراءات</th>
+                  <th className="p-4 font-bold text-center">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredRolls.map(roll => (
+                {processedRolls.map(roll => (
                   <tr key={roll.id} className="hover:bg-gray-50 transition">
+                    <td className="p-4">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 cursor-pointer"
+                        checked={selectedRolls.includes(roll.id)}
+                        onChange={() => toggleSelect(roll.id)}
+                      />
+                    </td>
                     <td className="p-4 text-gray-800 font-black">{roll.code}</td>
                     <td className="p-4 text-gray-800 font-bold">{roll.color}</td>
                     <td className="p-4 text-gray-600">{roll.type || '---'}</td>
                     <td className="p-4 text-green-700 font-bold bg-green-50">{roll.amount} {roll.unit}</td>
                     <td className="p-4 text-gray-500 text-sm">{roll.supplier || '---'}</td>
-                    <td className="p-4 flex gap-2 justify-end">
-                      <button onClick={() => setPrintRoll(roll)} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
+                    <td className="p-4 flex gap-2 justify-center">
+                      <button onClick={() => setPrintRolls([roll])} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
                         <Printer size={18} />
                       </button>
                       <button onClick={() => handleDelete(roll.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition" title="حذف التوب">
@@ -334,34 +415,58 @@ export default function FabricInventoryPage() {
       </div>
 
       {/* Print Modal */}
-      {printRoll && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print">
-          <div className="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
-            <h2 className="text-xl font-bold mb-4 text-center">معاينة تيكت الباركود (5سم × 2.5سم)</h2>
+      {/* Print Modal */}
+      {printRolls.length > 0 && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
+          <div className="bg-white p-8 rounded-xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              معاينة الطباعة ({printRolls.length} تيكت) (5سم × 2.5سم)
+            </h2>
             
-            {/* The actual element that will be printed */}
-            <div id="print-section" className="border border-gray-300 w-[50mm] h-[25mm] bg-white mx-auto flex items-center justify-between p-1 overflow-hidden" style={{ direction: 'rtl' }}>
-              <div className="flex flex-col justify-center h-full w-[65%]">
-                <span className="font-black text-[11px] leading-tight truncate text-black">{printRoll.color}</span>
-                <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{printRoll.type || 'قماش'}</span>
-                <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{printRoll.amount} {printRoll.unit}</span>
-                <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{printRoll.code}</span>
-              </div>
-              <div className="flex items-center justify-end h-full w-[35%]">
-                <QRCodeSVG value={printRoll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
-              </div>
+            <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
+              {/* Preview in browser (not printed) */}
+              {printRolls.map(roll => (
+                <div key={roll.id} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
+                  <div className="flex flex-col justify-center h-full w-[65%]">
+                    <span className="font-black text-[11px] leading-tight truncate text-black">{roll.color}</span>
+                    <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{roll.type || 'قماش'}</span>
+                    <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{roll.amount} {roll.unit}</span>
+                    <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{roll.code}</span>
+                  </div>
+                  <div className="flex items-center justify-end h-full w-[35%]">
+                    <QRCodeSVG value={roll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="flex gap-4 mt-8">
+            {/* The actual element that will be printed (Hidden on screen) */}
+            <div id="print-section" className="hidden">
+              {printRolls.map(roll => (
+                <div key={roll.id} className="print-page" style={{ direction: 'rtl' }}>
+                  <div className="flex flex-col justify-center h-full w-[65%]">
+                    <span className="font-black text-[11px] leading-tight truncate text-black">{roll.color}</span>
+                    <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{roll.type || 'قماش'}</span>
+                    <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{roll.amount} {roll.unit}</span>
+                    <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{roll.code}</span>
+                  </div>
+                  <div className="flex items-center justify-end h-full w-[35%]">
+                    <QRCodeSVG value={roll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-4 mt-6 shrink-0">
               <button 
                 onClick={() => window.print()}
-                className="btn bg-blue-600 hover:bg-blue-700 text-white flex-1 py-2 font-bold transition rounded-lg"
+                className="btn bg-blue-600 hover:bg-blue-700 text-white flex-1 py-3 font-bold transition rounded-lg text-lg shadow"
               >
-                🖨️ طباعة
+                🖨️ طباعة الكل
               </button>
               <button 
-                onClick={() => setPrintRoll(null)}
-                className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 flex-1 py-2 font-bold transition rounded-lg"
+                onClick={() => { setPrintRolls([]); setSelectedRolls([]); }}
+                className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 flex-1 py-3 font-bold transition rounded-lg"
               >
                 إغلاق
               </button>
@@ -378,15 +483,20 @@ export default function FabricInventoryPage() {
             margin: 0;
           }
           body * { visibility: hidden; }
-          #print-section, #print-section * { visibility: visible; }
-          #print-section { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
+          #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; visibility: visible; }
+          #print-section * { visibility: visible; }
+          .print-page { 
             width: 50mm !important; 
             height: 25mm !important; 
             border: none !important;
             margin: 0 !important;
+            padding: 1mm !important;
+            page-break-after: always;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            background: white;
           }
           .no-print { display: none !important; }
         }
