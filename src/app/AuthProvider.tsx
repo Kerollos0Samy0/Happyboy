@@ -21,8 +21,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setLoading(false);
 
       const isPublicPath = pathname === "/login" || pathname === "/factory/login" || pathname.startsWith("/public");
+      
       if (!currentUser && !isPublicPath) {
-        router.push("/factory/login"); // Redirect to factory login or maybe keep as /login, but let's just allow access
+        router.push("/factory/login");
+      } else if (currentUser && currentUser.email?.startsWith("dept_")) {
+        // If a department user tries to go to admin dashboard or home, force them to their factory page
+        if (pathname === "/" || pathname.startsWith("/admin") || pathname === "/factory/dashboard") {
+          const deptId = currentUser.email.split("@")[0].replace("dept_", "");
+          router.push(`/factory/${deptId}`);
+        }
       }
     });
 
