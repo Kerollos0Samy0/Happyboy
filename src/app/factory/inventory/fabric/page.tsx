@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { Search, PlusCircle, Scissors, Trash2 } from 'lucide-react';
+import { Search, PlusCircle, Scissors, Trash2, Printer } from 'lucide-react';
+import { QRCodeSVG } from "qrcode.react";
 
 type FabricRoll = {
   id: string;
@@ -22,6 +23,7 @@ export default function FabricInventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const [showAddForm, setShowAddForm] = useState(false);
+  const [printRoll, setPrintRoll] = useState<FabricRoll | null>(null);
   const [rollsCount, setRollsCount] = useState(1);
   const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
@@ -262,8 +264,11 @@ export default function FabricInventoryPage() {
                     <td className="p-4 text-gray-600">{roll.type || '---'}</td>
                     <td className="p-4 text-green-700 font-bold bg-green-50">{roll.amount} {roll.unit}</td>
                     <td className="p-4 text-gray-500 text-sm">{roll.supplier || '---'}</td>
-                    <td className="p-4">
-                      <button onClick={() => handleDelete(roll.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition">
+                    <td className="p-4 flex gap-2 justify-end">
+                      <button onClick={() => setPrintRoll(roll)} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
+                        <Printer size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(roll.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition" title="حذف التوب">
                         <Trash2 size={18} />
                       </button>
                     </td>
@@ -274,6 +279,65 @@ export default function FabricInventoryPage() {
           </div>
         )}
       </div>
+
+      {/* Print Modal */}
+      {printRoll && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print">
+          <div className="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
+            <h2 className="text-xl font-bold mb-4 text-center">معاينة تيكت الباركود (5سم × 2.5سم)</h2>
+            
+            {/* The actual element that will be printed */}
+            <div id="print-section" className="border border-gray-300 w-[50mm] h-[25mm] bg-white mx-auto flex items-center justify-between p-1 overflow-hidden" style={{ direction: 'rtl' }}>
+              <div className="flex flex-col justify-center h-full w-[65%]">
+                <span className="font-black text-[11px] leading-tight truncate text-black">{printRoll.color}</span>
+                <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{printRoll.type || 'قماش'}</span>
+                <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{printRoll.amount} {printRoll.unit}</span>
+                <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{printRoll.code}</span>
+              </div>
+              <div className="flex items-center justify-end h-full w-[35%]">
+                <QRCodeSVG value={printRoll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button 
+                onClick={() => window.print()}
+                className="btn bg-blue-600 hover:bg-blue-700 text-white flex-1 py-2 font-bold transition rounded-lg"
+              >
+                🖨️ طباعة
+              </button>
+              <button 
+                onClick={() => setPrintRoll(null)}
+                className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 flex-1 py-2 font-bold transition rounded-lg"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Styles */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          @page {
+            size: 50mm 25mm;
+            margin: 0;
+          }
+          body * { visibility: hidden; }
+          #print-section, #print-section * { visibility: visible; }
+          #print-section { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 50mm !important; 
+            height: 25mm !important; 
+            border: none !important;
+            margin: 0 !important;
+          }
+          .no-print { display: none !important; }
+        }
+      `}} />
 
     </div>
   );
