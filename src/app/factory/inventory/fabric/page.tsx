@@ -20,8 +20,9 @@ type FabricRoll = {
 export default function FabricInventoryPage() {
   const [rolls, setRolls] = useState<FabricRoll[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [printRoll, setPrintRoll] = useState<FabricRoll | null>(null);
   const [rollsCount, setRollsCount] = useState(1);
@@ -41,8 +42,9 @@ export default function FabricInventoryPage() {
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FabricRoll[];
       setRolls(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setErrorMsg(err.message || 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -279,7 +281,11 @@ export default function FabricInventoryPage() {
           </div>
         </div>
         
-        {loading ? (
+        {errorMsg ? (
+          <div className="p-10 text-center text-red-500 font-bold bg-red-50 m-4 rounded-lg">
+            حدث خطأ أثناء تحميل الأتواب: {errorMsg}
+          </div>
+        ) : loading ? (
           <div className="p-10 text-center text-gray-500 font-bold">جاري تحميل الأتواب...</div>
         ) : filteredRolls.length === 0 ? (
           <div className="p-10 text-center text-gray-400">لا توجد نتائج مطابقة.</div>
