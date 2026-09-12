@@ -7,6 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { CheckCircle, AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
+import Barcode from 'react-barcode';
 
 const getColorCode = (colorName: string) => {
   if (!colorName) return '#ffffff';
@@ -125,9 +126,12 @@ export default function PrintProductionOrderPage() {
               </div>
             </div>
             
-            <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
-              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={100} />
-              <span className="text-xs font-mono mt-2">{order.id.slice(-6).toUpperCase()}</span>
+            <div className="flex flex-col items-center border-r-2 pr-4 ml-4 gap-2">
+              <div className="flex gap-4">
+                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={64} />
+              </div>
+              <Barcode value={`ID:${order.id}`} width={1.2} height={30} fontSize={12} displayValue={false} margin={0} />
+              <span className="text-[10px] font-mono mt-1 text-gray-500">{order.id}</span>
             </div>
           </div>
         </div>
