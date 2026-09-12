@@ -339,18 +339,27 @@ export default function SupervisorDashboard() {
         }
       } else {
         // Fallback: search by bundleCode
-        const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
-        const snapshot = await getDocs(q);
+        let q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
+        let snapshot = await getDocs(q);
+        
+        // If not found by bundleCode, try modelName
+        if (snapshot.empty) {
+          q = query(collection(db, 'factory_production_orders'), where('modelName', '==', cleanCode));
+          snapshot = await getDocs(q);
+        }
+        
         if (!snapshot.empty) {
-          const data = snapshot.docs[0].data();
-          if (data.currentLocation !== 'done') {
-             toReceive.push({id: snapshot.docs[0].id, ...data});
-          }
+          snapshot.docs.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.currentLocation !== 'done') {
+               toReceive.push({id: docSnap.id, ...data});
+            }
+          });
         }
       }
 
-
       if (toReceive.length === 0) {
+
         alert(`لم يتم العثور على أوامر متاحة للاستلام! قد يكون تم إنهاء الموديل. (المقروء: ${cleanCode})`);
         return;
       }

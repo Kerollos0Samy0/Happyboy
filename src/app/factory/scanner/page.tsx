@@ -259,8 +259,20 @@ export default function WorkerScannerPage() {
         data.id = docSnap.id;
         selectSplitOption(data);
       } else {
-        const q = query(collection(db, "factory_production_orders"), where("originalOrderId", "==", orderId));
-        const querySnapshot = await getDocs(q);
+        let q = query(collection(db, "factory_production_orders"), where("originalOrderId", "==", orderId));
+        let querySnapshot = await getDocs(q);
+        
+        // Fallback to bundleCode
+        if (querySnapshot.empty) {
+          q = query(collection(db, "factory_production_orders"), where("bundleCode", "==", orderId));
+          querySnapshot = await getDocs(q);
+        }
+        
+        // Fallback to modelName
+        if (querySnapshot.empty) {
+          q = query(collection(db, "factory_production_orders"), where("modelName", "==", orderId));
+          querySnapshot = await getDocs(q);
+        }
         
         if (!querySnapshot.empty) {
           const splits = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as ProductionOrder));
