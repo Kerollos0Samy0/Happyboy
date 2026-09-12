@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -70,33 +69,52 @@ export default function WorkerScannerPage() {
 
   // Setup Scanner
   useEffect(() => {
-    if (isScannerActive) {
-      const scanner = new Html5QrcodeScanner(
-        "reader",
-        { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-        },
-        false
-      );
+    if (!isScannerActive) return;
 
-      scanner.render(
-        (decodedText) => {
-          // On success
+    let scanner: any = null;
+
+    const initScanner = async () => {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      scanner = new Html5Qrcode("reader");
+
+      // Prefer back camera to avoid mirror issue on front camera
+      let cameraId: string | { facingMode: string } = { facingMode: "environment" };
+
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          const backCamera = devices.find((d: any) =>
+            d.label.toLowerCase().includes("back") ||
+            d.label.toLowerCase().includes("rear") ||
+            d.label.toLowerCase().includes("environment")
+          );
+          cameraId = backCamera ? backCamera.id : devices[0].id;
+        }
+      } catch {
+        // Keep default facingMode: environment
+      }
+
+      await scanner.start(
+        cameraId,
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText: string) => {
           setScannedData(decodedText);
-          scanner.clear(); // stop scanning once found
+          scanner.stop().catch(console.error);
           setIsScannerActive(false);
         },
-        (errorMessage) => {
-          // On error - ignore to prevent spamming logs
+        (_errorMessage: string) => {
+          // Ignore scan errors silently
         }
       );
+    };
 
-      return () => {
-        scanner.clear().catch(e => console.error("Failed to clear scanner", e));
-      };
-    }
+    initScanner().catch(console.error);
+
+    return () => {
+      if (scanner) {
+        scanner.stop().catch((e: any) => console.error("Failed to stop scanner", e));
+      }
+    };
   }, [isScannerActive]);
 
   // Fetch order when scanned
