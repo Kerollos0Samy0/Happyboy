@@ -130,7 +130,7 @@ export default function PrintProductionOrderPage() {
               <div className="flex gap-4">
                 <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={64} />
               </div>
-              <Barcode value={order.id} format="CODE128B" width={1} height={40} fontSize={12} displayValue={false} margin={0} />
+              <Barcode value={order.id} format="CODE128B" width={2} height={40} fontSize={12} displayValue={false} margin={0} />
               <span className="text-[10px] font-mono mt-1 text-gray-500">{order.id}</span>
             </div>
           </div>
