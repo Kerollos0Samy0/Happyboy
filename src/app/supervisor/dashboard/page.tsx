@@ -779,19 +779,41 @@ export default function SupervisorDashboard() {
           </div>
         )}
 
-        <div className="bg-green-50 border-2 border-green-400 p-3 rounded-xl shadow-sm mb-6 flex justify-between items-center">
+        <div className="bg-green-50 border-2 border-green-400 p-3 rounded-xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🔫</span>
             <div>
               <h3 className="font-bold text-green-800">Scanner خارجي جاهز</h3>
-              <p className="text-xs text-green-600">وجّه الـ Scanner على أمر التشغيل للاستلام المباشر (تأكد أن الماوس خارج أي خانة بحث)</p>
+              <p className="text-xs text-green-600">وجّه الـ Scanner على أمر التشغيل للاستلام المباشر</p>
             </div>
           </div>
-          {externalScanInput && (
-            <div className="px-4 py-2 bg-white border border-green-300 rounded font-bold text-green-700">
-              {externalScanInput}
-            </div>
-          )}
+          
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <span className="text-sm font-bold text-green-700">أو إدخال يدوي:</span>
+            <input 
+              type="text" 
+              placeholder="اكتب كود الأمر هنا..." 
+              className="p-2 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                  handleReceiveScannedBasket(e.currentTarget.value.trim());
+                  e.currentTarget.value = '';
+                }
+              }}
+            />
+            <button 
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-bold"
+              onClick={(e) => {
+                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                if (input.value.trim()) {
+                  handleReceiveScannedBasket(input.value.trim());
+                  input.value = '';
+                }
+              }}
+            >
+              استلام
+            </button>
+          </div>
         </div>
 
         <h3 className="font-bold text-gray-600 mb-3 flex items-center gap-2">

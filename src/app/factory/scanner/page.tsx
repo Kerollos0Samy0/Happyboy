@@ -554,16 +554,45 @@ export default function WorkerScannerPage() {
         </button>
       </div>
 
-      {/* External Scanner Input - global listener, just shows what's being scanned */}
+      {/* External Scanner Input & Manual Fallback */}
       {!scannedData && !loading && !success && (
         <div className="bg-green-50 border-2 border-green-400 p-4 rounded-xl shadow-lg mb-4">
           <h3 className="font-bold text-green-800 mb-2 text-center flex items-center justify-center gap-2">
-            🔫 جهاز Scanner خارجي
+            🔫 جهاز Scanner خارجي / إدخال يدوي
           </h3>
-          <p className="text-xs text-green-600 text-center mb-3">وجّه جهاز الـ Scanner على الـ QR Code — لا يحتاج أي ضغط، سيتم القراءة تلقائياً</p>
-          <div className="w-full p-3 border-2 border-green-300 rounded-lg bg-white text-center font-bold text-lg text-green-700 min-h-[50px]">
-            {externalScanInput || <span className="text-gray-300 font-normal">في انتظار المسح...</span>}
+          <p className="text-xs text-green-600 text-center mb-3">وجّه جهاز الـ Scanner على الـ QR Code ليتم القراءة تلقائياً، أو اكتب الكود يدوياً إذا كان الجهاز لا يعمل</p>
+          
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              placeholder="اكتب كود الأمر هنا..." 
+              className="w-full p-3 border-2 border-green-300 rounded-lg text-center font-bold text-lg focus:outline-none focus:border-green-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.currentTarget.value.trim().length > 3) {
+                  setScannedData(e.currentTarget.value.trim());
+                  e.currentTarget.value = '';
+                }
+              }}
+            />
+            <button 
+              className="bg-green-600 hover:bg-green-700 text-white px-4 rounded-lg font-bold whitespace-nowrap"
+              onClick={(e) => {
+                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                if (input.value.trim().length > 3) {
+                  setScannedData(input.value.trim());
+                  input.value = '';
+                }
+              }}
+            >
+              دخول
+            </button>
           </div>
+          
+          {externalScanInput && (
+            <div className="mt-2 text-center text-xs text-green-600 animate-pulse">
+              جاري القراءة التلقائية: {externalScanInput}
+            </div>
+          )}
         </div>
       )}
 
