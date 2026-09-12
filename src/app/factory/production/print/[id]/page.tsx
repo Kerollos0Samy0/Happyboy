@@ -126,19 +126,18 @@ export default function PrintProductionOrderPage() {
               </div>
             </div>
             
-            <div className="flex flex-col items-center pr-4 ml-4 gap-2">
-              <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={100} />
-              <span className="text-xs font-mono mt-1 text-gray-500">{order.id}</span>
+            <div className="flex flex-col items-center border-r-2 pr-4 ml-4 gap-2">
+              <div className="flex gap-4">
+                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} size={64} />
+              </div>
+              <Barcode value={order.id} width={1} height={40} fontSize={12} displayValue={false} margin={0} />
+              <span className="text-[10px] font-mono mt-1 text-gray-500">{order.id}</span>
             </div>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t-2 border-gray-300 flex flex-col items-center">
-            <Barcode value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${order.id}` : ''} width={1.2} height={40} fontSize={12} displayValue={false} margin={0} />
-            <span className="text-[10px] font-mono mt-1 text-gray-400">لفتح الأمر خارج النظام، امسح الباركود أعلاه أو الـ QR Code</span>
           </div>
         </div>
 
         <div className="flex gap-6 flex-1">
+
 
           <div className="w-1/3 flex flex-col">
             <div className="border-2 border-gray-400 h-64 relative flex items-center justify-center p-2 mb-2">
