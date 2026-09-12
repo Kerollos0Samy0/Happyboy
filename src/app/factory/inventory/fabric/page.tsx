@@ -62,17 +62,46 @@ export default function FabricInventoryPage() {
     });
   };
 
+  const colorCodes: Record<string, string> = {
+    'أسود': 'BK', 'أبيض': 'WH', 'كحلي': 'NV', 'رمادي': 'GR', 'أحمر': 'RD',
+    'أصفر': 'YL', 'أخضر': 'GN', 'زيتي': 'OL', 'أزرق زهرى': 'RB', 'كشمير': 'CS',
+    'بيج': 'BG', 'بني': 'BR', 'برتقالي': 'OR', 'بينك': 'PK', 'لبني': 'LB', 'نبيتي': 'MR'
+  };
+
+  const handleColorChange = async (col: string) => {
+    setNewRoll({...newRoll, color: col});
+    if (!col) return;
+    
+    const prefix = colorCodes[col] || 'XX';
+    try {
+      const q = query(collection(db, 'factory_fabric_rolls'), where('color', '==', col));
+      const snap = await getDocs(q);
+      const count = snap.size;
+      const nextNum = (count + 1).toString().padStart(3, '0');
+      setNewRoll(prev => ({...prev, color: col, code: `${prefix}-${nextNum}`}));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleAddRoll = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoll.code || !newRoll.color || multiAmounts.some(a => !a)) return;
     setIsSaving(true);
     try {
       const promises = [];
+      const baseNumStr = newRoll.code.split('-')[1] || '001';
+      const baseNum = parseInt(baseNumStr, 10);
+      const prefix = newRoll.code.split('-')[0] || 'XX';
+
       for (let i = 0; i < rollsCount; i++) {
-        const paddedNum = (i + 1).toString().padStart(2, '0');
+        // If multiple, increment the base number for each
+        const currentNum = (baseNum + i).toString().padStart(3, '0');
+        const rollCode = rollsCount > 1 ? `${prefix}-${currentNum}` : newRoll.code;
+        
         promises.push(addDoc(collection(db, 'factory_fabric_rolls'), {
           ...newRoll,
-          code: rollsCount > 1 ? `${newRoll.code}-${paddedNum}` : newRoll.code,
+          code: rollCode,
           amount: Number(multiAmounts[i]),
           createdAt: serverTimestamp()
         }));
@@ -103,40 +132,51 @@ export default function FabricInventoryPage() {
   };
 
   const filteredRolls = rolls.filter(r => 
-    r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    r.color.includes(searchTerm)
+    r.code?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    r.color?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border-r-4 border-green-500">
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-black text-gray-800 flex items-center gap-2">
-            <Scissors className="text-green-600" /> مخزن الأتواب
+          <h1 className="text-3xl font-black text-green-800 tracking-tight flex items-center gap-2">
+            <Scissors className="text-green-600" />
+            مخزن القماش (أتواب)
           </h1>
-          <p className="text-gray-500 mt-1">إضافة وتتبع أتواب القماش بالكود واللون</p>
+          <p className="text-gray-500 mt-2">إدارة أتواب القماش الخام والباركودات الخاصة بها.</p>
         </div>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition shadow-md"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition shadow-sm"
         >
-          <PlusCircle size={20} /> إضافة توب جديد
+          <PlusCircle size={20} />
+          {showAddForm ? 'إلغاء' : 'إضافة توب جديد'}
         </button>
       </div>
 
       {showAddForm && (
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100 animate-fade-in">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100 animate-fade-in mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">تسجيل بيانات التوب</h2>
           <form onSubmit={handleAddRoll} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">كود التوب *</label>
-              <input type="text" required value={newRoll.code} onChange={(e) => setNewRoll({...newRoll, code: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="مثال: R-1020" />
+              <label className="block text-sm font-bold text-gray-700 mb-2">اللون *</label>
+              <select 
+                required 
+                value={newRoll.color} 
+                onChange={(e) => handleColorChange(e.target.value)} 
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 font-bold"
+              >
+                <option value="">-- اختر اللون --</option>
+                {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                <option value="أخرى">أخرى...</option>
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">اللون *</label>
-              <input type="text" required value={newRoll.color} onChange={(e) => setNewRoll({...newRoll, color: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="أحمر، كحلي..." />
+              <label className="block text-sm font-bold text-gray-700 mb-2">كود التوب الأساسي *</label>
+              <input type="text" required value={newRoll.code} onChange={(e) => setNewRoll({...newRoll, code: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono" placeholder="يتم توليده تلقائياً..." />
             </div>
 
             <div>
