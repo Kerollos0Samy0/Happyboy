@@ -38,9 +38,16 @@ export default function FabricInventoryPage() {
 
   const fetchRolls = async () => {
     try {
-      const q = query(collection(db, 'factory_fabric_rolls'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'factory_fabric_rolls'));
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FabricRoll[];
+      
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
+        return timeB - timeA;
+      });
+      
       setRolls(data);
     } catch (err: any) {
       console.error(err);
