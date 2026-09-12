@@ -72,21 +72,25 @@ export default function WorkerScannerPage() {
     if (!isScannerActive) return;
 
     let scanner: any = null;
-    let stopped = false;
 
     const initScanner = async () => {
-      const { Html5Qrcode } = await import("html5-qrcode");
-      const readerEl = document.getElementById("reader");
-      if (!readerEl || stopped) return;
+      const { Html5QrcodeScanner, Html5QrcodeScanType } = await import("html5-qrcode");
 
-      scanner = new Html5Qrcode("reader");
+      scanner = new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+          videoConstraints: { facingMode: { ideal: "environment" } },
+        },
+        false
+      );
 
-      await scanner.start(
-        { facingMode: { ideal: "environment" } }, // prefer back camera, fall back to front
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+      scanner.render(
         (decodedText: string) => {
           setScannedData(decodedText);
-          scanner.stop().catch(console.error);
+          scanner.clear();
           setIsScannerActive(false);
         },
         (_errorMessage: string) => {
@@ -95,14 +99,11 @@ export default function WorkerScannerPage() {
       );
     };
 
-    initScanner().catch((err) => {
-      console.error("Scanner init error:", err);
-    });
+    initScanner().catch(console.error);
 
     return () => {
-      stopped = true;
       if (scanner) {
-        scanner.stop().catch((e: any) => console.error("Failed to stop scanner", e));
+        scanner.clear().catch((e: any) => console.error("Failed to clear scanner", e));
       }
     };
   }, [isScannerActive]);
