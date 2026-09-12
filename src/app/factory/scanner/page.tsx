@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -69,43 +70,33 @@ export default function WorkerScannerPage() {
 
   // Setup Scanner
   useEffect(() => {
-    if (!isScannerActive) return;
-
-    let scanner: any = null;
-
-    const initScanner = async () => {
-      const { Html5QrcodeScanner, Html5QrcodeScanType } = await import("html5-qrcode");
-
-      scanner = new Html5QrcodeScanner(
+    if (isScannerActive) {
+      const scanner = new Html5QrcodeScanner(
         "reader",
-        {
-          fps: 10,
+        { 
+          fps: 10, 
           qrbox: { width: 250, height: 250 },
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-          videoConstraints: { facingMode: { ideal: "environment" } },
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
         },
         false
       );
 
       scanner.render(
-        (decodedText: string) => {
+        (decodedText) => {
+          // On success
           setScannedData(decodedText);
-          scanner.clear();
+          scanner.clear(); // stop scanning once found
           setIsScannerActive(false);
         },
-        (_errorMessage: string) => {
-          // Ignore scan errors silently
+        (errorMessage) => {
+          // On error - ignore to prevent spamming logs
         }
       );
-    };
 
-    initScanner().catch(console.error);
-
-    return () => {
-      if (scanner) {
-        scanner.clear().catch((e: any) => console.error("Failed to clear scanner", e));
-      }
-    };
+      return () => {
+        scanner.clear().catch(e => console.error("Failed to clear scanner", e));
+      };
+    }
   }, [isScannerActive]);
 
   // Fetch order when scanned
