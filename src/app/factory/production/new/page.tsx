@@ -3,10 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '../../../../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, updateDoc, doc, limit } from 'firebase/firestore';
 import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
+
+const colorCodes: Record<string, string> = {
+  'أسود': 'BK', 'أبيض': 'WH', 'كحلي': 'NV', 'رمادي': 'GR', 'أحمر': 'RD',
+  'أصفر': 'YL', 'أخضر': 'GN', 'زيتي': 'OL', 'أزرق زهرى': 'RB', 'كشمير': 'CS',
+  'بيج': 'BG', 'بني': 'BR', 'برتقالي': 'OR', 'بينك': 'PK', 'لبني': 'LB', 'نبيتي': 'MR'
+};
 
 export default function NewProductionOrderPage() {
   const router = useRouter();
@@ -16,8 +22,8 @@ export default function NewProductionOrderPage() {
   const [fabricType, setFabricType] = useState('');
   const [sizesSeries, setSizesSeries] = useState('');
   
-  // Dynamic color pairs array (now includes quantity)
-  const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '' }]);
+  // Dynamic color pairs array (now includes quantity and rollsCount)
+  const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '', tRolls: '', pRolls: '' }]);
   
   const [fabricSupplier, setFabricSupplier] = useState('');
   
@@ -114,6 +120,61 @@ export default function NewProductionOrderPage() {
         return p.quantity ? `${name} (${p.quantity}ق)` : name;
       }).filter(c => c).join('، ');
 
+      // Request and deduct rolls for each color
+      const usedRollsData: any[] = [];
+      const allRollsToDeduct: any[] = [];
+
+      for (const pair of validPairs) {
+        // Fetch for Tshirt color
+        if (pair.tshirt && Number(pair.tRolls) > 0) {
+          const tCount = Number(pair.tRolls);
+          const qT = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.tshirt), where('status', '==', 'in_stock'));
+          const snapT = await getDocs(qT);
+          let docsT = snapT.docs.map(d => ({id: d.id, ...d.data() as any}));
+          docsT.sort((a, b) => {
+            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
+            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
+            return timeA - timeB; // Oldest first
+          });
+          
+          const selectedT = docsT.slice(0, tCount);
+          selectedT.forEach(r => {
+            usedRollsData.push({ ...r, usedFor: 'tshirt' });
+            allRollsToDeduct.push(r.id);
+          });
+        }
+        
+        // Fetch for Pants color
+        if (pair.pants && Number(pair.pRolls) > 0) {
+          const pCount = Number(pair.pRolls);
+          const qP = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.pants), where('status', '==', 'in_stock'));
+          const snapP = await getDocs(qP);
+          let docsP = snapP.docs.map(d => ({id: d.id, ...d.data() as any}));
+          docsP.sort((a, b) => {
+            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
+            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
+            return timeA - timeB; // Oldest first
+          });
+          
+          // Filter out rolls already selected in this same request to avoid duplicates
+          docsP = docsP.filter(r => !allRollsToDeduct.includes(r.id));
+          const selectedP = docsP.slice(0, pCount);
+          
+          selectedP.forEach(r => {
+            usedRollsData.push({ ...r, usedFor: 'pants' });
+            allRollsToDeduct.push(r.id);
+          });
+        }
+      }
+
+      // Mark the selected rolls as used
+      for (const rollId of allRollsToDeduct) {
+        await updateDoc(doc(db, 'factory_fabric_rolls', rollId), {
+          status: 'used',
+          usedAt: serverTimestamp()
+        });
+      }
+
       const orderData = {
         modelName,
         totalQuantity: Number(totalQuantity),
@@ -132,12 +193,20 @@ export default function NewProductionOrderPage() {
         sewingNotes,
         generalNotes,
         modelImage: imageBase64,
+        used_rolls: usedRollsData,
         currentStage: 1,
         status: 'قيد التنفيذ',
         createdAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(collection(db, 'factory_production_orders'), orderData);
+      
+      // Save order id in the rolls
+      for (const rollId of allRollsToDeduct) {
+        await updateDoc(doc(db, 'factory_fabric_rolls', rollId), {
+          usedInOrder: docRef.id
+        });
+      }
       
       setGeneratedOrderId(docRef.id);
       setLoading(false);
@@ -456,34 +525,64 @@ export default function NewProductionOrderPage() {
                 
                 <div className="space-y-3">
                   {colorPairs.map((pair, idx) => (
-                    <div key={idx} className="flex gap-2 items-center">
-                      <div className="flex-[2]">
-                        <input 
-                          type="text" 
+                    <div key={idx} className="flex gap-2 items-center flex-wrap md:flex-nowrap">
+                      <div className="flex-[2] flex flex-col gap-1 min-w-[150px]">
+                        <select 
                           value={pair.tshirt} 
                           onChange={(e) => {
                             const newPairs = [...colorPairs];
                             newPairs[idx].tshirt = e.target.value;
                             setColorPairs(newPairs);
                           }} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                          placeholder={`التيشيرت (${idx + 1})`} 
-                        />
+                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
+                        >
+                          <option value="">لون التيشيرت ({idx + 1})</option>
+                          {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        {pair.tshirt && (
+                          <input 
+                            type="number" 
+                            min="0"
+                            placeholder="عدد الأتواب المسحوبة" 
+                            value={pair.tRolls}
+                            onChange={(e) => {
+                              const newPairs = [...colorPairs];
+                              newPairs[idx].tRolls = e.target.value;
+                              setColorPairs(newPairs);
+                            }}
+                            className="w-full p-1.5 text-xs border border-green-300 bg-green-50 rounded"
+                          />
+                        )}
                       </div>
-                      <div className="flex-[2]">
-                        <input 
-                          type="text" 
+                      <div className="flex-[2] flex flex-col gap-1 min-w-[150px]">
+                        <select 
                           value={pair.pants} 
                           onChange={(e) => {
                             const newPairs = [...colorPairs];
                             newPairs[idx].pants = e.target.value;
                             setColorPairs(newPairs);
                           }} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                          placeholder={`البنطلون (${idx + 1})`} 
-                        />
+                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
+                        >
+                          <option value="">لون البنطلون ({idx + 1})</option>
+                          {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        {pair.pants && (
+                          <input 
+                            type="number" 
+                            min="0"
+                            placeholder="عدد الأتواب المسحوبة" 
+                            value={pair.pRolls}
+                            onChange={(e) => {
+                              const newPairs = [...colorPairs];
+                              newPairs[idx].pRolls = e.target.value;
+                              setColorPairs(newPairs);
+                            }}
+                            className="w-full p-1.5 text-xs border border-green-300 bg-green-50 rounded"
+                          />
+                        )}
                       </div>
-                      <div className="w-24 shrink-0">
+                      <div className="w-24 shrink-0 flex flex-col justify-start h-full self-start">
                         <input 
                           type="number" 
                           value={pair.quantity} 
@@ -493,7 +592,7 @@ export default function NewProductionOrderPage() {
                             setColorPairs(newPairs);
                           }} 
                           className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-blue-700" 
-                          placeholder="الكمية" 
+                          placeholder="الكمية (ق)" 
                         />
                       </div>
                       {colorPairs.length > 1 && (
