@@ -312,29 +312,33 @@ export default function SupervisorDashboard() {
       const cleanCode = decodedText.trim();
       let toReceive: any[] = [];
 
+      let docId = cleanCode;
+      
       if (cleanCode.includes('/public/order/')) {
         const urlParts = cleanCode.split('/public/order/');
-        const docId = urlParts[urlParts.length - 1];
+        docId = urlParts[urlParts.length - 1];
+      }
+
+      // Try fetching by document ID first
+      const docRef = doc(db, 'factory_production_orders', docId);
+      const snap = await getDoc(docRef);
+      
+      if (snap.exists()) {
+        const data = snap.data();
         
-        const docRef = doc(db, 'factory_production_orders', docId);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-           const data = snap.data();
-           
-           if (data.isArchived && data.splitStatus === 'split_parent') {
-             const qChildren = query(collection(db, 'factory_production_orders'), where('originalOrderId', '==', docId));
-             const childSnaps = await getDocs(qChildren);
-             if (!childSnaps.empty) {
-                // filter out ones that are already done
-                toReceive = childSnaps.docs.filter(d => d.data().currentLocation !== 'done').map(d => ({id: d.id, ...d.data()}));
-             }
-           } else {
-             if (data.currentLocation !== 'done') {
-                toReceive.push({id: docRef.id, ...data});
-             }
-           }
+        if (data.isArchived && data.splitStatus === 'split_parent') {
+          const qChildren = query(collection(db, 'factory_production_orders'), where('originalOrderId', '==', docId));
+          const childSnaps = await getDocs(qChildren);
+          if (!childSnaps.empty) {
+            toReceive = childSnaps.docs.filter(d => d.data().currentLocation !== 'done').map(d => ({id: d.id, ...d.data()}));
+          }
+        } else {
+          if (data.currentLocation !== 'done') {
+            toReceive.push({id: docRef.id, ...data});
+          }
         }
       } else {
+        // Fallback: search by bundleCode
         const q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
@@ -344,6 +348,7 @@ export default function SupervisorDashboard() {
           }
         }
       }
+
 
       if (toReceive.length === 0) {
         alert(`لم يتم العثور على أوامر متاحة للاستلام! قد يكون تم إنهاء الموديل. (المقروء: ${cleanCode})`);
