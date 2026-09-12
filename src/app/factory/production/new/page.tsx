@@ -7,11 +7,18 @@ import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, up
 import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
+import Barcode from 'react-barcode';
 
 const colorCodes: Record<string, string> = {
   'أسود': 'BK', 'أبيض': 'WH', 'كحلي': 'NV', 'رمادي': 'GR', 'أحمر': 'RD',
   'أصفر': 'YL', 'أخضر': 'GN', 'زيتي': 'OL', 'أزرق زهرى': 'RB', 'كشمير': 'CS',
   'بيج': 'BG', 'بني': 'BR', 'برتقالي': 'OR', 'بينك': 'PK', 'لبني': 'LB', 'نبيتي': 'MR'
+};
+
+const colorHexMap: Record<string, string> = {
+  'أسود': '#000000', 'أبيض': '#FFFFFF', 'كحلي': '#000080', 'رمادي': '#808080', 'أحمر': '#FF0000',
+  'أصفر': '#FFFF00', 'أخضر': '#008000', 'زيتي': '#556B2F', 'أزرق زهرى': '#4169E1', 'كشمير': '#D1B2A1',
+  'بيج': '#F5F5DC', 'بني': '#8B4513', 'برتقالي': '#FFA500', 'بينك': '#FFC0CB', 'لبني': '#ADD8E6', 'نبيتي': '#800000'
 };
 
 export default function NewProductionOrderPage() {
@@ -168,12 +175,8 @@ export default function NewProductionOrderPage() {
       }
 
       // Mark the selected rolls as used
-      for (const rollId of allRollsToDeduct) {
-        await updateDoc(doc(db, 'factory_fabric_rolls', rollId), {
-          status: 'used',
-          usedAt: serverTimestamp()
-        });
-      }
+      const { writeBatch } = await import('firebase/firestore');
+      const batch = writeBatch(db);
 
       const orderData = {
         modelName,
@@ -199,16 +202,20 @@ export default function NewProductionOrderPage() {
         createdAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'factory_production_orders'), orderData);
-      
-      // Save order id in the rolls
+      const newOrderRef = doc(collection(db, 'factory_production_orders'));
+      batch.set(newOrderRef, orderData);
+
       for (const rollId of allRollsToDeduct) {
-        await updateDoc(doc(db, 'factory_fabric_rolls', rollId), {
-          usedInOrder: docRef.id
+        batch.update(doc(db, 'factory_fabric_rolls', rollId), {
+          status: 'used',
+          usedAt: serverTimestamp(),
+          usedInOrder: newOrderRef.id
         });
       }
+
+      await batch.commit();
       
-      setGeneratedOrderId(docRef.id);
+      setGeneratedOrderId(newOrderRef.id);
       setLoading(false);
     } catch (err: any) {
       console.error(err);
@@ -245,7 +252,12 @@ export default function NewProductionOrderPage() {
           <div className="border-4 border-gray-800 p-4 mb-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
+                <div className="flex items-start justify-between">
+                  <h1 className="text-3xl font-black mb-2 text-gray-900">أمر تشغيل مصنع (رئيسي)</h1>
+                  <div className="flex flex-col items-center justify-center">
+                    <Barcode value={generatedOrderId} width={1.5} height={40} displayValue={true} fontSize={12} margin={0} />
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                   <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{modelName}</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{sizesSeries}</span></div>
@@ -281,11 +293,11 @@ export default function NewProductionOrderPage() {
                     return (
                       <React.Fragment key={i}>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: tColors[i] ? colorHexMap[tColors[i]] : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
                           <span className="text-xs font-bold text-gray-800 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm"></div>
+                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: pColors[i] ? colorHexMap[pColors[i]] : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
                           <span className="text-xs font-bold text-gray-800 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
                         </div>
                       </React.Fragment>
