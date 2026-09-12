@@ -23,12 +23,12 @@ export default function FabricInventoryPage() {
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [rollsCount, setRollsCount] = useState(1);
+  const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
   const [newRoll, setNewRoll] = useState({
     code: '',
     color: '',
     type: '',
-    amount: '',
     unit: 'كجم',
     supplier: ''
   });
@@ -50,34 +50,37 @@ export default function FabricInventoryPage() {
     fetchRolls();
   }, []);
 
+  const handleRollsCountChange = (val: number) => {
+    const count = Math.max(1, val);
+    setRollsCount(count);
+    setMultiAmounts(prev => {
+      const newArr = [...prev];
+      while(newArr.length < count) newArr.push('');
+      return newArr.slice(0, count);
+    });
+  };
+
   const handleAddRoll = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRoll.code || !newRoll.color || !newRoll.amount) return;
+    if (!newRoll.code || !newRoll.color || multiAmounts.some(a => !a)) return;
     setIsSaving(true);
     try {
-      if (rollsCount > 1) {
-        const promises = [];
-        for (let i = 1; i <= rollsCount; i++) {
-          const paddedNum = i.toString().padStart(2, '0');
-          promises.push(addDoc(collection(db, 'factory_fabric_rolls'), {
-            ...newRoll,
-            code: `${newRoll.code}-${paddedNum}`,
-            amount: Number(newRoll.amount),
-            createdAt: serverTimestamp()
-          }));
-        }
-        await Promise.all(promises);
-      } else {
-        await addDoc(collection(db, 'factory_fabric_rolls'), {
+      const promises = [];
+      for (let i = 0; i < rollsCount; i++) {
+        const paddedNum = (i + 1).toString().padStart(2, '0');
+        promises.push(addDoc(collection(db, 'factory_fabric_rolls'), {
           ...newRoll,
-          amount: Number(newRoll.amount),
+          code: rollsCount > 1 ? `${newRoll.code}-${paddedNum}` : newRoll.code,
+          amount: Number(multiAmounts[i]),
           createdAt: serverTimestamp()
-        });
+        }));
       }
+      await Promise.all(promises);
       
       setShowAddForm(false);
-      setNewRoll({ code: '', color: '', type: '', amount: '', unit: 'كجم', supplier: '' });
+      setNewRoll({ code: '', color: '', type: '', unit: 'كجم', supplier: '' });
       setRollsCount(1);
+      setMultiAmounts(['']);
       fetchRolls();
     } catch (err) {
       console.error(err);
@@ -139,16 +142,30 @@ export default function FabricInventoryPage() {
               <input type="text" value={newRoll.type} onChange={(e) => setNewRoll({...newRoll, type: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="قطن، ميلتون..." />
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">الكمية *</label>
-              <div className="flex gap-2">
-                <input type="number" required min="0" step="0.01" value={newRoll.amount} onChange={(e) => setNewRoll({...newRoll, amount: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="مثال: 25.5" />
-                <select value={newRoll.unit} onChange={(e) => setNewRoll({...newRoll, unit: e.target.value})} className="p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-gray-50">
+            {rollsCount === 1 ? (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">الكمية *</label>
+                <div className="flex gap-2">
+                  <input type="number" required min="0" step="0.01" value={multiAmounts[0]} onChange={(e) => {
+                    const newArr = [...multiAmounts];
+                    newArr[0] = e.target.value;
+                    setMultiAmounts(newArr);
+                  }} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="مثال: 25.5" />
+                  <select value={newRoll.unit} onChange={(e) => setNewRoll({...newRoll, unit: e.target.value})} className="p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-gray-50">
+                    <option value="كجم">كجم</option>
+                    <option value="متر">متر</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">وحدة القياس للكل</label>
+                <select value={newRoll.unit} onChange={(e) => setNewRoll({...newRoll, unit: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-gray-50">
                   <option value="كجم">كجم</option>
                   <option value="متر">متر</option>
                 </select>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">المورد</label>
@@ -157,19 +174,45 @@ export default function FabricInventoryPage() {
 
             <div className="lg:col-span-3">
               <div className="mb-4">
-                <label className="block text-sm font-bold text-gray-700 mb-1">عدد الأثواب المراد إضافتها (بنفس المواصفات)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1">عدد الأثواب المراد إضافتها (بنفس اللون والنوع)</label>
                 <input 
                   type="number" 
                   min="1"
                   value={rollsCount}
-                  onChange={(e) => setRollsCount(Number(e.target.value) || 1)}
+                  onChange={(e) => handleRollsCountChange(Number(e.target.value) || 1)}
                   className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">إذا اخترت أكثر من 1، سيتم إضافة ترقيم تلقائي للكود الأساسي (مثال: Code-01، Code-02).</p>
               </div>
+              
+              {rollsCount > 1 && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">أوزان الأتواب (توب توب) *</label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {multiAmounts.map((amt, idx) => (
+                      <div key={idx} className="flex flex-col">
+                        <label className="text-xs font-bold text-gray-600 mb-1">توب {idx + 1}</label>
+                        <input 
+                          type="number" 
+                          required min="0" step="0.01" 
+                          value={amt} 
+                          onChange={(e) => {
+                            const newArr = [...multiAmounts];
+                            newArr[idx] = e.target.value;
+                            setMultiAmounts(newArr);
+                          }} 
+                          className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 outline-none text-center" 
+                          placeholder="الوزن" 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end">
                 <button type="submit" disabled={isSaving} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-8 rounded-lg flex items-center justify-center gap-2 transition shadow disabled:opacity-50">
-                  {isSaving ? 'جاري الحفظ...' : 'حفظ التوب بالمخزن'}
+                  {isSaving ? 'جاري الحفظ...' : 'حفظ بالمخزن'}
                 </button>
               </div>
             </div>
