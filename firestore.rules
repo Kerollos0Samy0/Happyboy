@@ -35,5 +35,20 @@ service cloud.firestore {
     match /inventory_logs/{logId} {
       allow read, write: if isAuthenticated();
     }
+
+    // Factory Collections: Supervisors use PINs locally, so no Firebase Auth is present. Allow read/write.
+    match /factory_production_orders/{docId} {
+      allow read, write: if true;
+    }
+    match /factory_settings/{docId} {
+      allow read, write: if true;
+    }
+    match /factory_line_configs/{docId} {
+      allow read, write: if true;
+    }
+    match /factory_worker_logs/{docId} {
+      allow read, write: if true;
+    }
   }
 }
+
