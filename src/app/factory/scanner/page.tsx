@@ -232,13 +232,20 @@ export default function WorkerScannerPage() {
     setFabricRolls([]);
 
     try {
-      let orderId = scannedText;
+      // Handle case where keyboard layout was Arabic when scanning
+      const arabicToEnglishMap: Record<string, string> = {
+        'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+        'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'أ': 'h', 'إ': 'h', 'آ': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': '\'',
+        'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/'
+      };
       
-      if (scannedText.includes('/public/order/')) {
-        const parts = scannedText.split('/public/order/');
+      let orderId = scannedText.split('').map(char => arabicToEnglishMap[char] || char).join('');
+      
+      if (orderId.includes('/public/order/')) {
+        const parts = orderId.split('/public/order/');
         orderId = parts[1].split(/[/?#]/)[0];
       } else {
-        const idMatch = scannedText.match(/ID:\s*([a-zA-Z0-9_-]+)/);
+        const idMatch = orderId.match(/ID:\s*([a-zA-Z0-9_-]+)/);
         if (idMatch && idMatch[1]) {
           orderId = idMatch[1];
         }
@@ -258,13 +265,14 @@ export default function WorkerScannerPage() {
         if (!querySnapshot.empty) {
           const splits = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as ProductionOrder));
           setSplitOptions(splits);
+          setOrderData({ id: orderId } as ProductionOrder); // Mock data for split view
         } else {
-          setError("لم يتم العثور على أمر تشغيل بهذا الرمز. تأكد من أن الرمز صحيح (أو ربما تم حذفه).");
+          setError(`لم يتم العثور على أمر تشغيل. (النص المقروء: ${scannedText} -> الكود: ${orderId})`);
         }
       }
     } catch (err) {
       console.error(err);
-      setError("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
+      setError(`حدث خطأ أثناء جلب البيانات. (النص المقروء: ${scannedText})`);
     } finally {
       setLoading(false);
     }
