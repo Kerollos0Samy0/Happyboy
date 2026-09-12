@@ -20,9 +20,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(currentUser);
       setLoading(false);
 
-      const isPublicPath = pathname === "/login" || pathname.startsWith("/public");
+      const isPublicPath = pathname === "/login" || pathname === "/factory/login" || pathname.startsWith("/public");
       if (!currentUser && !isPublicPath) {
-        router.push("/login");
+        router.push("/factory/login"); // Redirect to factory login or maybe keep as /login, but let's just allow access
       }
     });
 
@@ -40,7 +40,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }
 
   // If not logged in and trying to access a protected page, render nothing to avoid flicker
-  const isPublicPath = pathname === "/login" || pathname.startsWith("/public");
+  const isPublicPath = pathname === "/login" || pathname === "/factory/login" || pathname.startsWith("/public");
   if (!user && !isPublicPath) {
     return null;
   }
