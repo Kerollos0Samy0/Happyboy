@@ -109,23 +109,52 @@ export default function WorkerScannerPage() {
     }
   }, [scannedData]);
 
-  // Auto-focus external scanner input when ready to scan
+  // Global keyboard listener for external USB/Bluetooth scanner
+  // Scanners type very fast (< 50ms between chars), humans type slowly
   useEffect(() => {
-    if (!scannedData && !loading && !success && selectedStage && workerName) {
-      setTimeout(() => {
-        externalInputRef.current?.focus();
-      }, 300);
-    }
-  }, [scannedData, loading, success, selectedStage, workerName]);
+    if (!selectedStage || !workerName || scannedData || loading || success) return;
 
-  const handleExternalScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const value = externalScanInput.trim();
-      if (!value) return;
-      setExternalScanInput("");
-      setScannedData(value);
-    }
-  };
+    let buffer = "";
+    let lastKeyTime = 0;
+    const SCANNER_SPEED_MS = 80; // scanners type faster than this
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in another input (rollScanCode, workerNote, etc.)
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isOtherInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+      const isExternalInput = (e.target as HTMLElement) === externalInputRef.current;
+      if (isOtherInput && !isExternalInput) return;
+
+      const now = Date.now();
+      const timeSinceLast = now - lastKeyTime;
+      lastKeyTime = now;
+
+      if (e.key === "Enter") {
+        if (buffer.trim().length > 3) {
+          const scanned = buffer.trim();
+          buffer = "";
+          setExternalScanInput("");
+          setScannedData(scanned);
+        } else {
+          buffer = "";
+        }
+        return;
+      }
+
+      // Reset buffer if user is typing slowly (human typing)
+      if (timeSinceLast > 500 && buffer.length > 0) {
+        buffer = "";
+      }
+
+      if (e.key.length === 1) {
+        buffer += e.key;
+        setExternalScanInput(buffer);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [selectedStage, workerName, scannedData, loading, success]);
 
   const handleScanRoll = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -517,23 +546,16 @@ export default function WorkerScannerPage() {
         </button>
       </div>
 
-      {/* External Scanner Input - always visible when ready to scan */}
+      {/* External Scanner Input - global listener, just shows what's being scanned */}
       {!scannedData && !loading && !success && (
         <div className="bg-green-50 border-2 border-green-400 p-4 rounded-xl shadow-lg mb-4">
           <h3 className="font-bold text-green-800 mb-2 text-center flex items-center justify-center gap-2">
             🔫 جهاز Scanner خارجي
           </h3>
-          <p className="text-xs text-green-600 text-center mb-3">وجّه جهاز الـ Scanner على الـ QR Code وسيتم القراءة تلقائياً</p>
-          <input
-            ref={externalInputRef}
-            type="text"
-            value={externalScanInput}
-            onChange={(e) => setExternalScanInput(e.target.value)}
-            onKeyDown={handleExternalScan}
-            className="w-full p-3 border-2 border-green-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500 bg-white text-center font-bold text-lg"
-            placeholder="في انتظار المسح..."
-            autoComplete="off"
-          />
+          <p className="text-xs text-green-600 text-center mb-3">وجّه جهاز الـ Scanner على الـ QR Code — لا يحتاج أي ضغط، سيتم القراءة تلقائياً</p>
+          <div className="w-full p-3 border-2 border-green-300 rounded-lg bg-white text-center font-bold text-lg text-green-700 min-h-[50px]">
+            {externalScanInput || <span className="text-gray-300 font-normal">في انتظار المسح...</span>}
+          </div>
         </div>
       )}
 
