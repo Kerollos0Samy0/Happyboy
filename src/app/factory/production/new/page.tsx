@@ -208,8 +208,8 @@ export default function NewProductionOrderPage() {
 
       for (const rollId of allRollsToDeduct) {
         batch.update(doc(db, 'factory_fabric_rolls', rollId), {
-          status: 'used',
-          usedAt: serverTimestamp(),
+          status: 'reserved',
+          reservedAt: serverTimestamp(),
           usedInOrder: newOrderRef.id
         });
       }

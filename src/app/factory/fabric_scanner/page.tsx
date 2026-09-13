@@ -180,8 +180,11 @@ export default function FabricScannerPage() {
           // Update DB (Order verified rolls)
           await updateDoc(doc(db, "factory_production_orders", activeOrder.id), { verified_rolls: updatedVerifiedRolls });
           
-          // Also set the roll as verified in the fabric_rolls collection (optional but good for tracking)
-          await updateDoc(doc(db, "factory_fabric_rolls", expectedRoll.id), { verifiedAt: new Date().toISOString() });
+          // Set the roll as 'used' (Deducted) in the fabric_rolls collection
+          await updateDoc(doc(db, "factory_fabric_rolls", expectedRoll.id), { 
+            status: 'used',
+            verifiedAt: new Date().toISOString() 
+          });
         }
       } catch (err) {
         setRollError("حدث خطأ أثناء فحص التوب.");

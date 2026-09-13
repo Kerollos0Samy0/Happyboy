@@ -175,7 +175,9 @@ export default function FabricInventoryPage() {
   };
 
   let processedRolls = rolls.filter(r => 
-    (r.status === inventoryTab || (!r.status && inventoryTab === 'in_stock')) &&
+    ((r.status === inventoryTab) || 
+     (!r.status && inventoryTab === 'in_stock') || 
+     (r.status === 'reserved' && inventoryTab === 'in_stock')) &&
     (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterColor ? r.color === filterColor : true)
@@ -431,7 +433,14 @@ export default function FabricInventoryPage() {
                         onChange={() => toggleSelect(roll.id)}
                       />
                     </td>
-                    <td className="p-4 text-gray-800 font-black">{roll.code}</td>
+                    <td className="p-4 text-gray-800 font-black">
+                      {roll.code}
+                      {roll.status === 'reserved' && (
+                        <span className="mr-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full whitespace-nowrap">
+                          محجوز لـ {roll.usedInOrder?.slice(-6).toUpperCase()}
+                        </span>
+                      )}
+                    </td>
                     <td className="p-4 text-gray-800 font-bold">{roll.color}</td>
                     <td className="p-4 text-gray-600">{roll.type || '---'}</td>
                     <td className="p-4 text-green-700 font-bold bg-green-50">{roll.amount} {roll.unit}</td>
