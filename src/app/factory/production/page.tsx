@@ -123,6 +123,10 @@ export default function FactoryProductionDashboard() {
                 <span className="font-medium text-gray-700 group-hover:text-green-700">جرد المخازن</span>
                 <Package size={16} className="text-gray-400 group-hover:text-green-500" />
               </Link>
+              <Link href="/factory/order-tracking" className="w-full text-right p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center justify-between group mt-4 shadow-md">
+                <span className="font-bold">🔍 استعلام عن موديل / باركود</span>
+                <Search size={16} className="text-blue-200" />
+              </Link>
             </div>
           </div>
 
