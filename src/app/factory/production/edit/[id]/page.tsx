@@ -38,24 +38,26 @@ export default function EditProductionOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
+  const [usedRollsCount, setUsedRollsCount] = useState(0);
 
   // Auto-calculate total quantity based on colors
   useEffect(() => {
     if (id) {
       const fetchOrder = async () => {
-        setLoading(true);
         try {
+          setLoading(true);
           const docRef = doc(db, 'factory_production_orders', id);
           const snap = await getDoc(docRef);
           if (snap.exists()) {
             const data = snap.data();
             setModelName(data.modelName || '');
-            setTotalQuantity(data.totalQuantity?.toString() || '');
+            setTotalQuantity(data.totalQuantity || '');
             setFabricType(data.fabricType || '');
             setSizesSeries(data.sizesSeries || '');
             setFabricSupplier(data.fabricSupplier || '');
+            setUsedRollsCount(data.used_rolls ? data.used_rolls.length : 0);
             
-            if (data.colorPairs && data.colorPairs.length > 0) {
+            if (data.colorPairs && Array.isArray(data.colorPairs)) {
               setColorPairs(data.colorPairs);
             }
             
@@ -498,6 +500,13 @@ export default function EditProductionOrderPage() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">المورد / المخزن</label>
                   <input type="text" value={fabricSupplier} onChange={(e) => setFabricSupplier(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مكان القماش" />
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4 flex justify-between items-center">
+                <h3 className="font-bold text-blue-900 text-sm flex items-center gap-2">📦 الأتواب المحجوزة من المخزن</h3>
+                <div className="bg-white px-4 py-1.5 rounded-full font-bold text-blue-700 shadow-sm border border-blue-100">
+                  {usedRollsCount} توب
                 </div>
               </div>
 
