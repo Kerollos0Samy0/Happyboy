@@ -222,13 +222,29 @@ export default function EditProductionOrderPage() {
       });
       
       if (docsC.length < count) {
-        alert(`لا يوجد عدد كافٍ في المخزن! المتاح من لون ${missingColor} هو ${docsC.length} توب فقط.`);
-        setIsAddingRolls(false);
-        return;
+        const wantsPlaceholder = window.confirm(`لا يوجد عدد كافٍ في المخزن! المتاح من لون ${missingColor} هو ${docsC.length} توب فقط. هل تريد تسجيل الباقي كـ "أتواب ناقصة مطلوبة للشراء" داخل أمر الشغل؟`);
+        if (!wantsPlaceholder) {
+          setIsAddingRolls(false);
+          return;
+        }
       }
 
-      const selected = docsC.slice(0, count);
+      const availableCount = Math.min(docsC.length, count);
+      const missingCountNeeded = count - availableCount;
+
+      const selected = docsC.slice(0, availableCount);
       const newRollsData = selected.map(r => ({ ...r, usedFor: 'tshirt' }));
+      
+      // Generate placeholders for the deficit
+      for(let i=0; i<missingCountNeeded; i++) {
+        newRollsData.push({
+          id: `placeholder_${Date.now()}_${i}`,
+          color: missingColor,
+          code: 'ناقص (مطلوب شراء)',
+          isPlaceholder: true,
+          status: 'reserved'
+        });
+      }
       
       const batch = writeBatch(db);
       

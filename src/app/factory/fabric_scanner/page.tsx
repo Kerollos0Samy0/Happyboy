@@ -181,8 +181,27 @@ export default function FabricScannerPage() {
         }
 
         // Check if this roll is expected for this order
-        const expectedRoll = expectedRolls.find(r => r.code === rollCode);
+        let expectedRoll = expectedRolls.find(r => r.code === rollCode);
         
+        if (!expectedRoll) {
+          // Check if this is a physical roll being scanned to fulfill a placeholder
+          const qRoll = query(collection(db, "factory_fabric_rolls"), where("code", "==", rollCode));
+          const snapRoll = await getDocs(qRoll);
+          if (!snapRoll.empty) {
+            const actualRollData = { id: snapRoll.docs[0].id, ...snapRoll.docs[0].data() as any };
+            
+            // Find a placeholder of the same color that hasn't been fulfilled yet
+            const placeholderIdx = expectedRolls.findIndex(r => r.isPlaceholder && r.color === actualRollData.color);
+            
+            if (placeholderIdx !== -1) {
+              expectedRoll = actualRollData;
+              const newExpected = [...expectedRolls];
+              newExpected[placeholderIdx] = actualRollData; // Swap placeholder with actual
+              setExpectedRolls(newExpected);
+            }
+          }
+        }
+
         if (!expectedRoll) {
           setRollError(`هذا التوب غير مطلوب لهذا الموديل!`);
         } else {
