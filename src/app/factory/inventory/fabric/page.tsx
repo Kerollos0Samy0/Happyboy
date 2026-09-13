@@ -459,22 +459,6 @@ export default function FabricInventoryPage() {
               ))}
             </div>
 
-            {/* The actual element that will be printed (Hidden on screen) */}
-            <div id="print-section" className="hidden">
-              {printRolls.map(roll => (
-                <div key={roll.id} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
-                  <div className="flex justify-between w-full px-1 mb-1">
-                    <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
-                    <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
-                    <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
-                  </div>
-                  <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                    <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
             <div className="flex gap-4 mt-6 shrink-0">
               <button 
                 onClick={() => window.print()}
@@ -492,6 +476,25 @@ export default function FabricInventoryPage() {
           </div>
         </div>
       )}
+
+      {/* The actual element that will be printed (Hidden on screen) */}
+      {printRolls.length > 0 && (
+        <div id="print-section" className="hidden print:block">
+          {printRolls.map(roll => (
+            <div key={roll.id} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
+              <div className="flex justify-between w-full mb-1">
+                <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
+                <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
+                <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
+              </div>
+              <div className="flex items-center justify-center w-full bg-white rounded flex-1">
+                <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
 
       {/* Print Styles */}
       <style dangerouslySetInnerHTML={{__html: `
