@@ -176,8 +176,7 @@ export default function FabricInventoryPage() {
 
   let processedRolls = rolls.filter(r => 
     ((r.status === inventoryTab) || 
-     (!r.status && inventoryTab === 'in_stock') || 
-     (r.status === 'reserved' && inventoryTab === 'in_stock')) &&
+     (!r.status && inventoryTab === 'in_stock')) &&
     (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterColor ? r.color === filterColor : true)
@@ -334,6 +333,12 @@ export default function FabricInventoryPage() {
             className={`flex-1 py-3 font-bold text-lg transition ${inventoryTab === 'in_stock' ? 'border-b-4 border-green-500 text-green-700 bg-green-50' : 'text-gray-500 hover:bg-gray-50'}`}
           >
             الأتواب المتاحة
+          </button>
+          <button 
+            onClick={() => setInventoryTab('reserved')}
+            className={`flex-1 py-3 font-bold text-lg transition ${inventoryTab === 'reserved' ? 'border-b-4 border-orange-500 text-orange-700 bg-orange-50' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            الأتواب المحجوزة
           </button>
           <button 
             onClick={() => setInventoryTab('used')}
