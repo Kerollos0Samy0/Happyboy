@@ -197,7 +197,20 @@ export default function DepartmentDashboardPage() {
         </h1>
       </div>
 
-      {!activeOrder && (
+      {!activeOrder && department.id === "fabric_warehouse" && (
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">📦 ماسح الأتواب (مخزن القماش)</h2>
+          <p className="text-gray-500 mb-6 text-center">استخدم الماسح الخاص بالمخزن لقراءة الباركود الخاص بأتواب القماش وصرفها.</p>
+          <button 
+            onClick={() => router.push("/factory/fabric_scanner")}
+            className="w-full max-w-md py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition"
+          >
+            فتح شاشة صرف / مرتجع الأتواب
+          </button>
+        </div>
+      )}
+
+      {!activeOrder && department.id !== "fabric_warehouse" && (
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
           <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
             <Search size={32} />
