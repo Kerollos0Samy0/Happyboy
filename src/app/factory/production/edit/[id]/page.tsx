@@ -42,6 +42,10 @@ export default function EditProductionOrderPage() {
   const [usedRolls, setUsedRolls] = useState<any[]>([]);
   const [showRollDetails, setShowRollDetails] = useState(false);
 
+  const [missingColor, setMissingColor] = useState('');
+  const [missingCount, setMissingCount] = useState('');
+  const [isAddingRolls, setIsAddingRolls] = useState(false);
+
   // Auto-calculate total quantity based on colors
   useEffect(() => {
     if (id) {
@@ -201,6 +205,59 @@ export default function EditProductionOrderPage() {
       setError(err.message || 'حدث خطأ غير متوقع أثناء الحفظ.');
       setLoading(false);
     }
+  };
+
+  const handleAddMissingRolls = async () => {
+    if (!missingColor || !missingCount || Number(missingCount) <= 0) return;
+    setIsAddingRolls(true);
+    try {
+      const count = Number(missingCount);
+      const qColor = query(collection(db, 'factory_fabric_rolls'), where('color', '==', missingColor), where('status', '==', 'in_stock'));
+      const snapC = await getDocs(qColor);
+      let docsC = snapC.docs.map(d => ({id: d.id, ...d.data() as any}));
+      docsC.sort((a, b) => {
+        const codeA = a.code || '';
+        const codeB = b.code || '';
+        return codeA.localeCompare(codeB, undefined, { numeric: true });
+      });
+      
+      if (docsC.length < count) {
+        alert(`لا يوجد عدد كافٍ في المخزن! المتاح من لون ${missingColor} هو ${docsC.length} توب فقط.`);
+        setIsAddingRolls(false);
+        return;
+      }
+
+      const selected = docsC.slice(0, count);
+      const newRollsData = selected.map(r => ({ ...r, usedFor: 'tshirt' }));
+      
+      const { writeBatch, arrayUnion } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+      
+      selected.forEach(r => {
+        batch.update(doc(db, 'factory_fabric_rolls', r.id), {
+          status: 'reserved',
+          usedInOrder: generatedOrderId || id,
+          reservedAt: new Date().toISOString()
+        });
+      });
+      
+      batch.update(doc(db, 'factory_production_orders', id), {
+        used_rolls: arrayUnion(...newRollsData)
+      });
+      
+      await batch.commit();
+      
+      setUsedRolls(prev => [...prev, ...newRollsData]);
+      setUsedRollsCount(prev => prev + count);
+      setMissingColor('');
+      setMissingCount('');
+      alert('تم سحب الأتواب الناقصة بنجاح وإضافتها للأمر!');
+      
+    } catch (e) {
+      console.error(e);
+      alert('حدث خطأ أثناء الإضافة');
+    }
+    setIsAddingRolls(false);
   };
 
   const handlePrint = () => {
@@ -559,6 +616,35 @@ export default function EditProductionOrderPage() {
                     </table>
                   </div>
                 )}
+                
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <h4 className="text-xs font-bold text-blue-800 mb-2">سحب أتواب ناقصة للموديل من المخزن:</h4>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="اللون الناقص (مثال: بيج)"
+                      value={missingColor}
+                      onChange={(e) => setMissingColor(e.target.value)}
+                      className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500"
+                    />
+                    <input 
+                      type="number" 
+                      min="1"
+                      placeholder="العدد"
+                      value={missingCount}
+                      onChange={(e) => setMissingCount(e.target.value)}
+                      className="w-20 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500 text-center"
+                    />
+                    <button 
+                      type="button"
+                      disabled={isAddingRolls || !missingColor || !missingCount}
+                      onClick={handleAddMissingRolls}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-bold transition disabled:opacity-50"
+                    >
+                      {isAddingRolls ? 'جاري السحب...' : '+ إضافة'}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
