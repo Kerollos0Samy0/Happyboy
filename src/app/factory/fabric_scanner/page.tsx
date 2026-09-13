@@ -8,23 +8,32 @@ import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "fireb
 export default function FabricScannerPage() {
   const router = useRouter();
   
-  // State for Step 1: Model / Order Scan
+  // Main Mode
+  const [scannerMode, setScannerMode] = useState<'withdraw' | 'return'>('withdraw');
+
+  // State for Step 1: Model / Order Scan (Withdraw)
   const [orderQuery, setOrderQuery] = useState("");
   const [activeOrder, setActiveOrder] = useState<any>(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
   const [orderError, setOrderError] = useState("");
 
-  // State for Step 2: Roll Scan
+  // State for Step 2: Roll Scan (Withdraw)
   const [rollQuery, setRollQuery] = useState("");
   const [expectedRolls, setExpectedRolls] = useState<any[]>([]);
   const [verifiedRolls, setVerifiedRolls] = useState<any[]>([]);
   const [loadingRoll, setLoadingRoll] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [rollError, setRollError] = useState("");
+
+  // State for Return Mode
+  const [returnRollQuery, setReturnRollQuery] = useState("");
+  const [returnRolls, setReturnRolls] = useState<any[]>([]);
+  const [returnError, setReturnError] = useState("");
   
   // Auto-focus refs
   const orderInputRef = useRef<HTMLInputElement>(null);
   const rollInputRef = useRef<HTMLInputElement>(null);
+  const returnInputRef = useRef<HTMLInputElement>(null);
 
   // Focus the order input initially
   useEffect(() => {
@@ -228,11 +237,115 @@ export default function FabricScannerPage() {
     }
   };
 
+  const handleReturnRollScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!returnRollQuery.trim() || loadingRoll) return;
+
+      setLoadingRoll(true);
+      setReturnError("");
+
+      try {
+        let correctedQuery = returnRollQuery;
+        if (returnRollQuery.match(/[ا-ي]/)) {
+          const arabicMap: Record<string, string> = {
+            'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+            'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+            'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+            'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+            'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+            '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+          };
+          correctedQuery = Array.from(returnRollQuery).map(char => arabicMap[char] || char).join('');
+        }
+        const cleanCode = correctedQuery.trim().toUpperCase();
+
+        if (returnRolls.some(r => r.code === cleanCode)) {
+          setReturnError(`تم مسح التوب ${cleanCode} بالفعل!`);
+          setReturnRollQuery("");
+          return;
+        }
+
+        const snap = await getDocs(query(collection(db, "factory_fabric_rolls"), where("code", "==", cleanCode)));
+        if (snap.empty) {
+           setReturnError(`لا يوجد توب بهذا الكود (${cleanCode})`);
+        } else {
+           const rollDoc = snap.docs[0];
+           const rollData = rollDoc.data();
+           if (!rollData.status || rollData.status === 'in_stock') {
+              setReturnError(`التوب ${cleanCode} موجود بالفعل في المخزن كـ متاح!`);
+           } else {
+              setReturnRolls(prev => [...prev, { id: rollDoc.id, ...rollData }]);
+           }
+        }
+      } catch(err) {
+         setReturnError("حدث خطأ أثناء البحث عن التوب.");
+      } finally {
+         setLoadingRoll(false);
+         setReturnRollQuery("");
+         setTimeout(() => returnInputRef.current?.focus(), 100);
+      }
+    }
+  };
+
+  const handleConfirmReturn = async () => {
+    if (returnRolls.length === 0) return;
+    setIsConfirming(true);
+    setReturnError("");
+
+    try {
+      const { writeBatch, deleteField } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+
+      const orderGroups: Record<string, any[]> = {};
+      returnRolls.forEach(roll => {
+        if (roll.usedInOrder) {
+          if (!orderGroups[roll.usedInOrder]) orderGroups[roll.usedInOrder] = [];
+          orderGroups[roll.usedInOrder].push(roll);
+        }
+        
+        batch.update(doc(db, "factory_fabric_rolls", roll.id), {
+          status: deleteField(),
+          usedInOrder: deleteField(),
+          reservedAt: deleteField(),
+          verifiedAt: deleteField()
+        });
+      });
+
+      for (const orderId of Object.keys(orderGroups)) {
+        const orderSnap = await getDocs(query(collection(db, "factory_production_orders"), where("shortId", "==", orderId)));
+        if (!orderSnap.empty) {
+           const orderDoc = orderSnap.docs[0];
+           const orderData = orderDoc.data();
+           const returnedRollIds = orderGroups[orderId].map(r => r.id);
+           
+           const newUsedRolls = (orderData.used_rolls || []).filter((r:any) => !returnedRollIds.includes(r.id));
+           const newVerifiedRolls = (orderData.verified_rolls || []).filter((r:any) => !returnedRollIds.includes(r.id));
+           
+           batch.update(orderDoc.ref, {
+             used_rolls: newUsedRolls,
+             verified_rolls: newVerifiedRolls
+           });
+        }
+      }
+
+      await batch.commit();
+      alert("تم إرجاع الأتواب للمخزن بنجاح!");
+      setReturnRolls([]);
+      setTimeout(() => returnInputRef.current?.focus(), 100);
+    } catch (err) {
+      console.error(err);
+      setReturnError("حدث خطأ أثناء تأكيد الاسترجاع.");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          📦 صرف الأتواب (مخزن القماش)
+          📦 ماسح الأتواب (مخزن القماش)
         </h1>
         <button 
           onClick={() => router.back()}
@@ -242,6 +355,22 @@ export default function FabricScannerPage() {
         </button>
       </div>
 
+      <div className="flex gap-4 mb-6">
+        <button 
+          onClick={() => { setScannerMode('withdraw'); setTimeout(() => orderInputRef.current?.focus(), 100); }}
+          className={`flex-1 p-4 rounded-xl font-bold text-lg border-b-4 transition-all ${scannerMode === 'withdraw' ? 'bg-primary text-white border-blue-800 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+        >
+          📤 صرف الأتواب
+        </button>
+        <button 
+          onClick={() => { setScannerMode('return'); setTimeout(() => returnInputRef.current?.focus(), 100); }}
+          className={`flex-1 p-4 rounded-xl font-bold text-lg border-b-4 transition-all ${scannerMode === 'return' ? 'bg-orange-500 text-white border-orange-700 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+        >
+          📥 مرتجع الأتواب
+        </button>
+      </div>
+
+      {scannerMode === 'withdraw' && (
       <div className="grid grid-cols-1 gap-6">
         {/* Step 1: Model Scan */}
         <div className={`card p-6 shadow-sm rounded-xl border-t-4 ${activeOrder ? 'border-t-green-500 bg-green-50' : 'border-t-primary bg-white'}`}>
@@ -355,6 +484,76 @@ export default function FabricScannerPage() {
           </div>
         )}
       </div>
+      )}
+
+      {scannerMode === 'return' && (
+        <div className="grid grid-cols-1 gap-6">
+          <div className="card p-6 shadow-sm rounded-xl border-t-4 border-t-orange-500 bg-white">
+            <h2 className="text-lg font-bold mb-4">مرتجع أتواب إلى المخزن</h2>
+            <input 
+              ref={returnInputRef}
+              type="text" 
+              className="input w-full p-4 text-center text-xl font-bold rounded-lg border-2 border-orange-200 focus:border-orange-500" 
+              placeholder="مرر باركود التوب المراد إرجاعه واضغط Enter" 
+              value={returnRollQuery}
+              onChange={e => setReturnRollQuery(e.target.value)}
+              onKeyDown={handleReturnRollScan}
+              disabled={loadingRoll}
+              autoFocus
+            />
+            {loadingRoll && <p className="text-blue-500 mt-2 font-bold">جاري البحث...</p>}
+            {returnError && <p className="text-red-500 mt-2 font-bold">{returnError}</p>}
+
+            {returnRolls.length > 0 && (
+              <div className="mt-6 border-t pt-6">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center justify-between">
+                  <span>الأتواب المراد إرجاعها ({returnRolls.length} توب)</span>
+                  <button 
+                    onClick={() => setReturnRolls([])}
+                    className="text-red-500 hover:text-red-700 text-sm bg-red-50 px-3 py-1 rounded"
+                  >
+                    إلغاء الكل
+                  </button>
+                </h3>
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="table w-full text-right">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="p-3">حالة الإرجاع</th>
+                        <th className="p-3">كود التوب</th>
+                        <th className="p-3">اللون</th>
+                        <th className="p-3">أمر التشغيل السابق</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {returnRolls.map((r, i) => (
+                        <tr key={i} className="border-b bg-orange-50">
+                          <td className="p-3 font-bold text-orange-600 flex items-center gap-1">📥 قيد الإرجاع</td>
+                          <td className="p-3 font-bold text-gray-800">{r.code}</td>
+                          <td className="p-3">{r.color}</td>
+                          <td className="p-3">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{r.usedInOrder || 'غير معروف'}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="mt-6 flex justify-end border-t pt-4">
+                  <button 
+                    onClick={handleConfirmReturn}
+                    disabled={isConfirming}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 shadow-lg transition disabled:opacity-50 text-lg"
+                  >
+                    {isConfirming ? "جاري التأكيد..." : "✅ تأكيد إرجاع الأتواب للمخزن"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
