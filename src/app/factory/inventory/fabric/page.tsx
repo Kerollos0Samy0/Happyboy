@@ -156,8 +156,26 @@ export default function FabricInventoryPage() {
       }
     }
   };
+  const [inventoryTab, setInventoryTab] = useState<'in_stock' | 'used'>('in_stock');
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedRolls(processedRolls.map(r => r.id));
+    } else {
+      setSelectedRolls([]);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    if (selectedRolls.includes(id)) {
+      setSelectedRolls(selectedRolls.filter(r => r !== id));
+    } else {
+      setSelectedRolls([...selectedRolls, id]);
+    }
+  };
 
   let processedRolls = rolls.filter(r => 
+    (r.status === inventoryTab || (!r.status && inventoryTab === 'in_stock')) &&
     (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterColor ? r.color === filterColor : true)
@@ -180,21 +198,6 @@ export default function FabricInventoryPage() {
     return timeB - timeA; // newest (default)
   });
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedRolls(processedRolls.map(r => r.id));
-    } else {
-      setSelectedRolls([]);
-    }
-  };
-
-  const toggleSelect = (id: string) => {
-    if (selectedRolls.includes(id)) {
-      setSelectedRolls(selectedRolls.filter(r => r !== id));
-    } else {
-      setSelectedRolls([...selectedRolls, id]);
-    }
-  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -323,6 +326,21 @@ export default function FabricInventoryPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex border-b">
+          <button 
+            onClick={() => setInventoryTab('in_stock')}
+            className={`flex-1 py-3 font-bold text-lg transition ${inventoryTab === 'in_stock' ? 'border-b-4 border-green-500 text-green-700 bg-green-50' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            الأتواب المتاحة
+          </button>
+          <button 
+            onClick={() => setInventoryTab('used')}
+            className={`flex-1 py-3 font-bold text-lg transition ${inventoryTab === 'used' ? 'border-b-4 border-blue-500 text-blue-700 bg-blue-50' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            سجل الأتواب المنصرفة
+          </button>
+        </div>
+
         <div className="p-4 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4 flex-1">
             <div className="relative w-full max-w-sm">
@@ -398,7 +416,7 @@ export default function FabricInventoryPage() {
                   <th className="p-4 font-bold">اللون</th>
                   <th className="p-4 font-bold">النوع</th>
                   <th className="p-4 font-bold">الكمية/الوزن</th>
-                  <th className="p-4 font-bold">المورد</th>
+                  <th className="p-4 font-bold">{inventoryTab === 'used' ? 'أمر التشغيل' : 'المورد'}</th>
                   <th className="p-4 font-bold text-center">إجراءات</th>
                 </tr>
               </thead>
@@ -417,7 +435,11 @@ export default function FabricInventoryPage() {
                     <td className="p-4 text-gray-800 font-bold">{roll.color}</td>
                     <td className="p-4 text-gray-600">{roll.type || '---'}</td>
                     <td className="p-4 text-green-700 font-bold bg-green-50">{roll.amount} {roll.unit}</td>
-                    <td className="p-4 text-gray-500 text-sm">{roll.supplier || '---'}</td>
+                    <td className="p-4 text-gray-500 text-sm font-bold">
+                      {inventoryTab === 'used' ? (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{roll.usedInOrder?.slice(-6).toUpperCase() || '---'}</span>
+                      ) : (roll.supplier || '---')}
+                    </td>
                     <td className="p-4 flex gap-2 justify-center">
                       <button onClick={() => setPrintRolls([roll])} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
                         <Printer size={18} />

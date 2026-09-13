@@ -16,7 +16,8 @@ export default function FabricScannerPage() {
 
   // State for Step 2: Roll Scan
   const [rollQuery, setRollQuery] = useState("");
-  const [scannedRolls, setScannedRolls] = useState<any[]>([]);
+  const [expectedRolls, setExpectedRolls] = useState<any[]>([]);
+  const [verifiedRolls, setVerifiedRolls] = useState<any[]>([]);
   const [loadingRoll, setLoadingRoll] = useState(false);
   const [rollError, setRollError] = useState("");
   
@@ -37,7 +38,8 @@ export default function FabricScannerPage() {
       setLoadingOrder(true);
       setOrderError("");
       setActiveOrder(null);
-      setScannedRolls([]);
+      setExpectedRolls([]);
+      setVerifiedRolls([]);
 
       try {
         let rawId = orderQuery.trim();
@@ -114,7 +116,8 @@ export default function FabricScannerPage() {
 
         if (orderData) {
           setActiveOrder(orderData);
-          setScannedRolls(orderData.used_rolls || []);
+          setExpectedRolls(orderData.used_rolls || []);
+          setVerifiedRolls(orderData.verified_rolls || []);
           setOrderQuery("");
           // Switch focus to the rolls scanner
           setTimeout(() => rollInputRef.current?.focus(), 100);
@@ -154,42 +157,31 @@ export default function FabricScannerPage() {
           else { rollCode += arabicMap[rawId[i]] || rawId[i]; }
         }
         rollCode = rollCode.toUpperCase();
-        // Check if already scanned
-        if (scannedRolls.some(r => r.code === rollCode)) {
+        // Check if already verified
+        if (verifiedRolls.some(r => r.code === rollCode)) {
           setRollError("تم إسكان هذا التوب من قبل!");
           setRollQuery("");
           setLoadingRoll(false);
           return;
         }
 
-        // Fetch roll from DB
-        const q = query(collection(db, "factory_fabric_rolls"), where("code", "==", rollCode));
-        const snap = await getDocs(q);
-
-        if (snap.empty) {
-          setRollError(`التوب (${rollCode}) غير مسجل في المخزن!`);
+        // Check if this roll is expected for this order
+        const expectedRoll = expectedRolls.find(r => r.code === rollCode);
+        
+        if (!expectedRoll) {
+          setRollError(`هذا التوب غير مطلوب لهذا الموديل!`);
         } else {
-          const rollDoc = snap.docs[0];
-          const rollData = rollDoc.data();
-
-          if (rollData.status === "used") {
-            setRollError("هذا التوب تم صرفه مسبقاً!");
-          } else {
-            // Deduct and link
-            const newRoll = { id: rollDoc.id, ...rollData };
-            const updatedRolls = [newRoll, ...scannedRolls];
-            
-            // Update UI
-            setScannedRolls(updatedRolls);
-            
-            // Update DB (Roll status)
-            await updateDoc(doc(db, "factory_fabric_rolls", rollDoc.id), { status: "used", usedInOrder: activeOrder.id });
-            
-            // Update DB (Order used rolls)
-            await updateDoc(doc(db, "factory_production_orders", activeOrder.id), { used_rolls: updatedRolls });
-            
-            // Optional: Play beep sound here
-          }
+          // Verify and link
+          const updatedVerifiedRolls = [...verifiedRolls, expectedRoll];
+          
+          // Update UI
+          setVerifiedRolls(updatedVerifiedRolls);
+          
+          // Update DB (Order verified rolls)
+          await updateDoc(doc(db, "factory_production_orders", activeOrder.id), { verified_rolls: updatedVerifiedRolls });
+          
+          // Also set the roll as verified in the fabric_rolls collection (optional but good for tracking)
+          await updateDoc(doc(db, "factory_fabric_rolls", expectedRoll.id), { verifiedAt: new Date().toISOString() });
         }
       } catch (err) {
         setRollError("حدث خطأ أثناء فحص التوب.");
@@ -241,7 +233,8 @@ export default function FabricScannerPage() {
               <button 
                 onClick={() => {
                   setActiveOrder(null);
-                  setScannedRolls([]);
+                  setExpectedRolls([]);
+                  setVerifiedRolls([]);
                   setTimeout(() => orderInputRef.current?.focus(), 100);
                 }}
                 className="text-sm text-red-600 mt-3 underline"
@@ -270,27 +263,44 @@ export default function FabricScannerPage() {
             {rollError && <p className="text-red-500 mt-2 font-bold">{rollError}</p>}
             
             <div className="mt-6">
-              <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">الأتواب التي تم صرفها لهذا الأمر ({scannedRolls.length}):</h3>
-              {scannedRolls.length === 0 ? (
-                <p className="text-gray-400 text-center py-4">لم يتم صرف أي أتواب بعد.</p>
+              <div className="flex justify-between items-center mb-3 border-b pb-2">
+                <h3 className="font-bold text-gray-700">قائمة الأتواب المطلوبة للموديل ({expectedRolls.length}):</h3>
+                <span className="text-sm font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                  تم سحب {verifiedRolls.length} من {expectedRolls.length}
+                </span>
+              </div>
+              
+              {expectedRolls.length === 0 ? (
+                <p className="text-gray-400 text-center py-4">لم يتم تحديد أي أتواب لهذا الأمر.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-right">
                     <thead className="bg-gray-100">
                       <tr>
+                        <th className="p-3">حالة السحب</th>
                         <th className="p-3">رقم التوب (كود)</th>
                         <th className="p-3">اللون</th>
                         <th className="p-3">الوزن / المتر</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {scannedRolls.map((r, i) => (
-                        <tr key={i} className="border-b">
-                          <td className="p-3 font-bold">{r.code}</td>
-                          <td className="p-3">{r.color}</td>
-                          <td className="p-3">{r.weight || r.amount} {r.unit}</td>
-                        </tr>
-                      ))}
+                      {expectedRolls.map((r, i) => {
+                        const isVerified = verifiedRolls.some(vr => vr.code === r.code);
+                        return (
+                          <tr key={i} className={`border-b ${isVerified ? 'bg-green-50' : 'bg-white'}`}>
+                            <td className="p-3 font-bold">
+                              {isVerified ? (
+                                <span className="text-green-600 flex items-center gap-1">✅ تم السحب</span>
+                              ) : (
+                                <span className="text-gray-400 flex items-center gap-1">⏳ قيد الانتظار...</span>
+                              )}
+                            </td>
+                            <td className={`p-3 font-bold ${isVerified ? 'text-green-800' : 'text-gray-800'}`}>{r.code}</td>
+                            <td className="p-3">{r.color}</td>
+                            <td className="p-3">{r.weight || r.amount} {r.unit}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
