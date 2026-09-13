@@ -437,7 +437,7 @@ export default function FabricInventoryPage() {
                       {roll.code}
                       {roll.status === 'reserved' && (
                         <span className="mr-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full whitespace-nowrap">
-                          محجوز لـ {roll.usedInOrder || '---'}
+                          محجوز لـ {roll.usedInOrder?.length > 15 ? roll.usedInOrder.slice(-6).toUpperCase() : roll.usedInOrder || '---'}
                         </span>
                       )}
                     </td>
@@ -446,7 +446,7 @@ export default function FabricInventoryPage() {
                     <td className="p-4 text-green-700 font-bold bg-green-50">{roll.amount} {roll.unit}</td>
                     <td className="p-4 text-gray-500 text-sm font-bold">
                       {inventoryTab === 'used' ? (
-                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{roll.usedInOrder || '---'}</span>
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{roll.usedInOrder?.length > 15 ? roll.usedInOrder.slice(-6).toUpperCase() : roll.usedInOrder || '---'}</span>
                       ) : (roll.supplier || '---')}
                     </td>
                     <td className="p-4 flex gap-2 justify-center">
