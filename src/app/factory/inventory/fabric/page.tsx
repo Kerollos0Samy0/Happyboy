@@ -28,7 +28,7 @@ export default function FabricInventoryPage() {
   const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
   
   const [filterColor, setFilterColor] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('newest');
+  const [sortBy, setSortBy] = useState<string>('code_asc');
   
   const [rollsCount, setRollsCount] = useState(1);
   const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
@@ -43,20 +43,15 @@ export default function FabricInventoryPage() {
 
   const fetchRolls = async () => {
     try {
+      setLoading(true);
       const q = query(collection(db, 'factory_fabric_rolls'));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FabricRoll[];
-      
-      data.sort((a, b) => {
-        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
-        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
-        return timeB - timeA;
-      });
-      
+      const snap = await getDocs(q);
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FabricRoll[];
       setRolls(data);
+      setErrorMsg('');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'Unknown error');
+      setErrorMsg(err.message);
     } finally {
       setLoading(false);
     }
@@ -77,81 +72,104 @@ export default function FabricInventoryPage() {
   };
 
   const colorCodes: Record<string, string> = {
-    'أسود': 'BK', 'أبيض': 'WH', 'كحلي': 'NV', 'رمادي': 'GR', 'أحمر': 'RD',
-    'أصفر': 'YL', 'أخضر': 'GN', 'زيتي': 'OL', 'أزرق زهرى': 'RB', 'كشمير': 'CS',
-    'بيج': 'BG', 'بني': 'BR', 'برتقالي': 'OR', 'بينك': 'PK', 'لبني': 'LB', 'نبيتي': 'MR'
+    'أسود': 'BK',
+    'أبيض': 'WH',
+    'كحلي': 'NV',
+    'رمادي': 'GR',
+    'أحمر': 'RD',
+    'أصفر': 'YL',
+    'أخضر': 'GN',
+    'زيتي': 'OL',
+    'أزرق زهرى': 'RB',
+    'كشمير': 'CS',
+    'بيج': 'BG',
+    'بني': 'BR',
+    'برتقالي': 'OR',
+    'بينك': 'PK',
+    'لبني': 'LB',
+    'نبيتي': 'MR'
   };
 
-  const handleColorChange = async (col: string) => {
-    setNewRoll({...newRoll, color: col});
-    if (!col) return;
-    
-    const prefix = colorCodes[col] || 'XX';
-    try {
-      const q = query(collection(db, 'factory_fabric_rolls'), where('color', '==', col));
-      const snap = await getDocs(q);
-      const count = snap.size;
-      const nextNum = (count + 1).toString().padStart(3, '0');
-      setNewRoll(prev => ({...prev, color: col, code: `${prefix}-${nextNum}`}));
-    } catch (e) {
-      console.error(e);
-    }
+  const getNextCodeCount = (colorName: string) => {
+    const existingColorRolls = rolls.filter(r => r.color === colorName);
+    return existingColorRolls.length + 1;
+  };
+
+  const handleColorChange = (color: string) => {
+    const baseCode = colorCodes[color] || 'OT';
+    const nextCount = getNextCodeCount(color);
+    setNewRoll({ ...newRoll, color, code: `${baseCode}-${nextCount.toString().padStart(3, '0')}` });
   };
 
   const handleAddRoll = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRoll.code || !newRoll.color || multiAmounts.some(a => !a)) return;
+    if (isSaving) return;
     setIsSaving(true);
+    
     try {
-      const promises = [];
-      const baseNumStr = newRoll.code.split('-')[1] || '001';
-      const baseNum = parseInt(baseNumStr, 10);
-      const prefix = newRoll.code.split('-')[0] || 'XX';
+      const { writeBatch } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+      const baseCode = colorCodes[newRoll.color] || 'OT';
+      let currentCount = getNextCodeCount(newRoll.color);
 
       for (let i = 0; i < rollsCount; i++) {
-        // If multiple, increment the base number for each
-        const currentNum = (baseNum + i).toString().padStart(3, '0');
-        const rollCode = rollsCount > 1 ? `${prefix}-${currentNum}` : newRoll.code;
+        const rollCode = `${baseCode}-${currentCount.toString().padStart(3, '0')}`;
+        const newRef = doc(collection(db, 'factory_fabric_rolls'));
         
-        promises.push(addDoc(collection(db, 'factory_fabric_rolls'), {
-          ...newRoll,
+        batch.set(newRef, {
           code: rollCode,
-          amount: Number(multiAmounts[i]),
-          createdAt: serverTimestamp()
-        }));
+          color: newRoll.color,
+          type: newRoll.type,
+          amount: Number(multiAmounts[i]) || 0,
+          unit: newRoll.unit,
+          supplier: newRoll.supplier,
+          createdAt: serverTimestamp(),
+          status: 'in_stock'
+        });
+
+        currentCount++;
       }
-      await Promise.all(promises);
-      
-      setShowAddForm(false);
+
+      await batch.commit();
+
       setNewRoll({ code: '', color: '', type: '', unit: 'كجم', supplier: '' });
       setRollsCount(1);
       setMultiAmounts(['']);
+      setShowAddForm(false);
       fetchRolls();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("حدث خطأ أثناء الحفظ.");
+      alert('خطأ أثناء الحفظ: ' + err.message);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا التوب؟")) return;
-    try {
-      await deleteDoc(doc(db, 'factory_fabric_rolls', id));
-      fetchRolls();
-    } catch (err) {
-      console.error(err);
+    if (confirm('هل أنت متأكد من حذف هذا التوب؟')) {
+      try {
+        await deleteDoc(doc(db, 'factory_fabric_rolls', id));
+        fetchRolls();
+      } catch (error) {
+        console.error(error);
+        alert('حدث خطأ أثناء الحذف');
+      }
     }
   };
 
   let processedRolls = rolls.filter(r => 
-    (r.code?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterColor ? r.color === filterColor : true)
   );
 
   processedRolls.sort((a, b) => {
+    if (sortBy === 'code_asc') {
+      return a.code.localeCompare(b.code, 'en', { numeric: true });
+    }
+    if (sortBy === 'code_desc') {
+      return b.code.localeCompare(a.code, 'en', { numeric: true });
+    }
     if (sortBy === 'heaviest') return Number(b.amount) - Number(a.amount);
     if (sortBy === 'lightest') return Number(a.amount) - Number(b.amount);
     
@@ -332,6 +350,8 @@ export default function FabricInventoryPage() {
               onChange={(e) => setSortBy(e.target.value)} 
               className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
             >
+              <option value="code_asc">ترتيب أبجدي بالكود</option>
+              <option value="code_desc">الكود (تنازلي)</option>
               <option value="newest">الأحدث إضافة</option>
               <option value="oldest">الأقدم إضافة</option>
               <option value="heaviest">الأعلى وزناً</option>
