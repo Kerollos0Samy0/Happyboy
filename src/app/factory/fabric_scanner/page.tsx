@@ -19,6 +19,7 @@ export default function FabricScannerPage() {
   const [expectedRolls, setExpectedRolls] = useState<any[]>([]);
   const [verifiedRolls, setVerifiedRolls] = useState<any[]>([]);
   const [loadingRoll, setLoadingRoll] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [rollError, setRollError] = useState("");
   
   // Auto-focus refs
@@ -171,20 +172,13 @@ export default function FabricScannerPage() {
         if (!expectedRoll) {
           setRollError(`هذا التوب غير مطلوب لهذا الموديل!`);
         } else {
-          // Verify and link
+          // Verify and link locally
           const updatedVerifiedRolls = [...verifiedRolls, expectedRoll];
           
           // Update UI
           setVerifiedRolls(updatedVerifiedRolls);
           
-          // Update DB (Order verified rolls)
-          await updateDoc(doc(db, "factory_production_orders", activeOrder.id), { verified_rolls: updatedVerifiedRolls });
-          
-          // Set the roll as 'used' (Deducted) in the fabric_rolls collection
-          await updateDoc(doc(db, "factory_fabric_rolls", expectedRoll.id), { 
-            status: 'used',
-            verifiedAt: new Date().toISOString() 
-          });
+          // NOTE: DB will be updated when user clicks the Confirm button
         }
       } catch (err) {
         setRollError("حدث خطأ أثناء فحص التوب.");
@@ -194,6 +188,43 @@ export default function FabricScannerPage() {
         // Keep focus on roll scanner
         setTimeout(() => rollInputRef.current?.focus(), 100);
       }
+    }
+  };
+
+  const handleConfirmWithdrawal = async () => {
+    if (!activeOrder || verifiedRolls.length === 0) return;
+    setIsConfirming(true);
+    setRollError("");
+
+    try {
+      const { writeBatch } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+
+      // Update Order verified rolls
+      batch.update(doc(db, "factory_production_orders", activeOrder.id), { verified_rolls: verifiedRolls });
+
+      // Update each roll's status
+      verifiedRolls.forEach(roll => {
+        batch.update(doc(db, "factory_fabric_rolls", roll.id), {
+          status: 'used',
+          verifiedAt: new Date().toISOString()
+        });
+      });
+
+      await batch.commit();
+      
+      alert("تم سحب الأتواب بنجاح!");
+      // Optionally reset
+      setActiveOrder(null);
+      setExpectedRolls([]);
+      setVerifiedRolls([]);
+      setTimeout(() => orderInputRef.current?.focus(), 100);
+
+    } catch (err) {
+      console.error(err);
+      setRollError("حدث خطأ أثناء تأكيد السحب.");
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -306,6 +337,18 @@ export default function FabricScannerPage() {
                       })}
                     </tbody>
                   </table>
+                </div>
+              )}
+
+              {verifiedRolls.length > 0 && (
+                <div className="mt-6 flex justify-end border-t pt-4">
+                  <button 
+                    onClick={handleConfirmWithdrawal}
+                    disabled={isConfirming}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 shadow-lg transition disabled:opacity-50 text-lg"
+                  >
+                    {isConfirming ? "جاري التأكيد..." : "✅ تأكيد سحب الأتواب المحددة"}
+                  </button>
                 </div>
               )}
             </div>
