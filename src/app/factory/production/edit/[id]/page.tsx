@@ -38,7 +38,9 @@ export default function EditProductionOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
+  const [orderShortId, setOrderShortId] = useState<string | null>(null);
   const [usedRollsCount, setUsedRollsCount] = useState(0);
+  const [isAddingRolls, setIsAddingRolls] = useState(false);
   const [usedRolls, setUsedRolls] = useState<any[]>([]);
   const [showRollDetails, setShowRollDetails] = useState(false);
 
@@ -63,6 +65,9 @@ export default function EditProductionOrderPage() {
             setFabricSupplier(data.fabricSupplier || '');
             setUsedRollsCount(data.used_rolls ? data.used_rolls.length : 0);
             setUsedRolls(data.used_rolls || []);
+            if (data.shortId) {
+               setOrderShortId(data.shortId);
+            }
             
             if (data.colorPairs && Array.isArray(data.colorPairs)) {
               setColorPairs(data.colorPairs);
@@ -337,7 +342,7 @@ export default function EditProductionOrderPage() {
               
               <div className="w-32 flex flex-col items-center border-r-2 pr-4 ml-4">
                 <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${generatedOrderId}` : ''} size={100} />
-                <span className="text-xs font-mono mt-2">{generatedOrderId.slice(-6).toUpperCase()}</span>
+                <span className="text-xs font-mono mt-2">{orderShortId || generatedOrderId.slice(-6).toUpperCase()}</span>
               </div>
             </div>
           </div>
