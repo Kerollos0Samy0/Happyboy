@@ -8,7 +8,7 @@ import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { doc, getDoc, updateDoc, collection, serverTimestamp, query, where, getDocs, writeBatch, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, query, where, getDocs, writeBatch, arrayUnion } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 
 export default function EditProductionOrderPage() {
