@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Search, PlusCircle, Scissors, Trash2, Printer } from 'lucide-react';
 import { QRCodeSVG } from "qrcode.react";
-
+import Barcode from 'react-barcode';
 type FabricRoll = {
   id: string;
   code: string;
@@ -446,15 +446,14 @@ export default function FabricInventoryPage() {
             <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
               {/* Preview in browser (not printed) */}
               {printRolls.map(roll => (
-                <div key={roll.id} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
-                  <div className="flex flex-col justify-center h-full w-[65%]">
-                    <span className="font-black text-[11px] leading-tight truncate text-black">{roll.color}</span>
-                    <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{roll.type || 'قماش'}</span>
-                    <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{roll.amount} {roll.unit}</span>
-                    <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{roll.code}</span>
+                <div key={roll.id} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
+                  <div className="flex justify-between w-full px-1 mb-1">
+                    <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
+                    <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
+                    <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
-                  <div className="flex items-center justify-end h-full w-[35%]">
-                    <QRCodeSVG value={roll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
+                  <div className="flex items-center justify-center w-full bg-white rounded flex-1">
+                    <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
@@ -463,15 +462,14 @@ export default function FabricInventoryPage() {
             {/* The actual element that will be printed (Hidden on screen) */}
             <div id="print-section" className="hidden">
               {printRolls.map(roll => (
-                <div key={roll.id} className="print-page" style={{ direction: 'rtl' }}>
-                  <div className="flex flex-col justify-center h-full w-[65%]">
-                    <span className="font-black text-[11px] leading-tight truncate text-black">{roll.color}</span>
-                    <span className="font-bold text-[9px] leading-tight truncate text-gray-800 mt-0.5">{roll.type || 'قماش'}</span>
-                    <span className="font-bold text-[11px] leading-tight text-black mt-0.5">{roll.amount} {roll.unit}</span>
-                    <span className="font-mono text-[8px] leading-tight text-black mt-0.5 font-bold truncate break-all">{roll.code}</span>
+                <div key={roll.id} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
+                  <div className="flex justify-between w-full px-1 mb-1">
+                    <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
+                    <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
+                    <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
-                  <div className="flex items-center justify-end h-full w-[35%]">
-                    <QRCodeSVG value={roll.code} size={22} style={{ width: '22mm', height: '22mm' }} />
+                  <div className="flex items-center justify-center w-full bg-white rounded flex-1">
+                    <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
