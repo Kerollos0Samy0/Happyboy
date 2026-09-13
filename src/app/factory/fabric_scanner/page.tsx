@@ -41,29 +41,52 @@ export default function FabricScannerPage() {
 
       try {
         let searchedId = orderQuery.trim();
-        let q = query(collection(db, "factory_production_orders"), where("orderId", "==", searchedId));
-        let snap = await getDocs(q);
+        let orderData = null;
 
-        if (snap.empty) {
-          q = query(collection(db, "factory_production_orders"), where("modelName", "==", searchedId));
-          snap = await getDocs(q);
+        // 1. Try Document ID directly
+        if (searchedId.length > 10) {
+          const docRef = doc(db, "factory_production_orders", searchedId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            orderData = { id: docSnap.id, ...docSnap.data() };
+          }
         }
 
-        // If still not found, try to find product barcode
-        if (snap.empty) {
+        // 2. Try shortId
+        if (!orderData) {
+          const qShort = query(collection(db, "factory_production_orders"), where("shortId", "==", searchedId.toUpperCase()));
+          const snapShort = await getDocs(qShort);
+          if (!snapShort.empty) {
+            orderData = { id: snapShort.docs[0].id, ...snapShort.docs[0].data() };
+          }
+        }
+
+        // 3. Try modelName
+        if (!orderData) {
+          const qModel = query(collection(db, "factory_production_orders"), where("modelName", "==", searchedId));
+          const snapModel = await getDocs(qModel);
+          if (!snapModel.empty) {
+            orderData = { id: snapModel.docs[0].id, ...snapModel.docs[0].data() };
+          }
+        }
+
+        // 4. Try product barcode
+        if (!orderData) {
           const productQ = query(collection(db, "products"), where("barcodes", "array-contains", searchedId));
           const productSnap = await getDocs(productQ);
           if (!productSnap.empty) {
             const modelNum = productSnap.docs[0].data().modelNumber;
             if (modelNum) {
-              q = query(collection(db, "factory_production_orders"), where("modelName", "==", modelNum));
-              snap = await getDocs(q);
+              const qModel2 = query(collection(db, "factory_production_orders"), where("modelName", "==", modelNum));
+              const snapModel2 = await getDocs(qModel2);
+              if (!snapModel2.empty) {
+                orderData = { id: snapModel2.docs[0].id, ...snapModel2.docs[0].data() };
+              }
             }
           }
         }
 
-        if (!snap.empty) {
-          const orderData = { id: snap.docs[0].id, ...snap.docs[0].data() };
+        if (orderData) {
           setActiveOrder(orderData);
           setScannedRolls(orderData.used_rolls || []);
           setOrderQuery("");

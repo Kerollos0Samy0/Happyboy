@@ -203,6 +203,7 @@ export default function NewProductionOrderPage() {
       };
 
       const newOrderRef = doc(collection(db, 'factory_production_orders'));
+      orderData.shortId = newOrderRef.id.slice(-6).toUpperCase();
       batch.set(newOrderRef, orderData);
 
       for (const rollId of allRollsToDeduct) {
