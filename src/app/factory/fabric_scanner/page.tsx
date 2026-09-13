@@ -40,7 +40,23 @@ export default function FabricScannerPage() {
       setScannedRolls([]);
 
       try {
-        let searchedId = orderQuery.trim();
+        let rawId = orderQuery.trim();
+        // Fix Arabic keyboard layout issue
+        const arabicMap: Record<string, string> = {
+          'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+          'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+          'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+          'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+          'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+          '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+        };
+        let searchedId = "";
+        for (let i = 0; i < rawId.length; i++) {
+          const char2 = rawId.substring(i, i + 2);
+          if (arabicMap[char2]) { searchedId += arabicMap[char2]; i++; }
+          else { searchedId += arabicMap[rawId[i]] || rawId[i]; }
+        }
+        
         let orderData = null;
 
         // If it's a full URL (from QR code), extract the last part
@@ -122,7 +138,22 @@ export default function FabricScannerPage() {
       setRollError("");
 
       try {
-        const rollCode = rollQuery.trim();
+        let rawId = rollQuery.trim();
+        const arabicMap: Record<string, string> = {
+          'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+          'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+          'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+          'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+          'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+          '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+        };
+        let rollCode = "";
+        for (let i = 0; i < rawId.length; i++) {
+          const char2 = rawId.substring(i, i + 2);
+          if (arabicMap[char2]) { rollCode += arabicMap[char2]; i++; }
+          else { rollCode += arabicMap[rawId[i]] || rawId[i]; }
+        }
+        rollCode = rollCode.toUpperCase();
         // Check if already scanned
         if (scannedRolls.some(r => r.code === rollCode)) {
           setRollError("تم إسكان هذا التوب من قبل!");
