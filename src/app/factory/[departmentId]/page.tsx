@@ -26,6 +26,15 @@ export default function DepartmentDashboardPage() {
   const [deliverQty, setDeliverQty] = useState<number | "">("");
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Printing Dept State
+  const [printingLog, setPrintingLog] = useState<{
+    tshirtPrints: number;
+    pantsPrints: number;
+    type: string;
+    colors: { fabric: string; print: string; meters: number }[];
+  }>({ tshirtPrints: 0, pantsPrints: 0, type: '', colors: [] });
+  const [isSavingPrinting, setIsSavingPrinting] = useState(false);
+
   useEffect(() => {
     const dept = factoryDepartments.find((d) => d.id === departmentId);
     if (!dept) {
@@ -112,6 +121,14 @@ export default function DepartmentDashboardPage() {
           // Suggest default deliver quantity: what we received minus what we delivered
           const remainingToDeliver = Math.max(0, progress.receivedQty - progress.deliveredQty);
           setDeliverQty(remainingToDeliver > 0 ? remainingToDeliver : "");
+
+          if (departmentId === "printing_laser") {
+            if (orderDoc.printingLog) {
+              setPrintingLog(orderDoc.printingLog);
+            } else {
+              setPrintingLog({ tshirtPrints: 0, pantsPrints: 0, type: '', colors: [] });
+            }
+          }
         }
       } catch (err) {
         console.error(err);
@@ -179,6 +196,22 @@ export default function DepartmentDashboardPage() {
       alert("حدث خطأ أثناء التحديث.");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const savePrintingLog = async () => {
+    if (!activeOrder) return;
+    setIsSavingPrinting(true);
+    try {
+      await updateDoc(doc(db, "factory_production_orders", activeOrder.id), {
+        printingLog
+      });
+      alert("تم حفظ بيانات الطباعة بنجاح!");
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء الحفظ.");
+    } finally {
+      setIsSavingPrinting(false);
     }
   };
 
@@ -273,10 +306,134 @@ export default function DepartmentDashboardPage() {
                   <div className="col-span-full text-center text-yellow-600 py-2">لا توجد ملاحظات خاصة مسجلة لهذا الأمر.</div>
                 )}
               </div>
+              </div>
             </div>
-          </div>
+            
+            {departmentId === "printing_laser" && (
+              <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-purple-600 mt-6">
+                <h3 className="text-xl font-bold mb-6 border-b pb-2 text-purple-900">تسجيل بيانات الطباعة</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">عدد طبعات التيشيرت</label>
+                    <select 
+                      value={printingLog.tshirtPrints} 
+                      onChange={(e) => setPrintingLog({ ...printingLog, tshirtPrints: Number(e.target.value) })}
+                      className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value={0}>بدون طباعة</option>
+                      <option value={1}>طبعة واحدة (1)</option>
+                      <option value={2}>طبعتين (2)</option>
+                      <option value={3}>3 طبعات (3)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">عدد طبعات البنطلون</label>
+                    <select 
+                      value={printingLog.pantsPrints} 
+                      onChange={(e) => setPrintingLog({ ...printingLog, pantsPrints: Number(e.target.value) })}
+                      className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value={0}>بدون طباعة</option>
+                      <option value={1}>طبعة واحدة (1)</option>
+                      <option value={2}>طبعتين (2)</option>
+                      <option value={3}>3 طبعات (3)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">نوع الطباعة</label>
+                    <select 
+                      value={printingLog.type} 
+                      onChange={(e) => setPrintingLog({ ...printingLog, type: e.target.value })}
+                      className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">-- اختر نوع الطباعة --</option>
+                      <option value="DTF">DTF</option>
+                      <option value="Rubber">رابر (Rubber)</option>
+                      <option value="Puff">باف (Puff)</option>
+                      <option value="Vinyl">فينيل (Vinyl)</option>
+                    </select>
+                  </div>
+                </div>
 
-          <div className="space-y-6">
+                <h4 className="font-bold text-gray-700 mb-4 border-b pb-2">أمتار الطباعة لكل لون</h4>
+                {printingLog.colors.map((pc, idx) => (
+                  <div key={idx} className="flex gap-4 mb-4 items-end">
+                    <div className="flex-1">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">لون القماش الأساسي</label>
+                      <input 
+                        type="text" 
+                        value={pc.fabric} 
+                        onChange={(e) => {
+                          const newC = [...printingLog.colors];
+                          newC[idx].fabric = e.target.value;
+                          setPrintingLog({ ...printingLog, colors: newC });
+                        }}
+                        className="w-full p-2 border rounded outline-none text-sm"
+                        placeholder="مثال: أسود"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">لون الطباعة عليه</label>
+                      <input 
+                        type="text" 
+                        value={pc.print} 
+                        onChange={(e) => {
+                          const newC = [...printingLog.colors];
+                          newC[idx].print = e.target.value;
+                          setPrintingLog({ ...printingLog, colors: newC });
+                        }}
+                        className="w-full p-2 border rounded outline-none text-sm"
+                        placeholder="مثال: أحمر"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">الأمتار المسحوبة</label>
+                      <input 
+                        type="number" 
+                        value={pc.meters} 
+                        onChange={(e) => {
+                          const newC = [...printingLog.colors];
+                          newC[idx].meters = Number(e.target.value);
+                          setPrintingLog({ ...printingLog, colors: newC });
+                        }}
+                        className="w-full p-2 border rounded outline-none text-sm font-bold text-purple-700 text-center"
+                        placeholder="0"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const newC = [...printingLog.colors];
+                        newC.splice(idx, 1);
+                        setPrintingLog({ ...printingLog, colors: newC });
+                      }}
+                      className="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded transition"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                ))}
+                
+                <button 
+                  onClick={() => setPrintingLog({ ...printingLog, colors: [...printingLog.colors, { fabric: '', print: '', meters: 0 }] })}
+                  className="text-purple-600 font-bold text-sm bg-purple-50 px-4 py-2 rounded hover:bg-purple-100 transition mt-2"
+                >
+                  + إضافة لون وأمتار
+                </button>
+
+                <div className="mt-6 flex justify-end">
+                  <button 
+                    onClick={savePrintingLog}
+                    disabled={isSavingPrinting}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-bold transition flex items-center gap-2 disabled:opacity-50 shadow-md"
+                  >
+                    {isSavingPrinting ? "جاري الحفظ..." : "حفظ بيانات الطباعة والأمتار"}
+                  </button>
+                </div>
+              </div>
+            )}
+            
+          </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
               
