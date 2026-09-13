@@ -236,14 +236,37 @@ export default function EditProductionOrderPage() {
       const newRollsData = selected.map(r => ({ ...r, usedFor: 'tshirt' }));
       
       // Generate placeholders for the deficit
-      for(let i=0; i<missingCountNeeded; i++) {
-        newRollsData.push({
-          id: `placeholder_${Date.now()}_${i}`,
-          color: missingColor,
-          code: 'ناقص (مطلوب شراء)',
-          isPlaceholder: true,
-          status: 'reserved'
+      if (missingCountNeeded > 0) {
+        const colorCodesMap: Record<string, string> = {
+          'أسود': 'BK', 'أبيض': 'WH', 'كحلي': 'NV', 'رمادي': 'GR', 'أحمر': 'RD', 'أصفر': 'YL',
+          'أخضر': 'GN', 'زيتي': 'OL', 'أزرق زهرى': 'RB', 'كشمير': 'CS', 'بيج': 'BG',
+          'بني': 'BR', 'برتقالي': 'OR', 'بينك': 'PK', 'لبني': 'LB', 'نبيتي': 'MR'
+        };
+        const baseCode = colorCodesMap[missingColor] || 'OT';
+        
+        const qAll = query(collection(db, 'factory_fabric_rolls'), where('color', '==', missingColor));
+        const snapAll = await getDocs(qAll);
+        let maxNum = 0;
+        snapAll.docs.forEach(d => {
+           const c = d.data().code || '';
+           const m = c.match(/-(\d+)/);
+           if (m) {
+             const num = parseInt(m[1], 10);
+             if (num > maxNum) maxNum = num;
+           }
         });
+        
+        let nextCodeNum = maxNum + 1;
+        for(let i=0; i<missingCountNeeded; i++) {
+          const generatedMissingCode = `${baseCode}-${(nextCodeNum++).toString().padStart(3, '0')} (مطلوب شراء)`;
+          newRollsData.push({
+            id: `placeholder_${Date.now()}_${i}`,
+            color: missingColor,
+            code: generatedMissingCode,
+            isPlaceholder: true,
+            status: 'reserved'
+          });
+        }
       }
       
       const batch = writeBatch(db);
