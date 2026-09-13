@@ -338,13 +338,19 @@ export default function SupervisorDashboard() {
           }
         }
       } else {
-        // Fallback: search by bundleCode
-        let q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', cleanCode));
+        // Fallback: search by shortId
+        let q = query(collection(db, 'factory_production_orders'), where('shortId', '==', docId));
         let snapshot = await getDocs(q);
+        
+        // If not found, try bundleCode
+        if (snapshot.empty) {
+          q = query(collection(db, 'factory_production_orders'), where('bundleCode', '==', docId));
+          snapshot = await getDocs(q);
+        }
         
         // If not found by bundleCode, try modelName
         if (snapshot.empty) {
-          q = query(collection(db, 'factory_production_orders'), where('modelName', '==', cleanCode));
+          q = query(collection(db, 'factory_production_orders'), where('modelName', '==', docId));
           snapshot = await getDocs(q);
         }
         
