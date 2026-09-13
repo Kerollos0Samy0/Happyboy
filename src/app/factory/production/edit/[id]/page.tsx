@@ -8,7 +8,7 @@ import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, serverTimestamp, query, where, getDocs, writeBatch, arrayUnion } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 
 export default function EditProductionOrderPage() {
@@ -230,7 +230,6 @@ export default function EditProductionOrderPage() {
       const selected = docsC.slice(0, count);
       const newRollsData = selected.map(r => ({ ...r, usedFor: 'tshirt' }));
       
-      const { writeBatch, arrayUnion } = await import('firebase/firestore');
       const batch = writeBatch(db);
       
       selected.forEach(r => {
@@ -620,13 +619,14 @@ export default function EditProductionOrderPage() {
                 <div className="mt-4 pt-4 border-t border-blue-200">
                   <h4 className="text-xs font-bold text-blue-800 mb-2">سحب أتواب ناقصة للموديل من المخزن:</h4>
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="اللون الناقص (مثال: بيج)"
+                    <select 
                       value={missingColor}
                       onChange={(e) => setMissingColor(e.target.value)}
-                      className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500"
-                    />
+                      className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500 bg-white"
+                    >
+                      <option value="">-- اختر اللون الناقص --</option>
+                      {['أسود', 'أبيض', 'كحلي', 'رمادي', 'أحمر', 'أصفر', 'أخضر', 'زيتي', 'أزرق زهرى', 'كشمير', 'بيج', 'بني', 'برتقالي', 'بينك', 'لبني', 'نبيتي'].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
                     <input 
                       type="number" 
                       min="1"
