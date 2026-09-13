@@ -126,7 +126,12 @@ export default function FabricScannerPage() {
 
         if (orderData) {
           setActiveOrder(orderData);
-          setExpectedRolls(orderData.used_rolls || []);
+          const sortedRolls = (orderData.used_rolls || []).sort((a: any, b: any) => {
+            const codeA = a.code || '';
+            const codeB = b.code || '';
+            return codeA.localeCompare(codeB, undefined, { numeric: true });
+          });
+          setExpectedRolls(sortedRolls);
           setVerifiedRolls(orderData.verified_rolls || []);
           setOrderQuery("");
           // Switch focus to the rolls scanner
