@@ -83,6 +83,12 @@ export default function LoginPage() {
             {loading ? "جاري الدخول..." : "دخول"}
           </button>
         </form>
+
+        <div className="mt-6 text-center border-t pt-4">
+          <a href="/factory/login" className="text-gray-500 hover:text-red-600 font-bold text-sm transition">
+            الدخول لأقسام المصنع للتشغيل (عمال)
+          </a>
+        </div>
       </div>
     </div>
   );

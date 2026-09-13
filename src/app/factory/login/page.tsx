@@ -88,6 +88,12 @@ export default function FactoryLoginPage() {
             {loading ? "جاري الدخول..." : "دخول"}
           </button>
         </form>
+
+        <div className="mt-6 text-center border-t pt-4">
+          <a href="/login" className="text-gray-500 hover:text-blue-600 font-bold text-sm transition">
+            هل أنت مدير؟ الدخول للوحة الإدارة
+          </a>
+        </div>
       </div>
     </div>
   );
