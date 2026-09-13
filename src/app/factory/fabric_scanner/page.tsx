@@ -43,6 +43,11 @@ export default function FabricScannerPage() {
         let searchedId = orderQuery.trim();
         let orderData = null;
 
+        // If it's a full URL (from QR code), extract the last part
+        if (searchedId.includes('/')) {
+          searchedId = searchedId.split('/').pop() || searchedId;
+        }
+
         // 1. Try Document ID directly
         if (searchedId.length > 10) {
           const docRef = doc(db, "factory_production_orders", searchedId);
@@ -58,6 +63,11 @@ export default function FabricScannerPage() {
           const snapShort = await getDocs(qShort);
           if (!snapShort.empty) {
             orderData = { id: snapShort.docs[0].id, ...snapShort.docs[0].data() };
+          } else {
+             // Fallback for old orders that don't have shortId
+             const allOrdersSnap = await getDocs(collection(db, "factory_production_orders"));
+             const oldOrder = allOrdersSnap.docs.find(d => d.id.slice(-6).toUpperCase() === searchedId.toUpperCase());
+             if (oldOrder) orderData = { id: oldOrder.id, ...oldOrder.data() };
           }
         }
 
