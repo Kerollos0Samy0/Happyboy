@@ -315,7 +315,6 @@ export default function DepartmentDashboardPage() {
                   <div className="col-span-full text-center text-yellow-600 py-2">لا توجد ملاحظات خاصة مسجلة لهذا الأمر.</div>
                 )}
               </div>
-              </div>
             </div>
             
             {departmentId === "printing_laser" && (
@@ -443,6 +442,8 @@ export default function DepartmentDashboardPage() {
             )}
             
           </div>
+
+          <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
               

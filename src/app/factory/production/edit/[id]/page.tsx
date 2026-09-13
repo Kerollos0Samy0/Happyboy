@@ -46,8 +46,6 @@ export default function EditProductionOrderPage() {
 
   const [missingColor, setMissingColor] = useState('');
   const [missingCount, setMissingCount] = useState('');
-  const [isAddingRolls, setIsAddingRolls] = useState(false);
-
   // Auto-calculate total quantity based on colors
   useEffect(() => {
     if (id) {
