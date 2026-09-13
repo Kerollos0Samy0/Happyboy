@@ -536,36 +536,44 @@ export default function SupervisorDashboard() {
          if (effectiveDurationSeconds < 0) effectiveDurationSeconds = 0;
       }
 
-      await updateDoc(doc(db, 'factory_production_orders', task.orderId), {
-        history: arrayUnion({
-          stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}${totalPausedStr}`,
-          quantity: task.quantity,
-          startTime: task.startedAt || task.assignedAt,
-          endTime: endTime
-        })
-      });
+      try {
+        await updateDoc(doc(db, 'factory_production_orders', task.orderId), {
+          history: arrayUnion({
+            stageName: `تشغيل: ${worker.machine} (${worker.name}) - ${task.operation} - ${task.color}${totalPausedStr}`,
+            quantity: task.quantity,
+            startTime: task.startedAt || task.assignedAt,
+            endTime: endTime
+          })
+        });
+      } catch (orderHistoryErr) {
+        console.error("Failed to update order history", orderHistoryErr);
+      }
 
       // 2. Automatically log productivity
-      await setDoc(doc(collection(db, 'factory_productivity_logs')), {
-        date: new Date().toISOString().split('T')[0],
-        type: 'sewing',
-        modelNumber: task.modelNumber,
-        lineId: selectedLine,
-        amount: task.quantity,
-        unit: 'قطعة',
-        notes: `تسجيل آلي: ${worker.name} (${worker.machine}) - ${task.operation}`,
-        createdAt: new Date().toISOString(),
-        // New details for reports
-        workerId: worker.id,
-        workerName: worker.name,
-        machine: worker.machine,
-        operation: task.operation,
-        color: task.color,
-        startTime: task.startedAt || task.assignedAt,
-        endTime: endTime,
-        totalPausedSeconds: task.totalPausedSeconds || 0,
-        effectiveDurationSeconds: effectiveDurationSeconds
-      });
+      const { addDoc } = await import('firebase/firestore');
+      try {
+        await addDoc(collection(db, 'factory_productivity_logs'), {
+          date: new Date().toISOString().split('T')[0],
+          type: 'sewing',
+          modelNumber: task.modelNumber || 'غير محدد',
+          lineId: selectedLine,
+          amount: task.quantity,
+          unit: 'قطعة',
+          notes: `تسجيل آلي: ${worker.name} (${worker.machine}) - ${task.operation}`,
+          createdAt: new Date().toISOString(),
+          workerId: worker.id,
+          workerName: worker.name,
+          machine: worker.machine,
+          operation: task.operation,
+          color: task.color || '',
+          startTime: task.startedAt || task.assignedAt || new Date().toISOString(),
+          endTime: endTime,
+          totalPausedSeconds: task.totalPausedSeconds || 0,
+          effectiveDurationSeconds: effectiveDurationSeconds
+        });
+      } catch (productivityErr) {
+        console.error("Failed to log productivity", productivityErr);
+      }
 
       // 3. Remove the task from the queue
       const newWorkers = [...workers];
@@ -573,9 +581,9 @@ export default function SupervisorDashboard() {
       
       await saveLineConfig(newWorkers);
       alert('تم إنهاء المهمة وتسجيل الإنتاجية!');
-    } catch(err) {
+    } catch(err: any) {
       console.error(err);
-      alert('حدث خطأ أثناء إنهاء المهمة');
+      alert('حدث خطأ أثناء إنهاء المهمة: ' + (err.message || JSON.stringify(err)));
     }
   };
 
