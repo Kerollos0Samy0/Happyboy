@@ -199,6 +199,11 @@ export default function FabricInventoryPage() {
     return timeB - timeA; // newest (default)
   });
 
+  const totalCount = processedRolls.length;
+  const totalKg = processedRolls.reduce((sum, roll) => {
+    return roll.unit === 'كجم' ? sum + (Number(roll.amount) || 0) : sum;
+  }, 0);
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -385,8 +390,10 @@ export default function FabricInventoryPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="text-sm font-bold text-gray-500">
-              الإجمالي: {processedRolls.length} توب
+            <div className="text-sm font-bold bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200 flex items-center gap-2">
+              <span>الإجمالي: {totalCount} توب</span>
+              <span className="text-gray-400">|</span>
+              <span>الوزن: {totalKg.toFixed(1)} كجم</span>
             </div>
             {selectedRolls.length > 0 && (
               <button 
