@@ -45,7 +45,7 @@ export default function NewProductionOrderPage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
+  const [generatedOrderInfo, setGeneratedOrderInfo] = useState<{id: string, shortId: string} | null>(null);
 
   // Auto-calculate total quantity based on colors
   useEffect(() => {
@@ -203,20 +203,32 @@ export default function NewProductionOrderPage() {
       };
 
       const newOrderRef = doc(collection(db, 'factory_production_orders'));
-      orderData.shortId = newOrderRef.id.slice(-6).toUpperCase();
+      
+      let catLetter = '';
+      if (sizesSeries.includes('بيبي')) catLetter = 'B';
+      else if (sizesSeries.includes('وسط')) catLetter = 'W';
+      else if (sizesSeries.includes('محير')) catLetter = 'M';
+      
+      const cleanModelName = modelName.trim().replace(/\s+/g, '-');
+      // Only prefix if they didn't manually type the prefix
+      const finalShortId = (catLetter && !cleanModelName.toUpperCase().startsWith(`${catLetter}-`)) 
+        ? `${catLetter}-${cleanModelName}` 
+        : cleanModelName;
+
+      orderData.shortId = finalShortId.toUpperCase();
       batch.set(newOrderRef, orderData);
 
       for (const rollId of allRollsToDeduct) {
         batch.update(doc(db, 'factory_fabric_rolls', rollId), {
           status: 'reserved',
           reservedAt: serverTimestamp(),
-          usedInOrder: newOrderRef.id
+          usedInOrder: orderData.shortId
         });
       }
 
       await batch.commit();
       
-      setGeneratedOrderId(newOrderRef.id);
+      setGeneratedOrderInfo({ id: newOrderRef.id, shortId: orderData.shortId });
       setLoading(false);
     } catch (err: any) {
       console.error(err);
@@ -229,7 +241,7 @@ export default function NewProductionOrderPage() {
     window.print();
   };
 
-  if (generatedOrderId) {
+  if (generatedOrderInfo) {
     const validPairs = colorPairs.filter(p => p.tshirt.trim() || p.pants.trim());
     const tColors = validPairs.length > 0 ? validPairs.map(p => p.tshirt) : [''];
     const pColors = validPairs.length > 0 ? validPairs.map(p => p.pants) : [''];
@@ -248,7 +260,7 @@ export default function NewProductionOrderPage() {
           </div>
         </div>
 
-        <div className="bg-white p-8 shadow-lg print:shadow-none print:p-8 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
+        <div id="print-section" className="bg-white p-8 shadow-lg print:shadow-none print:p-8 w-full mx-auto flex flex-col" style={{ minHeight: '297mm' }}>
           
           <div className="border-4 border-gray-800 p-4 mb-6">
             <div className="flex justify-between items-start">
@@ -263,8 +275,8 @@ export default function NewProductionOrderPage() {
               </div>
               
               <div className="w-48 flex flex-col items-center justify-center border-r-2 pr-4 ml-4 gap-2">
-                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${generatedOrderId}` : ''} size={70} />
-                <Barcode value={generatedOrderId.slice(-6).toUpperCase()} width={1.2} height={30} displayValue={true} fontSize={14} margin={0} background="#ffffff" />
+                <QRCodeSVG value={typeof window !== 'undefined' ? `${window.location.origin}/public/order/${generatedOrderInfo.id}` : ''} size={70} />
+                <Barcode value={generatedOrderInfo.shortId} width={1.2} height={30} displayValue={true} fontSize={16} margin={0} background="#ffffff" />
               </div>
             </div>
           </div>
