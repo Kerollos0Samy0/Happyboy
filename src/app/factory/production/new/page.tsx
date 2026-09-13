@@ -139,9 +139,9 @@ export default function NewProductionOrderPage() {
           const snapT = await getDocs(qT);
           let docsT = snapT.docs.map(d => ({id: d.id, ...d.data() as any}));
           docsT.sort((a, b) => {
-            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
-            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
-            return timeA - timeB; // Oldest first
+            const codeA = a.code || '';
+            const codeB = b.code || '';
+            return codeA.localeCompare(codeB, undefined, { numeric: true });
           });
           
           const selectedT = docsT.slice(0, tCount);
@@ -158,9 +158,9 @@ export default function NewProductionOrderPage() {
           const snapP = await getDocs(qP);
           let docsP = snapP.docs.map(d => ({id: d.id, ...d.data() as any}));
           docsP.sort((a, b) => {
-            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?._seconds ? a.createdAt._seconds * 1000 : 0);
-            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?._seconds ? b.createdAt._seconds * 1000 : 0);
-            return timeA - timeB; // Oldest first
+            const codeA = a.code || '';
+            const codeB = b.code || '';
+            return codeA.localeCompare(codeB, undefined, { numeric: true });
           });
           
           // Filter out rolls already selected in this same request to avoid duplicates

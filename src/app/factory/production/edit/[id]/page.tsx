@@ -551,7 +551,7 @@ export default function EditProductionOrderPage() {
                               <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-sm font-bold">{data.count}</span>
                             </td>
                             <td className="p-3 text-gray-600 leading-relaxed font-mono text-xs max-w-md break-words" style={{ direction: 'ltr', textAlign: 'right' }}>
-                              {data.codes.join(', ')}
+                              {data.codes.sort((a: string, b: string) => a.localeCompare(b, undefined, { numeric: true })).join(', ')}
                             </td>
                           </tr>
                         ))}
