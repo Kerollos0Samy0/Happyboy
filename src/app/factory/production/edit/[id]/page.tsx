@@ -40,6 +40,7 @@ export default function EditProductionOrderPage() {
   const [generatedOrderId, setGeneratedOrderId] = useState<string | null>(null);
   const [usedRollsCount, setUsedRollsCount] = useState(0);
   const [usedRolls, setUsedRolls] = useState<any[]>([]);
+  const [showRollDetails, setShowRollDetails] = useState(false);
 
   // Auto-calculate total quantity based on colors
   useEffect(() => {
@@ -508,23 +509,54 @@ export default function EditProductionOrderPage() {
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-blue-900 text-sm flex items-center gap-2">📦 الأتواب المحجوزة من المخزن</h3>
-                  <div className="bg-white px-4 py-1.5 rounded-full font-bold text-blue-700 shadow-sm border border-blue-100">
-                    {usedRollsCount} توب
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white px-4 py-1.5 rounded-full font-bold text-blue-700 shadow-sm border border-blue-100">
+                      {usedRollsCount} توب
+                    </div>
+                    {usedRollsCount > 0 && (
+                      <button 
+                        type="button"
+                        onClick={() => setShowRollDetails(!showRollDetails)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-bold transition"
+                      >
+                        {showRollDetails ? "إخفاء التفاصيل" : "عرض التفاصيل"}
+                      </button>
+                    )}
                   </div>
                 </div>
-                {usedRollsCount > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Object.entries(usedRolls.reduce((acc:any, r:any) => { acc[r.color || 'بدون لون'] = (acc[r.color || 'بدون لون'] || 0) + 1; return acc; }, {})).map(([color, count], idx) => (
-                      <div key={idx} className="bg-white border border-gray-200 px-3 py-1 rounded text-sm font-bold flex items-center gap-2 shadow-sm">
-                        <span>{color}</span>
-                        <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-sm">{String(count)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {usedRollsCount > 0 && (
-                  <div className="mt-3 text-xs text-gray-500 flex flex-wrap gap-1 leading-relaxed">
-                    <strong>أكواد الأتواب:</strong> {usedRolls.map((r:any) => r.code).join('، ')}
+
+                {usedRollsCount > 0 && showRollDetails && (
+                  <div className="mt-4 bg-white rounded-lg border border-blue-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-right text-sm">
+                      <thead className="bg-blue-100 text-blue-900">
+                        <tr>
+                          <th className="p-3 w-1/4">اللون</th>
+                          <th className="p-3 w-1/6">العدد</th>
+                          <th className="p-3">أكواد الأتواب</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(
+                          usedRolls.reduce((acc:any, r:any) => { 
+                            const c = r.color || 'بدون لون';
+                            if (!acc[c]) acc[c] = { count: 0, codes: [] };
+                            acc[c].count++;
+                            acc[c].codes.push(r.code);
+                            return acc; 
+                          }, {})
+                        ).map(([color, data]: [string, any], idx) => (
+                          <tr key={idx} className="border-t border-blue-50 hover:bg-blue-50 transition">
+                            <td className="p-3 font-bold text-gray-800">{color}</td>
+                            <td className="p-3">
+                              <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-sm font-bold">{data.count}</span>
+                            </td>
+                            <td className="p-3 text-gray-600 leading-relaxed font-mono text-xs max-w-md break-words" style={{ direction: 'ltr', textAlign: 'right' }}>
+                              {data.codes.join(', ')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
