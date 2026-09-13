@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { Search, PlusCircle, Scissors, Trash2, Printer } from 'lucide-react';
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from 'react-barcode';
@@ -41,24 +41,22 @@ export default function FabricInventoryPage() {
     supplier: ''
   });
 
-  const fetchRolls = async () => {
-    try {
-      setLoading(true);
-      const q = query(collection(db, 'factory_fabric_rolls'));
-      const snap = await getDocs(q);
+  useEffect(() => {
+    setLoading(true);
+    const q = query(collection(db, 'factory_fabric_rolls'));
+    
+    const unsubscribe = onSnapshot(q, (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FabricRoll[];
       setRolls(data);
       setErrorMsg('');
-    } catch (err: any) {
+      setLoading(false);
+    }, (err) => {
       console.error(err);
       setErrorMsg(err.message);
-    } finally {
       setLoading(false);
-    }
-  };
+    });
 
-  useEffect(() => {
-    fetchRolls();
+    return () => unsubscribe();
   }, []);
 
   const handleRollsCountChange = (val: number) => {
@@ -136,7 +134,6 @@ export default function FabricInventoryPage() {
       setRollsCount(1);
       setMultiAmounts(['']);
       setShowAddForm(false);
-      fetchRolls();
     } catch (err: any) {
       console.error(err);
       alert('خطأ أثناء الحفظ: ' + err.message);
