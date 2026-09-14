@@ -469,18 +469,18 @@ export default function DepartmentDashboardPage() {
               <div className="space-y-4">
                 <div className="p-4 border rounded-xl bg-blue-50/50">
                   <label className="block text-sm font-bold text-blue-800 mb-2">استلام دفعة جديدة</label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
                     <input 
                       type="number" 
                       value={receiveQty} 
                       onChange={(e) => setReceiveQty(e.target.value ? Number(e.target.value) : "")}
-                      className="flex-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
+                      className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg"
                       placeholder="الكمية"
                     />
                     <button 
                       onClick={() => updateProgress('receive')}
                       disabled={isUpdating || !receiveQty}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-lg font-bold transition disabled:opacity-50"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
                     >
                       استلام
                     </button>
@@ -489,18 +489,18 @@ export default function DepartmentDashboardPage() {
 
                 <div className="p-4 border rounded-xl bg-green-50/50">
                   <label className="block text-sm font-bold text-green-800 mb-2">تسليم دفعة للقسم التالي</label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
                     <input 
                       type="number" 
                       value={deliverQty} 
                       onChange={(e) => setDeliverQty(e.target.value ? Number(e.target.value) : "")}
-                      className="flex-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold"
+                      className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold text-lg"
                       placeholder="الكمية"
                     />
                     <button 
                       onClick={() => updateProgress('deliver')}
                       disabled={isUpdating || !deliverQty}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 rounded-lg font-bold transition disabled:opacity-50"
+                      className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
                     >
                       تسليم
                     </button>
