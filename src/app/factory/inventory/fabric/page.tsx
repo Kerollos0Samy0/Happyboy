@@ -126,7 +126,7 @@ export default function FabricInventoryPage() {
 
       for (let i = 0; i < rollsCount; i++) {
         const weight = Number(multiAmounts[i]) || 0;
-        const rollCode = `${baseCode}-${currentCount.toString().padStart(5, '0')}-${weight}Kg`;
+        const rollCode = `${baseCode}-${currentCount.toString().padStart(5, '0')}`;
         const newRef = doc(collection(db, 'factory_fabric_rolls'));
         
         batch.set(newRef, {
@@ -209,7 +209,7 @@ export default function FabricInventoryPage() {
           colorCounters[colorName] = getNextCodeCount(colorName);
         }
         
-        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(5, '0')}-${amount}Kg`;
+        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(5, '0')}`;
         
         const newDocRef = doc(collection(db, 'factory_fabric_rolls'));
         batch.set(newDocRef, {
