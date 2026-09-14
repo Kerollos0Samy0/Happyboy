@@ -633,13 +633,18 @@ export default function FabricInventoryPage() {
               {/* Preview in browser (not printed) */}
               {printRolls.map(roll => (
                 <div key={roll.id} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between p-1 overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
-                  <div className="flex justify-between w-full px-1 mb-1">
-                    <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
-                    <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
-                    <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
+                  <div className="flex justify-between w-full px-1 mb-1 items-center">
+                    <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
+                    <div className="flex flex-col items-center leading-none">
+                      <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
+                        #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
+                      </span>
+                      <span className="font-bold text-[8px] text-gray-700 mt-[1px]">{roll.type || 'قماش'}</span>
+                    </div>
+                    <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
                   <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                    <Barcode value={roll.code} width={1.2} height={18} fontSize={14} margin={0} displayValue={true} background="#ffffff" />
+                    <Barcode value={roll.code} width={1.2} height={16} fontSize={17} margin={0} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
@@ -668,13 +673,18 @@ export default function FabricInventoryPage() {
         <div id="print-section" className="hidden print:block">
           {printRolls.map(roll => (
             <div key={roll.id} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
-              <div className="flex justify-between w-full mb-1">
-                <span className="font-black text-[11px] leading-tight text-black">{roll.color}</span>
-                <span className="font-bold text-[10px] leading-tight text-gray-800">{roll.type || 'قماش'}</span>
-                <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
+              <div className="flex justify-between w-full px-1 mb-1 items-center">
+                <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
+                <div className="flex flex-col items-center leading-none">
+                  <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
+                    #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
+                  </span>
+                  <span className="font-bold text-[8px] text-gray-700 mt-[1px]">{roll.type || 'قماش'}</span>
+                </div>
+                <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
               </div>
               <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                <Barcode value={roll.code} width={1.2} height={18} fontSize={14} margin={0} displayValue={true} background="#ffffff" />
+                <Barcode value={roll.code} width={1.2} height={16} fontSize={17} margin={0} displayValue={true} background="#ffffff" />
               </div>
             </div>
           ))}
