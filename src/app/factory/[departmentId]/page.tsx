@@ -505,12 +505,12 @@ export default function DepartmentDashboardPage() {
               </div>
               
               {/* Fabric Requirements Section */}
-              {((activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0) || (departmentId === 'fabric_order' || departmentId === 'fabric_warehouse')) && (
+              {((activeOrder.used_rolls && activeOrder.used_rolls.length > 0) || (departmentId === 'fabric_order' || departmentId === 'fabric_warehouse')) && (
                 <div className="mt-6 border-t pt-6">
                   <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    🛍️ متطلبات القماش للموديل
+                    🛍️ متطلبات القماش للموديل (مأخوذة من الأتواب المسحوبة)
                   </h3>
-                  {activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0 ? (
+                  {activeOrder.used_rolls && activeOrder.used_rolls.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-right bg-white rounded-lg overflow-hidden border">
                         <thead>
@@ -518,16 +518,23 @@ export default function DepartmentDashboardPage() {
                             <th className="p-3 font-bold">اللون</th>
                             <th className="p-3 font-bold">عدد الأتواب</th>
                             <th className="p-3 font-bold">الخامة</th>
-                            <th className="p-3 font-bold">المورد</th>
+                            <th className="p-3 font-bold">المورد/المخزن</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {activeOrder.fabricRequirements.map((req: any, idx: number) => (
+                          {Object.entries(
+                            activeOrder.used_rolls.reduce((acc: any, r: any) => {
+                              const c = r.color || 'غير محدد';
+                              if (!acc[c]) acc[c] = 0;
+                              acc[c]++;
+                              return acc;
+                            }, {})
+                          ).map(([colorName, count]: [string, any], idx: number) => (
                             <tr key={idx} className="border-b last:border-0 hover:bg-gray-50">
-                              <td className="p-3">{req.color || '-'}</td>
-                              <td className="p-3 font-bold text-blue-600">{req.count || '-'}</td>
-                              <td className="p-3">{req.material || '-'}</td>
-                              <td className="p-3">{req.supplier || '-'}</td>
+                              <td className="p-3">{colorName}</td>
+                              <td className="p-3 font-bold text-blue-600">{count}</td>
+                              <td className="p-3">{activeOrder.fabricType || '-'}</td>
+                              <td className="p-3">{activeOrder.fabricSupplier || '-'}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -535,8 +542,8 @@ export default function DepartmentDashboardPage() {
                     </div>
                   ) : (
                     <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
-                      لا توجد متطلبات قماش مسجلة لهذا الموديل. <br/>
-                      <span className="text-sm">يرجى تسجيل متطلبات القماش من (قسم العينات) بالضغط على تعديل أمر الشغل.</span>
+                      لا توجد أتواب محجوزة لهذا الموديل. <br/>
+                      <span className="text-sm">يرجى حجز الأتواب من المخزن أو تسجيلها كمطلوبة (من قسم العينات).</span>
                     </div>
                   )}
                 </div>
