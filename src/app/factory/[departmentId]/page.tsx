@@ -508,7 +508,7 @@ export default function DepartmentDashboardPage() {
               {((activeOrder.used_rolls && activeOrder.used_rolls.length > 0) || (departmentId === 'fabric_order' || departmentId === 'fabric_warehouse')) && (
                 <div className="mt-6 border-t pt-6">
                   <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    🛍️ متطلبات القماش للموديل (مأخوذة من الأتواب المسحوبة)
+                    🛍️ متطلبات القماش للموديل
                   </h3>
                   {activeOrder.used_rolls && activeOrder.used_rolls.length > 0 ? (
                     <div className="overflow-x-auto">
