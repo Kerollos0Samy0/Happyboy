@@ -184,7 +184,7 @@ export default function FabricInventoryPage() {
         const colorName = row["اللون"] || 'غير محدد';
         const type = row["نوع القماش"] || '';
         // Fallback to older column name just in case they use the old template
-        const amount = Number(row["الوزن (كجم)"]) || Number(row["الكمية (الوزن)"]) || 0;
+        const amount = Number(row["الوزن (كجم)"]) || Number(row["الكمية (الوزن)"]) || Number(row["الكيلو"]) || 0;
         const supplier = row["المورد"] || '';
 
         const baseCode = colorCodes[colorName] || 'OT';
