@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { factoryDepartments } from "../../../lib/departments";
 import { db } from "../../../lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
-import { CheckCircle, Search, AlertCircle, ArrowLeft, ArrowRight, Printer, Check } from "lucide-react";
+import { CheckCircle, Search, AlertCircle, ArrowLeft, ArrowRight, Printer, Check, Camera } from "lucide-react";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 
 export default function DepartmentDashboardPage() {
   const params = useParams();
@@ -35,6 +36,38 @@ export default function DepartmentDashboardPage() {
   }>({ tshirtPrints: 0, pantsPrints: 0, type: '', colors: [] });
   const [isSavingPrinting, setIsSavingPrinting] = useState(false);
 
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  useEffect(() => {
+    let scanner: Html5QrcodeScanner | null = null;
+    if (isScannerOpen) {
+      scanner = new Html5QrcodeScanner(
+        "dept-reader",
+        { 
+          qrbox: { width: 250, height: 250 }, 
+          fps: 5,
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        }, 
+        false
+      );
+      
+      scanner.render(
+        (text: string) => {
+          setOrderQuery(text);
+          setIsScannerOpen(false);
+          if (scanner) scanner.clear();
+          processScan(text);
+        }, 
+        (err: any) => { /* ignore */ }
+      );
+    }
+    return () => {
+      if (scanner) {
+        scanner.clear().catch((e: any) => console.error(e));
+      }
+    };
+  }, [isScannerOpen]);
+
   useEffect(() => {
     const dept = factoryDepartments.find((d) => d.id === departmentId);
     if (!dept) {
@@ -50,93 +83,97 @@ export default function DepartmentDashboardPage() {
     }
   }, [department, activeOrder]);
 
+  const processScan = async (queryText: string) => {
+    if (!queryText.trim()) return;
+
+    setLoadingOrder(true);
+    setOrderError("");
+    setActiveOrder(null);
+    
+    let rawId = queryText.trim();
+    let parsedId = rawId;
+
+    // Extract ID if URL
+    try {
+      if (rawId.includes('http')) {
+        const url = new URL(rawId);
+        const parts = url.pathname.split('/');
+        parsedId = parts[parts.length - 1];
+      }
+    } catch(e) {}
+
+    // Handle arabic layout swap
+    const arabicMap: Record<string, string> = {
+      'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+      'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+      'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+      'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+      'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+      '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+    };
+    
+    let finalId = "";
+    for (let i = 0; i < parsedId.length; i++) {
+      finalId += arabicMap[parsedId[i]] || parsedId[i];
+    }
+    
+    try {
+      let orderDoc: any = null;
+      let orderDocId = finalId;
+
+      // Try direct ID
+      const directDocRef = doc(db, "factory_production_orders", finalId);
+      const directDocSnap = await getDoc(directDocRef);
+      
+      if (directDocSnap.exists()) {
+        orderDoc = directDocSnap.data();
+      } else {
+        // Try shortId
+        const q = query(collection(db, "factory_production_orders"), where("shortId", "==", finalId.toUpperCase()));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          orderDoc = querySnapshot.docs[0].data();
+          orderDocId = querySnapshot.docs[0].id;
+        }
+      }
+
+      if (!orderDoc) {
+        setOrderError("لم يتم العثور على أمر الشغل!");
+      } else {
+        setActiveOrder({ id: orderDocId, ...orderDoc });
+        // Initialize quantities based on what was previously submitted
+        const progress = orderDoc.departmentsProgress?.[departmentId] || { receivedQty: 0, deliveredQty: 0 };
+        
+        // Suggest default receive quantity: full order quantity minus what we already received
+        const totalQty = Number(orderDoc.totalQuantity || 0);
+        const remainingToReceive = Math.max(0, totalQty - progress.receivedQty);
+        setReceiveQty(remainingToReceive > 0 ? remainingToReceive : "");
+        
+        // Suggest default deliver quantity: what we received minus what we delivered
+        const remainingToDeliver = Math.max(0, progress.receivedQty - progress.deliveredQty);
+        setDeliverQty(remainingToDeliver > 0 ? remainingToDeliver : "");
+
+        if (departmentId === "printing_laser") {
+          if (orderDoc.printingLog) {
+            setPrintingLog(orderDoc.printingLog);
+          } else {
+            setPrintingLog({ tshirtPrints: 0, pantsPrints: 0, type: '', colors: [] });
+          }
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setOrderError("حدث خطأ أثناء البحث.");
+    } finally {
+      setLoadingOrder(false);
+      setOrderQuery("");
+    }
+  };
+
   const handleOrderScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!orderQuery.trim()) return;
-
-      setLoadingOrder(true);
-      setOrderError("");
-      setActiveOrder(null);
-      
-      let rawId = orderQuery.trim();
-      let parsedId = rawId;
-
-      // Extract ID if URL
-      try {
-        if (rawId.includes('http')) {
-          const url = new URL(rawId);
-          const parts = url.pathname.split('/');
-          parsedId = parts[parts.length - 1];
-        }
-      } catch(e) {}
-
-      // Handle arabic layout swap
-      const arabicMap: Record<string, string> = {
-        'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
-        'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
-        'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
-        'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
-        'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
-        '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
-      };
-      
-      let finalId = "";
-      for (let i = 0; i < parsedId.length; i++) {
-        finalId += arabicMap[parsedId[i]] || parsedId[i];
-      }
-      
-      try {
-        let orderDoc: any = null;
-        let orderDocId = finalId;
-
-        // Try direct ID
-        const directDocRef = doc(db, "factory_production_orders", finalId);
-        const directDocSnap = await getDoc(directDocRef);
-        
-        if (directDocSnap.exists()) {
-          orderDoc = directDocSnap.data();
-        } else {
-          // Try shortId
-          const q = query(collection(db, "factory_production_orders"), where("shortId", "==", finalId.toUpperCase()));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            orderDoc = querySnapshot.docs[0].data();
-            orderDocId = querySnapshot.docs[0].id;
-          }
-        }
-
-        if (!orderDoc) {
-          setOrderError("لم يتم العثور على أمر الشغل!");
-        } else {
-          setActiveOrder({ id: orderDocId, ...orderDoc });
-          // Initialize quantities based on what was previously submitted
-          const progress = orderDoc.departmentsProgress?.[departmentId] || { receivedQty: 0, deliveredQty: 0 };
-          
-          // Suggest default receive quantity: full order quantity minus what we already received
-          const totalQty = Number(orderDoc.totalQuantity || 0);
-          const remainingToReceive = Math.max(0, totalQty - progress.receivedQty);
-          setReceiveQty(remainingToReceive > 0 ? remainingToReceive : "");
-          
-          // Suggest default deliver quantity: what we received minus what we delivered
-          const remainingToDeliver = Math.max(0, progress.receivedQty - progress.deliveredQty);
-          setDeliverQty(remainingToDeliver > 0 ? remainingToDeliver : "");
-
-          if (departmentId === "printing_laser") {
-            if (orderDoc.printingLog) {
-              setPrintingLog(orderDoc.printingLog);
-            } else {
-              setPrintingLog({ tshirtPrints: 0, pantsPrints: 0, type: '', colors: [] });
-            }
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        setOrderError("حدث خطأ أثناء البحث.");
-      } finally {
-        setLoadingOrder(false);
-        setOrderQuery("");
-      }
+      await processScan(orderQuery);
     }
   };
 
@@ -278,6 +315,18 @@ export default function DepartmentDashboardPage() {
             )}
           </div>
           
+          <button 
+            onClick={() => setIsScannerOpen(!isScannerOpen)}
+            className="mt-6 flex items-center justify-center gap-2 w-full max-w-md bg-gray-800 text-white p-3 rounded-xl font-bold hover:bg-gray-900 transition shadow-lg"
+          >
+            <Camera size={20} /> {isScannerOpen ? "أغلق الكاميرا" : "افتح كاميرا الموبايل للاسكان"}
+          </button>
+          
+          {isScannerOpen && (
+            <div className="mt-4 w-full max-w-md border-2 rounded-xl overflow-hidden shadow-sm bg-gray-50">
+              <div id="dept-reader" width="100%"></div>
+            </div>
+          )}
           {orderError && (
             <div className="mt-4 flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg w-full max-w-md">
               <AlertCircle size={20} />
