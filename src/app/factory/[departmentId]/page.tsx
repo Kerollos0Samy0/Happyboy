@@ -229,8 +229,12 @@ export default function DepartmentDashboardPage() {
       
       if (type === 'receive') {
         newProgress.receivedQty = (newProgress.receivedQty || 0) + qtyToAdd;
+        if (!newProgress.firstReceivedAt) {
+          newProgress.firstReceivedAt = new Date().toISOString();
+        }
       } else {
         newProgress.deliveredQty = (newProgress.deliveredQty || 0) + qtyToAdd;
+        newProgress.lastDeliveredAt = new Date().toISOString();
       }
 
       const updateData = {

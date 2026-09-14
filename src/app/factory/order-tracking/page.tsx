@@ -227,7 +227,8 @@ export default function OrderTrackingPage() {
                     <th className="p-4 font-bold border-b text-center text-blue-700">الكمية المستلمة</th>
                     <th className="p-4 font-bold border-b text-center text-green-700">الكمية المُسلمة</th>
                     <th className="p-4 font-bold border-b text-center text-orange-600">الرصيد المتبقي بالقسم</th>
-                    <th className="p-4 font-bold border-b text-left">آخر تحديث</th>
+                    <th className="p-4 font-bold border-b text-center text-indigo-600">وقت الدخول للقسم</th>
+                    <th className="p-4 font-bold border-b text-center text-teal-600">وقت خروج آخر دفعة</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -239,14 +240,20 @@ export default function OrderTrackingPage() {
                     
                     if (received === 0 && delivered === 0) return null; // Hide untouched departments for cleaner UI
 
+                    const entryTime = progress?.firstReceivedAt || progress?.lastUpdated;
+                    const exitTime = progress?.lastDeliveredAt;
+
                     return (
                       <tr key={dept.id} className="border-b hover:bg-gray-50 transition">
                         <td className="p-4 font-bold text-gray-800">{dept.name}</td>
                         <td className="p-4 text-center font-black text-blue-600 text-lg">{received}</td>
                         <td className="p-4 text-center font-black text-green-600 text-lg">{delivered}</td>
                         <td className="p-4 text-center font-black text-orange-500 text-lg">{balance > 0 ? balance : "-"}</td>
-                        <td className="p-4 text-left text-sm text-gray-500" dir="ltr">
-                          {progress?.lastUpdated ? new Date(progress.lastUpdated).toLocaleString('ar-EG') : '-'}
+                        <td className="p-4 text-center text-xs font-bold text-indigo-500" dir="ltr">
+                          {entryTime ? new Date(entryTime).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) : '-'}
+                        </td>
+                        <td className="p-4 text-center text-xs font-bold text-teal-500" dir="ltr">
+                          {exitTime ? new Date(exitTime).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) : '-'}
                         </td>
                       </tr>
                     );
