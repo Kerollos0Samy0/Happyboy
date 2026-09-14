@@ -705,6 +705,42 @@ export default function DepartmentDashboardPage() {
                     )}
                   </div>
                 </>
+              ) : department.id === "fabric_order" ? (
+                <>
+                  <h3 className="text-xl font-bold mb-6 border-b pb-2">توجيه أمر الشغل</h3>
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => routeOrder("fabric_warehouse")}
+                      disabled={isUpdating}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                    >
+                      تم الشراء والتوجيه لمخزن القماش
+                    </button>
+                    {activeOrder.routedTo === "fabric_warehouse" && (
+                      <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 text-center font-bold text-sm">
+                        تم التوجيه لمخزن القماش بنجاح
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : department.id === "fabric_warehouse" ? (
+                <>
+                  <h3 className="text-xl font-bold mb-6 border-b pb-2">توجيه أمر الشغل</h3>
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => routeOrder("cutting_sorting")}
+                      disabled={isUpdating}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                    >
+                      تم تحضير القماش والتوجيه لقسم القص
+                    </button>
+                    {activeOrder.routedTo === "cutting_sorting" && (
+                      <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 text-center font-bold text-sm">
+                        تم التوجيه لقسم القص بنجاح
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
                 <>
                   <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
