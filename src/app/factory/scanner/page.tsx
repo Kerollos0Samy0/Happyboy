@@ -5,7 +5,7 @@ import { db } from "../../../lib/firebase";
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
-import { calculateEffectiveWorkingSeconds } from "../../../../lib/timeUtils";
+import { calculateEffectiveWorkingSeconds } from "../../../lib/timeUtils";
 import Link from "next/link";
 
 const STAGES = [
