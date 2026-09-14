@@ -23,7 +23,6 @@ export default function EditProductionOrderPage() {
   
   // Dynamic color pairs array (now includes quantity)
   const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '' }]);
-  const [fabricRequirements, setFabricRequirements] = useState<{color: string, count: string, material: string, supplier: string}[]>([]);
   
   const [fabricSupplier, setFabricSupplier] = useState('');
   
@@ -59,7 +58,6 @@ export default function EditProductionOrderPage() {
             const data = snap.data();
             setModelName(data.modelName || '');
             setTotalQuantity(data.totalQuantity || '');
-            setFabricRequirements(data.fabricRequirements || []);
             setFabricType(data.fabricType || '');
             setSizesSeries(data.sizesSeries || '');
             setFabricSupplier(data.fabricSupplier || '');
@@ -190,7 +188,6 @@ export default function EditProductionOrderPage() {
         sewingNotes,
         generalNotes,
         modelImage: imageBase64,
-        fabricRequirements: fabricRequirements.filter(r => r.color.trim() !== ''),
         currentStage: 1,
         status: 'قيد التنفيذ',
         createdAt: serverTimestamp(),
@@ -777,81 +774,6 @@ export default function EditProductionOrderPage() {
                 </button>
               </div>
 
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm space-y-4 border-t-4 border-orange-500">
-              <h2 className="text-lg font-bold border-b pb-2 text-gray-800">🛍️ متطلبات ومشتريات القماش (تُرسل للمشتريات والمخزن)</h2>
-              <div className="space-y-3">
-                {fabricRequirements.map((req, idx) => (
-                  <div key={idx} className="flex gap-2 items-center">
-                    <input 
-                      type="text" 
-                      placeholder="اللون (مثال: أحمر)" 
-                      value={req.color}
-                      onChange={(e) => {
-                        const newReqs = [...fabricRequirements];
-                        newReqs[idx].color = e.target.value;
-                        setFabricRequirements(newReqs);
-                      }}
-                      className="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-orange-500"
-                    />
-                    <input 
-                      type="number" 
-                      placeholder="عدد الأتواب المطلوبة" 
-                      value={req.count}
-                      onChange={(e) => {
-                        const newReqs = [...fabricRequirements];
-                        newReqs[idx].count = e.target.value;
-                        setFabricRequirements(newReqs);
-                      }}
-                      className="w-40 p-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-orange-500"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="نوع الخامة (مثال: ميلتون)" 
-                      value={req.material}
-                      onChange={(e) => {
-                        const newReqs = [...fabricRequirements];
-                        newReqs[idx].material = e.target.value;
-                        setFabricRequirements(newReqs);
-                      }}
-                      className="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-orange-500"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="اسم المورد (اختياري)" 
-                      value={req.supplier}
-                      onChange={(e) => {
-                        const newReqs = [...fabricRequirements];
-                        newReqs[idx].supplier = e.target.value;
-                        setFabricRequirements(newReqs);
-                      }}
-                      className="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-orange-500"
-                    />
-                    {fabricRequirements.length > 0 && (
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          const newReqs = [...fabricRequirements];
-                          newReqs.splice(idx, 1);
-                          setFabricRequirements(newReqs);
-                        }} 
-                        className="p-2.5 text-red-500 hover:bg-red-100 rounded-lg transition shrink-0"
-                      >
-                        <Minus size={20} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                
-                <button 
-                  type="button" 
-                  onClick={() => setFabricRequirements([...fabricRequirements, { color: '', count: '', material: '', supplier: '' }])} 
-                  className="text-orange-600 text-sm font-bold flex items-center gap-1 hover:bg-orange-50 p-2 rounded transition mt-2"
-                >
-                  <Plus size={16} /> إضافة متطلب قماش جديد للطلب
-                </button>
-              </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 border-t-4 border-gray-800">
