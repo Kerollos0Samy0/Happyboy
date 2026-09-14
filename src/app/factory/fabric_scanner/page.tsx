@@ -382,7 +382,7 @@ export default function FabricScannerPage() {
       <div className="flex gap-4 mb-6">
         <button 
           onClick={() => { setScannerMode('withdraw'); setTimeout(() => orderInputRef.current?.focus(), 100); }}
-          className={`flex-1 p-4 rounded-xl font-bold text-lg border-b-4 transition-all ${scannerMode === 'withdraw' ? 'bg-primary text-white border-blue-800 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+          className={`flex-1 p-4 rounded-xl font-bold text-lg border-b-4 transition-all ${scannerMode === 'withdraw' ? 'bg-blue-600 text-white border-blue-800 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
         >
           📤 صرف الأتواب
         </button>
