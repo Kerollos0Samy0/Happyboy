@@ -5,6 +5,7 @@ import { db } from "../../../lib/firebase";
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { Camera, CheckCircle, AlertCircle, ArrowRight, UserCircle } from "lucide-react";
+import { calculateEffectiveWorkingSeconds } from "../../../../lib/timeUtils";
 import Link from "next/link";
 
 const STAGES = [
@@ -311,9 +312,7 @@ export default function WorkerScannerPage() {
       
       // Auto-end previous stage if it was left running
       if (orderData.stageStatus === 'running' && orderData.stageStartedAt && orderData.currentStage !== selectedStage) {
-        const start = new Date(orderData.stageStartedAt);
-        const end = new Date(now);
-        const durationSecs = Math.floor((end.getTime() - start.getTime()) / 1000);
+        const durationSecs = calculateEffectiveWorkingSeconds(orderData.stageStartedAt, now);
         const prevStageName = STAGES.find(s => s.id === orderData.currentStage)?.name || 'مرحلة سابقة';
         
         await addDoc(collection(db, 'factory_productivity_logs'), {
@@ -472,10 +471,11 @@ export default function WorkerScannerPage() {
       await updateDoc(doc(db, "factory_production_orders", orderData.id), updateData);
 
       // Log productivity if stage was running
-      if (orderData.stageStatus === 'running' && orderData.stageStartedAt) {
-        const start = new Date(orderData.stageStartedAt);
-        const end = new Date();
-        const durationSecs = Math.floor((end.getTime() - start.getTime()) / 1000);
+      if (orderData.stageStatus === 'running') {
+        let durationSecs = 0;
+        if (orderData.stageStartedAt) {
+          durationSecs = calculateEffectiveWorkingSeconds(orderData.stageStartedAt, now);
+        }
         
         await addDoc(collection(db, 'factory_productivity_logs'), {
           date: new Date().toISOString().split('T')[0],
