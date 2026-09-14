@@ -53,13 +53,6 @@ export default function FabricScannerPage() {
 
     try {
       let rawId = queryStr.trim();
-      setOrderError("");
-      setActiveOrder(null);
-      setExpectedRolls([]);
-      setVerifiedRolls([]);
-
-      try {
-        let rawId = orderQuery.trim();
         // Fix Arabic keyboard layout issue
         const arabicMap: Record<string, string> = {
           'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
