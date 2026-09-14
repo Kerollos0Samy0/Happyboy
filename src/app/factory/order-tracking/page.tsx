@@ -88,6 +88,10 @@ export default function OrderTrackingPage() {
     }
   };
 
+  const totalSets = activeOrder?.colorPairs
+    ? activeOrder.colorPairs.reduce((sum: number, pair: any) => sum + (Number(pair.quantity) || 0), 0)
+    : activeOrder?.totalQuantity;
+
   return (
     <div className="p-6 max-w-5xl mx-auto" dir="rtl">
       <div className="flex items-center gap-4 mb-8">
@@ -145,7 +149,7 @@ export default function OrderTrackingPage() {
             </div>
             <div className="text-center bg-gray-50 px-8 py-6 rounded-2xl border border-gray-100 shadow-inner">
               <div className="text-sm font-bold text-gray-500 mb-2">الكمية المستهدفة</div>
-              <div className="text-4xl font-black text-gray-800">{activeOrder.totalQuantity} <span className="text-lg font-normal text-gray-500">قطعة</span></div>
+              <div className="text-4xl font-black text-gray-800">{totalSets} <span className="text-lg font-normal text-gray-500">ترنج/طقم</span></div>
             </div>
           </div>
 

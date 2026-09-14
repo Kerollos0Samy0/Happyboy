@@ -298,8 +298,12 @@ export default function DepartmentDashboardPage() {
                   <div className="text-lg text-blue-600 font-bold mt-1">كود: {activeOrder.shortId || activeOrder.id.slice(-6).toUpperCase()}</div>
                 </div>
                 <div className="text-center bg-gray-50 px-6 py-4 rounded-xl border">
-                  <div className="text-sm font-bold text-gray-500 mb-1">الكمية الكلية المستهدفة</div>
-                  <div className="text-3xl font-black text-gray-800">{activeOrder.totalQuantity} <span className="text-sm font-normal text-gray-500">قطعة</span></div>
+                  <div className="text-sm font-bold text-gray-500 mb-1">الكمية المستهدفة (عدد الأطقم)</div>
+                  <div className="text-3xl font-black text-gray-800">
+                    {activeOrder.colorPairs 
+                      ? activeOrder.colorPairs.reduce((sum: number, pair: any) => sum + (Number(pair.quantity) || 0), 0)
+                      : activeOrder.totalQuantity} <span className="text-sm font-normal text-gray-500">طقم/ترنج</span>
+                  </div>
                 </div>
               </div>
 
