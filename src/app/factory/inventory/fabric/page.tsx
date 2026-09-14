@@ -149,13 +149,12 @@ export default function FabricInventoryPage() {
       {
         "اللون": "",
         "نوع القماش": "",
-        "الكمية (الوزن)": "",
-        "الوحدة (كجم / متر)": "كجم",
+        "الوزن (كجم)": "",
         "المورد": ""
       }
     ]);
     // Auto-adjust columns width
-    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 25 }];
+    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 25 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "أتواب القماش");
     XLSX.writeFile(wb, "fabric_inventory_template.xlsx");
@@ -184,8 +183,8 @@ export default function FabricInventoryPage() {
       for (const row of rows) {
         const colorName = row["اللون"] || 'غير محدد';
         const type = row["نوع القماش"] || '';
-        const amount = Number(row["الكمية (الوزن)"]) || 0;
-        const unit = row["الوحدة (كجم / متر)"] || 'كجم';
+        // Fallback to older column name just in case they use the old template
+        const amount = Number(row["الوزن (كجم)"]) || Number(row["الكمية (الوزن)"]) || 0;
         const supplier = row["المورد"] || '';
 
         const baseCode = colorCodes[colorName] || 'OT';
@@ -200,7 +199,7 @@ export default function FabricInventoryPage() {
           color: colorName,
           type,
           amount,
-          unit,
+          unit: 'كجم',
           supplier,
           createdAt: serverTimestamp(),
           status: 'in_stock'
