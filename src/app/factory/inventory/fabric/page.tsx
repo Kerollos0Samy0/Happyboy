@@ -242,13 +242,37 @@ export default function FabricInventoryPage() {
     if (confirm('هل أنت متأكد من حذف هذا التوب؟')) {
       try {
         await deleteDoc(doc(db, 'factory_fabric_rolls', id));
-        fetchRolls();
       } catch (error) {
         console.error(error);
         alert('حدث خطأ أثناء الحذف');
       }
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (selectedRolls.length === 0) return;
+    if (confirm(`هل أنت متأكد من حذف ${selectedRolls.length} توب محدد؟\nهذا الإجراء لا يمكن التراجع عنه!`)) {
+      setIsSaving(true);
+      try {
+        const { writeBatch } = await import('firebase/firestore');
+        const batch = writeBatch(db);
+        
+        selectedRolls.forEach(id => {
+          const docRef = doc(db, 'factory_fabric_rolls', id);
+          batch.delete(docRef);
+        });
+        
+        await batch.commit();
+        setSelectedRolls([]);
+      } catch (error) {
+        console.error(error);
+        alert('حدث خطأ أثناء حذف الأتواب المحددة.');
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
   const [inventoryTab, setInventoryTab] = useState<'in_stock' | 'used'>('in_stock');
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -506,12 +530,21 @@ export default function FabricInventoryPage() {
               <span>الوزن: {totalKg.toFixed(1)} كجم</span>
             </div>
             {selectedRolls.length > 0 && (
-              <button 
-                onClick={() => setPrintRolls(rolls.filter(r => selectedRolls.includes(r.id)))}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition text-sm shadow"
-              >
-                <Printer size={16} /> طباعة {selectedRolls.length} تيكت
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleBulkDelete}
+                  disabled={isSaving}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition text-sm shadow disabled:opacity-50"
+                >
+                  <Trash2 size={16} /> حذف {selectedRolls.length}
+                </button>
+                <button 
+                  onClick={() => setPrintRolls(rolls.filter(r => selectedRolls.includes(r.id)))}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition text-sm shadow"
+                >
+                  <Printer size={16} /> طباعة {selectedRolls.length}
+                </button>
+              </div>
             )}
           </div>
         </div>
