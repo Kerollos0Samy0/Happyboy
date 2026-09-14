@@ -163,11 +163,12 @@ export default function FabricInventoryPage() {
         "اللون": "",
         "نوع القماش": "",
         "الوزن (كجم)": "",
-        "المورد": ""
+        "المورد": "",
+        "الاختصار": ""
       }
     ]);
     // Auto-adjust columns width
-    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 25 }];
+    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 15 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "أتواب القماش");
     XLSX.writeFile(wb, "fabric_inventory_template.xlsx");
@@ -202,8 +203,9 @@ export default function FabricInventoryPage() {
         // Fallback to older column name just in case they use the old template
         const amount = Number(row["الوزن (كجم)"]) || Number(row["الكمية (الوزن)"]) || Number(row["الكيلو"]) || 0;
         const supplier = row["المورد"] || '';
+        const prefix = row["الاختصار"];
 
-        const baseCode = colorCodes[colorName] || 'OT';
+        const baseCode = prefix || colorCodes[colorName] || 'OT';
         
         if (colorCounters[colorName] === undefined) {
           colorCounters[colorName] = getNextCodeCount(colorName);
