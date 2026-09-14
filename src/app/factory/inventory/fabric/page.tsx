@@ -637,7 +637,7 @@ export default function FabricInventoryPage() {
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
                     <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
                     <div className="flex flex-col items-center leading-none">
-                      <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
+                      <span className="font-black text-[13px] text-black px-1">
                         #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
                       </span>
                       <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
@@ -677,7 +677,7 @@ export default function FabricInventoryPage() {
               <div className="flex justify-between w-full px-1 mb-1 items-center">
                 <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
                 <div className="flex flex-col items-center leading-none">
-                  <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
+                  <span className="font-black text-[13px] text-black px-1">
                     #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
                   </span>
                   <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
