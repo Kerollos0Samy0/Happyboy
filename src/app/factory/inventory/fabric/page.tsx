@@ -639,7 +639,7 @@ export default function FabricInventoryPage() {
                     <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
                   <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                    <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
+                    <Barcode value={roll.code} width={1.2} height={18} fontSize={14} margin={0} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
@@ -674,7 +674,7 @@ export default function FabricInventoryPage() {
                 <span className="font-black text-[11px] leading-tight text-black">{roll.amount} {roll.unit}</span>
               </div>
               <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                <Barcode value={roll.code} width={1.4} height={25} fontSize={10} margin={0} displayValue={true} background="#ffffff" />
+                <Barcode value={roll.code} width={1.2} height={18} fontSize={14} margin={0} displayValue={true} background="#ffffff" />
               </div>
             </div>
           ))}
