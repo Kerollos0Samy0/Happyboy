@@ -5,7 +5,7 @@ import {
   Package, Scissors, Printer, Pocket, Stitch, Shirt, CheckCircle,
   TrendingUp, Clock, Play, Settings, Plus, ShoppingCart, Layers,
   Wand2, Copy, AlignVerticalSpaceAround, Archive, Store, Wind,
-  Microscope, ScanBarcode, ArrowRight
+  Microscope, ScanBarcode, ArrowRight, Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
