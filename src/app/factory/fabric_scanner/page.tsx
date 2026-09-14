@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../lib/firebase";
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
+import CameraScanner from '@/components/CameraScanner';
 
 export default function FabricScannerPage() {
   const router = useRouter();
@@ -40,12 +41,18 @@ export default function FabricScannerPage() {
     orderInputRef.current?.focus();
   }, []);
 
-  const handleOrderScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (!orderQuery.trim()) return;
-      
-      setLoadingOrder(true);
+  const processOrderScan = async (queryStr: string) => {
+    if (!queryStr.trim()) return;
+    
+    setOrderQuery(queryStr);
+    setLoadingOrder(true);
+    setOrderError("");
+    setActiveOrder(null);
+    setExpectedRolls([]);
+    setVerifiedRolls([]);
+
+    try {
+      let rawId = queryStr.trim();
       setOrderError("");
       setActiveOrder(null);
       setExpectedRolls([]);
@@ -141,22 +148,26 @@ export default function FabricScannerPage() {
         }
       } catch (err) {
         setOrderError("حدث خطأ أثناء البحث.");
-      } finally {
-        setLoadingOrder(false);
-      }
+    } finally {
+      setLoadingOrder(false);
     }
   };
 
-  const handleRollScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleOrderScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!rollQuery.trim() || !activeOrder) return;
+      await processOrderScan(orderQuery);
+    }
+  };
 
-      setLoadingRoll(true);
-      setRollError("");
+  const processRollScan = async (queryStr: string) => {
+    if (!queryStr.trim() || !activeOrder) return;
 
-      try {
-        let rawId = rollQuery.trim();
+    setLoadingRoll(true);
+    setRollError("");
+
+    try {
+      let rawId = queryStr.trim();
         const arabicMap: Record<string, string> = {
           'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
           'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
@@ -215,12 +226,17 @@ export default function FabricScannerPage() {
         }
       } catch (err) {
         setRollError("حدث خطأ أثناء فحص التوب.");
-      } finally {
-        setRollQuery("");
-        setLoadingRoll(false);
-        // Keep focus on roll scanner
-        setTimeout(() => rollInputRef.current?.focus(), 100);
-      }
+    } finally {
+      setRollQuery("");
+      setLoadingRoll(false);
+      setTimeout(() => rollInputRef.current?.focus(), 100);
+    }
+  };
+
+  const handleRollScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      await processRollScan(rollQuery);
     }
   };
 
@@ -261,54 +277,58 @@ export default function FabricScannerPage() {
     }
   };
 
+  const processReturnRollScan = async (queryStr: string) => {
+    if (!queryStr.trim() || loadingRoll) return;
+
+    setLoadingRoll(true);
+    setReturnError("");
+
+    try {
+      let correctedQuery = queryStr;
+      if (queryStr.match(/[ا-ي]/)) {
+        const arabicMap: Record<string, string> = {
+          'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+          'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+          'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+          'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+          'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+          '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+        };
+        correctedQuery = Array.from(queryStr).map(char => arabicMap[char] || char).join('');
+      }
+      const cleanCode = correctedQuery.trim().toUpperCase();
+
+      if (returnRolls.some(r => r.code === cleanCode)) {
+        setReturnError(`تم مسح التوب ${cleanCode} بالفعل!`);
+        setReturnRollQuery("");
+        return;
+      }
+
+      const snap = await getDocs(query(collection(db, "factory_fabric_rolls"), where("code", "==", cleanCode)));
+      if (snap.empty) {
+         setReturnError(`لا يوجد توب بهذا الكود (${cleanCode})`);
+      } else {
+         const rollDoc = snap.docs[0];
+         const rollData = rollDoc.data();
+         if (!rollData.status || rollData.status === 'in_stock') {
+            setReturnError(`التوب ${cleanCode} موجود بالفعل في المخزن كـ متاح!`);
+         } else {
+            setReturnRolls(prev => [...prev, { id: rollDoc.id, ...rollData }]);
+         }
+      }
+    } catch(err) {
+       setReturnError("حدث خطأ أثناء البحث عن التوب.");
+    } finally {
+       setLoadingRoll(false);
+       setReturnRollQuery("");
+       setTimeout(() => returnInputRef.current?.focus(), 100);
+    }
+  };
+
   const handleReturnRollScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!returnRollQuery.trim() || loadingRoll) return;
-
-      setLoadingRoll(true);
-      setReturnError("");
-
-      try {
-        let correctedQuery = returnRollQuery;
-        if (returnRollQuery.match(/[ا-ي]/)) {
-          const arabicMap: Record<string, string> = {
-            'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
-            'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
-            'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
-            'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
-            'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
-            '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
-          };
-          correctedQuery = Array.from(returnRollQuery).map(char => arabicMap[char] || char).join('');
-        }
-        const cleanCode = correctedQuery.trim().toUpperCase();
-
-        if (returnRolls.some(r => r.code === cleanCode)) {
-          setReturnError(`تم مسح التوب ${cleanCode} بالفعل!`);
-          setReturnRollQuery("");
-          return;
-        }
-
-        const snap = await getDocs(query(collection(db, "factory_fabric_rolls"), where("code", "==", cleanCode)));
-        if (snap.empty) {
-           setReturnError(`لا يوجد توب بهذا الكود (${cleanCode})`);
-        } else {
-           const rollDoc = snap.docs[0];
-           const rollData = rollDoc.data();
-           if (!rollData.status || rollData.status === 'in_stock') {
-              setReturnError(`التوب ${cleanCode} موجود بالفعل في المخزن كـ متاح!`);
-           } else {
-              setReturnRolls(prev => [...prev, { id: rollDoc.id, ...rollData }]);
-           }
-        }
-      } catch(err) {
-         setReturnError("حدث خطأ أثناء البحث عن التوب.");
-      } finally {
-         setLoadingRoll(false);
-         setReturnRollQuery("");
-         setTimeout(() => returnInputRef.current?.focus(), 100);
-      }
+      await processReturnRollScan(returnRollQuery);
     }
   };
 
@@ -399,17 +419,22 @@ export default function FabricScannerPage() {
         {/* Step 1: Model Scan */}
         <div className={`card p-6 shadow-sm rounded-xl border-t-4 ${activeOrder ? 'border-t-green-500 bg-green-50' : 'border-t-primary bg-white'}`}>
           <h2 className="text-lg font-bold mb-4">1. إسكان الموديل أو أمر الشغل</h2>
-          <input 
-            ref={orderInputRef}
-            type="text" 
-            className="input w-full p-4 text-center text-xl font-bold rounded-lg border-2" 
-            placeholder="مرر باركود الموديل أو اكتب رقم الموديل واضغط Enter" 
-            value={orderQuery}
-            onChange={e => setOrderQuery(e.target.value)}
-            onKeyDown={handleOrderScan}
-            disabled={loadingOrder}
-            autoFocus
-          />
+          <div className="flex gap-2">
+            <input 
+              ref={orderInputRef}
+              type="text" 
+              className="input flex-1 p-4 text-center text-xl font-bold rounded-lg border-2" 
+              placeholder="مرر باركود الموديل أو اكتب رقم الموديل واضغط Enter" 
+              value={orderQuery}
+              onChange={e => setOrderQuery(e.target.value)}
+              onKeyDown={handleOrderScan}
+              disabled={loadingOrder}
+              autoFocus
+            />
+            <div className="w-1/4">
+              <CameraScanner onScan={(txt) => processOrderScan(txt)} />
+            </div>
+          </div>
           {loadingOrder && <p className="text-blue-500 mt-2 font-bold">جاري البحث...</p>}
           {orderError && <p className="text-red-500 mt-2 font-bold">{orderError}</p>}
           
@@ -436,16 +461,21 @@ export default function FabricScannerPage() {
         {activeOrder && (
           <div className="card p-6 bg-white shadow-sm rounded-xl border-t-4 border-t-blue-500">
             <h2 className="text-lg font-bold mb-4">2. إسكان أتواب القماش لخصمها</h2>
-            <input 
-              ref={rollInputRef}
-              type="text" 
-              className="input w-full p-4 text-center text-xl font-bold rounded-lg border-2 border-blue-300 focus:border-blue-600 bg-blue-50" 
-              placeholder="مرر باركود التوب لخصمه فوراً..." 
-              value={rollQuery}
-              onChange={e => setRollQuery(e.target.value)}
-              onKeyDown={handleRollScan}
-              disabled={loadingRoll}
-            />
+            <div className="flex gap-2">
+              <input 
+                ref={rollInputRef}
+                type="text" 
+                className="input flex-1 p-4 text-center text-xl font-bold rounded-lg border-2 border-blue-300 focus:border-blue-600 bg-blue-50" 
+                placeholder="مرر باركود التوب لخصمه فوراً..." 
+                value={rollQuery}
+                onChange={e => setRollQuery(e.target.value)}
+                onKeyDown={handleRollScan}
+                disabled={loadingRoll}
+              />
+              <div className="w-1/4">
+                <CameraScanner onScan={(txt) => processRollScan(txt)} />
+              </div>
+            </div>
             {loadingRoll && <p className="text-blue-500 mt-2 font-bold">جاري الصرف...</p>}
             {rollError && <p className="text-red-500 mt-2 font-bold">{rollError}</p>}
             
@@ -514,17 +544,22 @@ export default function FabricScannerPage() {
         <div className="grid grid-cols-1 gap-6">
           <div className="card p-6 shadow-sm rounded-xl border-t-4 border-t-orange-500 bg-white">
             <h2 className="text-lg font-bold mb-4">مرتجع أتواب إلى المخزن</h2>
-            <input 
-              ref={returnInputRef}
-              type="text" 
-              className="input w-full p-4 text-center text-xl font-bold rounded-lg border-2 border-orange-200 focus:border-orange-500" 
-              placeholder="مرر باركود التوب المراد إرجاعه واضغط Enter" 
-              value={returnRollQuery}
-              onChange={e => setReturnRollQuery(e.target.value)}
-              onKeyDown={handleReturnRollScan}
-              disabled={loadingRoll}
-              autoFocus
-            />
+            <div className="flex gap-2">
+              <input 
+                ref={returnInputRef}
+                type="text" 
+                className="input flex-1 p-4 text-center text-xl font-bold rounded-lg border-2 border-orange-200 focus:border-orange-500" 
+                placeholder="مرر باركود التوب المراد إرجاعه واضغط Enter" 
+                value={returnRollQuery}
+                onChange={e => setReturnRollQuery(e.target.value)}
+                onKeyDown={handleReturnRollScan}
+                disabled={loadingRoll}
+                autoFocus
+              />
+              <div className="w-1/4">
+                <CameraScanner onScan={(txt) => processReturnRollScan(txt)} />
+              </div>
+            </div>
             {loadingRoll && <p className="text-blue-500 mt-2 font-bold">جاري البحث...</p>}
             {returnError && <p className="text-red-500 mt-2 font-bold">{returnError}</p>}
 

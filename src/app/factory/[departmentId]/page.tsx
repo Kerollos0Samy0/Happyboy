@@ -6,7 +6,7 @@ import { factoryDepartments } from "../../../lib/departments";
 import { db } from "../../../lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
 import { CheckCircle, Search, AlertCircle, ArrowLeft, ArrowRight, Printer, Check, Camera } from "lucide-react";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import CameraScanner from "@/components/CameraScanner";
 
 export default function DepartmentDashboardPage() {
   const params = useParams();
@@ -67,36 +67,6 @@ export default function DepartmentDashboardPage() {
   useEffect(() => {
     fetchPendingOrders();
   }, [departmentId]);
-
-  useEffect(() => {
-    let scanner: Html5QrcodeScanner | null = null;
-    if (isScannerOpen) {
-      scanner = new Html5QrcodeScanner(
-        "dept-reader",
-        { 
-          qrbox: { width: 250, height: 250 }, 
-          fps: 5,
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-        }, 
-        false
-      );
-      
-      scanner.render(
-        (text: string) => {
-          setOrderQuery(text);
-          setIsScannerOpen(false);
-          if (scanner) scanner.clear();
-          processScan(text);
-        }, 
-        (err: any) => { /* ignore */ }
-      );
-    }
-    return () => {
-      if (scanner) {
-        scanner.clear().catch((e: any) => console.error(e));
-      }
-    };
-  }, [isScannerOpen]);
 
   useEffect(() => {
     const dept = factoryDepartments.find((d) => d.id === departmentId);
@@ -377,18 +347,9 @@ export default function DepartmentDashboardPage() {
             )}
           </div>
           
-          <button 
-            onClick={() => setIsScannerOpen(!isScannerOpen)}
-            className="mt-6 flex items-center justify-center gap-2 w-full max-w-md bg-gray-800 text-white p-3 rounded-xl font-bold hover:bg-gray-900 transition shadow-lg"
-          >
-            <Camera size={20} /> {isScannerOpen ? "أغلق الكاميرا" : "افتح كاميرا الموبايل للاسكان"}
-          </button>
-          
-          {isScannerOpen && (
-            <div className="mt-4 w-full max-w-md border-2 rounded-xl overflow-hidden shadow-sm bg-gray-50">
-              <div id="dept-reader" width="100%"></div>
-            </div>
-          )}
+          <div className="mt-4 w-full max-w-md">
+            <CameraScanner onScan={(txt) => { setOrderQuery(txt); processScan(txt); }} />
+          </div>
           {orderError && (
             <div className="mt-4 flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg w-full max-w-md">
               <AlertCircle size={20} />
