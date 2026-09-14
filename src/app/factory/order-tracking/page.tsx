@@ -202,6 +202,18 @@ export default function OrderTrackingPage() {
             </div>
           </div>
 
+          {activeOrder.routedTo && (
+            <div className={`p-4 rounded-2xl flex items-center gap-3 text-lg font-bold shadow-sm ${activeOrder.routedTo === 'fabric_order' ? 'bg-blue-50 text-blue-800 border-2 border-blue-200' : 'bg-purple-50 text-purple-800 border-2 border-purple-200'}`}>
+              <History size={28} />
+              <span>
+                الحالة الحالية: تم توجيه هذا الموديل بواسطة قسم العينات إلى: 
+                <span className="text-2xl mr-2 underline decoration-2 underline-offset-4">
+                  {activeOrder.routedTo === "fabric_order" ? "أوردر القماش" : "مخزن القماش"}
+                </span>
+              </span>
+            </div>
+          )}
+
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2 border-b pb-4">
               <History className="text-blue-500" /> مسار الموديل في الأقسام

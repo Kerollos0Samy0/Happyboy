@@ -236,6 +236,34 @@ export default function DepartmentDashboardPage() {
     }
   };
 
+  const routeOrder = async (targetDept: string) => {
+    if (!activeOrder) return;
+    setIsUpdating(true);
+    try {
+      const docRef = doc(db, "factory_production_orders", activeOrder.id);
+      
+      const updateData = {
+        routedTo: targetDept,
+        lastRoutedAt: new Date().toISOString()
+      };
+
+      await updateDoc(docRef, updateData);
+      
+      setActiveOrder({
+        ...activeOrder,
+        ...updateData
+      });
+      
+      alert(targetDept === "fabric_order" ? "تم التوجيه إلى أوردر القماش بنجاح!" : "تم التوجيه إلى مخزن القماش بنجاح!");
+      
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء التوجيه.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const savePrintingLog = async () => {
     if (!activeOrder) return;
     setIsSavingPrinting(true);
@@ -331,6 +359,18 @@ export default function DepartmentDashboardPage() {
             <div className="mt-4 flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg w-full max-w-md">
               <AlertCircle size={20} />
               <span className="font-bold">{orderError}</span>
+            </div>
+          )}
+
+          {department.id === "samples" && (
+            <div className="mt-10 pt-8 border-t border-gray-100 w-full max-w-md flex flex-col items-center">
+              <h3 className="text-gray-600 font-bold mb-4">أو يمكنك إنشاء أمر جديد:</h3>
+              <button 
+                onClick={() => router.push("/factory/production/new")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-black text-lg transition shadow-md flex items-center justify-center gap-2"
+              >
+                <span className="text-2xl">+</span> إنشاء أمر شغل جديد
+              </button>
             </div>
           )}
         </div>
@@ -498,65 +538,95 @@ export default function DepartmentDashboardPage() {
 
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
-              
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-bold text-gray-600">إجمالي المُستلم:</span>
-                  <span className="text-xl font-black text-blue-600">{currentProgress.receivedQty}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-bold text-gray-600">إجمالي المُسلم:</span>
-                  <span className="text-xl font-black text-green-600">{currentProgress.deliveredQty}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-bold text-gray-600">رصيد بالقسم:</span>
-                  <span className="text-xl font-black text-orange-500">{currentProgress.receivedQty - currentProgress.deliveredQty}</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 border rounded-xl bg-blue-50/50">
-                  <label className="block text-sm font-bold text-blue-800 mb-2">استلام دفعة جديدة</label>
-                  <div className="flex flex-col gap-3">
-                    <input 
-                      type="number" 
-                      value={receiveQty} 
-                      onChange={(e) => setReceiveQty(e.target.value ? Number(e.target.value) : "")}
-                      className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg"
-                      placeholder="الكمية"
-                    />
+              {department.id === "samples" ? (
+                <>
+                  <h3 className="text-xl font-bold mb-6 border-b pb-2">توجيه أمر الشغل</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 mb-4">بعد الانتهاء من العينة وكتابة تفاصيل الموديل، اختر مسار الموديل التالي:</p>
                     <button 
-                      onClick={() => updateProgress('receive')}
-                      disabled={isUpdating || !receiveQty}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                      onClick={() => routeOrder("fabric_order")}
+                      disabled={isUpdating}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition disabled:opacity-50 text-lg shadow-sm"
                     >
-                      استلام
+                      طلب قماش (أوردر قماش)
                     </button>
-                  </div>
-                </div>
-
-                <div className="p-4 border rounded-xl bg-green-50/50">
-                  <label className="block text-sm font-bold text-green-800 mb-2">تسليم دفعة للقسم التالي</label>
-                  <div className="flex flex-col gap-3">
-                    <input 
-                      type="number" 
-                      value={deliverQty} 
-                      onChange={(e) => setDeliverQty(e.target.value ? Number(e.target.value) : "")}
-                      className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold text-lg"
-                      placeholder="الكمية"
-                    />
                     <button 
-                      onClick={() => updateProgress('deliver')}
-                      disabled={isUpdating || !deliverQty}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                      onClick={() => routeOrder("fabric_warehouse")}
+                      disabled={isUpdating}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-xl font-bold transition disabled:opacity-50 text-lg shadow-sm"
                     >
-                      تسليم
+                      إرسال لمخزن القماش (متاح)
                     </button>
+                    
+                    {activeOrder.routedTo && (
+                      <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 text-center font-bold text-sm">
+                        تم توجيه هذا الأمر مسبقاً إلى: {activeOrder.routedTo === "fabric_order" ? "أوردر قماش" : "مخزن القماش"}
+                      </div>
+                    )}
                   </div>
-                </div>
-              </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
+                  
+                  <div className="space-y-4 mb-8">
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="font-bold text-gray-600">إجمالي المُستلم:</span>
+                      <span className="text-xl font-black text-blue-600">{currentProgress.receivedQty}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="font-bold text-gray-600">إجمالي المُسلم:</span>
+                      <span className="text-xl font-black text-green-600">{currentProgress.deliveredQty}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="font-bold text-gray-600">رصيد بالقسم:</span>
+                      <span className="text-xl font-black text-orange-500">{currentProgress.receivedQty - currentProgress.deliveredQty}</span>
+                    </div>
+                  </div>
 
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-xl bg-blue-50/50">
+                      <label className="block text-sm font-bold text-blue-800 mb-2">استلام دفعة جديدة</label>
+                      <div className="flex flex-col gap-3">
+                        <input 
+                          type="number" 
+                          value={receiveQty} 
+                          onChange={(e) => setReceiveQty(e.target.value ? Number(e.target.value) : "")}
+                          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg"
+                          placeholder="الكمية"
+                        />
+                        <button 
+                          onClick={() => updateProgress('receive')}
+                          disabled={isUpdating || !receiveQty}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                        >
+                          استلام
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border rounded-xl bg-green-50/50">
+                      <label className="block text-sm font-bold text-green-800 mb-2">تسليم دفعة للقسم التالي</label>
+                      <div className="flex flex-col gap-3">
+                        <input 
+                          type="number" 
+                          value={deliverQty} 
+                          onChange={(e) => setDeliverQty(e.target.value ? Number(e.target.value) : "")}
+                          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold text-lg"
+                          placeholder="الكمية"
+                        />
+                        <button 
+                          onClick={() => updateProgress('deliver')}
+                          disabled={isUpdating || !deliverQty}
+                          className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                        >
+                          تسليم
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <button 
