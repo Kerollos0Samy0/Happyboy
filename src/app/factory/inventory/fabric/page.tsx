@@ -640,7 +640,7 @@ export default function FabricInventoryPage() {
                       <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
                         #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
                       </span>
-                      <span className="font-bold text-[8px] text-gray-700 mt-[1px]">{roll.type || 'قماش'}</span>
+                      <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
                     </div>
                     <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
@@ -680,7 +680,7 @@ export default function FabricInventoryPage() {
                   <span className="font-black text-[13px] text-black bg-gray-100 px-2 rounded-full border border-gray-300">
                     #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
                   </span>
-                  <span className="font-bold text-[8px] text-gray-700 mt-[1px]">{roll.type || 'قماش'}</span>
+                  <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
                 </div>
                 <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
               </div>
