@@ -37,6 +37,36 @@ export default function DepartmentDashboardPage() {
   const [isSavingPrinting, setIsSavingPrinting] = useState(false);
 
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+
+  const fetchPendingOrders = async () => {
+    if (departmentId !== "fabric_order" && departmentId !== "fabric_warehouse") return;
+    setLoadingPending(true);
+    try {
+      const q = query(
+        collection(db, "factory_production_orders"), 
+        where("routedTo", "==", departmentId)
+      );
+      const snap = await getDocs(q);
+      const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort in memory by lastRoutedAt desc
+      orders.sort((a: any, b: any) => {
+        const dA = a.lastRoutedAt ? new Date(a.lastRoutedAt).getTime() : 0;
+        const dB = b.lastRoutedAt ? new Date(b.lastRoutedAt).getTime() : 0;
+        return dB - dA;
+      });
+      setPendingOrders(orders);
+    } catch (e) {
+      console.error("Error fetching pending orders", e);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingOrders();
+  }, [departmentId]);
 
   useEffect(() => {
     let scanner: Html5QrcodeScanner | null = null;
@@ -371,6 +401,59 @@ export default function DepartmentDashboardPage() {
               >
                 <span className="text-2xl">+</span> إنشاء أمر شغل جديد
               </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!activeOrder && (department.id === "fabric_order" || department.id === "fabric_warehouse") && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-orange-500 mt-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <AlertCircle className="text-orange-500" />
+            طلبات قماش معلقة (موجهة من العينات)
+          </h2>
+          
+          {loadingPending ? (
+            <div className="text-center p-6 text-gray-500">جاري تحميل الطلبات...</div>
+          ) : pendingOrders.length === 0 ? (
+            <div className="text-center p-6 bg-gray-50 rounded-xl text-gray-500 border border-dashed border-gray-300">
+              لا توجد طلبات قماش معلقة في الوقت الحالي.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-right">
+                <thead>
+                  <tr className="bg-orange-50 text-orange-800 rounded-t-lg">
+                    <th className="p-3 rounded-tr-lg">كود الموديل</th>
+                    <th className="p-3">اسم الموديل</th>
+                    <th className="p-3">نوع القماش</th>
+                    <th className="p-3">الكمية المستهدفة</th>
+                    <th className="p-3 rounded-tl-lg">الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingOrders.map(order => (
+                    <tr key={order.id} className="border-b border-gray-100 hover:bg-orange-50/50 transition">
+                      <td className="p-3 font-bold text-blue-600" dir="ltr">{order.shortId || order.id.slice(-6).toUpperCase()}</td>
+                      <td className="p-3 font-bold">{order.modelName}</td>
+                      <td className="p-3">{order.fabricType || 'غير محدد'}</td>
+                      <td className="p-3">
+                        {order.colorPairs 
+                          ? order.colorPairs.reduce((sum: number, pair: any) => sum + (Number(pair.quantity) || 0), 0)
+                          : order.totalQuantity} طقم
+                      </td>
+                      <td className="p-3">
+                        <button 
+                          onClick={() => processScan(order.shortId || order.id.slice(-6).toUpperCase())}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition"
+                        >
+                          فتح الأمر للتنفيذ
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
