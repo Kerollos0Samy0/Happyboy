@@ -505,33 +505,40 @@ export default function DepartmentDashboardPage() {
               </div>
               
               {/* Fabric Requirements Section */}
-              {activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0 && (
+              {((activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0) || (departmentId === 'fabric_order' || departmentId === 'fabric_warehouse')) && (
                 <div className="mt-6 border-t pt-6">
                   <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                     🛍️ متطلبات القماش للموديل
                   </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-right bg-white rounded-lg overflow-hidden border">
-                      <thead>
-                        <tr className="bg-orange-50 text-orange-900 border-b">
-                          <th className="p-3 font-bold">اللون</th>
-                          <th className="p-3 font-bold">عدد الأتواب</th>
-                          <th className="p-3 font-bold">الخامة</th>
-                          <th className="p-3 font-bold">المورد</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeOrder.fabricRequirements.map((req: any, idx: number) => (
-                          <tr key={idx} className="border-b last:border-0 hover:bg-gray-50">
-                            <td className="p-3">{req.color || '-'}</td>
-                            <td className="p-3 font-bold text-blue-600">{req.count || '-'}</td>
-                            <td className="p-3">{req.material || '-'}</td>
-                            <td className="p-3">{req.supplier || '-'}</td>
+                  {activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-right bg-white rounded-lg overflow-hidden border">
+                        <thead>
+                          <tr className="bg-orange-50 text-orange-900 border-b">
+                            <th className="p-3 font-bold">اللون</th>
+                            <th className="p-3 font-bold">عدد الأتواب</th>
+                            <th className="p-3 font-bold">الخامة</th>
+                            <th className="p-3 font-bold">المورد</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {activeOrder.fabricRequirements.map((req: any, idx: number) => (
+                            <tr key={idx} className="border-b last:border-0 hover:bg-gray-50">
+                              <td className="p-3">{req.color || '-'}</td>
+                              <td className="p-3 font-bold text-blue-600">{req.count || '-'}</td>
+                              <td className="p-3">{req.material || '-'}</td>
+                              <td className="p-3">{req.supplier || '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
+                      لا توجد متطلبات قماش مسجلة لهذا الموديل. <br/>
+                      <span className="text-sm">يرجى تسجيل متطلبات القماش من (قسم العينات) بالضغط على تعديل أمر الشغل.</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
