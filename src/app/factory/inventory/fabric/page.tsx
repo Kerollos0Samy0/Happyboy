@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
-import { Search, PlusCircle, Scissors, Trash2, Printer } from 'lucide-react';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, onSnapshot, writeBatch } from 'firebase/firestore';
+import { Search, PlusCircle, Scissors, Trash2, Printer, Upload, Download } from 'lucide-react';
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from 'react-barcode';
+import * as XLSX from 'xlsx';
+
 type FabricRoll = {
   id: string;
   code: string;
@@ -142,6 +144,82 @@ export default function FabricInventoryPage() {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "اللون": "",
+        "نوع القماش": "",
+        "الكمية (الوزن)": "",
+        "الوحدة (كجم / متر)": "كجم",
+        "المورد": ""
+      }
+    ]);
+    // Auto-adjust columns width
+    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 25 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "أتواب القماش");
+    XLSX.writeFile(wb, "fabric_inventory_template.xlsx");
+  };
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsSaving(true);
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws) as any[];
+
+      if (rows.length === 0) {
+        alert("الشيت فارغ!");
+        setIsSaving(false);
+        return;
+      }
+
+      const batch = writeBatch(db);
+      let count = 0;
+
+      for (const row of rows) {
+        const colorName = row["اللون"] || 'غير محدد';
+        const type = row["نوع القماش"] || '';
+        const amount = Number(row["الكمية (الوزن)"]) || 0;
+        const unit = row["الوحدة (كجم / متر)"] || 'كجم';
+        const supplier = row["المورد"] || '';
+
+        const baseCode = colorCodes[colorName] || 'OT';
+        
+        // Auto-generate code (simplified batch approach: we fetch max for each color, but since we are looping, it's safer to query once or just generate timestamps if querying in a loop is too heavy. Let's just generate a time-based unique code + color prefix for batch imports to prevent collision)
+        const uniqueId = Math.floor(Math.random() * 9000 + 1000); 
+        const rollCode = `${baseCode}-${Date.now().toString().slice(-4)}${uniqueId}`;
+
+        const newDocRef = doc(collection(db, 'factory_fabric_rolls'));
+        batch.set(newDocRef, {
+          code: rollCode,
+          color: colorName,
+          type,
+          amount,
+          unit,
+          supplier,
+          createdAt: serverTimestamp(),
+          status: 'in_stock'
+        });
+        count++;
+      }
+
+      await batch.commit();
+      alert(`تم إضافة ${count} توب بنجاح!`);
+    } catch (err: any) {
+      console.error(err);
+      alert("حدث خطأ أثناء قراءة الملف: " + err.message);
+    } finally {
+      setIsSaving(false);
+      // reset file input
+      e.target.value = '';
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm('هل أنت متأكد من حذف هذا التوب؟')) {
       try {
@@ -212,13 +290,30 @@ export default function FabricInventoryPage() {
           </h1>
           <p className="text-gray-500 mt-2">إدارة أتواب القماش الخام والباركودات الخاصة بها.</p>
         </div>
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition shadow-sm"
-        >
-          <PlusCircle size={20} />
-          {showAddForm ? 'إلغاء' : 'إضافة توب جديد'}
-        </button>
+        <div className="flex gap-3 items-center">
+          <button 
+            onClick={handleDownloadTemplate}
+            title="تحميل شيت إكسيل فارغ لتعبئة بيانات الأتواب"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition shadow-sm border border-gray-300"
+          >
+            <Download size={20} />
+            شيت فاضي
+          </button>
+          
+          <label className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition shadow-sm cursor-pointer">
+            <Upload size={20} />
+            رفع إكسيل
+            <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} className="hidden" />
+          </label>
+
+          <button 
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition shadow-sm"
+          >
+            <PlusCircle size={20} />
+            {showAddForm ? 'إلغاء' : 'إضافة توب جديد'}
+          </button>
+        </div>
       </div>
 
       {showAddForm && (
