@@ -87,18 +87,29 @@ export default function FabricInventoryPage() {
     'برتقالي': 'OR',
     'بينك': 'PK',
     'لبني': 'LB',
-    'نبيتي': 'MR'
+    'نبيتي': 'MR',
+    'جنزاري': 'GE'
   };
 
-  const getNextCodeCount = (colorName: string) => {
+  const getNextCodeCount = (colorName: string, additionalOffset = 0) => {
     const existingColorRolls = rolls.filter(r => r.color === colorName);
-    return existingColorRolls.length + 1;
+    let max = 0;
+    existingColorRolls.forEach(r => {
+      const parts = r.code.split('-');
+      if (parts.length >= 2) {
+        const num = parseInt(parts[1], 10);
+        if (!isNaN(num) && num > max) {
+          max = num;
+        }
+      }
+    });
+    return max + 1 + additionalOffset;
   };
 
   const handleColorChange = (color: string) => {
     const baseCode = colorCodes[color] || 'OT';
     const nextCount = getNextCodeCount(color);
-    setNewRoll({ ...newRoll, color, code: `${baseCode}-${nextCount.toString().padStart(3, '0')}` });
+    setNewRoll({ ...newRoll, color, code: `${baseCode}-${nextCount.toString().padStart(5, '0')}` });
   };
 
   const handleAddRoll = async (e: React.FormEvent) => {
@@ -113,14 +124,15 @@ export default function FabricInventoryPage() {
       let currentCount = getNextCodeCount(newRoll.color);
 
       for (let i = 0; i < rollsCount; i++) {
-        const rollCode = `${baseCode}-${currentCount.toString().padStart(3, '0')}`;
+        const weight = Number(multiAmounts[i]) || 0;
+        const rollCode = `${baseCode}-${currentCount.toString().padStart(5, '0')}-${weight}Kg`;
         const newRef = doc(collection(db, 'factory_fabric_rolls'));
         
         batch.set(newRef, {
           code: rollCode,
           color: newRoll.color,
           type: newRoll.type,
-          amount: Number(multiAmounts[i]) || 0,
+          amount: weight,
           unit: newRoll.unit,
           supplier: newRoll.supplier,
           createdAt: serverTimestamp(),
@@ -179,6 +191,9 @@ export default function FabricInventoryPage() {
 
       const batch = writeBatch(db);
       let count = 0;
+      
+      // Track current counters for colors to increment correctly during batch
+      const colorCounters: Record<string, number> = {};
 
       for (const row of rows) {
         const colorName = row["اللون"] || 'غير محدد';
@@ -189,10 +204,12 @@ export default function FabricInventoryPage() {
 
         const baseCode = colorCodes[colorName] || 'OT';
         
-        // Auto-generate code (simplified batch approach: we fetch max for each color, but since we are looping, it's safer to query once or just generate timestamps if querying in a loop is too heavy. Let's just generate a time-based unique code + color prefix for batch imports to prevent collision)
-        const uniqueId = Math.floor(Math.random() * 9000 + 1000); 
-        const rollCode = `${baseCode}-${Date.now().toString().slice(-4)}${uniqueId}`;
-
+        if (colorCounters[colorName] === undefined) {
+          colorCounters[colorName] = getNextCodeCount(colorName);
+        }
+        
+        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(5, '0')}-${amount}Kg`;
+        
         const newDocRef = doc(collection(db, 'factory_fabric_rolls'));
         batch.set(newDocRef, {
           code: rollCode,
@@ -204,6 +221,8 @@ export default function FabricInventoryPage() {
           createdAt: serverTimestamp(),
           status: 'in_stock'
         });
+        
+        colorCounters[colorName]++;
         count++;
       }
 
