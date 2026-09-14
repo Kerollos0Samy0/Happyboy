@@ -539,7 +539,7 @@ export default function FabricInventoryPage() {
                   <Trash2 size={16} /> حذف {selectedRolls.length}
                 </button>
                 <button 
-                  onClick={() => setPrintRolls(rolls.filter(r => selectedRolls.includes(r.id)))}
+                  onClick={() => setPrintRolls(rolls.filter(r => selectedRolls.includes(r.id)).sort((a,b) => a.code.localeCompare(b.code)))}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition text-sm shadow"
                 >
                   <Printer size={16} /> طباعة {selectedRolls.length}
