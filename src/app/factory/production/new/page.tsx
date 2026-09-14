@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, updateDoc, doc, limit } from 'firebase/firestore';
-import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus, Minus } from 'lucide-react';
+import { Image as ImageIcon, CheckCircle, AlertCircle, ArrowRight, Printer, Plus, Minus, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
@@ -503,6 +503,20 @@ export default function NewProductionOrderPage() {
                 required={!imageBase64}
               />
             </div>
+            
+            <div className="flex gap-2 mt-4">
+              <label className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg cursor-pointer font-bold transition shadow flex items-center justify-center gap-2">
+                <Camera size={20} />
+                تصوير بالكاميرا
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageChange} />
+              </label>
+              <label className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-center py-3 rounded-lg cursor-pointer font-bold transition shadow flex items-center justify-center gap-2">
+                <ImageIcon size={20} />
+                رفع صورة
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              </label>
+            </div>
+
             <div className="mt-4 p-3 bg-blue-50 rounded text-sm text-blue-800 border border-blue-100">
               💡 <strong>تلميح:</strong> بعد الضغط على إصدار، سيتم نقلك لشاشة (A4) جاهزة للطباعة فوراً لتحتوي على هذه الصورة والباركود.
             </div>
