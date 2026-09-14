@@ -503,6 +503,37 @@ export default function DepartmentDashboardPage() {
                   <div className="col-span-full text-center text-yellow-600 py-2">لا توجد ملاحظات خاصة مسجلة لهذا الأمر.</div>
                 )}
               </div>
+              
+              {/* Fabric Requirements Section */}
+              {activeOrder.fabricRequirements && activeOrder.fabricRequirements.length > 0 && (
+                <div className="mt-6 border-t pt-6">
+                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    🛍️ متطلبات القماش للموديل
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-right bg-white rounded-lg overflow-hidden border">
+                      <thead>
+                        <tr className="bg-orange-50 text-orange-900 border-b">
+                          <th className="p-3 font-bold">اللون</th>
+                          <th className="p-3 font-bold">عدد الأتواب</th>
+                          <th className="p-3 font-bold">الخامة</th>
+                          <th className="p-3 font-bold">المورد</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeOrder.fabricRequirements.map((req: any, idx: number) => (
+                          <tr key={idx} className="border-b last:border-0 hover:bg-gray-50">
+                            <td className="p-3">{req.color || '-'}</td>
+                            <td className="p-3 font-bold text-blue-600">{req.count || '-'}</td>
+                            <td className="p-3">{req.material || '-'}</td>
+                            <td className="p-3">{req.supplier || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
             
             {departmentId === "printing_laser" && (
