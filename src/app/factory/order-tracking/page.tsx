@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
-import { Search, AlertCircle, ArrowRight, History, Package } from "lucide-react";
+import { Search, AlertCircle, ArrowRight, History, Package, Camera } from "lucide-react";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { factoryDepartments } from "../../../lib/departments";
 
 export default function OrderTrackingPage() {
@@ -13,7 +14,38 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeOrder, setActiveOrder] = useState<any>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let scanner: Html5QrcodeScanner | null = null;
+    if (isScannerOpen) {
+      scanner = new Html5QrcodeScanner(
+        "tracking-reader",
+        { 
+          qrbox: { width: 250, height: 250 }, 
+          fps: 5,
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        }, 
+        false
+      );
+      
+      scanner.render(
+        (text: string) => {
+          setOrderQuery(text);
+          setIsScannerOpen(false);
+          if (scanner) scanner.clear();
+          processScan(text);
+        }, 
+        (err: any) => { /* ignore */ }
+      );
+    }
+    return () => {
+      if (scanner) {
+        scanner.clear().catch((e: any) => console.error(e));
+      }
+    };
+  }, [isScannerOpen]);
 
   useEffect(() => {
     if (inputRef.current && !activeOrder) {
@@ -21,70 +53,74 @@ export default function OrderTrackingPage() {
     }
   }, [activeOrder]);
 
+  const processScan = async (queryText: string) => {
+    if (!queryText.trim()) return;
+
+    setLoading(true);
+    setError("");
+    setActiveOrder(null);
+    
+    let rawId = queryText.trim();
+    let parsedId = rawId;
+
+    try {
+      if (rawId.includes('http')) {
+        const url = new URL(rawId);
+        const parts = url.pathname.split('/');
+        parsedId = parts[parts.length - 1];
+      }
+    } catch(e) {}
+
+    const arabicMap: Record<string, string> = {
+      'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+      'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
+      'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+      'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+      'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
+      '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
+    };
+    
+    let finalId = "";
+    for (let i = 0; i < parsedId.length; i++) {
+      finalId += arabicMap[parsedId[i]] || parsedId[i];
+    }
+    
+    try {
+      let orderDoc: any = null;
+      let orderDocId = finalId;
+
+      const directDocRef = doc(db, "factory_production_orders", finalId);
+      const directDocSnap = await getDoc(directDocRef);
+      
+      if (directDocSnap.exists()) {
+        orderDoc = directDocSnap.data();
+      } else {
+        const q = query(collection(db, "factory_production_orders"), where("shortId", "==", finalId.toUpperCase()));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          orderDoc = querySnapshot.docs[0].data();
+          orderDocId = querySnapshot.docs[0].id;
+        }
+      }
+
+      if (!orderDoc) {
+        setError("لم يتم العثور على أمر الشغل!");
+      } else {
+        setActiveOrder({ id: orderDocId, ...orderDoc });
+      }
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ أثناء البحث.");
+    } finally {
+      setLoading(false);
+      setOrderQuery("");
+    }
+  };
+
   const handleScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!orderQuery.trim()) return;
-
-      setLoading(true);
-      setError("");
-      setActiveOrder(null);
-      
-      let rawId = orderQuery.trim();
-      let parsedId = rawId;
-
-      try {
-        if (rawId.includes('http')) {
-          const url = new URL(rawId);
-          const parts = url.pathname.split('/');
-          parsedId = parts[parts.length - 1];
-        }
-      } catch(e) {}
-
-      const arabicMap: Record<string, string> = {
-        'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
-        'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': "'",
-        'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
-        'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P',
-        'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', ':': ':', '"': '"',
-        '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', ',': '<', '.': '>', '؟': '?'
-      };
-      
-      let finalId = "";
-      for (let i = 0; i < parsedId.length; i++) {
-        finalId += arabicMap[parsedId[i]] || parsedId[i];
-      }
-      
-      try {
-        let orderDoc: any = null;
-        let orderDocId = finalId;
-
-        const directDocRef = doc(db, "factory_production_orders", finalId);
-        const directDocSnap = await getDoc(directDocRef);
-        
-        if (directDocSnap.exists()) {
-          orderDoc = directDocSnap.data();
-        } else {
-          const q = query(collection(db, "factory_production_orders"), where("shortId", "==", finalId.toUpperCase()));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            orderDoc = querySnapshot.docs[0].data();
-            orderDocId = querySnapshot.docs[0].id;
-          }
-        }
-
-        if (!orderDoc) {
-          setError("لم يتم العثور على أمر الشغل!");
-        } else {
-          setActiveOrder({ id: orderDocId, ...orderDoc });
-        }
-      } catch (err) {
-        console.error(err);
-        setError("حدث خطأ أثناء البحث.");
-      } finally {
-        setLoading(false);
-        setOrderQuery("");
-      }
+      await processScan(orderQuery);
     }
   };
 
@@ -129,6 +165,19 @@ export default function OrderTrackingPage() {
               </div>
             )}
           </div>
+
+          <button 
+            onClick={() => setIsScannerOpen(!isScannerOpen)}
+            className="mt-6 flex items-center justify-center gap-2 w-full max-w-lg bg-gray-800 text-white p-4 rounded-2xl font-bold hover:bg-gray-900 transition shadow-lg"
+          >
+            <Camera size={24} /> {isScannerOpen ? "أغلق الكاميرا" : "افتح كاميرا الموبايل للاسكان"}
+          </button>
+          
+          {isScannerOpen && (
+            <div className="mt-4 w-full max-w-lg border-2 rounded-xl overflow-hidden shadow-sm bg-gray-50">
+              <div id="tracking-reader" width="100%"></div>
+            </div>
+          )}
           
           {error && (
             <div className="mt-6 flex items-center gap-2 text-red-600 bg-red-50 px-6 py-4 rounded-xl w-full max-w-lg text-lg">
