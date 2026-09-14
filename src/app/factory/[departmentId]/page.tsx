@@ -472,6 +472,14 @@ export default function DepartmentDashboardPage() {
                   <div className="text-sm font-bold text-gray-400 mb-1">الموديل</div>
                   <h2 className="text-3xl font-black text-gray-900">{activeOrder.modelName}</h2>
                   <div className="text-lg text-blue-600 font-bold mt-1">كود: {activeOrder.shortId || activeOrder.id.slice(-6).toUpperCase()}</div>
+                  {department.id === "samples" && (
+                    <button 
+                      onClick={() => router.push(`/factory/production/edit/${activeOrder.id}`)}
+                      className="mt-4 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-bold transition text-sm flex items-center gap-2 border border-gray-300 shadow-sm"
+                    >
+                      تعديل بيانات أمر الشغل
+                    </button>
+                  )}
                 </div>
                 <div className="text-center bg-gray-50 px-6 py-4 rounded-xl border">
                   <div className="text-sm font-bold text-gray-500 mb-1">الكمية المستهدفة (عدد الأطقم)</div>
