@@ -88,7 +88,8 @@ export default function FabricInventoryPage() {
     'بينك': 'PK',
     'لبني': 'LB',
     'نبيتي': 'MR',
-    'جنزاري': 'GE'
+    'جنزاري': 'GE',
+    'ليموني': 'LE'
   };
 
   const getNextCodeCount = (colorName: string, additionalOffset = 0) => {
