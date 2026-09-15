@@ -49,6 +49,9 @@ service cloud.firestore {
     match /factory_worker_logs/{docId} {
       allow read, write: if true;
     }
+    match /factory_fabric_rolls/{docId} {
+      allow read, write: if true;
+    }
   }
 }
 

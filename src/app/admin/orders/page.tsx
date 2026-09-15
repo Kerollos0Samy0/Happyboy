@@ -95,6 +95,40 @@ const getSizesText = (name: string, modelNumber: string, sizes: string[] | undef
   return '';
 };
 
+const playNotificationSound = () => {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    
+    const ctx = new AudioContextClass();
+    
+    const playTone = (freq: number, startTime: number, duration: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.5, startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+
+    const now = ctx.currentTime;
+    // tin tin
+    playTone(987.77, now, 0.2);
+    playTone(987.77, now + 0.25, 0.2);
+    
+    // - 
+    // tin tin
+    playTone(987.77, now + 0.7, 0.2);
+    playTone(987.77, now + 0.95, 0.2);
+  } catch (e) {
+    console.error("Audio play failed", e);
+  }
+};
 
 export default function LiveOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -236,15 +270,38 @@ export default function LiveOrdersPage() {
   const [isGeneratingAllPDFs, setIsGeneratingAllPDFs] = useState(false);
   const allInvoicesRef = useRef<HTMLDivElement>(null);
 
+  const initialLoadRef = useRef(true);
+
   useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      Notification.requestPermission();
+    }
+
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
+      if (!initialLoadRef.current) {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            const data = change.doc.data();
+            if (typeof window !== "undefined") {
+              playNotificationSound();
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("🔔 طلب جديد!", {
+                  body: `تم استلام طلب جديد من: ${data.customerName || "عميل"}`,
+                });
+              }
+            }
+          }
+        });
+      }
+
       setOrders(
         snapshot.docs
           .map(d => ({ id: d.id, ...d.data() } as Order))
           .filter(o => !o.isDeleted)
       );
       setLoading(false);
+      initialLoadRef.current = false;
     });
   }, []);
 
@@ -624,7 +681,7 @@ export default function LiveOrdersPage() {
       if (!matchesSearch) return false;
     }
 
-    const orderBranch = o.branch || "التجمع";
+    const orderBranch = o.branch || "العبور";
     const orderCountry = o.customerCountry || "مصر";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
@@ -1199,7 +1256,7 @@ export default function LiveOrdersPage() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
                       <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                         <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
-                          {order.branch || "التجمع"}
+                          {order.branch || "العبور"}
                         </span>
                         <span style={{ fontSize: "0.68rem", color: "#047857", fontWeight: "bold", background: "#d1fae5", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
                           {order.customerCountry || "مصر"}
