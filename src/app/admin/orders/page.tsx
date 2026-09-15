@@ -844,6 +844,25 @@ export default function LiveOrdersPage() {
               🔔 الطلبات الحية <span style={{ color: "#A62E2E" }}>Live Orders</span>
             </h2>
             <button 
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  if ("Notification" in window) {
+                    Notification.requestPermission().then(perm => {
+                      if (perm === "granted") {
+                        new Notification("🔔 تجربة!", { body: "الإشعارات شغالة تمام!" });
+                      } else {
+                        alert("الإشعارات مقفولة من المتصفح، يرجى تفعيلها من القفل بجوار الرابط.");
+                      }
+                    });
+                  }
+                  playNotificationSound();
+                }
+              }}
+              style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.75rem", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "0.5rem", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer" }}
+            >
+              تجربة الإشعار والصوت 🔊
+            </button>
+            <button 
               onClick={prepareAllPDFs}
               disabled={isGeneratingAllPDFs}
               style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.75rem", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "0.5rem", fontSize: "0.85rem", fontWeight: "bold", cursor: isGeneratingAllPDFs ? "not-allowed" : "pointer" }}
