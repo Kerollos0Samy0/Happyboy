@@ -513,7 +513,7 @@ export default function FabricInventoryPage() {
               className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
             >
               <option value="">كل الألوان</option>
-              {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+              {Array.from(new Set(rolls.map(r => r.color).filter(Boolean))).sort().map(c => <option key={c} value={c}>{c}</option>)}
             </select>
 
             <select 
