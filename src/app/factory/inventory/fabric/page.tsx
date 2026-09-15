@@ -98,7 +98,7 @@ export default function FabricInventoryPage() {
     existingColorRolls.forEach(r => {
       const parts = r.code.split('-');
       if (parts.length >= 2) {
-        const num = parseInt(parts[1], 10);
+        const num = parseInt(parts[parts.length - 1], 10);
         if (!isNaN(num) && num > max) {
           max = num;
         }
@@ -644,7 +644,7 @@ export default function FabricInventoryPage() {
                     <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
                     <div className="flex flex-col items-center leading-none">
                       <span className="font-black text-[13px] text-black px-1">
-                        #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
+                        #{roll.code.split('-').length > 1 ? parseInt(roll.code.split('-').pop() as string, 10) : ''}
                       </span>
                       <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
                     </div>
@@ -684,7 +684,7 @@ export default function FabricInventoryPage() {
                 <span className="font-black text-[12px] leading-tight text-black">{roll.color}</span>
                 <div className="flex flex-col items-center leading-none">
                   <span className="font-black text-[13px] text-black px-1">
-                    #{roll.code.split('-')[1] ? parseInt(roll.code.split('-')[1], 10) : ''}
+                    #{roll.code.split('-').length > 1 ? parseInt(roll.code.split('-').pop() as string, 10) : ''}
                   </span>
                   <span className="font-bold text-[10px] text-gray-800 mt-[3px]">{roll.type || 'قماش'}</span>
                 </div>
