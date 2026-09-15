@@ -84,7 +84,7 @@ export default function AnalyticsPage() {
 
         const orderTotal = Number(order.total) || 0;
         
-        const branch = order.branch || "العبور";
+        const branch = order.branch || "التجمع";
         if (!branchMap[branch]) {
           branchMap[branch] = { count: 0, totalRevenue: 0 };
         }

@@ -681,7 +681,7 @@ export default function LiveOrdersPage() {
       if (!matchesSearch) return false;
     }
 
-    const orderBranch = o.branch || "العبور";
+    const orderBranch = o.branch || "التجمع";
     const orderCountry = o.customerCountry || "مصر";
     
     if (employeeFilter !== "all" && getDisplayEmployee(o.employeeName) !== employeeFilter) return false;
@@ -1256,7 +1256,7 @@ export default function LiveOrdersPage() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
                       <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                         <span style={{ fontSize: "0.68rem", color: "#3b82f6", fontWeight: "bold", background: "#dbeafe", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
-                          {order.branch || "العبور"}
+                          {order.branch || "التجمع"}
                         </span>
                         <span style={{ fontSize: "0.68rem", color: "#047857", fontWeight: "bold", background: "#d1fae5", padding: "0.1rem 0.4rem", borderRadius: "0.2rem", whiteSpace: "nowrap" }}>
                           {order.customerCountry || "مصر"}
