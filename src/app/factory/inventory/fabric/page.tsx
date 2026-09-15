@@ -157,21 +157,25 @@ export default function FabricInventoryPage() {
     }
   };
 
-  const handleDownloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([
-      {
-        "اللون": "",
-        "نوع القماش": "",
-        "الوزن (كجم)": "",
-        "المورد": "",
-        "الاختصار": ""
-      }
-    ]);
+  const handleDownloadInventory = () => {
+    if (processedRolls.length === 0) {
+      alert("لا يوجد أتواب لتحميلها");
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(processedRolls.map(r => ({
+      "كود التوب": r.code || "",
+      "اللون": r.color || "",
+      "نوع القماش": r.type || "",
+      "الوزن": r.amount || "",
+      "الوحدة": r.unit || "",
+      "المورد": r.supplier || "",
+      "الحالة": r.status === 'in_stock' || !r.status ? "متاح" : (r.status === 'reserved' ? "محجوز" : "منصرف")
+    })));
     // Auto-adjust columns width
-    ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 15 }];
+    ws['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 10 }, { wch: 20 }, { wch: 15 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "أتواب القماش");
-    XLSX.writeFile(wb, "fabric_inventory_template.xlsx");
+    XLSX.writeFile(wb, "fabric_inventory.xlsx");
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -337,12 +341,12 @@ export default function FabricInventoryPage() {
         </div>
         <div className="flex gap-3 items-center">
           <button 
-            onClick={handleDownloadTemplate}
-            title="تحميل شيت إكسيل فارغ لتعبئة بيانات الأتواب"
+            onClick={handleDownloadInventory}
+            title="تحميل شيت إكسيل يحتوي على الأتواب المعروضة حالياً"
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition shadow-sm border border-gray-300"
           >
             <Download size={20} />
-            شيت فاضي
+            شيت المخزن
           </button>
           
           <label className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition shadow-sm cursor-pointer">
