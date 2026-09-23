@@ -770,8 +770,7 @@ export default function InventoryPage() {
   const restoreBarcodes = async () => {
     try {
       alert("جاري استرجاع الباركودات المفقودة...");
-      const res = await fetch('/master_barcodes_dump.json');
-      const masterBarcodes = await res.json();
+      const { masterBarcodes } = await import('./masterBarcodes');
       
       let updated = 0;
       function normalizeColor(str: string) {
