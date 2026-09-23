@@ -393,8 +393,17 @@ export default function InventoryPage() {
 
   // Calculate totals
   const totalModels = products.length;
-  const totalPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-  const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
+  const totalPieces = products.reduce((sum, p) => {
+    if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.max(0, Number(p.quantity) || 0);
+    return sum + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+  }, 0);
+  const totalCapital = products.reduce((sum, p) => {
+    let positiveQty = Math.max(0, Number(p.quantity) || 0);
+    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
+      positiveQty = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+    }
+    return sum + (positiveQty * (Number(p.price) || 0));
+  }, 0);
 
   // Grouping Logic
   const categories = [
@@ -436,26 +445,54 @@ export default function InventoryPage() {
     title: cat.title,
     totalPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + Math.max(0, Number(p.quantity) || 0), 0);
+      return sum + prods.reduce((acc, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + Math.max(0, Number(p.quantity) || 0);
+        return acc + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+      }, 0);
     }, 0),
     totalSeries: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+      return sum + prods.reduce((acc, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes));
+        const posSum = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+        return acc + (posSum / getSizesCount(p.name, p.modelNumber, p.sizes));
+      }, 0);
     }, 0),
     totalShortagesPieces: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
+      return sum + prods.reduce((acc, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + Math.abs(Math.min(0, Number(p.quantity) || 0));
+        return acc + p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
+      }, 0);
     }, 0),
     totalShortagesSeries: cat.sections.reduce((sum, sec) => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      return sum + prods.reduce((acc, p) => acc + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+      return sum + prods.reduce((acc, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes));
+        const negSum = p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
+        return acc + (negSum / getSizesCount(p.name, p.modelNumber, p.sizes));
+      }, 0);
     }, 0),
     sections: cat.sections.map(sec => {
       const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
-      const pieces = prods.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
-      const series = prods.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
-      const shortagesPieces = prods.reduce((sum, p) => sum + Math.abs(Math.min(0, Number(p.quantity) || 0)), 0);
-      const shortagesSeries = prods.reduce((sum, p) => sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes)), 0);
+      const pieces = prods.reduce((sum, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.max(0, Number(p.quantity) || 0);
+        return sum + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+      }, 0);
+      const series = prods.reduce((sum, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes));
+        const posSum = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
+        return sum + (posSum / getSizesCount(p.name, p.modelNumber, p.sizes));
+      }, 0);
+      const shortagesPieces = prods.reduce((sum, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.abs(Math.min(0, Number(p.quantity) || 0));
+        return sum + p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
+      }, 0);
+      const shortagesSeries = prods.reduce((sum, p) => {
+        if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes));
+        const negSum = p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
+        return sum + (negSum / getSizesCount(p.name, p.modelNumber, p.sizes));
+      }, 0);
       return { name: sec.name, pieces, series, shortagesPieces, shortagesSeries };
     })
   }));
@@ -581,8 +618,7 @@ export default function InventoryPage() {
                     <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                       {isEditing && hasColors ? (
                         <div className="flex items-center gap-1">
-                          <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.colors[0].barcode} onChange={e => handleEditColor(0, 'barcode', e.target.value)} />
-                          <button onClick={() => handleDeleteColor(0)} className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded" title="حذف اللون"><Trash2 size={14} /></button>
+                          <input type="text" className="w-full bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200 rounded p-1 text-xs text-center outline-none" value={displayProduct.colors[0].barcode} disabled title="لا يمكن تعديل الباركود" />
                         </div>
                       ) : (
                         hasColors ? displayProduct.colors[0].barcode : "-"
@@ -637,8 +673,7 @@ export default function InventoryPage() {
                         <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                           {isEditing ? (
                             <div className="flex items-center gap-1">
-                              <input type="text" className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center focus:ring-2 focus:ring-blue-500 outline-none" value={color.barcode} onChange={e => handleEditColor(idx, 'barcode', e.target.value)} />
-                              <button onClick={() => handleDeleteColor(idx)} className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded" title="حذف اللون"><Trash2 size={14} /></button>
+                              <input type="text" className="w-full bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200 rounded p-1 text-xs text-center outline-none" value={color.barcode} disabled title="لا يمكن تعديل الباركود" />
                             </div>
                           ) : (
                             color.barcode
@@ -733,7 +768,12 @@ export default function InventoryPage() {
   };
 
   const handlePrintZeroQty = () => {
-    const zeroQtyProducts = products.filter(p => (Number(p.quantity) || 0) < 0);
+    const zeroQtyProducts = products.filter(p => {
+      if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
+        return p.colors.some(c => (Number(c.quantity) || 0) < 0);
+      }
+      return (Number(p.quantity) || 0) < 0;
+    });
     
     const grouped: Record<string, typeof zeroQtyProducts> = {};
     zeroQtyProducts.forEach(p => {
@@ -760,7 +800,9 @@ export default function InventoryPage() {
       let catTotalShortages = 0;
       
       const rowsHtml = grouped[cat].map(p => {
-        const totalReq = Number(p.quantity) < 0 ? Math.abs(Number(p.quantity)) : 0;
+        const totalReq = (p.colors && Array.isArray(p.colors) && p.colors.length > 0) 
+          ? p.colors.reduce((sum, c) => sum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0)
+          : Math.abs(Math.min(0, Number(p.quantity) || 0));
         catTotalShortages += totalReq;
         
         return '<tr><td style="font-weight: bold; text-align: center;">' + p.modelNumber + '</td><td class="model-name">' + (p.name || 'غير محدد') + '</td><td style="text-align: center; font-weight: bold; color: ' + (totalReq > 0 ? '#dc2626' : '#6b7280') + ';">' + (totalReq > 0 ? totalReq : 'صفر') + '</td><td>' + (p.colors && p.colors.length > 0 ? p.colors.filter(c => (Number(c.quantity) || 0) < 0).map(c => {
@@ -852,6 +894,9 @@ export default function InventoryPage() {
           </div>
           
             <div className="flex gap-3">
+              <button onClick={() => { alert("جاري استرجاع الباركودات المفقودة..."); fetch('/api/fix-missing-barcodes').then(r=>r.json()).then(res=>{alert(res.message); window.location.reload();}).catch(e=>alert(e.message)) }} className="px-6 py-3.5 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full font-bold text-base hover:bg-yellow-100 transition-all shadow-sm flex items-center gap-2">
+                <span className="hidden sm:inline">استرجاع الباركودات المفقودة</span>
+              </button>
               <button onClick={handlePrintZeroQty} className="px-6 py-3.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full font-bold text-base hover:bg-blue-100 transition-all shadow-sm flex items-center gap-2">
                 <Printer size={20} />
                 <span className="hidden sm:inline">طباعة النواقص</span>
