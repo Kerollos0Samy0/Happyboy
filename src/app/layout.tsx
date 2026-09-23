@@ -29,9 +29,9 @@ export default function RootLayout({
                 <img src="/ColoredLogo.png" alt="HappyBoy Face Logo" width={280} height={70} style={{ objectFit: 'contain' }} />
               </div>
             </div>
-            <div style={{ width: '100%', height: '5px', backgroundColor: '#14b8a6' }}></div>
+            <div style={{ width: '100%', height: '5px', backgroundColor: '#0095A5' }}></div>
             <div style={{ width: '100%', height: '2px', backgroundColor: 'white' }}></div>
-            <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--primary)' }}></div>
+            <div style={{ width: '100%', height: '8px', backgroundColor: '#B11F22' }}></div>
           </header>
           <main className="container mt-6">{children}</main>
         </AuthProvider>
