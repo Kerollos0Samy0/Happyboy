@@ -767,6 +767,51 @@ export default function InventoryPage() {
     );
   };
 
+  const restoreBarcodes = async () => {
+    try {
+      alert("جاري استرجاع الباركودات المفقودة...");
+      const res = await fetch('/master_barcodes_dump.json');
+      const masterBarcodes = await res.json();
+      
+      let updated = 0;
+      function normalizeColor(str: string) {
+        if (!str) return "";
+        return str.replace(/ي/g, "ي").replace(/[أإآ]/g, "ا").trim();
+      }
+
+      for (const product of products) {
+        const m = String(product.modelNumber).trim();
+        if (masterBarcodes[m]) {
+          let changed = false;
+          const updatedColors = (product.colors || []).map((c: any) => {
+             const normC = normalizeColor(c.name);
+             if (!c.barcode || c.barcode.trim() === "") {
+                 const exBarcode = masterBarcodes[m][normC];
+                 if (exBarcode) {
+                     changed = true;
+                     return { ...c, barcode: exBarcode };
+                 }
+             }
+             return c;
+          });
+
+          if (changed) {
+             const newBarcodes = updatedColors.map((c: any) => c.barcode).filter(Boolean);
+             await updateDoc(doc(db, "products", product.id), {
+                 colors: updatedColors,
+                 barcodes: newBarcodes
+             });
+             updated++;
+          }
+        }
+      }
+      alert(`تم استرجاع باركودات لـ ${updated} موديل بنجاح`);
+      window.location.reload();
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
   const handlePrintZeroQty = () => {
     const zeroQtyProducts = products.filter(p => {
       if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
@@ -894,7 +939,7 @@ export default function InventoryPage() {
           </div>
           
             <div className="flex gap-3">
-              <button onClick={() => { alert("جاري استرجاع الباركودات المفقودة..."); fetch('/api/fix-missing-barcodes').then(r=>r.json()).then(res=>{alert(res.message); window.location.reload();}).catch(e=>alert(e.message)) }} className="px-6 py-3.5 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full font-bold text-base hover:bg-yellow-100 transition-all shadow-sm flex items-center gap-2">
+              <button onClick={restoreBarcodes} className="px-6 py-3.5 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full font-bold text-base hover:bg-yellow-100 transition-all shadow-sm flex items-center gap-2">
                 <span className="hidden sm:inline">استرجاع الباركودات المفقودة</span>
               </button>
               <button onClick={handlePrintZeroQty} className="px-6 py-3.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full font-bold text-base hover:bg-blue-100 transition-all shadow-sm flex items-center gap-2">

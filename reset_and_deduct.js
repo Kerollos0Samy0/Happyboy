@@ -28,7 +28,7 @@ const getSizesCount = (name, modelNumber, sizes) => {
   const category = modelNumber ? parseInt(String(modelNumber).replace(/\D/g, ''), 10) : NaN;
   let sizesCount = 1;
   if (!isNaN(category)) {
-    if ((category >= 5 && category <= 90) || (category >= 500 && category <= 589) || (category >= 3000 && category <= 3099) || (category >= 4000 && category <= 4099) || (name && (name.includes('بيبي') || name.includes('سمر')))) {
+    if ((category >= 5 && category <= 90) || (category >= 100 && category <= 6999) || (name && (name.includes('بيبي') || name.includes('سمر') || name.includes('محير')))) {
       sizesCount = 4;
     } else if (sizes && sizes.length > 0) {
       sizesCount = sizes.length;
