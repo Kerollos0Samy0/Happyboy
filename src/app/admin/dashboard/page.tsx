@@ -29,12 +29,8 @@ const getCategoryName = (modelNumber: string) => {
 };
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
-  const num = parseInt(modelNumber, 10);
-  if (!isNaN(num)) {
-    if ((num >= 5 && num <= 90) || (num >= 100 && num <= 6999) || (name && (name.includes('بيبي') || name.includes('سمر') || name.includes('محير')))) {
-      return 4;
-    }
-  }
+  const category = getCategoryName(modelNumber);
+  if (category.includes('بيبي') || category.includes('وسط') || category.includes('محير') || category.includes('رياضي') || name.includes('بيبي') || name.includes('وسط') || name.includes('محير')) return 4;
   return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
@@ -279,7 +275,6 @@ export default function AdminDashboardPage() {
   });
   const totalCapital = products.reduce((sum, p) => sum + (Math.max(0, Number(p.quantity) || 0) * (Number(p.price) || 0)), 0);
   
-<<<<<<< Updated upstream
   let totalInventoryPieces = products.reduce((sum, p) => sum + Math.max(0, Number(p.quantity) || 0), 0);
   const netInventoryPieces = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   const EXCEL_BASELINE = netInventoryPieces + totalSalesPieces;
@@ -292,20 +287,12 @@ export default function AdminDashboardPage() {
   let negSummer = 0;
   let totalNeg = 0;
   
-=======
-  let totalInventoryPieces = 0; // Positive stock
-  let totalShortagesPieces = 0; // Negative stock (shortages)
-  
-  let negBoys = 0;
-  let negGirls = 0;
->>>>>>> Stashed changes
   let posBoys = 0;
   let posGirls = 0;
   let posSport = 0;
   let posSummer = 0;
 
   products.forEach(p => {
-<<<<<<< Updated upstream
     let qty = Number(p.quantity) || 0;
     let posQty = Math.max(0, qty);
 
@@ -367,58 +354,6 @@ export default function AdminDashboardPage() {
   
   const totalInventorySeries = Math.round(totalInventoryPieces / 4);
   const totalShortagesSeries = Math.round(trueShortages / 4);
-=======
-    const cat = getCategoryName(p.modelNumber);
-    const isBoys = cat.includes("ولادي") || cat.includes("رياضي");
-    const isGirls = cat.includes("بناتي");
-
-    if (p.colors && Array.isArray(p.colors) && p.colors.length > 0) {
-      p.colors.forEach(c => {
-        const q = Number(c.quantity) || 0;
-        if (q > 0) {
-          totalInventoryPieces += q;
-          if (isBoys) posBoys += q;
-          else if (isGirls) posGirls += q;
-        } else if (q < 0) {
-          const absQ = Math.abs(q);
-          totalShortagesPieces += absQ;
-          if (isBoys) negBoys += absQ;
-          else if (isGirls) negGirls += absQ;
-        }
-      });
-    } else {
-      const q = Number(p.quantity) || 0;
-      if (q > 0) {
-        totalInventoryPieces += q;
-        if (isBoys) posBoys += q;
-        else if (isGirls) posGirls += q;
-      } else if (q < 0) {
-        const absQ = Math.abs(q);
-        totalShortagesPieces += absQ;
-        if (isBoys) negBoys += absQ;
-        else if (isGirls) negGirls += absQ;
-      }
-    }
-  });
-
-  const deductedFromOriginal = Math.max(0, totalSalesPieces - totalShortagesPieces);
-
-  const boysPosPct = totalInventoryPieces > 0 ? ((posBoys / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-  const girlsPosPct = totalInventoryPieces > 0 ? ((posGirls / totalInventoryPieces) * 100).toFixed(1) : "0.0";
-
-  const deductedBoys = Math.max(0, totalBoysSales - negBoys);
-  const deductedGirls = Math.max(0, totalGirlsSales - negGirls);
-  
-  const totalDeducted = deductedBoys + deductedGirls;
-  const boysDeductedPct = totalDeducted > 0 ? ((deductedBoys / totalDeducted) * 100).toFixed(1) : "0.0";
-  const girlsDeductedPct = totalDeducted > 0 ? ((deductedGirls / totalDeducted) * 100).toFixed(1) : "0.0";
-
-  const boysSalesPct = totalSalesPieces > 0 ? ((totalBoysSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
-  const girlsSalesPct = totalSalesPieces > 0 ? ((totalGirlsSales / totalSalesPieces) * 100).toFixed(1) : "0.0";
-
-  const boysNegPct = totalShortagesPieces > 0 ? ((negBoys / totalShortagesPieces) * 100).toFixed(1) : "0.0";
-  const girlsNegPct = totalShortagesPieces > 0 ? ((negGirls / totalShortagesPieces) * 100).toFixed(1) : "0.0";
->>>>>>> Stashed changes
 
   const productQtyMap: Record<string, number> = {};
   products.forEach(p => { productQtyMap[p.modelNumber] = Number(p.quantity) || 0; });

@@ -429,10 +429,6 @@ export default function LiveOrdersPage() {
         deposit: Number(selectedOrder.deposit) || 0,
         discountPercentage: Number(selectedOrder.discountPercentage) || 0,
         notes: selectedOrder.notes || "",
-<<<<<<< Updated upstream
-=======
-        employeeName: selectedOrder.employeeName || "",
->>>>>>> Stashed changes
         items: selectedOrder.items,
         total: newTotal
       };
