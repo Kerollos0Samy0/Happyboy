@@ -333,7 +333,8 @@ export default function FabricInventoryPage() {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <>
+    <div className="p-6 max-w-7xl mx-auto print:hidden">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-black text-green-800 tracking-tight flex items-center gap-2">
@@ -687,6 +688,8 @@ export default function FabricInventoryPage() {
         </div>
       )}
 
+    </div>
+
       {/* The actual element that will be printed (Hidden on screen) */}
       {printRolls.length > 0 && (
         <div id="print-section" className="hidden print:block">
@@ -718,9 +721,9 @@ export default function FabricInventoryPage() {
             size: 50mm 25mm;
             margin: 0;
           }
-          body * { visibility: hidden; }
-          #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; visibility: visible; }
-          #print-section * { visibility: visible; }
+          html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
+          #print-section { display: block !important; width: 100%; }
+          
           .print-page { 
             width: 50mm !important; 
             height: 25mm !important; 
