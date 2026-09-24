@@ -430,7 +430,9 @@ export default function LiveOrdersPage() {
         discountPercentage: Number(selectedOrder.discountPercentage) || 0,
         notes: selectedOrder.notes || "",
         items: selectedOrder.items,
-        total: newTotal
+        total: newTotal,
+        branch: selectedOrder.branch || "التجمع",
+        employeeName: selectedOrder.employeeName || ""
       };
       
       await updateDoc(doc(db, "orders", selectedOrder.id), updateData);
@@ -1061,6 +1063,7 @@ export default function LiveOrdersPage() {
                   { key: "all",       label: "كل الفروع" },
                   { key: "التجمع",    label: "التجمع" },
                   { key: "العبور",    label: "العبور" },
+                  { key: "عين شمس",    label: "عين شمس" },
                 ].map(b => (
                   <button
                     key={b.key}
@@ -1452,6 +1455,15 @@ export default function LiveOrdersPage() {
                     <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px", color: "#A62E2E" }}>
                       <strong>الموظف:</strong>
                       <input type="text" value={selectedOrder.employeeName || ''} onChange={e => handleOrderChange('employeeName', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#A62E2E", fontWeight: "bold" }} placeholder="اسم الموظف" />
+                    </p>
+                    <p style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "5px" }}>
+                      <strong>الفرع:</strong>
+                      <select value={selectedOrder.branch || 'التجمع'} onChange={e => handleOrderChange('branch', e.target.value)} style={{ border: "none", borderBottom: "1px dashed #cbd5e1", background: "transparent", outline: "none", fontSize: "16px", flex: 1, padding: "2px 5px", color: "#000" }}>
+                        <option value="التجمع">التجمع</option>
+                        <option value="العبور">العبور</option>
+                        <option value="عين شمس">عين شمس</option>
+                        <option value="المخزن">المخزن</option>
+                      </select>
                     </p>
                   </div>
                   <div style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", gap: "10px" }}>

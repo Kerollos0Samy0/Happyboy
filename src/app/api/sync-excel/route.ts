@@ -1,10 +1,10 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '../../../lib/firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import * as xlsxImport from 'xlsx';
 import path from 'path';
 
-const xlsx = xlsxImport.default || xlsxImport;
+const xlsx: any = (xlsxImport as any).default || xlsxImport;
 
 export async function GET() {
   try {
@@ -14,8 +14,8 @@ export async function GET() {
     const worksheet = workbook.Sheets[sheetName];
     const excelData = xlsx.utils.sheet_to_json(worksheet);
 
-    const excelMap = {};
-    for (const row of excelData) {
+    const excelMap: Record<string, Record<string, number>> = {};
+    for (const row of excelData as any[]) {
       const modelCode = row['كود الموديل'];
       const barcode = row['الباركود'];
       const qty = row['عدد القطع'];
@@ -43,7 +43,7 @@ export async function GET() {
       let totalComputed = 0;
       let changed = false;
       
-      const newColors = (data.colors || []).map((color) => {
+      const newColors = (data.colors || []).map((color: any) => {
         const barcodeStr = String(color.barcode).trim();
         let expectedQty = barcodesInExcel[barcodeStr];
         
@@ -58,6 +58,7 @@ export async function GET() {
         return { ...color, quantity: expectedQty };
       });
 
+
       if (changed || data.quantity !== totalComputed) {
         await updateDoc(doc(db, 'products', productDoc.id), {
           colors: newColors,
@@ -68,7 +69,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, updated, message: 'Sync completed from المخزن.xlsx. Total rows: ' + excelData.length });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

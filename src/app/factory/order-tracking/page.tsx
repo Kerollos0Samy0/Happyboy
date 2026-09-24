@@ -175,7 +175,7 @@ export default function OrderTrackingPage() {
           
           {isScannerOpen && (
             <div className="mt-4 w-full max-w-lg border-2 rounded-xl overflow-hidden shadow-sm bg-gray-50">
-              <div id="tracking-reader" width="100%"></div>
+              <div id="tracking-reader" style={{ width: "100%" }}></div>
             </div>
           )}
           

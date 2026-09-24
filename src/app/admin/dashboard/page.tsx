@@ -53,6 +53,7 @@ interface Product {
   price: number;
   quantity: number;
   sizes?: string[];
+  colors?: any[];
   isDeleted?: boolean;
 }
 

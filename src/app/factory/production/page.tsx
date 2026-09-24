@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Package, Scissors, Printer, Pocket, Stitch, Shirt, CheckCircle,
+  Package, Scissors, Printer, Briefcase, Activity, Shirt, CheckCircle,
   TrendingUp, Clock, Play, Settings, Plus, ShoppingCart, Layers,
   Wand2, Copy, AlignVerticalSpaceAround, Archive, Store, Wind,
   Microscope, ScanBarcode, ArrowRight, Search

@@ -474,7 +474,7 @@ export default function WorkerScannerPage() {
       if (orderData.stageStatus === 'running') {
         let durationSecs = 0;
         if (orderData.stageStartedAt) {
-          durationSecs = calculateEffectiveWorkingSeconds(orderData.stageStartedAt, now);
+          durationSecs = calculateEffectiveWorkingSeconds(orderData.stageStartedAt, new Date().toISOString());
         }
         
         await addDoc(collection(db, 'factory_productivity_logs'), {

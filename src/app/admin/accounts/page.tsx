@@ -23,6 +23,7 @@ interface Order {
   deposit?: number;
   createdAt: any;
   isDeleted?: boolean;
+  customerId?: string;
 }
 
 interface Payment {

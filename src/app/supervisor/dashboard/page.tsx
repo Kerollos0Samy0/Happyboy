@@ -803,7 +803,7 @@ export default function SupervisorDashboard() {
 
         {isScannerOpen && (
           <div className="mb-6 p-4 bg-gray-50 border rounded-lg">
-            <div id="supervisor-reader" width="100%"></div>
+            <div id="supervisor-reader" style={{ width: "100%" }}></div>
           </div>
         )}
 

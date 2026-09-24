@@ -69,7 +69,7 @@ export default function FabricScannerPage() {
           else { searchedId += arabicMap[rawId[i]] || rawId[i]; }
         }
         
-        let orderData = null;
+        let orderData: any = null;
 
         // If it's a full URL (from QR code), extract the last part
         if (searchedId.includes('/')) {

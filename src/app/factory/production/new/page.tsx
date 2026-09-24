@@ -178,7 +178,7 @@ export default function NewProductionOrderPage() {
       const { writeBatch } = await import('firebase/firestore');
       const batch = writeBatch(db);
 
-      const orderData = {
+      const orderData: any = {
         modelName,
         totalQuantity: Number(totalQuantity),
         fabricType,
@@ -648,7 +648,7 @@ export default function NewProductionOrderPage() {
                 
                 <button 
                   type="button" 
-                  onClick={() => setColorPairs([...colorPairs, { tshirt: '', pants: '', quantity: '' }])} 
+                  onClick={() => setColorPairs([...colorPairs, { tshirt: '', pants: '', quantity: '', tRolls: '', pRolls: '' }])} 
                   className="text-blue-700 text-sm font-bold flex items-center gap-1 hover:bg-blue-100 p-2 rounded transition mt-2"
                 >
                   <Plus size={16} /> إضافة لون آخر
