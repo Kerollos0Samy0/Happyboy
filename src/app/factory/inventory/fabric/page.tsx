@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 import { Search, PlusCircle, Scissors, Trash2, Printer, Upload, Download } from 'lucide-react';
@@ -691,8 +692,8 @@ export default function FabricInventoryPage() {
     </div>
 
       {/* The actual element that will be printed (Hidden on screen) */}
-      {printRolls.length > 0 && (
-        <div id="print-section" className="hidden print:block">
+      {printRolls.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div id="print-section" className="hidden print:block w-full">
           {printRolls.map(roll => (
             <div key={roll.id} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl' }}>
               <div className="flex justify-between w-full px-1 mb-1 items-center">
@@ -710,20 +711,29 @@ export default function FabricInventoryPage() {
               </div>
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
 
-
       {/* Print Styles */}
-            <style dangerouslySetInnerHTML={{__html: `
+                  <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page {
             size: 50mm 25mm;
             margin: 0;
           }
-          body * { visibility: hidden; }
-          #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; visibility: visible; }
-          #print-section * { visibility: visible; }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          body > :not(#print-section) {
+            display: none !important;
+          }
+          #print-section { 
+            display: block !important; 
+            width: 100%; 
+          }
           
           .print-page { 
             width: 50mm !important; 
@@ -738,7 +748,6 @@ export default function FabricInventoryPage() {
             box-sizing: border-box;
             background: white;
           }
-          .no-print { display: none !important; }
         }
       `}} />
 
