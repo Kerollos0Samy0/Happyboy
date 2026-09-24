@@ -780,12 +780,13 @@ export default function InventoryPage() {
 
       for (const product of products) {
         const m = String(product.modelNumber).trim();
-        if (masterBarcodes[m]) {
+        const mb: any = masterBarcodes;
+        if (mb[m]) {
           let changed = false;
           const updatedColors = (product.colors || []).map((c: any) => {
              const normC = normalizeColor(c.name);
              if (!c.barcode || c.barcode.trim() === "") {
-                 const exBarcode = masterBarcodes[m][normC];
+                 const exBarcode = mb[m][normC];
                  if (exBarcode) {
                      changed = true;
                      return { ...c, barcode: exBarcode };
