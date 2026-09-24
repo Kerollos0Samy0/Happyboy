@@ -113,7 +113,7 @@ export default function FabricInventoryPage() {
   const handleColorChange = (color: string) => {
     const baseCode = colorCodes[color] || 'OT';
     const nextCount = getNextCodeCount(color);
-    setNewRoll({ ...newRoll, color, code: `${baseCode}-${nextCount.toString().padStart(5, '0')}` });
+    setNewRoll({ ...newRoll, color, code: `${baseCode}-${nextCount.toString().padStart(3, '0')}` });
   };
 
   const handleAddRoll = async (e: React.FormEvent) => {
@@ -130,7 +130,7 @@ export default function FabricInventoryPage() {
 
       for (let i = 0; i < rollsCount; i++) {
         const weight = Number(multiAmounts[i]) || 0;
-        const rollCode = `${typeAbbr}-${baseCode}-${currentCount.toString().padStart(5, '0')}`;
+        const rollCode = `${typeAbbr}-${baseCode}-${currentCount.toString().padStart(3, '0')}`;
         const newRef = doc(collection(db, 'factory_fabric_rolls'));
         
         batch.set(newRef, {
@@ -219,7 +219,7 @@ export default function FabricInventoryPage() {
           colorCounters[colorName] = getNextCodeCount(colorName);
         }
         
-        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(5, '0')}`;
+        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(3, '0')}`;
         
         const newDocRef = doc(collection(db, 'factory_fabric_rolls'));
         batch.set(newDocRef, {
