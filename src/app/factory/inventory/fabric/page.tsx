@@ -124,12 +124,13 @@ export default function FabricInventoryPage() {
     try {
       const { writeBatch } = await import('firebase/firestore');
       const batch = writeBatch(db);
+      const typeAbbr = newRoll.type === 'سمر ميلتون' ? 'Su' : (newRoll.type === 'أنتر لوك' ? 'En' : 'Ot');
       const baseCode = colorCodes[newRoll.color] || 'OT';
       let currentCount = getNextCodeCount(newRoll.color);
 
       for (let i = 0; i < rollsCount; i++) {
         const weight = Number(multiAmounts[i]) || 0;
-        const rollCode = `${baseCode}-${currentCount.toString().padStart(5, '0')}`;
+        const rollCode = `${typeAbbr}-${baseCode}-${currentCount.toString().padStart(5, '0')}`;
         const newRef = doc(collection(db, 'factory_fabric_rolls'));
         
         batch.set(newRef, {
