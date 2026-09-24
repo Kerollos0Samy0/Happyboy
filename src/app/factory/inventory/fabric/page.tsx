@@ -665,7 +665,7 @@ export default function FabricInventoryPage() {
                     <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
                   <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
-                    <Barcode value={roll.code} width={1.8} height={26} fontSize={24} margin={0} textMargin={2} textMargin={2} displayValue={true} background="#ffffff" />
+                    <Barcode value={roll.code} width={1.8} height={26} fontSize={24} fontOptions="bold" margin={0} textMargin={2} textMargin={2} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
