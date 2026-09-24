@@ -32,8 +32,8 @@ export default function FabricInventoryPage() {
   const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
   
   const [filterColor, setFilterColor] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('code_asc');
-  
+  const [filterType, setFilterType] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('code_asc');  
   const [rollsCount, setRollsCount] = useState(1);
   const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
@@ -305,7 +305,8 @@ export default function FabricInventoryPage() {
      (!r.status && inventoryTab === 'in_stock')) &&
     (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filterColor ? r.color === filterColor : true)
+    (filterColor ? r.color === filterColor : true) &&
+    (filterType ? r.type === filterType : true)
   );
 
   processedRolls.sort((a, b) => {
@@ -516,6 +517,15 @@ export default function FabricInventoryPage() {
             >
               <option value="">كل الألوان</option>
               {Array.from(new Set(rolls.map(r => r.color).filter(Boolean))).sort().map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <select 
+              value={filterType} 
+              onChange={(e) => setFilterType(e.target.value)} 
+              className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
+            >
+              <option value="">كل الأنواع</option>
+              {Array.from(new Set(rolls.map(r => r.type).filter(Boolean))).sort().map(t => <option key={t} value={t}>{t}</option>)}
             </select>
 
             <select 
