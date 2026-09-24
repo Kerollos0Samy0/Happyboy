@@ -500,7 +500,7 @@ export default function FabricInventoryPage() {
         </div>
 
         <div className="p-4 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4 flex-1">
+          <div className="flex flex-wrap items-center gap-4 flex-1 pb-2">
             <div className="relative w-full max-w-sm">
               <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
               <input 
@@ -664,8 +664,8 @@ export default function FabricInventoryPage() {
                     </div>
                     <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
                   </div>
-                  <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                    <Barcode value={roll.code} width={1.8} height={26} fontSize={18} margin={0} displayValue={true} background="#ffffff" />
+                  <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
+                    <Barcode value={roll.code} width={1.8} height={26} fontSize={24} margin={0} textMargin={2} textMargin={2} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
               ))}
@@ -707,7 +707,7 @@ export default function FabricInventoryPage() {
                 <span className="font-black text-[12px] leading-tight text-black">{roll.amount} {roll.unit}</span>
               </div>
               <div className="flex items-center justify-center w-full bg-white rounded flex-1">
-                <Barcode value={roll.code} width={1.8} height={26} fontSize={18} margin={0} displayValue={true} background="#ffffff" />
+                <Barcode value={roll.code} width={1.8} height={26} fontSize={24} margin={0} displayValue={true} background="#ffffff" />
               </div>
             </div>
           ))}
