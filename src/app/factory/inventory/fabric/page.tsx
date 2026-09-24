@@ -715,14 +715,15 @@ export default function FabricInventoryPage() {
 
 
       {/* Print Styles */}
-      <style dangerouslySetInnerHTML={{__html: `
+            <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page {
             size: 50mm 25mm;
             margin: 0;
           }
-          html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
-          #print-section { display: block !important; width: 100%; }
+          body * { visibility: hidden; }
+          #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; visibility: visible; }
+          #print-section * { visibility: visible; }
           
           .print-page { 
             width: 50mm !important; 
