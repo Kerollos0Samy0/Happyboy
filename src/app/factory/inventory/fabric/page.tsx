@@ -741,6 +741,6 @@ export default function FabricInventoryPage() {
         }
       `}} />
 
-    </div>
+    </>
   );
 }
