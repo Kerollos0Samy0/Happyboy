@@ -30,6 +30,7 @@ export default function FabricInventoryPage() {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [printRolls, setPrintRolls] = useState<FabricRoll[]>([]);
+  const [printColorTotals, setPrintColorTotals] = useState<any[]>([]);
   const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
   
   const [filterColor, setFilterColor] = useState<string>('');
@@ -108,6 +109,41 @@ export default function FabricInventoryPage() {
       }
     });
     return max + 1 + additionalOffset;
+  };
+
+  const getColorBarcode = (colorName: string) => {
+    if (!colorName) return 'COLOR-UNKNOWN';
+    const baseCode = colorCodes[colorName];
+    if (baseCode) return `COLOR-${baseCode}`;
+    let hash = 0;
+    for (let i = 0; i < colorName.length; i++) {
+      hash = (hash << 5) - hash + colorName.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return `COLOR-${Math.abs(hash)}`;
+  };
+
+  const handlePrintColorCards = () => {
+    const inStock = rolls.filter(r => !r.status || r.status === 'in_stock');
+    const colorGroups: Record<string, { count: number, weight: number }> = {};
+    inStock.forEach(r => {
+      if (!colorGroups[r.color]) {
+        colorGroups[r.color] = { count: 0, weight: 0 };
+      }
+      colorGroups[r.color].count += 1;
+      if (r.unit === 'كجم') {
+        colorGroups[r.color].weight += (Number(r.amount) || 0);
+      }
+    });
+
+    const totalsArray = Object.keys(colorGroups).map(color => ({
+      color,
+      count: colorGroups[color].count,
+      weight: colorGroups[color].weight,
+      barcode: getColorBarcode(color)
+    }));
+
+    setPrintColorTotals(totalsArray);
   };
 
   const handleColorChange = (color: string) => {
@@ -361,6 +397,14 @@ export default function FabricInventoryPage() {
             <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} className="hidden" />
           </label>
 
+          <button 
+            onClick={handlePrintColorCards}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition shadow-sm"
+          >
+            <Printer size={20} />
+            طباعة كارتلات الألوان
+          </button>
+          
           <button 
             onClick={() => setShowAddForm(!showAddForm)}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition shadow-sm"
@@ -642,7 +686,93 @@ export default function FabricInventoryPage() {
         )}
       </div>
 
+      {/* Print Color Cards Modal */}
+      {printColorTotals.length > 0 && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
+          <div className="bg-white p-8 rounded-xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              معاينة طباعة كارتلات الألوان ({printColorTotals.length})
+            </h2>
+            
+            <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
+              {printColorTotals.map((item, idx) => (
+                <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
+                  <div className="flex justify-between w-full px-1 mb-1 items-center">
+                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                    <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
+                  </div>
+                  <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
+                    <Barcode value={item.barcode} width={1.5} height={25} fontSize={14} fontOptions="bold" margin={0} textMargin={2} displayValue={true} background="#ffffff" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-4 mt-6 shrink-0">
+              <button 
+                onClick={() => {
+                  setTimeout(() => { window.print(); }, 100);
+                }}
+                className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex-1 py-3 font-bold transition rounded-lg text-lg shadow"
+              >
+                🖨️ طباعة كارتلات الألوان
+              </button>
+              <button 
+                onClick={() => setPrintColorTotals([])}
+                className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 flex-1 py-3 font-bold transition rounded-lg"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Print Modal */}
+      {/* Print Color Cards Modal */}
+      {printColorTotals.length > 0 && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
+          <div className="bg-white p-8 rounded-xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              معاينة طباعة كارتلات الألوان ({printColorTotals.length})
+            </h2>
+            
+            <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
+              {printColorTotals.map((item, idx) => (
+                <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
+                  <div className="flex justify-between w-full px-1 mb-1 items-center">
+                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                    <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
+                  </div>
+                  <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
+                    <Barcode value={item.barcode} width={1.5} height={25} fontSize={14} fontOptions="bold" margin={0} textMargin={2} displayValue={true} background="#ffffff" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-4 mt-6 shrink-0">
+              <button 
+                onClick={() => {
+                  setTimeout(() => { window.print(); }, 100);
+                }}
+                className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex-1 py-3 font-bold transition rounded-lg text-lg shadow"
+              >
+                🖨️ طباعة كارتلات الألوان
+              </button>
+              <button 
+                onClick={() => setPrintColorTotals([])}
+                className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 flex-1 py-3 font-bold transition rounded-lg"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Print Modal */}
       {printRolls.length > 0 && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
@@ -692,6 +822,25 @@ export default function FabricInventoryPage() {
 
     </div>
 
+      {/* The actual element that will be printed for color cards (Hidden on screen) */}
+      {printColorTotals.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div id="print-section" className="hidden print:block w-full">
+          {printColorTotals.map((item, idx) => (
+            <div key={idx} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
+              <div className="flex justify-between w-full px-1 mb-1 items-center">
+                <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
+              </div>
+              <div className="flex items-center justify-center w-full bg-white rounded flex-1">
+                <Barcode value={item.barcode} width={1.5} height={25} fontSize={14} fontOptions="bold" margin={0} displayValue={true} background="#ffffff" />
+              </div>
+            </div>
+          ))}
+        </div>,
+        document.body
+      )}
+      
       {/* The actual element that will be printed (Hidden on screen) */}
       {printRolls.length > 0 && typeof document !== 'undefined' && createPortal(
         <div id="print-section" className="hidden print:block w-full">

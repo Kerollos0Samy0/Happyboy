@@ -33,6 +33,33 @@ export default function NewProductionOrderPage() {
   const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '', tRolls: '', pRolls: '' }]);
   
   const [fabricSupplier, setFabricSupplier] = useState('');
+
+  // Handle scanned color barcode
+  const handleColorScan = (idx: number, type: 'tshirt' | 'pants', barcodeVal: string) => {
+    if (!barcodeVal) return;
+    let detectedColor = '';
+    
+    // Reverse lookup from colorCodes or parse hash
+    if (barcodeVal.startsWith('COLOR-')) {
+      const codePart = barcodeVal.replace('COLOR-', '');
+      const foundKey = Object.keys(colorCodes).find(k => colorCodes[k] === codePart);
+      if (foundKey) {
+        detectedColor = foundKey;
+      }
+    }
+    
+    // If not found in standard codes, maybe we can't reverse hash easily. 
+    // Usually they'll scan standard colors.
+    if (!detectedColor) {
+      alert('لم يتم التعرف على كود اللون: ' + barcodeVal);
+      return;
+    }
+    
+    const newPairs = [...colorPairs];
+    if (type === 'tshirt') newPairs[idx].tshirt = detectedColor;
+    if (type === 'pants') newPairs[idx].pants = detectedColor;
+    setColorPairs(newPairs);
+  };
   
   const [cuttingNotes, setCuttingNotes] = useState('');
   const [printingType, setPrintingType] = useState('');
@@ -563,18 +590,33 @@ export default function NewProductionOrderPage() {
                   {colorPairs.map((pair, idx) => (
                     <div key={idx} className="flex gap-2 items-center flex-wrap md:flex-nowrap">
                       <div className="flex-[2] flex flex-col gap-1 min-w-[150px]">
-                        <select 
-                          value={pair.tshirt} 
-                          onChange={(e) => {
-                            const newPairs = [...colorPairs];
-                            newPairs[idx].tshirt = e.target.value;
-                            setColorPairs(newPairs);
-                          }} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
-                        >
-                          <option value="">لون التيشيرت ({idx + 1})</option>
-                          {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                        <div className="flex gap-1">
+                          <select 
+                            value={pair.tshirt} 
+                            onChange={(e) => {
+                              const newPairs = [...colorPairs];
+                              newPairs[idx].tshirt = e.target.value;
+                              setColorPairs(newPairs);
+                            }} 
+                            className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
+                          >
+                            <option value="">لون التيشيرت ({idx + 1})</option>
+                            {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <input 
+                            type="text" 
+                            placeholder="سكان" 
+                            title="سكان باركود اللون"
+                            className="w-14 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleColorScan(idx, 'tshirt', (e.target as HTMLInputElement).value);
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }}
+                          />
+                        </div>
                         {pair.tshirt && (
                           <input 
                             type="number" 
@@ -591,18 +633,33 @@ export default function NewProductionOrderPage() {
                         )}
                       </div>
                       <div className="flex-[2] flex flex-col gap-1 min-w-[150px]">
-                        <select 
-                          value={pair.pants} 
-                          onChange={(e) => {
-                            const newPairs = [...colorPairs];
-                            newPairs[idx].pants = e.target.value;
-                            setColorPairs(newPairs);
-                          }} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
-                        >
-                          <option value="">لون البنطلون ({idx + 1})</option>
-                          {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                        <div className="flex gap-1">
+                          <select 
+                            value={pair.pants} 
+                            onChange={(e) => {
+                              const newPairs = [...colorPairs];
+                              newPairs[idx].pants = e.target.value;
+                              setColorPairs(newPairs);
+                            }} 
+                            className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
+                          >
+                            <option value="">لون البنطلون ({idx + 1})</option>
+                            {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <input 
+                            type="text" 
+                            placeholder="سكان" 
+                            title="سكان باركود اللون"
+                            className="w-14 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleColorScan(idx, 'pants', (e.target as HTMLInputElement).value);
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }}
+                          />
+                        </div>
                         {pair.pants && (
                           <input 
                             type="number" 
