@@ -42,27 +42,31 @@ export default function NewProductionOrderPage() {
   const handleColorScan = (idx: number, type: 'tshirt' | 'pants', barcodeVal: string) => {
     if (!barcodeVal) return;
     let detectedColor = '';
+    const valStr = barcodeVal.trim();
     
-    // Reverse lookup from colorCodes or parse hash
-    if (barcodeVal.startsWith('COLOR-')) {
-      const codePart = barcodeVal.replace('COLOR-', '');
-      // Check standard code
+    if (valStr.startsWith('COLOR-')) {
+      const codePart = valStr.replace('COLOR-', '');
       const foundKey = Object.keys(colorCodes).find(k => colorCodes[k] === codePart);
       if (foundKey) {
         detectedColor = foundKey;
       } else if (abbrToColorDict[codePart]) {
-        // Check abbr dict
         detectedColor = abbrToColorDict[codePart];
       } else if (colorHashDict[codePart]) {
-        // Check hash dict (fallback)
         detectedColor = colorHashDict[codePart];
+      }
+    } else {
+      const normalizeArabic = (text: string) => {
+        return text.replace(/[أإآا]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').toLowerCase();
+      };
+      const normVal = normalizeArabic(valStr);
+      detectedColor = availableColors.find(c => normalizeArabic(c) === normVal) || '';
+      if (!detectedColor) {
+         detectedColor = availableColors.find(c => normalizeArabic(c).includes(normVal)) || '';
       }
     }
     
-    // If not found in standard codes, maybe we can't reverse hash easily. 
-    // Usually they'll scan standard colors.
     if (!detectedColor) {
-      alert('لم يتم التعرف على كود اللون: ' + barcodeVal);
+      alert('لم يتم التعرف على اللون: ' + barcodeVal);
       return;
     }
     
@@ -673,9 +677,9 @@ export default function NewProductionOrderPage() {
                           </select>
                           <input 
                             type="text" 
-                            placeholder="سكان" 
-                            title="سكان باركود اللون"
-                            className="w-14 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
+                            placeholder="بحث/سكان" 
+                            title="بحث بالاسم أو سكان بالباركود"
+                            className="w-20 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -716,9 +720,9 @@ export default function NewProductionOrderPage() {
                           </select>
                           <input 
                             type="text" 
-                            placeholder="سكان" 
-                            title="سكان باركود اللون"
-                            className="w-14 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
+                            placeholder="بحث/سكان" 
+                            title="بحث بالاسم أو سكان بالباركود"
+                            className="w-20 p-2.5 border border-blue-300 bg-blue-50 rounded-lg text-xs outline-none text-center" 
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
