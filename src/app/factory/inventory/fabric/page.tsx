@@ -710,7 +710,7 @@ export default function FabricInventoryPage() {
                       <span className="font-black text-[12px] text-black">{item.color}</span>
                       <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
                     </div>
-                    <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                    <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
                   <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
@@ -757,7 +757,7 @@ export default function FabricInventoryPage() {
                       <span className="font-black text-[12px] text-black">{item.color}</span>
                       <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
                     </div>
-                    <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                    <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
                   <div className="flex items-center justify-center w-full bg-white rounded flex-1 pb-1">
@@ -846,7 +846,7 @@ export default function FabricInventoryPage() {
                       <span className="font-black text-[12px] text-black">{item.color}</span>
                       <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
                     </div>
-                <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
+                <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                 <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
               </div>
               <div className="flex items-center justify-center w-full bg-white rounded flex-1">
