@@ -36,6 +36,7 @@ export default function NewProductionOrderPage() {
   const [abbrToColorDict, setAbbrToColorDict] = useState<Record<string, string>>({});
   
   const [fabricSupplier, setFabricSupplier] = useState('');
+  const [gender, setGender] = useState('');
 
   // Handle scanned color barcode
   const handleColorScan = (idx: number, type: 'tshirt' | 'pants', barcodeVal: string) => {
@@ -266,6 +267,7 @@ export default function NewProductionOrderPage() {
         totalQuantity: Number(totalQuantity),
         fabricType,
         sizesSeries,
+        gender,
         tshirtColors: tColors,
         pantsColors: pColors,
         colorPairs: validPairs,
@@ -354,6 +356,7 @@ export default function NewProductionOrderPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4 text-lg">
                   <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{modelName}</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{sizesSeries}</span></div>
+                  <div className="font-bold border-b border-gray-300 pb-1">النوع: <span className="font-normal">{gender || '---'}</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{totalQuantity} قطعة</span></div>
                   <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{new Date().toLocaleDateString('ar-EG')}</span></div>
                 </div>
@@ -612,6 +615,15 @@ export default function NewProductionOrderPage() {
               <h2 className="text-lg font-bold border-b pb-2 text-gray-800">1. البيانات الأساسية والمخزن</h2>
               
               <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">النوع (ولادي / بناتي) *</label>
+                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <option value="">-- اختر النوع --</option>
+                    <option value="ولادي">ولادي</option>
+                    <option value="بناتي">بناتي</option>
+                    <option value="للطرفين">للطرفين</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">اسم أو كود الموديل *</label>
                   <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
