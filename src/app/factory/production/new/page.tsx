@@ -21,6 +21,36 @@ const colorHexMap: Record<string, string> = {
   'بيج': '#F5F5DC', 'بني': '#8B4513', 'برتقالي': '#FFA500', 'بينك': '#FFC0CB', 'لبني': '#ADD8E6', 'نبيتي': '#800000'
 };
 
+const stringToColor = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).slice(-2);
+  }
+  return color;
+};
+
+const getHexColor = (color: string) => {
+  if (!color) return 'white';
+  if (colorHexMap[color]) return colorHexMap[color];
+  if (color.includes('تركواز')) return '#40E0D0';
+  if (color.includes('موف')) return '#E0B0FF';
+  if (color.includes('جنزاري')) return '#008B8B';
+  if (color.includes('مسطرد')) return '#FFDB58';
+  if (color.includes('بطيخ')) return '#FC6C85';
+  if (color.includes('سيمون')) return '#FF8C69';
+  if (color.includes('فوشيا')) return '#FF00FF';
+  if (color.includes('كشمير')) return '#D1B2A1';
+  if (color.includes('زهري')) return '#FF6FFF';
+  if (color.includes('رصاصي')) return '#808080';
+  if (color.includes('مينت')) return '#98FF98';
+  return stringToColor(color);
+};
+
 export default function NewProductionOrderPage() {
   const router = useRouter();
   
@@ -405,11 +435,11 @@ export default function NewProductionOrderPage() {
                     return (
                       <React.Fragment key={i}>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: tColors[i] ? colorHexMap[tColors[i]] : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: tColors[i] ? getHexColor(tColors[i]) : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
                           <span className="text-xs font-bold text-gray-800 text-center">{tColors[i] ? `تيشيرت ${tColors[i]}${qtyText}` : 'تيشيرت'}</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: pColors[i] ? colorHexMap[pColors[i]] : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+                          <div className="w-[2cm] h-[2cm] border-2 border-gray-400 bg-white shadow-sm" style={{ backgroundColor: pColors[i] ? getHexColor(pColors[i]) : 'white', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
                           <span className="text-xs font-bold text-gray-800 text-center">{pColors[i] ? `بنطلون ${pColors[i]}${qtyText}` : 'بنطلون'}</span>
                         </div>
                       </React.Fragment>
