@@ -531,7 +531,13 @@ export default function AdminDashboardPage() {
               <div className={styles.linkList}>
                 {isPrivileged && (
                   <a href="/admin/inventory" className={`${styles.linkItem} ${styles.gray}`}>
-                    <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن</div>
+                    <div className={styles.linkContent}><Package size={20} style={{color: '#6366f1'}}/> إدارة المخزن (منتجات تامة)</div>
+                    <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                  </a>
+                )}
+                {(isOwner || userEmail?.toLowerCase().includes('omnia')) && (
+                  <a href="/factory/inventory" className={`${styles.linkItem} ${styles.gray}`}>
+                    <div className={styles.linkContent}><Package size={20} style={{color: '#10b981'}}/> مخازن المصنع (قماش وخيوط)</div>
                     <ChevronLeft size={18} style={{color: '#9ca3af'}} />
                   </a>
                 )}
