@@ -125,9 +125,11 @@ export default function FabricInventoryPage() {
 
   const handlePrintColorCards = () => {
     const inStock = rolls.filter(r => !r.status || r.status === 'in_stock');
-    const colorGroups: Record<string, { count: number, weight: number, abbr: string }> = {};
+    const colorGroups: Record<string, { count: number, weight: number, abbr: string, type: string, color: string }> = {};
     inStock.forEach(r => {
-      if (!colorGroups[r.color]) {
+      const type = r.type || 'غير محدد';
+      const key = r.color + '_' + type;
+      if (!colorGroups[key]) {
         let abbr = 'OT';
         if (r.code) {
            const parts = r.code.split('-');
@@ -135,20 +137,21 @@ export default function FabricInventoryPage() {
            else if (parts.length === 2) abbr = parts[0];
            else abbr = r.code;
         }
-        colorGroups[r.color] = { count: 0, weight: 0, abbr };
+        colorGroups[key] = { count: 0, weight: 0, abbr, type, color: r.color };
       }
-      colorGroups[r.color].count += 1;
+      colorGroups[key].count += 1;
       if (r.unit === 'كجم') {
-        colorGroups[r.color].weight += (Number(r.amount) || 0);
+        colorGroups[key].weight += (Number(r.amount) || 0);
       }
     });
 
-    const totalsArray = Object.keys(colorGroups).map(color => ({
-      color,
-      count: colorGroups[color].count,
-      weight: colorGroups[color].weight,
-      abbr: colorGroups[color].abbr,
-      barcode: `COLOR-${colorGroups[color].abbr}`
+    const totalsArray = Object.keys(colorGroups).map(key => ({
+      color: colorGroups[key].color,
+      type: colorGroups[key].type,
+      count: colorGroups[key].count,
+      weight: colorGroups[key].weight,
+      abbr: colorGroups[key].abbr,
+      barcode: `COLOR-${colorGroups[key].abbr}`
     }));
 
     setPrintColorTotals(totalsArray);
@@ -706,7 +709,10 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <div className="flex flex-col items-start leading-none max-w-[20mm]">
+                      <span className="font-black text-[12px] text-black whitespace-nowrap">{item.color}</span>
+                      <span className="font-bold text-[8px] text-gray-500 mt-[2px] truncate w-full leading-tight">{item.type}</span>
+                    </div>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -750,7 +756,10 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <div className="flex flex-col items-start leading-none max-w-[20mm]">
+                      <span className="font-black text-[12px] text-black whitespace-nowrap">{item.color}</span>
+                      <span className="font-bold text-[8px] text-gray-500 mt-[2px] truncate w-full leading-tight">{item.type}</span>
+                    </div>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -836,7 +845,10 @@ export default function FabricInventoryPage() {
           {printColorTotals.map((item, idx) => (
             <div key={idx} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
               <div className="flex justify-between w-full px-1 mb-1 items-center">
-                <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                <div className="flex flex-col items-start leading-none max-w-[20mm]">
+                      <span className="font-black text-[12px] text-black whitespace-nowrap">{item.color}</span>
+                      <span className="font-bold text-[8px] text-gray-500 mt-[2px] truncate w-full leading-tight">{item.type}</span>
+                    </div>
                 <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                 <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
               </div>
