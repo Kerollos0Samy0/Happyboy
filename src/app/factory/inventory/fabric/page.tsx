@@ -125,10 +125,17 @@ export default function FabricInventoryPage() {
 
   const handlePrintColorCards = () => {
     const inStock = rolls.filter(r => !r.status || r.status === 'in_stock');
-    const colorGroups: Record<string, { count: number, weight: number }> = {};
+    const colorGroups: Record<string, { count: number, weight: number, abbr: string }> = {};
     inStock.forEach(r => {
       if (!colorGroups[r.color]) {
-        colorGroups[r.color] = { count: 0, weight: 0 };
+        let abbr = 'OT';
+        if (r.code) {
+           const parts = r.code.split('-');
+           if (parts.length >= 3) abbr = parts[1];
+           else if (parts.length === 2) abbr = parts[0];
+           else abbr = r.code;
+        }
+        colorGroups[r.color] = { count: 0, weight: 0, abbr };
       }
       colorGroups[r.color].count += 1;
       if (r.unit === 'كجم') {
@@ -140,6 +147,7 @@ export default function FabricInventoryPage() {
       color,
       count: colorGroups[color].count,
       weight: colorGroups[color].weight,
+      abbr: colorGroups[color].abbr,
       barcode: getColorBarcode(color)
     }));
 
@@ -698,7 +706,10 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="font-black text-[12px] text-black">{item.color}</span>
+                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
+                    </div>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -742,7 +753,10 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="font-black text-[12px] text-black">{item.color}</span>
+                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
+                    </div>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -828,7 +842,10 @@ export default function FabricInventoryPage() {
           {printColorTotals.map((item, idx) => (
             <div key={idx} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
               <div className="flex justify-between w-full px-1 mb-1 items-center">
-                <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
+                <div className="flex flex-col items-start leading-none">
+                      <span className="font-black text-[12px] text-black">{item.color}</span>
+                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
+                    </div>
                 <span className="font-bold text-[10px] text-gray-800">{item.count} أتواب</span>
                 <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
               </div>
