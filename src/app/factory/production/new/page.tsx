@@ -199,6 +199,8 @@ export default function NewProductionOrderPage() {
         used_rolls: usedRollsData,
         currentStage: 1,
         status: 'قيد التنفيذ',
+        routedTo: 'samples',
+        lastRoutedAt: new Date().toISOString(),
         createdAt: serverTimestamp(),
       };
 

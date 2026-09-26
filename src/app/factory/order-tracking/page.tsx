@@ -203,12 +203,12 @@ export default function OrderTrackingPage() {
           </div>
 
           {activeOrder.routedTo && (
-            <div className={`p-4 rounded-2xl flex items-center gap-3 text-lg font-bold shadow-sm ${activeOrder.routedTo === 'fabric_order' ? 'bg-blue-50 text-blue-800 border-2 border-blue-200' : 'bg-purple-50 text-purple-800 border-2 border-purple-200'}`}>
+            <div className="p-4 rounded-2xl flex items-center gap-3 text-lg font-bold shadow-sm bg-blue-50 text-blue-800 border-2 border-blue-200">
               <History size={28} />
               <span>
-                الحالة الحالية: تم توجيه هذا الموديل بواسطة قسم العينات إلى: 
+                القسم الحالي (المنتظر به الموديل):
                 <span className="text-2xl mr-2 underline decoration-2 underline-offset-4">
-                  {activeOrder.routedTo === "fabric_order" ? "أوردر القماش" : "مخزن القماش"}
+                  {factoryDepartments.find(d => d.id === activeOrder.routedTo)?.name || activeOrder.routedTo}
                 </span>
               </span>
             </div>

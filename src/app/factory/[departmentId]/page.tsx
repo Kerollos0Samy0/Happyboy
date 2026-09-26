@@ -22,9 +22,11 @@ export default function DepartmentDashboardPage() {
   const [activeOrder, setActiveOrder] = useState<any>(null);
   const orderInputRef = useRef<HTMLInputElement>(null);
 
-  // Quantities state
+  // Quantities state (Moved down near updateProgress, wait, it's better to keep them here and remove the lower ones, or just remove these). 
+  // We added defectQty lower, so we can just replace this with nothing or add defectQty here.
   const [receiveQty, setReceiveQty] = useState<number | "">("");
   const [deliverQty, setDeliverQty] = useState<number | "">("");
+  const [defectQty, setDefectQty] = useState<number | "">("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Printing Dept State
@@ -39,9 +41,9 @@ export default function DepartmentDashboardPage() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [loadingPending, setLoadingPending] = useState(false);
+  const [nextDeptId, setNextDeptId] = useState("");
 
   const fetchPendingOrders = async () => {
-    if (departmentId !== "fabric_order" && departmentId !== "fabric_warehouse") return;
     setLoadingPending(true);
     try {
       const q = query(
@@ -177,20 +179,41 @@ export default function DepartmentDashboardPage() {
     }
   };
 
-  const updateProgress = async (type: 'receive' | 'deliver') => {
+
+
+  const updateProgress = async (type: 'receive' | 'deliver' | 'defect') => {
     if (!activeOrder) return;
     
-    let qtyToAdd = type === 'receive' ? Number(receiveQty) : Number(deliverQty);
+    let qtyToAdd = 0;
+    if (type === 'receive') qtyToAdd = Number(receiveQty);
+    else if (type === 'deliver') qtyToAdd = Number(deliverQty);
+    else if (type === 'defect') qtyToAdd = Number(defectQty);
+
     if (!qtyToAdd || qtyToAdd <= 0) {
       alert("يرجى إدخال كمية صحيحة!");
       return;
     }
 
+    const currentProgress = activeOrder.departmentsProgress?.[departmentId] || { receivedQty: 0, deliveredQty: 0, defectQty: 0 };
+    const totalOrderQty = activeOrder.colorPairs 
+      ? activeOrder.colorPairs.reduce((sum: number, pair: any) => sum + (Number(pair.quantity) || 0), 0)
+      : activeOrder.totalQuantity;
+
+    // Strict Validation
+    if (type === 'receive') {
+      if (currentProgress.receivedQty + qtyToAdd > totalOrderQty) {
+        return alert(`خطأ: لا يمكنك استلام كمية أكبر من الكمية المستهدفة للأوردر (${totalOrderQty})!`);
+      }
+    } else if (type === 'deliver' || type === 'defect') {
+      const balance = currentProgress.receivedQty - (currentProgress.deliveredQty || 0) - (currentProgress.defectQty || 0);
+      if (qtyToAdd > balance) {
+        return alert(`خطأ: الكمية المتاحة بالقسم (${balance}) غير كافية لهذا الإجراء!`);
+      }
+    }
+
     setIsUpdating(true);
     try {
       const docRef = doc(db, "factory_production_orders", activeOrder.id);
-      
-      const currentProgress = activeOrder.departmentsProgress?.[departmentId] || { receivedQty: 0, deliveredQty: 0 };
       
       const newProgress = {
         ...currentProgress,
@@ -202,9 +225,11 @@ export default function DepartmentDashboardPage() {
         if (!newProgress.firstReceivedAt) {
           newProgress.firstReceivedAt = new Date().toISOString();
         }
-      } else {
+      } else if (type === 'deliver') {
         newProgress.deliveredQty = (newProgress.deliveredQty || 0) + qtyToAdd;
         newProgress.lastDeliveredAt = new Date().toISOString();
+      } else if (type === 'defect') {
+        newProgress.defectQty = (newProgress.defectQty || 0) + qtyToAdd;
       }
 
       const updateData = {
@@ -213,7 +238,6 @@ export default function DepartmentDashboardPage() {
 
       await updateDoc(docRef, updateData);
       
-      // Update local state
       setActiveOrder({
         ...activeOrder,
         departmentsProgress: {
@@ -222,15 +246,11 @@ export default function DepartmentDashboardPage() {
         }
       });
       
-      if (type === 'receive') {
-        setReceiveQty("");
-        const newRemainingToDeliver = newProgress.receivedQty - newProgress.deliveredQty;
-        setDeliverQty(newRemainingToDeliver > 0 ? newRemainingToDeliver : "");
-      } else {
-        setDeliverQty("");
-      }
+      if (type === 'receive') setReceiveQty("");
+      else if (type === 'deliver') setDeliverQty("");
+      else if (type === 'defect') setDefectQty("");
       
-      alert("تم تحديث الكمية بنجاح!");
+      alert("تم تحديث البيانات بنجاح!");
       
     } catch (err) {
       console.error(err);
@@ -258,7 +278,8 @@ export default function DepartmentDashboardPage() {
         ...updateData
       });
       
-      alert(targetDept === "fabric_order" ? "تم التوجيه إلى أوردر القماش بنجاح!" : "تم التوجيه إلى مخزن القماش بنجاح!");
+      const deptName = factoryDepartments.find(d => d.id === targetDept)?.name || targetDept;
+      alert(`تم التوجيه إلى ${deptName} بنجاح!`);
       
     } catch (err) {
       console.error(err);
@@ -281,6 +302,22 @@ export default function DepartmentDashboardPage() {
       alert("حدث خطأ أثناء الحفظ.");
     } finally {
       setIsSavingPrinting(false);
+    }
+  };
+
+  const getDepartmentChecklist = (deptId: string) => {
+    switch (deptId) {
+      case 'cutting': return ["استلام باترون الموديل (أو الماركر)", "مراجعة كمية القماش وتطابق الألوان مع المطلوب", "قراءة ملاحظات القص بدقة قبل البدء"];
+      case 'sorting': return ["فرز القطع المقصوصة واستبعاد المعيب", "تجميع كل مقاس ولون بشكل منفصل ومنظم"];
+      case 'printing_laser':
+      case 'cutting_hollow': return ["مراجعة ألوان الطباعة ومطابقتها للتصميم", "عمل عينة اختبار (Sample) قبل طباعة الكمية"];
+      case 'pressing': return ["ضبط درجة حرارة المكبس لتناسب نوع القماش", "التأكد من عدم وجود حرق أو لمعان بالقطع"];
+      case 'preparation': return ["تجهيز الإكسسوارات (أزرار، سوست، بادجات)", "تحضير الخيوط المناسبة للمكن"];
+      case 'machinery': return ["استلام الخيوط المناسبة وتعبئة المكوك", "مراجعة ملاحظات التقفيل وطريقة التجميع"];
+      case 'finishing': return ["قص الخيوط الزائدة بدقة", "فحص الجودة النهائي (QC) لكل قطعة"];
+      case 'ironing': return ["استخدام البخار المناسب للنوع", "التأكد من نظافة المكواة لعدم تلطيخ القطع"];
+      case 'packing': return ["التأكد من وجود التيكت والمقاس", "استخدام الأكياس المخصصة للموديل"];
+      default: return [];
     }
   };
 
@@ -371,11 +408,11 @@ export default function DepartmentDashboardPage() {
         </div>
       )}
 
-      {!activeOrder && (department.id === "fabric_order" || department.id === "fabric_warehouse") && (
+      {!activeOrder && department.id !== "samples" && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-orange-500 mt-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <AlertCircle className="text-orange-500" />
-            طلبات قماش معلقة (موجهة من العينات)
+            أوامر شغل معلقة (موجهة إلى قسمك)
           </h2>
           
           {loadingPending ? (
@@ -397,9 +434,14 @@ export default function DepartmentDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pendingOrders.map(order => (
-                    <tr key={order.id} className="border-b border-gray-100 hover:bg-orange-50/50 transition">
-                      <td className="p-3 font-bold text-blue-600" dir="ltr">{order.shortId || order.id.slice(-6).toUpperCase()}</td>
+                  {pendingOrders.map(order => {
+                    const isDelayed = order.lastRoutedAt && (new Date().getTime() - new Date(order.lastRoutedAt).getTime() > 24 * 60 * 60 * 1000);
+                    return (
+                    <tr key={order.id} className={`border-b transition ${isDelayed ? 'bg-red-50 hover:bg-red-100 border-red-100' : 'border-gray-100 hover:bg-orange-50/50'}`}>
+                      <td className="p-3 font-bold text-blue-600 flex items-center gap-2" dir="ltr">
+                        {order.shortId || order.id.slice(-6).toUpperCase()}
+                        {isDelayed && <span className="text-xs bg-red-500 text-white px-2 py-1 rounded shadow-sm" title="متأخر لأكثر من 24 ساعة">متأخر ⚠️</span>}
+                      </td>
                       <td className="p-3 font-bold">{order.modelName}</td>
                       <td className="p-3">{order.fabricType || 'غير محدد'}</td>
                       <td className="p-3">
@@ -416,7 +458,7 @@ export default function DepartmentDashboardPage() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>
@@ -689,13 +731,13 @@ export default function DepartmentDashboardPage() {
                   <h3 className="text-xl font-bold mb-6 border-b pb-2">توجيه أمر الشغل</h3>
                   <div className="space-y-4">
                     <button 
-                      onClick={() => routeOrder("cutting_sorting")}
+                      onClick={() => routeOrder("cutting")}
                       disabled={isUpdating}
                       className="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold transition disabled:opacity-50 text-lg shadow-sm"
                     >
                       تم تحضير القماش والتوجيه لقسم القص
                     </button>
-                    {activeOrder.routedTo === "cutting_sorting" && (
+                    {activeOrder.routedTo === "cutting" && (
                       <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 text-center font-bold text-sm">
                         تم التوجيه لقسم القص بنجاح
                       </div>
@@ -704,24 +746,41 @@ export default function DepartmentDashboardPage() {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات قسمك</h3>
+                  <h3 className="text-xl font-bold mb-6 border-b pb-2">إحصائيات وتوجيه الأوردر</h3>
                   
                   <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="font-bold text-gray-600">إجمالي المُستلم:</span>
+                      <span className="font-bold text-gray-600">إجمالي المُستلم بالقسم:</span>
                       <span className="text-xl font-black text-blue-600">{currentProgress.receivedQty}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                       <span className="font-bold text-gray-600">إجمالي المُسلم:</span>
-                      <span className="text-xl font-black text-green-600">{currentProgress.deliveredQty}</span>
+                      <span className="text-xl font-black text-green-600">{currentProgress.deliveredQty || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <span className="font-bold text-red-800">إجمالي الهالك/التوالف:</span>
+                      <span className="text-xl font-black text-red-600">{currentProgress.defectQty || 0}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="font-bold text-gray-600">رصيد بالقسم:</span>
-                      <span className="text-xl font-black text-orange-500">{currentProgress.receivedQty - currentProgress.deliveredQty}</span>
+                      <span className="font-bold text-gray-600">رصيد بالقسم (المتبقي):</span>
+                      <span className="text-xl font-black text-orange-500">{(currentProgress.receivedQty || 0) - (currentProgress.deliveredQty || 0) - (currentProgress.defectQty || 0)}</span>
                     </div>
                   </div>
 
                   <div className="space-y-4">
+                    {getDepartmentChecklist(department.id).length > 0 && (
+                      <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                        <h4 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                          <AlertCircle size={18} /> متطلبات وقائمة مراجعة القسم:
+                        </h4>
+                        <ul className="list-disc list-inside text-sm text-yellow-900 space-y-1">
+                          {getDepartmentChecklist(department.id).map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
                     <div className="p-4 border rounded-xl bg-blue-50/50">
                       <label className="block text-sm font-bold text-blue-800 mb-2">استلام دفعة جديدة</label>
                       <div className="flex flex-col gap-3">
@@ -730,37 +789,119 @@ export default function DepartmentDashboardPage() {
                           value={receiveQty} 
                           onChange={(e) => setReceiveQty(e.target.value ? Number(e.target.value) : "")}
                           className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg"
-                          placeholder="الكمية"
+                          placeholder="الكمية المستلمة"
                         />
                         <button 
                           onClick={() => updateProgress('receive')}
                           disabled={isUpdating || !receiveQty}
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
                         >
-                          استلام
+                          تأكيد الاستلام
                         </button>
                       </div>
                     </div>
 
-                    <div className="p-4 border rounded-xl bg-green-50/50">
-                      <label className="block text-sm font-bold text-green-800 mb-2">تسليم دفعة للقسم التالي</label>
-                      <div className="flex flex-col gap-3">
-                        <input 
-                          type="number" 
-                          value={deliverQty} 
-                          onChange={(e) => setDeliverQty(e.target.value ? Number(e.target.value) : "")}
-                          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold text-lg"
-                          placeholder="الكمية"
-                        />
-                        <button 
-                          onClick={() => updateProgress('deliver')}
-                          disabled={isUpdating || !deliverQty}
-                          className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
-                        >
-                          تسليم
-                        </button>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 border rounded-xl bg-green-50/50">
+                        <label className="block text-sm font-bold text-green-800 mb-2">تسليم دفعة ناجحة</label>
+                        <div className="flex flex-col gap-3">
+                          <input 
+                            type="number" 
+                            value={deliverQty} 
+                            onChange={(e) => setDeliverQty(e.target.value ? Number(e.target.value) : "")}
+                            className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-center font-bold text-lg"
+                            placeholder="الكمية المُسلمة"
+                          />
+                          <button 
+                            onClick={() => updateProgress('deliver')}
+                            disabled={isUpdating || !deliverQty}
+                            className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                          >
+                            تأكيد الانتهاء
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 border rounded-xl bg-red-50/50">
+                        <label className="block text-sm font-bold text-red-800 mb-2">تسجيل قطع هالكة/تالفة</label>
+                        <div className="flex flex-col gap-3">
+                          <input 
+                            type="number" 
+                            value={defectQty} 
+                            onChange={(e) => setDefectQty(e.target.value ? Number(e.target.value) : "")}
+                            className="w-full p-3 border border-red-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500 text-center font-bold text-lg"
+                            placeholder="كمية الهالك"
+                          />
+                          <button 
+                            onClick={() => updateProgress('defect')}
+                            disabled={isUpdating || !defectQty}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                          >
+                            تسجيل هالك
+                          </button>
+                        </div>
                       </div>
                     </div>
+
+                    {departmentId === 'models_warehouse' ? (
+                      <div className="p-4 border rounded-xl bg-gray-800 text-white">
+                        <label className="block text-sm font-bold mb-2">إغلاق الأوردر نهائياً وإضافته للمخزن الرئيسي</label>
+                        <button 
+                          onClick={async () => {
+                            if (!confirm("هل أنت متأكد من إغلاق الأوردر؟ سيتم تسجيله كمكتمل.")) return;
+                            setIsUpdating(true);
+                            try {
+                              await updateDoc(doc(db, "factory_production_orders", activeOrder.id), {
+                                status: 'مكتمل',
+                                routedTo: '',
+                                completedAt: new Date().toISOString()
+                              });
+                              setActiveOrder({ ...activeOrder, status: 'مكتمل', routedTo: '' });
+                              alert("تم إغلاق الأوردر بنجاح! الأوردر الآن مكتمل.");
+                            } catch(e) {
+                              alert("حدث خطأ!");
+                            } finally {
+                              setIsUpdating(false);
+                            }
+                          }}
+                          disabled={isUpdating || activeOrder.status === 'مكتمل'}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                        >
+                          {activeOrder.status === 'مكتمل' ? "الأوردر مكتمل ومغلق ✅" : "إنهاء وإغلاق الأوردر 🏁"}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-4 border rounded-xl bg-purple-50/50">
+                        <label className="block text-sm font-bold text-purple-800 mb-2">توجيه الأوردر بالكامل لقسم آخر</label>
+                        <div className="flex flex-col gap-3">
+                          <select
+                            value={nextDeptId}
+                            onChange={(e) => setNextDeptId(e.target.value)}
+                            className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-500 font-bold"
+                          >
+                            <option value="">-- اختر القسم التالي --</option>
+                            {factoryDepartments.filter(d => d.id !== departmentId && d.id !== 'samples' && d.id !== 'fabric_order' && d.id !== 'fabric_warehouse').map(d => (
+                              <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                          </select>
+                          <button 
+                            onClick={() => {
+                              if (!nextDeptId) return alert("يرجى اختيار القسم التالي أولاً");
+                              routeOrder(nextDeptId);
+                            }}
+                            disabled={isUpdating || !nextDeptId}
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-lg font-bold transition disabled:opacity-50 text-lg shadow-sm"
+                          >
+                            توجيه للقسم التالي
+                          </button>
+                        </div>
+                        {activeOrder.routedTo && (
+                          <div className="mt-4 p-3 bg-gray-100 text-gray-800 rounded-lg text-center text-sm font-bold border">
+                            الأوردر موجه حالياً إلى: {factoryDepartments.find(d => d.id === activeOrder.routedTo)?.name || activeOrder.routedTo}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
