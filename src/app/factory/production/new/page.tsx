@@ -295,16 +295,28 @@ export default function NewProductionOrderPage() {
 
       const newOrderRef = doc(collection(db, 'factory_production_orders'));
       
+      let genderLetter = '';
+      if (gender.includes('ولادي')) genderLetter = 'B';
+      else if (gender.includes('بناتي')) genderLetter = 'G';
+      else if (gender.includes('للطرفين')) genderLetter = 'U';
+
       let catLetter = '';
       if (sizesSeries.includes('بيبي')) catLetter = 'B';
       else if (sizesSeries.includes('وسط')) catLetter = 'W';
       else if (sizesSeries.includes('محير')) catLetter = 'M';
       
       const cleanModelName = modelName.trim().replace(/\s+/g, '-');
-      // Only prefix if they didn't manually type the prefix
-      const finalShortId = (catLetter && !cleanModelName.toUpperCase().startsWith(`${catLetter}-`)) 
-        ? `${catLetter}-${cleanModelName}` 
-        : cleanModelName;
+      let baseModelName = cleanModelName.toUpperCase();
+      // Remove any previously typed prefix to avoid B-B-W-10
+      baseModelName = baseModelName.replace(/^[BGUMW]-/g, '').replace(/^[BGUMW]-/g, '');
+
+      const prefixParts = [];
+      if (genderLetter) prefixParts.push(genderLetter);
+      if (catLetter) prefixParts.push(catLetter);
+      
+      const finalShortId = prefixParts.length > 0 
+        ? `${prefixParts.join('-')}-${baseModelName}` 
+        : baseModelName;
 
       orderData.shortId = finalShortId.toUpperCase();
       batch.set(newOrderRef, orderData);
