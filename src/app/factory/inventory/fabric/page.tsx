@@ -706,10 +706,7 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <div className="flex flex-col items-start leading-none">
-                      <span className="font-black text-[12px] text-black">{item.color}</span>
-                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
-                    </div>
+                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -753,10 +750,7 @@ export default function FabricInventoryPage() {
               {printColorTotals.map((item, idx) => (
                 <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
-                    <div className="flex flex-col items-start leading-none">
-                      <span className="font-black text-[12px] text-black">{item.color}</span>
-                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
-                    </div>
+                    <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
                     <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                     <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
                   </div>
@@ -842,10 +836,7 @@ export default function FabricInventoryPage() {
           {printColorTotals.map((item, idx) => (
             <div key={idx} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
               <div className="flex justify-between w-full px-1 mb-1 items-center">
-                <div className="flex flex-col items-start leading-none">
-                      <span className="font-black text-[12px] text-black">{item.color}</span>
-                      <span className="font-bold text-[10px] text-gray-500 mt-[2px]">كود: {item.abbr}</span>
-                    </div>
+                <span className="font-black text-[12px] leading-tight text-black">{item.color}</span>
                 <span className="font-bold text-[10px] text-gray-800">{item.count} توب</span>
                 <span className="font-black text-[12px] leading-tight text-black">{item.weight.toFixed(1)} كجم</span>
               </div>
