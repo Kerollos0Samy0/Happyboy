@@ -120,7 +120,7 @@ export default function FabricInventoryPage() {
       hash = (hash << 5) - hash + colorName.charCodeAt(i);
       hash = hash & hash;
     }
-    return `COLOR-${Math.abs(hash)}`;
+    return `COLOR-${Math.abs(hash).toString(36).toUpperCase()}`;
   };
 
   const handlePrintColorCards = () => {

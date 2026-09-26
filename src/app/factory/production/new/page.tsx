@@ -31,6 +31,8 @@ export default function NewProductionOrderPage() {
   
   // Dynamic color pairs array (now includes quantity and rollsCount)
   const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '', tRolls: '', pRolls: '' }]);
+  const [availableColors, setAvailableColors] = useState<string[]>(Object.keys(colorCodes));
+  const [colorHashDict, setColorHashDict] = useState<Record<string, string>>({});
   
   const [fabricSupplier, setFabricSupplier] = useState('');
 
@@ -42,9 +44,13 @@ export default function NewProductionOrderPage() {
     // Reverse lookup from colorCodes or parse hash
     if (barcodeVal.startsWith('COLOR-')) {
       const codePart = barcodeVal.replace('COLOR-', '');
+      // Check standard code
       const foundKey = Object.keys(colorCodes).find(k => colorCodes[k] === codePart);
       if (foundKey) {
         detectedColor = foundKey;
+      } else if (colorHashDict[codePart]) {
+        // Check hash dict
+        detectedColor = colorHashDict[codePart];
       }
     }
     
@@ -73,6 +79,39 @@ export default function NewProductionOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedOrderInfo, setGeneratedOrderInfo] = useState<{id: string, shortId: string} | null>(null);
+
+  // Fetch available colors from warehouse
+  useEffect(() => {
+    const fetchColors = async () => {
+      try {
+        const q = query(collection(db, 'factory_fabric_rolls'), where('status', '==', 'in_stock'));
+        const snap = await getDocs(q);
+        const uniqueColors = new Set(Object.keys(colorCodes));
+        snap.docs.forEach(doc => {
+          const color = doc.data().color;
+          if (color) uniqueColors.add(color);
+        });
+        const colorsArray = Array.from(uniqueColors);
+        setAvailableColors(colorsArray);
+
+        // Build Hash Dictionary
+        const dict: Record<string, string> = {};
+        colorsArray.forEach(colorName => {
+          let hash = 0;
+          for (let i = 0; i < colorName.length; i++) {
+            hash = (hash << 5) - hash + colorName.charCodeAt(i);
+            hash = hash & hash;
+          }
+          const hashStr = Math.abs(hash).toString(36).toUpperCase();
+          dict[hashStr] = colorName;
+        });
+        setColorHashDict(dict);
+      } catch (err) {
+        console.error('Error fetching colors', err);
+      }
+    };
+    fetchColors();
+  }, []);
 
   // Auto-calculate total quantity based on colors
   useEffect(() => {
@@ -601,7 +640,7 @@ export default function NewProductionOrderPage() {
                             className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
                           >
                             <option value="">لون التيشيرت ({idx + 1})</option>
-                            {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                            {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           <input 
                             type="text" 
@@ -644,7 +683,7 @@ export default function NewProductionOrderPage() {
                             className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
                           >
                             <option value="">لون البنطلون ({idx + 1})</option>
-                            {Object.keys(colorCodes).map(c => <option key={c} value={c}>{c}</option>)}
+                            {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           <input 
                             type="text" 
