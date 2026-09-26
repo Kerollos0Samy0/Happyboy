@@ -148,7 +148,7 @@ export default function FabricInventoryPage() {
       count: colorGroups[color].count,
       weight: colorGroups[color].weight,
       abbr: colorGroups[color].abbr,
-      barcode: getColorBarcode(color)
+      barcode: `COLOR-${colorGroups[color].abbr}`
     }));
 
     setPrintColorTotals(totalsArray);

@@ -33,6 +33,7 @@ export default function NewProductionOrderPage() {
   const [colorPairs, setColorPairs] = useState([{ tshirt: '', pants: '', quantity: '', tRolls: '', pRolls: '' }]);
   const [availableColors, setAvailableColors] = useState<string[]>(Object.keys(colorCodes));
   const [colorHashDict, setColorHashDict] = useState<Record<string, string>>({});
+  const [abbrToColorDict, setAbbrToColorDict] = useState<Record<string, string>>({});
   
   const [fabricSupplier, setFabricSupplier] = useState('');
 
@@ -48,8 +49,11 @@ export default function NewProductionOrderPage() {
       const foundKey = Object.keys(colorCodes).find(k => colorCodes[k] === codePart);
       if (foundKey) {
         detectedColor = foundKey;
+      } else if (abbrToColorDict[codePart]) {
+        // Check abbr dict
+        detectedColor = abbrToColorDict[codePart];
       } else if (colorHashDict[codePart]) {
-        // Check hash dict
+        // Check hash dict (fallback)
         detectedColor = colorHashDict[codePart];
       }
     }
@@ -87,10 +91,23 @@ export default function NewProductionOrderPage() {
         const q = query(collection(db, 'factory_fabric_rolls'), where('status', '==', 'in_stock'));
         const snap = await getDocs(q);
         const uniqueColors = new Set(Object.keys(colorCodes));
+        const tempAbbrDict: Record<string, string> = {};
         snap.docs.forEach(doc => {
-          const color = doc.data().color;
-          if (color) uniqueColors.add(color);
+          const data = doc.data();
+          const color = data.color;
+          if (color) {
+            uniqueColors.add(color);
+            if (data.code) {
+              const parts = data.code.split('-');
+              let abbr = 'OT';
+              if (parts.length >= 3) abbr = parts[1];
+              else if (parts.length === 2) abbr = parts[0];
+              else abbr = data.code;
+              tempAbbrDict[abbr] = color;
+            }
+          }
         });
+        setAbbrToColorDict(tempAbbrDict);
         const colorsArray = Array.from(uniqueColors);
         setAvailableColors(colorsArray);
 
