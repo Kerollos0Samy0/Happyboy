@@ -40,6 +40,7 @@ export default function FabricInventoryPage() {
   
   const [filterColor, setFilterColor] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('');
+  const [filterDate, setFilterDate] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('code_asc');  
   const [rollsCount, setRollsCount] = useState(1);
   const [multiAmounts, setMultiAmounts] = useState<string[]>(['']);
@@ -393,7 +394,8 @@ export default function FabricInventoryPage() {
     (r.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
      r.color?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterColor ? r.color === filterColor : true) &&
-    (filterType ? r.type === filterType : true)
+    (filterType ? r.type === filterType : true) &&
+    (filterDate ? (r.createdAt && new Date(r.createdAt.toMillis ? r.createdAt.toMillis() : (r.createdAt._seconds ? r.createdAt._seconds * 1000 : Date.now())).toISOString().split('T')[0] === filterDate) : true)
   );
 
   processedRolls.sort((a, b) => {
@@ -623,6 +625,14 @@ export default function FabricInventoryPage() {
               <option value="">كل الأنواع</option>
               {Array.from(new Set(rolls.map(r => r.type).filter(Boolean))).sort().map(t => <option key={t} value={t}>{t}</option>)}
             </select>
+            
+            <input 
+              type="date" 
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="py-2 px-3 border border-gray-300 rounded-lg outline-none text-sm bg-white"
+              title="تصفية بتاريخ الإضافة"
+            />
 
             <select 
               value={sortBy} 
