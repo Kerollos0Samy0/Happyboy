@@ -33,6 +33,31 @@ export default function GeneralInquiryPage() {
     inputRef.current?.focus();
   }, []);
 
+  const fixArabicBarcode = (text: string) => {
+    const map: Record<string, string> = {
+      'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ج': '[', 'د': ']',
+      'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ك': ';', 'ط': '\'',
+      'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm', 'و': ',', 'ز': '.', 'ظ': '/',
+      'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '‘': 'U', '÷': 'I', '×': 'O', '؛': 'P', 
+      'ِ': 'A', 'ٍ': 'S', ']': 'D', '[': 'F', 'لأ': 'G', 'أ': 'H', 'ـ': 'J', '،': 'K', '/': 'L', 
+      '~': 'Z', 'ْ': 'X', '}': 'C', '{': 'V', 'لآ': 'B', 'آ': 'N', '’': 'M', '؟': '?'
+    };
+    
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      if (i < text.length - 1) {
+        const doubleChar = text.substring(i, i + 2);
+        if (map[doubleChar]) {
+          result += map[doubleChar];
+          i++;
+          continue;
+        }
+      }
+      result += map[text[i]] || text[i];
+    }
+    return result;
+  };
+
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!barcode.trim()) return;
@@ -44,7 +69,7 @@ export default function GeneralInquiryPage() {
     setOrderResult(null);
 
     try {
-      const val = barcode.trim();
+      const val = fixArabicBarcode(barcode.trim());
       
       // 1. Is it a COLOR card barcode? (e.g., COLOR-En-Ye)
       if (val.startsWith('COLOR-')) {
