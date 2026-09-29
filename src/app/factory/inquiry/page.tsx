@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { db } from '../../../../lib/firebase';
+import { db } from '../../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Search, Package, ShoppingBag, Clock, ArrowRight, Activity, MapPin } from 'lucide-react';
+import { Search, Package, ShoppingBag, MapPin } from 'lucide-react';
 
 export default function GeneralInquiryPage() {
   const [barcode, setBarcode] = useState('');
