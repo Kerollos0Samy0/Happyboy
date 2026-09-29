@@ -3,12 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Search, Package, ShoppingBag, MapPin } from 'lucide-react';
+import { Search, Package, ShoppingBag, MapPin, Camera } from 'lucide-react';
+import CameraScanner from '../../../components/CameraScanner';
 
 export default function GeneralInquiryPage() {
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showCamera, setShowCamera] = useState(false);
   const [resultType, setResultType] = useState<'fabric' | 'order' | 'roll' | null>(null);
   
   // Fabric Results
@@ -169,25 +171,52 @@ export default function GeneralInquiryPage() {
       </div>
 
       <form onSubmit={handleScan} className="mb-10">
-        <div className="relative max-w-2xl mx-auto shadow-sm">
-          <input 
-            ref={inputRef}
-            type="text" 
-            placeholder="امسح الباركود هنا (سكانر)..." 
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            className="w-full text-center text-2xl p-5 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition"
-            autoFocus
-          />
-          <button 
-            type="submit" 
-            disabled={loading || !barcode}
-            className="absolute left-3 top-3 bottom-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 font-bold rounded-xl transition"
+        <div className="relative max-w-2xl mx-auto shadow-sm flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCamera(true)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-5 rounded-2xl border-2 border-gray-200 transition flex items-center justify-center shrink-0"
+            title="مسح بالكاميرا"
           >
-            {loading ? 'جاري البحث...' : 'استعلام'}
+            <Camera size={28} />
           </button>
+          
+          <div className="relative flex-1">
+            <input 
+              ref={inputRef}
+              type="text" 
+              placeholder="امسح الباركود هنا (سكانر)..." 
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value)}
+              className="w-full text-center text-2xl p-5 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition"
+              autoFocus
+            />
+            <button 
+              type="submit" 
+              disabled={loading || !barcode}
+              className="absolute left-3 top-3 bottom-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 font-bold rounded-xl transition"
+            >
+              {loading ? 'جاري البحث...' : 'استعلام'}
+            </button>
+          </div>
         </div>
       </form>
+
+      {showCamera && (
+        <CameraScanner
+          onScan={(text) => {
+            setBarcode(text);
+            setShowCamera(false);
+            // We use setTimeout to allow the state to update, then submit the form programmatically
+            setTimeout(() => {
+              if (inputRef.current?.form) {
+                inputRef.current.form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+              }
+            }, 100);
+          }}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
 
       {error && (
         <div className="bg-red-50 text-red-600 p-6 rounded-2xl text-center font-bold text-lg border border-red-100 mb-8 animate-fade-in shadow-sm">
