@@ -193,7 +193,7 @@ export default function FactoryDashboard() {
           const batch = writeBatch(db);
           rollsSnap.forEach(rollDoc => {
             batch.update(rollDoc.ref, {
-              status: 'available',
+              status: 'in_stock',
               usedInOrder: null,
               reservedAt: null
             });
