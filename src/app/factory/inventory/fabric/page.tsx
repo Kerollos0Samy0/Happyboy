@@ -708,9 +708,23 @@ export default function FabricInventoryPage() {
               <h2 className="text-xl font-bold text-center">
                 معاينة طباعة كارتلات الألوان (محدد: {selectedColorKeys.length} من {printColorTotals.length})
               </h2>
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2 justify-center">
                  <button onClick={() => setSelectedColorKeys(printColorTotals.map(t => t.key))} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">تحديد الكل</button>
                  <button onClick={() => setSelectedColorKeys([])} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">إلغاء التحديد</button>
+                 
+                 <select 
+                   className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 outline-none cursor-pointer"
+                   onChange={(e) => {
+                     const val = e.target.value;
+                     if (val === '') setSelectedColorKeys(printColorTotals.map(t => t.key));
+                     else setSelectedColorKeys(printColorTotals.filter(t => t.type === val).map(t => t.key));
+                   }}
+                 >
+                   <option value="">تحديد بنوع القماش (الكل)</option>
+                   {Array.from(new Set(printColorTotals.map(t => t.type))).map(type => (
+                     <option key={type as string} value={type as string}>{type as string}</option>
+                   ))}
+                 </select>
               </div>
             </div>
             
