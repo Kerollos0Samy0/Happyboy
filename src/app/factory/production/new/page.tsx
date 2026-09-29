@@ -75,7 +75,17 @@ export default function NewProductionOrderPage() {
     const valStr = barcodeVal.trim();
     
     if (valStr.startsWith('COLOR-')) {
-      const codePart = valStr.replace('COLOR-', '');
+      let codePart = valStr.replace('COLOR-', '');
+      let typePrefix = '';
+      if (codePart.includes('-')) {
+        const parts = codePart.split('-');
+        typePrefix = parts[0];
+        codePart = parts[1];
+        
+        if (typePrefix === 'En') setFabricType('انتر لوك');
+        else if (typePrefix === 'Su') setFabricType('سمر ميلتون');
+      }
+
       const foundKey = Object.keys(colorCodes).find(k => colorCodes[k] === codePart);
       if (foundKey) {
         detectedColor = foundKey;

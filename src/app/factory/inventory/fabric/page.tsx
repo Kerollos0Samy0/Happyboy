@@ -138,7 +138,7 @@ export default function FabricInventoryPage() {
         let abbr = 'OT';
         if (r.code) {
            const parts = r.code.split('-');
-           if (parts.length >= 3) abbr = parts[1];
+           if (parts.length >= 3) abbr = `${parts[0]}-${parts[1]}`;
            else if (parts.length === 2) abbr = parts[0];
            else abbr = r.code;
         }
