@@ -31,6 +31,7 @@ export default function FabricInventoryPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [printRolls, setPrintRolls] = useState<FabricRoll[]>([]);
   const [printColorTotals, setPrintColorTotals] = useState<any[]>([]);
+  const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>([]);
   const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
   
   const [filterColor, setFilterColor] = useState<string>('');
@@ -146,6 +147,7 @@ export default function FabricInventoryPage() {
     });
 
     const totalsArray = Object.keys(colorGroups).map(key => ({
+      key,
       color: colorGroups[key].color,
       type: colorGroups[key].type,
       count: colorGroups[key].count,
@@ -155,6 +157,7 @@ export default function FabricInventoryPage() {
     }));
 
     setPrintColorTotals(totalsArray);
+    setSelectedColorKeys(totalsArray.map(t => t.key));
   };
 
   const handleColorChange = (color: string) => {
@@ -701,13 +704,24 @@ export default function FabricInventoryPage() {
       {printColorTotals.length > 0 && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
           <div className="bg-white p-8 rounded-xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]">
-            <h2 className="text-xl font-bold mb-4 text-center">
-              معاينة طباعة كارتلات الألوان ({printColorTotals.length})
-            </h2>
+            <div className="flex flex-col items-center mb-4">
+              <h2 className="text-xl font-bold text-center">
+                معاينة طباعة كارتلات الألوان (محدد: {selectedColorKeys.length} من {printColorTotals.length})
+              </h2>
+              <div className="flex gap-2 mt-2">
+                 <button onClick={() => setSelectedColorKeys(printColorTotals.map(t => t.key))} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">تحديد الكل</button>
+                 <button onClick={() => setSelectedColorKeys([])} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">إلغاء التحديد</button>
+              </div>
+            </div>
             
             <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
-              {printColorTotals.map((item, idx) => (
-                <div key={idx} className="border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
+              {printColorTotals.map((item, idx) => {
+                const isSelected = selectedColorKeys.includes(item.key);
+                return (
+                <div key={idx} onClick={() => {
+                  if (isSelected) setSelectedColorKeys(prev => prev.filter(k => k !== item.key));
+                  else setSelectedColorKeys(prev => [...prev, item.key]);
+                }} className={`border border-gray-300 w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0 cursor-pointer transition-all ${isSelected ? 'ring-4 ring-blue-500 opacity-100' : 'opacity-40 hover:opacity-70'}`} style={{ direction: 'rtl', padding: '1mm' }}>
                   <div className="flex justify-between w-full px-1 mb-1 items-center">
                     <div className="flex flex-col items-start leading-none max-w-[20mm]">
                       <span className="font-black text-[12px] text-black whitespace-nowrap">{item.color}</span>
@@ -720,7 +734,7 @@ export default function FabricInventoryPage() {
                     <Barcode value={item.barcode} width={1.5} height={25} fontSize={14} fontOptions="bold" margin={0} textMargin={2} displayValue={true} background="#ffffff" />
                   </div>
                 </div>
-              ))}
+                )})}
             </div>
 
             <div className="flex gap-4 mt-6 shrink-0">
@@ -842,7 +856,7 @@ export default function FabricInventoryPage() {
       {/* The actual element that will be printed for color cards (Hidden on screen) */}
       {printColorTotals.length > 0 && typeof document !== 'undefined' && createPortal(
         <div id="print-section" className="hidden print:block w-full">
-          {printColorTotals.map((item, idx) => (
+          {printColorTotals.filter(item => selectedColorKeys.includes(item.key)).map((item, idx) => (
             <div key={idx} className="print-page w-[50mm] h-[25mm] bg-white flex flex-col items-center justify-between overflow-hidden shrink-0" style={{ direction: 'rtl', padding: '1mm' }}>
               <div className="flex justify-between w-full px-1 mb-1 items-center">
                 <div className="flex flex-col items-start leading-none max-w-[20mm]">
