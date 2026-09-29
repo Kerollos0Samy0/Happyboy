@@ -9,7 +9,7 @@ export default function GeneralInquiryPage() {
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [resultType, setResultType] = useState<'fabric' | 'order' | null>(null);
+  const [resultType, setResultType] = useState<'fabric' | 'order' | 'roll' | null>(null);
   
   // Fabric Results
   const [fabricResults, setFabricResults] = useState<{
@@ -22,6 +22,9 @@ export default function GeneralInquiryPage() {
 
   // Order Results
   const [orderResult, setOrderResult] = useState<any>(null);
+
+  // Single Roll Results
+  const [rollResult, setRollResult] = useState<any>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -94,7 +97,8 @@ export default function GeneralInquiryPage() {
           
           if (!snapRoll.empty) {
             const roll = snapRoll.docs[0].data();
-            setError(`هذا باركود توب واحد فقط (${roll.color} - ${roll.type}). استعلم باستخدام كارتلة اللون أو أمر الشغل.`);
+            setRollResult(roll);
+            setResultType('roll');
           } else {
             setError('الباركود غير مسجل في النظام. تأكد من صحة الباركود.');
           }
@@ -269,6 +273,48 @@ export default function GeneralInquiryPage() {
                 <p className="font-medium text-gray-700">{orderResult.colors}</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SINGLE ROLL RESULT */}
+      {resultType === 'roll' && rollResult && (
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden animate-fade-in border border-gray-100">
+          <div className="bg-gradient-to-r from-orange-600 to-amber-500 p-6 text-white text-center">
+            <Package size={48} className="mx-auto mb-3 opacity-90" />
+            <h2 className="text-2xl font-black mb-1">توب قماش: {rollResult.code}</h2>
+            <p className="text-orange-50 font-medium text-lg">{rollResult.type} - {rollResult.color}</p>
+          </div>
+          
+          <div className="p-8">
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 text-center">
+                <p className="text-orange-800 font-bold mb-1">الوزن / الكمية</p>
+                <p className="text-4xl font-black text-orange-600">{rollResult.amount} <span className="text-xl">{rollResult.unit}</span></p>
+              </div>
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center flex flex-col justify-center items-center">
+                <p className="text-gray-500 font-bold mb-1">حالة التوب</p>
+                {rollResult.status === 'in_stock' ? (
+                  <span className="bg-green-100 text-green-800 px-4 py-1.5 rounded-full font-bold text-lg">متاح في المخزن</span>
+                ) : rollResult.status === 'reserved' ? (
+                  <span className="bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full font-bold text-lg">محجوز لأمر تشغيل</span>
+                ) : rollResult.status === 'used' ? (
+                  <span className="bg-red-100 text-red-800 px-4 py-1.5 rounded-full font-bold text-lg">تم استخدامه</span>
+                ) : (
+                  <span className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-full font-bold text-lg">{rollResult.status || 'غير معروف'}</span>
+                )}
+              </div>
+            </div>
+
+            {rollResult.usedInOrder && (
+              <div className="border-t pt-6 text-center">
+                <p className="text-gray-500 font-bold mb-2">مرتبط بأمر شغل:</p>
+                <span className="inline-block bg-blue-50 text-blue-700 px-6 py-2 rounded-xl text-xl font-black border border-blue-100">
+                  {rollResult.usedInOrder}
+                </span>
+                <p className="text-sm text-gray-400 mt-3">امسح باركود أمر الشغل لمعرفة مكانه في المصنع</p>
+              </div>
+            )}
           </div>
         </div>
       )}
