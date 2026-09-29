@@ -193,7 +193,16 @@ export default function OrderTrackingPage() {
           <div className="bg-white p-8 rounded-3xl shadow-sm border-t-4 border-blue-600 flex justify-between items-center">
             <div>
               <div className="text-sm font-bold text-gray-500 mb-1 flex items-center gap-2"><Package size={16}/> الموديل</div>
-              <h2 className="text-4xl font-black text-gray-900">{activeOrder.modelName}</h2>
+              <h2 className="text-4xl font-black text-gray-900 flex items-center gap-4">
+                {activeOrder.modelName}
+                {activeOrder.gender && (
+                  <span className={`text-base px-4 py-1 rounded-full font-bold shadow-sm ${
+                    activeOrder.gender.includes('بناتي') ? 'bg-pink-100 text-pink-700' : 'bg-cyan-100 text-cyan-800'
+                  }`}>
+                    {activeOrder.gender}
+                  </span>
+                )}
+              </h2>
               <div className="text-xl text-blue-600 font-bold mt-2 tracking-wider">{activeOrder.shortId || activeOrder.id.slice(-6).toUpperCase()}</div>
             </div>
             <div className="text-center bg-gray-50 px-8 py-6 rounded-2xl border border-gray-100 shadow-inner">

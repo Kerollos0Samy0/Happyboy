@@ -442,7 +442,16 @@ export default function DepartmentDashboardPage() {
                         {order.shortId || order.id.slice(-6).toUpperCase()}
                         {isDelayed && <span className="text-xs bg-red-500 text-white px-2 py-1 rounded shadow-sm" title="متأخر لأكثر من 24 ساعة">متأخر ⚠️</span>}
                       </td>
-                      <td className="p-3 font-bold">{order.modelName}</td>
+                      <td className="p-3 font-bold">
+                        {order.modelName}
+                        {order.gender && (
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold mr-2 ${
+                            order.gender.includes('بناتي') ? 'bg-pink-100 text-pink-700' : 'bg-cyan-100 text-cyan-800'
+                          }`}>
+                            {order.gender}
+                          </span>
+                        )}
+                      </td>
                       <td className="p-3">{order.fabricType || 'غير محدد'}</td>
                       <td className="p-3">
                         {order.colorPairs 
@@ -473,7 +482,16 @@ export default function DepartmentDashboardPage() {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <div className="text-sm font-bold text-gray-400 mb-1">الموديل</div>
-                  <h2 className="text-3xl font-black text-gray-900">{activeOrder.modelName}</h2>
+                  <h2 className="text-3xl font-black text-gray-900 flex items-center gap-4">
+                    {activeOrder.modelName}
+                    {activeOrder.gender && (
+                      <span className={`text-sm px-3 py-1 rounded-full font-bold shadow-sm ${
+                        activeOrder.gender.includes('بناتي') ? 'bg-pink-100 text-pink-700' : 'bg-cyan-100 text-cyan-800'
+                      }`}>
+                        {activeOrder.gender}
+                      </span>
+                    )}
+                  </h2>
                   <div className="text-lg text-blue-600 font-bold mt-1">كود: {activeOrder.shortId || activeOrder.id.slice(-6).toUpperCase()}</div>
                   {department.id === "samples" && (
                     <button 

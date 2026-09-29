@@ -528,7 +528,16 @@ export default function FactoryDashboard() {
                                     <img src={order.modelImage} alt="model" className="w-24 h-24 object-contain bg-white rounded border shadow-sm" />
                                   )}
                                   <div className="flex-1 min-w-0 pr-1">
-                                      <h4 className="font-extrabold text-lg text-gray-900 truncate leading-tight" title={order.modelName}>{order.modelName}</h4>
+                                      <h4 className="font-extrabold text-lg text-gray-900 truncate leading-tight" title={order.modelName}>
+                                        {order.modelName}
+                                        {order.gender && (
+                                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold mr-2 ${
+                                            order.gender.includes('بناتي') ? 'bg-pink-100 text-pink-700' : 'bg-cyan-100 text-cyan-800'
+                                          }`}>
+                                            {order.gender}
+                                          </span>
+                                        )}
+                                      </h4>
                                       <p className="text-sm text-gray-700 mb-1 font-bold">الكمية: <span className="text-lg text-blue-700">{order.totalQuantity}</span></p>
                                       <div className="flex flex-col gap-1 mb-1">
                                         <div className="flex items-center gap-1">
