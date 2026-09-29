@@ -179,9 +179,12 @@ export default function FabricInventoryPage() {
     try {
       const { writeBatch } = await import('firebase/firestore');
       const batch = writeBatch(db);
-      const typeAbbr = newRoll.type === 'سمر ميلتون' ? 'Su' : (newRoll.type === 'أنتر لوك' ? 'En' : 'Ot');
-      const baseCode = colorCodes[newRoll.color] || 'OT';
-      let currentCount = getNextCodeCount(newRoll.color);
+      const typeAbbr = newRoll.type === 'سمر ميلتون' ? 'Su' : (newRoll.type === 'أنتر لوك' || newRoll.type === 'انتر لوك' ? 'En' : 'Ot');
+      const isInterlock = newRoll.type === 'أنتر لوك' || newRoll.type === 'انتر لوك';
+      const finalColorName = isInterlock && !newRoll.color.startsWith('En ') ? `En ${newRoll.color}` : newRoll.color;
+      const cleanColor = finalColorName.replace(/^En\s+/, '').trim();
+      const baseCode = colorCodes[cleanColor] || 'OT';
+      let currentCount = getNextCodeCount(finalColorName);
 
       for (let i = 0; i < rollsCount; i++) {
         const weight = Number(multiAmounts[i]) || 0;
@@ -190,7 +193,7 @@ export default function FabricInventoryPage() {
         
         batch.set(newRef, {
           code: rollCode,
-          color: newRoll.color,
+          color: finalColorName,
           type: newRoll.type,
           amount: weight,
           unit: newRoll.unit,
@@ -261,25 +264,30 @@ export default function FabricInventoryPage() {
       const colorCounters: Record<string, number> = {};
 
       for (const row of rows) {
-        const colorName = row["اللون"] || 'غير محدد';
+        let rawColor = row["اللون"] || 'غير محدد';
         const type = row["نوع القماش"] || '';
+        const isInterlock = type === 'أنتر لوك' || type === 'انتر لوك';
+        const finalColorName = isInterlock && !rawColor.startsWith('En ') ? `En ${rawColor}` : rawColor;
+        const cleanColor = finalColorName.replace(/^En\s+/, '').trim();
+        
         // Fallback to older column name just in case they use the old template
         const amount = Number(row["الوزن (كجم)"]) || Number(row["الكمية (الوزن)"]) || Number(row["الكيلو"]) || 0;
         const supplier = row["المورد"] || '';
         const prefix = row["الاختصار"];
 
-        const baseCode = prefix || colorCodes[colorName] || 'OT';
+        const baseCode = prefix || colorCodes[cleanColor] || 'OT';
         
-        if (colorCounters[colorName] === undefined) {
-          colorCounters[colorName] = getNextCodeCount(colorName);
+        if (colorCounters[finalColorName] === undefined) {
+          colorCounters[finalColorName] = getNextCodeCount(finalColorName);
         }
         
-        const rollCode = `${baseCode}-${colorCounters[colorName].toString().padStart(3, '0')}`;
+        const typeAbbr = type === 'سمر ميلتون' ? 'Su' : (isInterlock ? 'En' : 'Ot');
+        const rollCode = `${typeAbbr}-${baseCode}-${colorCounters[finalColorName].toString().padStart(3, '0')}`;
         
         const newDocRef = doc(collection(db, 'factory_fabric_rolls'));
         batch.set(newDocRef, {
           code: rollCode,
-          color: colorName,
+          color: finalColorName,
           type,
           amount,
           unit: 'كجم',
@@ -320,9 +328,12 @@ export default function FabricInventoryPage() {
     if (!editingRoll) return;
     setIsSaving(true);
     try {
+      const isInterlock = editForm.type === 'أنتر لوك' || editForm.type === 'انتر لوك';
+      const finalColorName = isInterlock && !editForm.color.startsWith('En ') ? `En ${editForm.color}` : editForm.color;
+      
       await updateDoc(doc(db, 'factory_fabric_rolls', editingRoll.id), {
         code: editForm.code,
-        color: editForm.color,
+        color: finalColorName,
         type: editForm.type,
         amount: Number(editForm.amount),
         supplier: editForm.supplier
