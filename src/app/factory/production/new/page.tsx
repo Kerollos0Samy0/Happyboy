@@ -80,7 +80,7 @@ export default function NewProductionOrderPage() {
       if (codePart.includes('-')) {
         const parts = codePart.split('-');
         typePrefix = parts[0];
-        codePart = parts[1];
+        codePart = parts.slice(1).join('-');
         
         if (typePrefix === 'En') setFabricType('انتر لوك');
         else if (typePrefix === 'Su') setFabricType('سمر ميلتون');
