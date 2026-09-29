@@ -253,7 +253,7 @@ export default function NewProductionOrderPage() {
         // Fetch for Tshirt color
         if (pair.tshirt && Number(pair.tRolls) > 0) {
           const tCount = Number(pair.tRolls);
-          const qT = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.tshirt), where('status', '==', 'in_stock'));
+          const qT = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.tshirt), where('type', '==', fabricType), where('status', '==', 'in_stock'));
           const snapT = await getDocs(qT);
           let docsT = snapT.docs.map(d => ({id: d.id, ...d.data() as any}));
           docsT.sort((a, b) => {
@@ -272,7 +272,7 @@ export default function NewProductionOrderPage() {
         // Fetch for Pants color
         if (pair.pants && Number(pair.pRolls) > 0) {
           const pCount = Number(pair.pRolls);
-          const qP = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.pants), where('status', '==', 'in_stock'));
+          const qP = query(collection(db, 'factory_fabric_rolls'), where('color', '==', pair.pants), where('type', '==', fabricType), where('status', '==', 'in_stock'));
           const snapP = await getDocs(qP);
           let docsP = snapP.docs.map(d => ({id: d.id, ...d.data() as any}));
           docsP.sort((a, b) => {
@@ -688,8 +688,15 @@ export default function NewProductionOrderPage() {
                   <input type="number" value={totalQuantity} readOnly className="w-full p-2.5 border border-gray-300 rounded-lg outline-none bg-gray-200 cursor-not-allowed font-bold" required min="1" placeholder="أدخل كميات الألوان بالأسفل" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش</label>
-                  <input type="text" value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: قطن، ميلتون..." />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">نوع القماش *</label>
+                  <select required value={fabricType} onChange={(e) => setFabricType(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                    <option value="">اختر نوع القماش...</option>
+                    <option value="انتر لوك">انتر لوك</option>
+                    <option value="سمر ميلتون">سمر ميلتون</option>
+                    <option value="قطن">قطن</option>
+                    <option value="سنجل">سنجل</option>
+                    <option value="أخرى">أخرى</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">المورد / المخزن</label>
