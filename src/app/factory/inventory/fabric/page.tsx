@@ -32,6 +32,7 @@ export default function FabricInventoryPage() {
   const [printRolls, setPrintRolls] = useState<FabricRoll[]>([]);
   const [printColorTotals, setPrintColorTotals] = useState<any[]>([]);
   const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>([]);
+  const [printModalSearch, setPrintModalSearch] = useState('');
   const [selectedRolls, setSelectedRolls] = useState<string[]>([]);
   
   const [filterColor, setFilterColor] = useState<string>('');
@@ -158,6 +159,7 @@ export default function FabricInventoryPage() {
 
     setPrintColorTotals(totalsArray);
     setSelectedColorKeys(totalsArray.map(t => t.key));
+    setPrintModalSearch('');
   };
 
   const handleColorChange = (color: string) => {
@@ -704,16 +706,17 @@ export default function FabricInventoryPage() {
       {printColorTotals.length > 0 && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 no-print p-4">
           <div className="bg-white p-8 rounded-xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex flex-col items-center mb-4">
+            <div className="flex flex-col items-center mb-4 w-full">
               <h2 className="text-xl font-bold text-center">
                 معاينة طباعة كارتلات الألوان (محدد: {selectedColorKeys.length} من {printColorTotals.length})
               </h2>
-              <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                 <button onClick={() => setSelectedColorKeys(printColorTotals.map(t => t.key))} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">تحديد الكل</button>
-                 <button onClick={() => setSelectedColorKeys([])} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">إلغاء التحديد</button>
+              <div className="flex flex-wrap gap-2 mt-2 justify-center w-full max-w-2xl">
+                 <input type="text" placeholder="بحث باسم اللون..." value={printModalSearch} onChange={(e) => setPrintModalSearch(e.target.value)} className="flex-1 text-sm px-3 py-1.5 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]" />
+                 <button onClick={() => setSelectedColorKeys(printColorTotals.map(t => t.key))} className="text-sm px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">تحديد الكل</button>
+                 <button onClick={() => setSelectedColorKeys([])} className="text-sm px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">إلغاء التحديد</button>
                  
                  <select 
-                   className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 outline-none cursor-pointer"
+                   className="text-sm px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 outline-none cursor-pointer"
                    onChange={(e) => {
                      const val = e.target.value;
                      if (val === '') setSelectedColorKeys(printColorTotals.map(t => t.key));
@@ -729,7 +732,7 @@ export default function FabricInventoryPage() {
             </div>
             
             <div className="flex-1 overflow-auto border p-4 bg-gray-50 flex flex-wrap gap-4 justify-center">
-              {printColorTotals.map((item, idx) => {
+              {printColorTotals.filter(t => t.color.includes(printModalSearch)).map((item, idx) => {
                 const isSelected = selectedColorKeys.includes(item.key);
                 return (
                 <div key={idx} onClick={() => {
