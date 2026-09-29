@@ -55,17 +55,18 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
           <div className="w-full px-4 lg:px-8 mx-auto flex justify-between items-center">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-black text-blue-900 tracking-tight">نظام مصنع HappyBoy</h1>
-              {!userEmail?.startsWith("dept_") && (
-                <nav className="hidden lg:flex gap-2">
-                  {!userEmail?.toLowerCase().includes("omnia") && (
-                    <>
-                      <Link 
-                        href="/factory/inquiry" 
-                        className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-                      >
-                        <Search size={18} /> استعلام عام
-                      </Link>
-                      <Link 
+              <nav className="hidden lg:flex gap-2">
+                <Link 
+                  href="/factory/inquiry" 
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                >
+                  <Search size={18} /> استعلام عام
+                </Link>
+                {!userEmail?.startsWith("dept_") && (
+                  <>
+                    {!userEmail?.toLowerCase().includes("omnia") && (
+                      <>
+                        <Link 
                         href="/factory/dashboard" 
                         className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
                       >
@@ -103,9 +104,10 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                       </Link>
                     </>
                   )}
-                </nav>
+                </>
               )}
-            </div>
+            </nav>
+          </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-bold text-gray-500 hidden sm:inline-block bg-gray-100 px-3 py-1 rounded-full">{userEmail}</span>
               {!userEmail?.startsWith("dept_") ? (
@@ -129,16 +131,17 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
           </div>
           
           {/* Mobile Navigation */}
-          {!userEmail?.startsWith("dept_") && (
-            <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
+          <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
+            <Link 
+              href="/factory/inquiry" 
+              className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+            >
+              <Search size={16} /> استعلام عام
+            </Link>
+            {!userEmail?.startsWith("dept_") && (
+              <>
                 {!userEmail?.toLowerCase().includes("omnia") && (
                   <>
-                    <Link 
-                      href="/factory/inquiry" 
-                      className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
-                    >
-                      <Search size={16} /> استعلام عام
-                    </Link>
                     <Link 
                       href="/factory/dashboard" 
                       className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
@@ -160,8 +163,9 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                 >
                   <PackageOpen size={16} /> المخازن
                 </Link>
-            </nav>
-          )}
+              </>
+            )}
+          </nav>
         </header>
       )}
       {!(isLoginPage || isScannerPage) && (
