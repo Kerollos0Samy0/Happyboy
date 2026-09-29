@@ -9,7 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   TrendingUp, Users, Package, ShoppingCart, QrCode, 
   DollarSign, MapPin, AlertTriangle, Archive, CheckCircle, 
-  Clock, Truck, ChevronLeft, Wallet, PlusCircle, ClipboardList
+  Clock, Truck, ChevronLeft, Wallet, PlusCircle, ClipboardList, Search
 } from "lucide-react";
 import styles from "./dashboard.module.css";
 
@@ -569,6 +569,11 @@ export default function AdminDashboardPage() {
                     </a>
                   </>
                 )}
+                
+                <a href="/factory/inquiry" className={`${styles.linkItem} ${styles.gray}`}>
+                  <div className={styles.linkContent}><Search size={20} style={{color: '#f97316'}}/> الاستعلام العام</div>
+                  <ChevronLeft size={18} style={{color: '#9ca3af'}} />
+                </a>
                 <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                   <a href="/customer" className={`${styles.linkItem} ${styles.green}`} style={{ flex: 1 }}>
                     <div className={styles.linkContent}><QrCode size={20} /> مسح الموديلات</div>
