@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, onSnapshot, writeBatch } from 'firebase/firestore';
-import { Search, PlusCircle, Scissors, Trash2, Printer, Upload, Download } from 'lucide-react';
+import { Search, PlusCircle, Scissors, Trash2, Printer, Edit, Upload, Download } from 'lucide-react';
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from 'react-barcode';
 import * as XLSX from 'xlsx';
@@ -29,6 +29,9 @@ export default function FabricInventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingRoll, setEditingRoll] = useState<FabricRoll | null>(null);
+  const [editForm, setEditForm] = useState({ code: '', color: '', type: '', amount: 0, supplier: '' });
+
   const [printRolls, setPrintRolls] = useState<FabricRoll[]>([]);
   const [printColorTotals, setPrintColorTotals] = useState<any[]>([]);
   const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>([]);
@@ -299,6 +302,36 @@ export default function FabricInventoryPage() {
       // reset file input
       e.target.value = '';
     }
+  };
+
+  const handleEditClick = (roll: FabricRoll) => {
+    setEditingRoll(roll);
+    setEditForm({
+      code: roll.code || '',
+      color: roll.color || '',
+      type: roll.type || '',
+      amount: roll.amount || 0,
+      supplier: roll.supplier || ''
+    });
+  };
+
+  const handleUpdateRoll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRoll) return;
+    setIsSaving(true);
+    try {
+      await updateDoc(doc(db, 'factory_fabric_rolls', editingRoll.id), {
+        code: editForm.code,
+        color: editForm.color,
+        type: editForm.type,
+        amount: Number(editForm.amount),
+        supplier: editForm.supplier
+      });
+      setEditingRoll(null);
+    } catch (err: any) {
+      alert('خطأ في التعديل: ' + err.message);
+    }
+    setIsSaving(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -686,11 +719,14 @@ export default function FabricInventoryPage() {
                         <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{(roll.usedInOrder && roll.usedInOrder.length > 15) ? roll.usedInOrder.slice(-6).toUpperCase() : (roll.usedInOrder || '---')}</span>
                       ) : (roll.supplier || '---')}
                     </td>
-                    <td className="p-4 flex gap-2 justify-center">
-                      <button onClick={() => setPrintRolls([roll])} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
-                        <Printer size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(roll.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition" title="حذف التوب">
+                                          <td className="p-4 flex gap-2 justify-center">
+                        <button onClick={() => setPrintRolls([roll])} className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition" title="طباعة الباركود">
+                          <Printer size={18} />
+                        </button>
+                        <button onClick={() => handleEditClick(roll)} className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition" title="تعديل">
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => handleDelete(roll.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition" title="حذف التوب">
                         <Trash2 size={18} />
                       </button>
                     </td>
@@ -869,6 +905,46 @@ export default function FabricInventoryPage() {
       )}
 
     </div>
+
+
+      {/* Edit Modal */}
+      {editingRoll && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 no-print" dir="rtl">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <h2 className="text-xl font-bold mb-4 border-b pb-2">تعديل بيانات التوب</h2>
+            <form onSubmit={handleUpdateRoll} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-bold mb-1">الكود</label>
+                <input required type="text" value={editForm.code} onChange={e => setEditForm({...editForm, code: e.target.value})} className="w-full border p-2 rounded" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-1">اللون</label>
+                  <input type="text" value={editForm.color} onChange={e => setEditForm({...editForm, color: e.target.value})} className="w-full border p-2 rounded" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">النوع</label>
+                  <input required type="text" value={editForm.type} onChange={e => setEditForm({...editForm, type: e.target.value})} className="w-full border p-2 rounded" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-1">الوزن (كجم)</label>
+                  <input required type="number" step="0.1" value={editForm.amount} onChange={e => setEditForm({...editForm, amount: Number(e.target.value)})} className="w-full border p-2 rounded" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">المورد</label>
+                  <input type="text" value={editForm.supplier} onChange={e => setEditForm({...editForm, supplier: e.target.value})} className="w-full border p-2 rounded" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button type="button" onClick={() => setEditingRoll(null)} className="px-4 py-2 bg-gray-200 rounded font-bold hover:bg-gray-300">إلغاء</button>
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700">حفظ التعديلات</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* The actual element that will be printed for color cards (Hidden on screen) */}
       {printColorTotals.length > 0 && typeof document !== 'undefined' && createPortal(
