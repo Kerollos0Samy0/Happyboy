@@ -181,6 +181,27 @@ export default function FactoryDashboard() {
     setActiveMenuId(null);
     if (!confirm('هل أنت متأكد من حذف أمر التشغيل هذا نهائياً؟')) return;
     try {
+      const orderToDelete = orders.find(o => o.id === id);
+      
+      // Free reserved rolls if any
+      if (orderToDelete && orderToDelete.shortId) {
+        const { getDocs, query, collection, where, writeBatch } = await import('firebase/firestore');
+        const rollsQ = query(collection(db, 'factory_fabric_rolls'), where('usedInOrder', '==', orderToDelete.shortId));
+        const rollsSnap = await getDocs(rollsQ);
+        
+        if (!rollsSnap.empty) {
+          const batch = writeBatch(db);
+          rollsSnap.forEach(rollDoc => {
+            batch.update(rollDoc.ref, {
+              status: 'available',
+              usedInOrder: null,
+              reservedAt: null
+            });
+          });
+          await batch.commit();
+        }
+      }
+
       await deleteDoc(doc(db, 'factory_production_orders', id));
     } catch (err) {
       console.error(err);
