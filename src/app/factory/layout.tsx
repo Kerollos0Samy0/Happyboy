@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { auth } from "../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
-import { BarChart3, PackageOpen, Monitor, ArrowRight } from "lucide-react";
+import { BarChart3, PackageOpen, Monitor, ArrowRight, Search } from "lucide-react";
 
 export default function FactoryLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -59,6 +59,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
                 <nav className="hidden lg:flex gap-2">
                   {!userEmail?.toLowerCase().includes("omnia") && (
                     <>
+                      <Link 
+                        href="/factory/inquiry" 
+                        className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                      >
+                        <Search size={18} /> استعلام عام
+                      </Link>
                       <Link 
                         href="/factory/dashboard" 
                         className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
@@ -127,6 +133,12 @@ export default function FactoryLayout({ children }: { children: React.ReactNode 
             <nav className="lg:hidden flex gap-2 mt-4 border-t pt-3 overflow-x-auto pb-2 scrollbar-hide">
                 {!userEmail?.toLowerCase().includes("omnia") && (
                   <>
+                    <Link 
+                      href="/factory/inquiry" 
+                      className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/inquiry' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
+                    >
+                      <Search size={16} /> استعلام عام
+                    </Link>
                     <Link 
                       href="/factory/dashboard" 
                       className={`px-4 py-2 whitespace-nowrap rounded-lg text-sm transition-colors flex items-center gap-1 ${pathname === '/factory/dashboard' ? 'bg-blue-100 text-blue-800 font-bold' : 'text-gray-600 hover:bg-gray-100 font-medium'}`}
