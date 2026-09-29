@@ -175,28 +175,28 @@ export default function GeneralInquiryPage() {
           <button
             type="button"
             onClick={() => setShowCamera(true)}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-5 rounded-2xl border-2 border-gray-200 transition flex items-center justify-center shrink-0"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-3 sm:p-5 rounded-2xl border-2 border-gray-200 transition flex items-center justify-center shrink-0"
             title="مسح بالكاميرا"
           >
-            <Camera size={28} />
+            <Camera className="w-6 h-6 sm:w-7 sm:h-7" />
           </button>
           
           <div className="relative flex-1">
             <input 
               ref={inputRef}
               type="text" 
-              placeholder="امسح الباركود هنا (سكانر)..." 
+              placeholder="امسح الباركود هنا..." 
               value={barcode}
               onChange={(e) => setBarcode(e.target.value)}
-              className="w-full text-center text-2xl p-5 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition"
+              className="w-full text-center text-lg sm:text-2xl p-3 sm:p-5 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition"
               autoFocus
             />
             <button 
               type="submit" 
               disabled={loading || !barcode}
-              className="absolute left-3 top-3 bottom-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 font-bold rounded-xl transition"
+              className="absolute left-2 sm:left-3 top-2 sm:top-3 bottom-2 sm:bottom-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 sm:px-6 text-sm sm:text-base font-bold rounded-xl transition"
             >
-              {loading ? 'جاري البحث...' : 'استعلام'}
+              {loading ? 'بحث...' : 'استعلام'}
             </button>
           </div>
         </div>
@@ -334,28 +334,28 @@ export default function GeneralInquiryPage() {
       {/* SINGLE ROLL RESULT */}
       {resultType === 'roll' && rollResult && (
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden animate-fade-in border border-gray-100">
-          <div className="bg-gradient-to-r from-orange-600 to-amber-500 p-6 text-white text-center">
-            <Package size={48} className="mx-auto mb-3 opacity-90" />
-            <h2 className="text-2xl font-black mb-1">توب قماش: {rollResult.code}</h2>
-            <p className="text-orange-50 font-medium text-lg">{rollResult.type} - {rollResult.color}</p>
+          <div className="bg-gradient-to-r from-orange-600 to-amber-500 p-4 sm:p-6 text-white text-center">
+            <Package className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-90" />
+            <h2 className="text-xl sm:text-2xl font-black mb-1">توب قماش: {rollResult.code}</h2>
+            <p className="text-orange-50 font-medium text-sm sm:text-lg">{rollResult.type} - {rollResult.color}</p>
           </div>
           
-          <div className="p-8">
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 text-center">
-                <p className="text-orange-800 font-bold mb-1">الوزن / الكمية</p>
-                <p className="text-4xl font-black text-orange-600">{rollResult.amount} <span className="text-xl">{rollResult.unit}</span></p>
+          <div className="p-4 sm:p-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 sm:p-6 text-center">
+                <p className="text-orange-800 font-bold mb-1 text-sm sm:text-base">الوزن / الكمية</p>
+                <p className="text-3xl sm:text-4xl font-black text-orange-600">{rollResult.amount} <span className="text-lg sm:text-xl">{rollResult.unit}</span></p>
               </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center flex flex-col justify-center items-center">
-                <p className="text-gray-500 font-bold mb-1">حالة التوب</p>
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6 text-center flex flex-col justify-center items-center">
+                <p className="text-gray-500 font-bold mb-1 text-sm sm:text-base">حالة التوب</p>
                 {rollResult.status === 'in_stock' ? (
-                  <span className="bg-green-100 text-green-800 px-4 py-1.5 rounded-full font-bold text-lg">متاح في المخزن</span>
+                  <span className="bg-green-100 text-green-800 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-sm sm:text-lg">متاح في المخزن</span>
                 ) : rollResult.status === 'reserved' ? (
-                  <span className="bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full font-bold text-lg">محجوز لأمر تشغيل</span>
+                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-sm sm:text-lg">محجوز لأمر تشغيل</span>
                 ) : rollResult.status === 'used' ? (
-                  <span className="bg-red-100 text-red-800 px-4 py-1.5 rounded-full font-bold text-lg">تم استخدامه</span>
+                  <span className="bg-red-100 text-red-800 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-sm sm:text-lg">تم استخدامه</span>
                 ) : (
-                  <span className="bg-gray-200 text-gray-800 px-4 py-1.5 rounded-full font-bold text-lg">{rollResult.status || 'غير معروف'}</span>
+                  <span className="bg-gray-200 text-gray-800 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-sm sm:text-lg">{rollResult.status || 'غير معروف'}</span>
                 )}
               </div>
             </div>
