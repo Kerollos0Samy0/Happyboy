@@ -54,201 +54,274 @@ export default function PublicOrderViewPage() {
   const sizeHeaders = sizesMatch ? sizesMatch[0].split('-') : ['', '', '', ''];
   while(sizeHeaders.length < 4) sizeHeaders.push('');
 
+
+  const validPairs = order.colorPairs?.filter(p => p.tshirt.trim() || p.pants.trim()) || [];
+  
+
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4 pb-10 p-2 sm:p-4" dir="rtl">
-      <div className="bg-white p-3 sm:p-8 shadow-lg w-full mx-auto flex flex-col rounded-lg">
-        
-        <div className="border-2 sm:border-4 border-gray-800 p-3 sm:p-4 mb-4 sm:mb-6 rounded">
-          <div className="flex flex-col sm:flex-row justify-between items-start">
-            <div className="flex-1 w-full">
-              <h1 className="text-xl sm:text-3xl font-black mb-2 text-gray-900 text-center sm:text-right">أمر تشغيل مصنع (رئيسي)</h1>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mt-2 sm:mt-4 text-sm sm:text-lg">
-                <div className="font-bold border-b border-gray-300 pb-1">الموديل: <span className="font-normal">{order.modelName}</span></div>
-                <div className="font-bold border-b border-gray-300 pb-1">التصنيف: <span className="font-normal">{order.sizesSeries || '---'}</span></div>
-                <div className="font-bold border-b border-gray-300 pb-1">الكمية: <span className="font-normal">{order.totalQuantity} قطعة</span></div>
-                <div className="font-bold border-b border-gray-300 pb-1">التاريخ: <span className="font-normal">{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG')}</span></div>
+    <div className="max-w-[297mm] mx-auto pb-20 bg-gray-100 print:bg-white print:pb-0" dir="rtl">
+      <div className="bg-white mx-auto flex flex-col font-sans p-2 border-2 border-gray-200 print:border-0" style={{ width: '297mm', minHeight: '210mm' }}>
+          
+          {/* Header */}
+          <div className="flex items-stretch border-2 border-[#1a1a1a] rounded mb-2 h-20">
+            {/* Title */}
+            <div className="w-[30%] bg-[#1a1a1a] text-white flex flex-col justify-center items-center p-2">
+              <h1 className="text-3xl font-black mb-1">أمر شغل طباعة</h1>
+              <span className="tracking-widest text-xs">P R I N T &nbsp; W O R K &nbsp; O R D E R</span>
+            </div>
+            
+            {/* Center Info */}
+            <div className="flex-1 flex gap-4 p-2 items-center justify-center bg-gray-50 border-r-2 border-l-2 border-[#1a1a1a]">
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold mb-1">رقم أمر الشغل</span>
+                <div className="bg-white border border-gray-400 h-8 w-28 flex items-center justify-center font-bold text-sm">
+                  {order.shortId || order.id.slice(-6).toUpperCase()}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold mb-1">التاريخ</span>
+                <div className="bg-white border border-gray-400 h-8 w-28 flex items-center justify-center text-sm font-bold">
+                  {new Date().toLocaleDateString('en-GB')}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold mb-1">كود الموديل</span>
+                <div className="bg-white border border-gray-400 h-8 w-28 flex items-center justify-center font-bold text-sm">
+                  {order.modelName}
+                </div>
+              </div>
+            </div>
+            
+            {/* Model Name */}
+            <div className="w-[30%] bg-[#1a1a1a] text-white flex flex-col p-2 items-center justify-center">
+              <span className="text-sm font-bold mb-1">اسم الموديل</span>
+              <div className="bg-white text-black h-8 w-full rounded flex items-center justify-center font-bold text-sm">
+                {order.modelName}
+              </div>
+            </div>
+          </div>
+
+          {/* T-Shirt Section */}
+          <div className="flex border-2 border-[#5c4033] rounded mb-2 overflow-hidden" style={{ height: '220px' }}>
+            <div className="w-24 bg-[#5c4033] text-white flex flex-col items-center justify-center p-2 shrink-0">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+              <span className="font-bold text-lg">التيشيرت</span>
+              <span className="text-[10px] tracking-widest mt-1">T-SHIRT</span>
+            </div>
+            
+            <div className="flex-1 flex p-2 gap-4">
+              {/* Illustrations Area */}
+              <div className="w-[35%] flex gap-2 justify-around items-end pb-2">
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-28 border border-gray-300 rounded mb-1 bg-gray-50 flex items-center justify-center">
+                    {/* SVG placeholder for front */}
+                    {order.modelImage ? <img src={order.modelImage} className="h-full object-contain p-1" /> : <div className="text-xs text-gray-400">أمام</div>}
+                  </div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">أمام</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-28 border border-gray-300 rounded mb-1 bg-gray-50"></div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">خلف</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-28 border border-gray-300 rounded mb-1 bg-gray-50"></div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">كم</div>
+                </div>
+              </div>
+
+              {/* Checkboxes Area */}
+              <div className="flex-1 grid grid-cols-3 gap-2">
+                {/* Print Location */}
+                <div className="border border-gray-300 rounded p-2 flex flex-col">
+                  <div className="bg-[#5c4033] text-white text-center text-xs font-bold py-1 mb-2 rounded-t">موقع الطباعة</div>
+                  <div className="space-y-2 flex-1 flex flex-col justify-around text-sm font-bold">
+                    <div className="flex justify-between items-center px-1"><span>صدر</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>ظهر</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>كم يمين</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>كم شمال</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                  </div>
+                </div>
+
+                {/* Print Type */}
+                <div className="border border-gray-300 rounded p-2 flex flex-col">
+                  <div className="bg-[#5c4033] text-white text-center text-xs font-bold py-1 mb-2 rounded-t">نوع الطباعة</div>
+                  <div className="space-y-1.5 flex-1 flex flex-col justify-around text-xs font-bold">
+                    <div className="flex justify-between items-center"><div className="bg-[#a8c8ff] py-1 px-2 rounded flex-1 ml-1 text-center">DTF</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#ffb6c1] py-1 px-2 rounded flex-1 ml-1 text-center">RUBBER</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#b4eeb4] py-1 px-2 rounded flex-1 ml-1 text-center">VINYL</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#d8bfd8] py-1 px-2 rounded flex-1 ml-1 text-center">UV-DTF</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#d3d3d3] py-1 px-2 rounded flex-1 ml-1 text-center">أخرى</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                  </div>
+                </div>
+
+                {/* Colors */}
+                <div className="flex flex-col gap-1 h-full">
+                  <div className="flex text-center text-xs font-bold mb-1">
+                    <div className="bg-[#5c4033] text-white py-1 flex-[1.5] rounded-tr ml-1">لون الموديل</div>
+                    <div className="bg-[#5c4033] text-white py-1 flex-[2] rounded-tl">لون الطباعة</div>
+                  </div>
+                  {[
+                    { id: 1, name: tColors[0] || '', bg: '#d2b48c' },
+                    { id: 2, name: tColors[1] || '', bg: '#556b2f' },
+                    { id: 3, name: tColors[2] || '', bg: '#4682b4' },
+                    { id: 4, name: tColors[3] || '', bg: '#000000' }
+                  ].map((c) => (
+                    <div key={c.id} className="flex flex-1 items-center gap-1">
+                      <div className="flex-[1.5] flex h-full">
+                        <div className="w-6 h-full flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: c.bg }}>{c.id}</div>
+                        <div className="flex-1 h-full border border-gray-400 bg-gray-50 flex items-center justify-center text-xs">{c.name}</div>
+                      </div>
+                      <div className="flex-[2] h-full border border-gray-400 bg-white"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pants Section */}
+          <div className="flex border-2 border-[#5c4033] rounded mb-2 overflow-hidden" style={{ height: '220px' }}>
+            <div className="w-24 bg-[#5c4033] text-white flex flex-col items-center justify-center p-2 shrink-0">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-2"><path d="M5.5 3h13L19 21H14L12 12L10 21H5L5.5 3Z"/><path d="M9 3v4M15 3v4"/></svg>
+              <span className="font-bold text-lg">البنطلون</span>
+              <span className="text-[10px] tracking-widest mt-1">PANTS</span>
+            </div>
+            
+            <div className="flex-1 flex p-2 gap-4">
+              {/* Illustrations Area */}
+              <div className="w-[35%] flex gap-2 justify-around items-end pb-2">
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-28 border border-gray-300 rounded mb-1 bg-gray-50"></div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">أمام</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-28 border border-gray-300 rounded mb-1 bg-gray-50"></div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">خلف</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-28 border border-gray-300 rounded mb-1 bg-gray-50"></div>
+                  <div className="bg-[#8b654b] text-white text-xs py-1 px-4 rounded w-full text-center">جنب</div>
+                </div>
+              </div>
+
+              {/* Checkboxes Area */}
+              <div className="flex-1 grid grid-cols-3 gap-2">
+                {/* Print Location */}
+                <div className="border border-gray-300 rounded p-2 flex flex-col">
+                  <div className="bg-[#5c4033] text-white text-center text-xs font-bold py-1 mb-2 rounded-t">موقع الطباعة</div>
+                  <div className="space-y-2 flex-1 flex flex-col justify-around text-sm font-bold">
+                    <div className="flex justify-between items-center px-1"><span>أمام</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>خلف</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>جانب يمين</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                    <div className="flex justify-between items-center px-1"><span>جانب شمال</span> <div className="w-12 h-6 border border-gray-400 bg-white"></div></div>
+                  </div>
+                </div>
+
+                {/* Print Type */}
+                <div className="border border-gray-300 rounded p-2 flex flex-col">
+                  <div className="bg-[#5c4033] text-white text-center text-xs font-bold py-1 mb-2 rounded-t">نوع الطباعة</div>
+                  <div className="space-y-1.5 flex-1 flex flex-col justify-around text-xs font-bold">
+                    <div className="flex justify-between items-center"><div className="bg-[#a8c8ff] py-1 px-2 rounded flex-1 ml-1 text-center">DTF</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#ffb6c1] py-1 px-2 rounded flex-1 ml-1 text-center">RUBBER</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#b4eeb4] py-1 px-2 rounded flex-1 ml-1 text-center">VINYL</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#d8bfd8] py-1 px-2 rounded flex-1 ml-1 text-center">UV-DTF</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                    <div className="flex justify-between items-center"><div className="bg-[#d3d3d3] py-1 px-2 rounded flex-1 ml-1 text-center">أخرى</div> <div className="w-5 h-5 border border-gray-400 bg-white rounded-sm shrink-0"></div></div>
+                  </div>
+                </div>
+
+                {/* Colors */}
+                <div className="flex flex-col gap-1 h-full">
+                  <div className="flex text-center text-xs font-bold mb-1">
+                    <div className="bg-[#5c4033] text-white py-1 flex-[1.5] rounded-tr ml-1">لون الموديل</div>
+                    <div className="bg-[#5c4033] text-white py-1 flex-[2] rounded-tl">لون الطباعة</div>
+                  </div>
+                  {[
+                    { id: 1, name: pColors[0] || '', bg: '#d2b48c' },
+                    { id: 2, name: pColors[1] || '', bg: '#556b2f' },
+                    { id: 3, name: pColors[2] || '', bg: '#4682b4' },
+                    { id: 4, name: pColors[3] || '', bg: '#000000' }
+                  ].map((c) => (
+                    <div key={c.id} className="flex flex-1 items-center gap-1">
+                      <div className="flex-[1.5] flex h-full">
+                        <div className="w-6 h-full flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: c.bg }}>{c.id}</div>
+                        <div className="flex-1 h-full border border-gray-400 bg-gray-50 flex items-center justify-center text-xs">{c.name}</div>
+                      </div>
+                      <div className="flex-[2] h-full border border-gray-400 bg-white"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="flex h-24 gap-2">
+            <div className="w-24 bg-[#1a1a1a] text-white flex flex-col items-center justify-center rounded p-1 shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span className="font-bold">الكميات</span>
+              <span className="text-[8px] tracking-wider mt-1">QUANTITY</span>
+            </div>
+            
+            <div className="flex-1 flex gap-2">
+              {[
+                    { id: 1, name: '', bg: '#d2b48c', qty: validPairs[0]?.quantity || '' },
+                    { id: 2, name: '', bg: '#556b2f', qty: validPairs[1]?.quantity || '' },
+                    { id: 3, name: '', bg: '#4682b4', qty: validPairs[2]?.quantity || '' },
+                    { id: 4, name: '', bg: '#000000', qty: validPairs[3]?.quantity || '' }
+              ].map((c) => (
+                <div key={c.id} className="flex-1 flex flex-col border border-gray-300 rounded overflow-hidden">
+                  <div className="h-8 flex items-center justify-center text-white font-bold" style={{ backgroundColor: c.bg }}>{c.id}</div>
+                  <div className="flex-1 bg-white border-t border-gray-300 flex items-center justify-center font-bold text-lg">{c.qty}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="w-[30%] border border-gray-300 rounded flex flex-col overflow-hidden">
+              <div className="h-8 bg-gray-100 border-b border-gray-300 flex items-center px-2 text-sm font-bold gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                ملاحظات التصميم
+              </div>
+              <div className="flex-1 bg-white p-2 flex flex-col justify-around">
+                <div className="border-b border-gray-300 w-full h-1"></div>
+                <div className="border-b border-gray-300 w-full h-1"></div>
+                <div className="border-b border-gray-300 w-full h-1"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-1">
-          <div className="w-full sm:w-1/3 flex flex-col">
-            <div className="border-2 border-gray-400 h-48 sm:h-64 relative flex items-center justify-center p-2 mb-2 rounded">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {order.modelImage ? <img src={order.modelImage} alt="Model" className="w-full h-full object-contain" /> : <div className="text-gray-400 text-sm">لا توجد صورة</div>}
-            </div>
-            <div className="border border-gray-400 p-3 sm:p-2 bg-gray-50 flex-1 flex flex-col rounded">
-              <h3 className="font-bold border-b pb-1 mb-2 text-md sm:text-lg">مخزن القماش</h3>
-              <p className="text-sm mb-2"><strong>النوع:</strong> {order.fabricType || '---'}</p>
-              <p className="text-sm mb-2"><strong>المورد:</strong> {order.fabricSupplier || '---'}</p>
-              <p className="text-sm mb-2"><strong>الكمية (كجم/توب):</strong> .....................</p>
-              <p className="text-sm mb-2"><strong>استهلاك القطعة:</strong> .....................</p>
-              <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-auto pt-4">
-                {colorPairs?.filter((pair: any) => pair.quantity).map((pair: any, idx: number) => (
-                  <React.Fragment key={idx}>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-12 h-12 sm:w-[2cm] sm:h-[2cm] border border-gray-400 bg-white shadow-sm rounded-sm"></div>
-                      <p className="text-[10px] sm:text-xs text-center font-bold">تيشيرت {pair.tshirt} ({pair.quantity}ق)</p>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-12 h-12 sm:w-[2cm] sm:h-[2cm] border border-gray-400 bg-white shadow-sm rounded-sm"></div>
-                      <p className="text-[10px] sm:text-xs text-center font-bold">بنطلون {pair.pants} ({pair.quantity}ق)</p>
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full sm:w-2/3 flex flex-col gap-4">
-            <div className="border border-gray-400 p-3 sm:p-2 flex flex-col rounded">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1 text-md">✂️ قسم القص</h3>
-              <div className="flex flex-col gap-1 mb-1 border-b border-dashed border-gray-300 pb-1">
-                <p className="text-sm font-bold text-red-700">المقاسات: {order.sizesSeries || '---'}</p>
-                <p className="text-sm font-bold text-blue-700">الكمية: {order.totalQuantity}</p>
-              </div>
-              <div className="mb-1 border-b border-dashed border-gray-300 pb-2 mt-2 overflow-x-auto">
-                <table className="w-full min-w-[300px] text-center text-[10px] sm:text-xs border-collapse border border-gray-400">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-400 p-1">التيشيرت</th>
-                      <th className="border border-gray-400 p-1">البنطلون</th>
-                      <th className="border border-gray-400 p-1">الكمية</th>
-                      <th className="border border-gray-400 p-1">المقاس الواحد</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {colorPairs?.filter((p: any) => p.quantity).map((pair: any, idx: number) => (
-                      <tr key={idx}>
-                        <td className="border border-gray-400 p-1">{pair.tshirt}</td>
-                        <td className="border border-gray-400 p-1">{pair.pants}</td>
-                        <td className="border border-gray-400 p-1">{pair.quantity}</td>
-                        <td className="border border-gray-400 p-1">{pair.quantity / 4}</td>
-                      </tr>
-                    ))}
-                    <tr className="bg-gray-50 font-bold">
-                      <td className="border border-gray-400 p-1" colSpan={2}>الإجمالي</td>
-                      <td className="border border-gray-400 p-1 text-center" colSpan={2}>{order.totalQuantity} قطعة</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-sm min-h-[30px] whitespace-pre-wrap">{order.cuttingNotes || '---'}</p>
-            </div>
-
-            <div className="border border-gray-400 p-3 flex flex-col rounded">
-              <div className="flex justify-between items-center border-b border-gray-300 pb-1 mb-2 bg-gray-100 px-1">
-                <h3 className="font-bold text-lg">🧵 قسم المكن (التقفيل)</h3>
-              </div>
-              <p className="text-sm mb-2 whitespace-pre-wrap">{order.sewingNotes || 'ملاحظات المكن:'}</p>
-              
-              <div className="flex flex-col gap-4 overflow-x-auto pb-2">
-                {/* T-Shirt Table */}
-                <table className="w-full min-w-[400px] text-center border-collapse border border-gray-400 text-[10px] sm:text-xs">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-400 p-1 font-bold w-1/4">التيشيرت</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[0]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[1]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[2]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[3]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tColors.length > 0 ? tColors.map((color: string, i: number) => color ? (
-                      <tr key={i}>
-                        <td className="border border-gray-400 p-1 font-bold bg-gray-50">{color}</td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                      </tr>
-                    ) : null) : null}
-                    {/* Add empty rows */}
-                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                  </tbody>
-                </table>
-
-                {/* Pants Table */}
-                <table className="w-full min-w-[400px] text-center border-collapse border border-gray-400 text-[10px] sm:text-xs">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-400 p-1 font-bold w-1/4">البنطلون</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[0]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[1]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[2]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-8">{sizeHeaders[3]}</th>
-                      <th className="border border-gray-400 p-1 font-bold w-1/4">ملاحظات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pColors.length > 0 ? pColors.map((color: string, i: number) => color ? (
-                      <tr key={i}>
-                        <td className="border border-gray-400 p-1 font-bold bg-gray-50">{color}</td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                        <td className="border border-gray-400 p-1"></td>
-                      </tr>
-                    ) : null) : null}
-                    {/* Add empty rows */}
-                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                    <tr><td className="border border-gray-400 h-5 p-1"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td><td className="border border-gray-400"></td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="border border-gray-400 p-3 flex flex-col rounded">
-              <h3 className="font-bold border-b border-gray-300 pb-1 mb-1 bg-gray-100 px-1 text-md">📝 ملاحظات عامة (تشطيب، مكواة، تعبئة)</h3>
-              <p className="text-sm min-h-[50px] whitespace-pre-wrap">{order.generalNotes || '---'}</p>
-            </div>
-          </div>
-        </div>
-        
-
-
+        <style jsx global>{`
+          @media print {
+            @page {
+              size: A4 landscape;
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+              background-color: white;
+            }
+            body * {
+              visibility: hidden;
+            }
+            .print\\:hidden {
+              display: none !important;
+            }
+            .max-w-\\[297mm\\] > div:nth-child(2), .max-w-\\[297mm\\] > div:nth-child(2) * {
+              visibility: visible;
+            }
+            .max-w-\\[297mm\\] > div:nth-child(2) {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 297mm !important;
+              height: 210mm !important;
+              padding: 5mm;
+              box-sizing: border-box;
+            }
+          }
+        `}</style>
       </div>
-      
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4;
-            margin: 5mm;
-          }
-          body {
-            margin: 0;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          body * {
-            visibility: hidden;
-          }
-          .print\\:shadow-none {
-            box-shadow: none !important;
-          }
-          .print\\:p-0 {
-            padding: 0 !important;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-          .max-w-4xl > div:nth-child(2), .max-w-4xl > div:nth-child(2) * {
-            visibility: visible;
-          }
-          .max-w-4xl > div:nth-child(2) {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
-    </div>
-  );
+    );
+
 }
