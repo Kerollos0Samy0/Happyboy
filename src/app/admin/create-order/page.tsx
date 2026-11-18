@@ -70,13 +70,13 @@ interface Customer {
 const getCategoryName = (modelNumber: string) => {
   const num = parseInt(modelNumber, 10);
   if (isNaN(num)) return "أخرى";
+  if ((num >= 1090 && num <= 1199) || (num >= 2085 && num <= 2199) || (num >= 210 && num <= 265) || (num >= 410 && num <= 465)) return "New Collection";
   if (num >= 5 && num <= 90) return "بيبي ولادي";
   if (num >= 100 && num <= 299) return "وسط ولادي";
   if (num >= 300 && num <= 499) return "محير ولادي";
   if (num >= 500 && num <= 589) return "بيبي بناتي";
   if (num >= 590 && num <= 789) return "وسط بناتي";
   if (num >= 790 && num <= 999) return "محير بناتي";
-  if ((num >= 1090 && num <= 1199) || (num >= 2085 && num <= 2199)) return "New Collection";
   if (num >= 1000 && num <= 2999) return "رياضي";
   if (num >= 3000 && num <= 4999) return "سمر ولادي";
   if (num >= 5000 && num <= 6999) return "سمر بناتي";
