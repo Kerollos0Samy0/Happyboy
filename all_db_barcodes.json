@@ -4418,15 +4418,15 @@
   },
   {
     "modelNumber": "720",
-    "name": "سوت وسط حوض",
-    "color": "موف",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "موف (حوض)",
     "barcode": "822",
     "category": "بناتي وسط New Collection"
   },
   {
     "modelNumber": "720",
-    "name": "سوت وسط حوض",
-    "color": "روز",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "روز (حوض)",
     "barcode": "823",
     "category": "بناتي وسط New Collection"
   },
@@ -4474,15 +4474,15 @@
   },
   {
     "modelNumber": "740",
-    "name": "سوت وسط كابيشو",
-    "color": "روز",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "روز (كابيشو)",
     "barcode": "831",
     "category": "بناتي وسط New Collection"
   },
   {
     "modelNumber": "740",
-    "name": "سوت وسط كابيشو",
-    "color": "بيج",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "بيج (كابيشو)",
     "barcode": "830",
     "category": "بناتي وسط New Collection"
   },
@@ -4530,15 +4530,15 @@
   },
   {
     "modelNumber": "920",
-    "name": "سوت محير حوض",
-    "color": "اصفر",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "اصفر (حوض)",
     "barcode": "839",
     "category": "بناتي محير New Collection"
   },
   {
     "modelNumber": "920",
-    "name": "سوت محير حوض",
-    "color": "عنابي",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "عنابي (حوض)",
     "barcode": "838",
     "category": "بناتي محير New Collection"
   },
@@ -4586,15 +4586,15 @@
   },
   {
     "modelNumber": "940",
-    "name": "سوت محير كابيشو",
-    "color": "اصفر",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "اصفر (كابيشو)",
     "barcode": "846",
     "category": "بناتي محير New Collection"
   },
   {
     "modelNumber": "940",
-    "name": "سوت محير كابيشو",
-    "color": "موف",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "موف (كابيشو)",
     "barcode": "847",
     "category": "بناتي محير New Collection"
   },
@@ -4610,6 +4610,62 @@
     "name": "سوت محير كابيشو",
     "color": "اصفر",
     "barcode": "849",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "720",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "موف (كابيشو)",
+    "barcode": "820",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "720",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "روز (كابيشو)",
+    "barcode": "821",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "740",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "بيج (حوض)",
+    "barcode": "852",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "740",
+    "name": "سوت وسط كابيشو وحوض",
+    "color": "روز (حوض)",
+    "barcode": "853",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "920",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "عنابي (كابيشو)",
+    "barcode": "850",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "920",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "اصفر (كابيشو)",
+    "barcode": "851",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "940",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "اصفر (حوض)",
+    "barcode": "854",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "940",
+    "name": "سوت محير كابيشو وحوض",
+    "color": "موف (حوض)",
+    "barcode": "855",
     "category": "بناتي محير New Collection"
   }
 ]
