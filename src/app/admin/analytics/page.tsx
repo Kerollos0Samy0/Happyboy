@@ -13,7 +13,7 @@ import {
 const getCategoryName = (modelNumber: string) => {
   const num = parseInt(modelNumber, 10);
   if (isNaN(num)) return "أخرى";
-  if ((num >= 1090 && num <= 1199) || (num >= 2085 && num <= 2199) || (num >= 210 && num <= 265) || (num >= 410 && num <= 465) || (num >= 710 && num <= 745)) return "New Collection";
+  if ((num >= 1090 && num <= 1199) || (num >= 2085 && num <= 2199) || (num >= 210 && num <= 265) || (num >= 410 && num <= 465) || (num >= 710 && num <= 745) || (num >= 910 && num <= 945)) return "New Collection";
   if (num >= 5 && num <= 90) return "بيبي ولادي";
   if (num >= 100 && num <= 299) return "وسط ولادي";
   if (num >= 300 && num <= 499) return "محير ولادي";
