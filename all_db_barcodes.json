@@ -4366,5 +4366,138 @@
     "color": "بني",
     "barcode": "812",
     "category": "اولادي محير New Collection"
+  },
+  {
+    "modelNumber": "605",
+    "name": "سوت بناتي وسط",
+    "color": "ابيض",
+    "barcode": "589",
+    "category": "وسط بناتي"
+  },
+  {
+    "modelNumber": "670",
+    "name": "سوت وسط كابيشو",
+    "color": "اكوا",
+    "barcode": "252",
+    "category": "وسط بناتي"
+  },
+  {
+    "modelNumber": "695",
+    "name": "سوت وسط كابيشو",
+    "color": "ابيض",
+    "barcode": "665",
+    "category": "وسط بناتي"
+  },
+  {
+    "modelNumber": "710",
+    "name": "سوت وسط كابيشو",
+    "color": "بني",
+    "barcode": "816",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "710",
+    "name": "سوت وسط كابيشو",
+    "color": "برجاندي",
+    "barcode": "817",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "715",
+    "name": "سوت وسط كابيشو",
+    "color": "اصفر",
+    "barcode": "819",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "715",
+    "name": "سوت وسط كابيشو",
+    "color": "موف",
+    "barcode": "818",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "720",
+    "name": "سوت وسط حوض",
+    "color": "موف",
+    "barcode": "822",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "720",
+    "name": "سوت وسط حوض",
+    "color": "روز",
+    "barcode": "823",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "725",
+    "name": "سوت وسط كابيشو",
+    "color": "بني",
+    "barcode": "824",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "725",
+    "name": "سوت وسط كابيشو",
+    "color": "موف",
+    "barcode": "825",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "730",
+    "name": "سوت وسط كابيشو",
+    "color": "اصفر",
+    "barcode": "827",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "730",
+    "name": "سوت وسط كابيشو",
+    "color": "موف",
+    "barcode": "826",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "735",
+    "name": "سوت وسط كابيشو",
+    "color": "موف",
+    "barcode": "829",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "735",
+    "name": "سوت وسط كابيشو",
+    "color": "اصفر",
+    "barcode": "828",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "740",
+    "name": "سوت وسط كابيشو",
+    "color": "روز",
+    "barcode": "831",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "740",
+    "name": "سوت وسط كابيشو",
+    "color": "بيج",
+    "barcode": "830",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "745",
+    "name": "سوت وسط كابيشو",
+    "color": "روز",
+    "barcode": "833",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "745",
+    "name": "سوت وسط كابيشو",
+    "color": "عنابي",
+    "barcode": "832",
+    "category": "بناتي وسط New Collection"
   }
 ]
