@@ -413,8 +413,12 @@ export default function InventoryPage() {
     {
       title: "New Collection",
       sections: [
-        { name: "وسط New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'وسط' : ((num >= 1090 && num <= 1199) || (num >= 210 && num <= 265)) },
-        { name: "محير New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'محير' : ((num >= 2085 && num <= 2199) || (num >= 410 && num <= 465)) },
+        { name: "رياضي وسط", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'رياضي وسط' : (num >= 1090 && num <= 1199) },
+        { name: "رياضي محير", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'رياضي محير' : (num >= 2085 && num <= 2199) },
+        { name: "اولادي وسط", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'اولادي وسط' : (num >= 210 && num <= 265) },
+        { name: "اولادي محير", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'اولادي محير' : (num >= 410 && num <= 465) },
+        { name: "بناتي وسط", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' && (p?.subCategory === 'بناتي وسط' || (num >= 590 && num <= 789)) },
+        { name: "بناتي محير", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' && (p?.subCategory === 'بناتي محير' || (num >= 790 && num <= 999)) },
       ]
     },
     {
@@ -429,8 +433,8 @@ export default function InventoryPage() {
       title: "قسم البناتي",
       sections: [
         { name: "بيبي مقاس 2-3-4-5 (500 - 589)", filter: (num: number) => num >= 500 && num <= 589 },
-        { name: "وسط مقاس 6-8-10-12 (600 - 789)", filter: (num: number) => num >= 590 && num <= 789 },
-        { name: "محير مقاس 14-16-18-20 (800 - 999)", filter: (num: number) => num >= 790 && num <= 999 },
+        { name: "وسط مقاس 6-8-10-12 (600 - 789)", filter: (num: number, p?: Product) => (p?.mainCategory !== 'New Collection') && num >= 590 && num <= 789 },
+        { name: "محير مقاس 14-16-18-20 (800 - 999)", filter: (num: number, p?: Product) => (p?.mainCategory !== 'New Collection') && num >= 790 && num <= 999 },
       ]
     },
     {
