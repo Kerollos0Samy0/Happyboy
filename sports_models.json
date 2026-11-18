@@ -1087,5 +1087,31 @@
     "price": 850,
     "quantity": 0,
     "modelNumber": "2125"
+  },
+  {
+    "name": "سوت وسط كابيشو",
+    "sizes": [
+      "6",
+      "8",
+      "10",
+      "12"
+    ],
+    "colors": [
+      {
+        "name": "بني",
+        "barcode": "788"
+      },
+      {
+        "name": "اسود",
+        "barcode": "787"
+      }
+    ],
+    "barcodes": [
+      "788",
+      "787"
+    ],
+    "price": 670,
+    "quantity": 0,
+    "modelNumber": "1135"
   }
 ]

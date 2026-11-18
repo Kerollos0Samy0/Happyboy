@@ -4009,5 +4009,19 @@
     "color": "جيشي",
     "barcode": "649",
     "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "1135",
+    "name": "سوت وسط كابيشو",
+    "color": "بني",
+    "barcode": "788",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1135",
+    "name": "سوت وسط كابيشو",
+    "color": "اسود",
+    "barcode": "787",
+    "category": "وسط New Collection"
   }
 ]

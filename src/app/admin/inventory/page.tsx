@@ -10,7 +10,7 @@ import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag
 const getCategoryName = (modelStr: string) => {
   const m = parseInt(modelStr.replace(/\D/g, ''), 10);
   if (isNaN(m)) return "غير معروف";
-  if ((m >= 1090 && m <= 1130) || (m >= 2085 && m <= 2125)) return "New Collection";
+  if ((m >= 1090 && m <= 1199) || (m >= 2085 && m <= 2199)) return "New Collection";
   if (m >= 1000 && m <= 1040) return "أولادي صيفي";
   if (m >= 2000 && m <= 2040) return "بناتي صيفي";
   if (m >= 3000 && m <= 3040) return "بيبي أولادي صيفي";
@@ -413,8 +413,8 @@ export default function InventoryPage() {
     {
       title: "New Collection",
       sections: [
-        { name: "وسط New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'وسط' : (num >= 1090 && num <= 1130) },
-        { name: "محير New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'محير' : (num >= 2085 && num <= 2125) },
+        { name: "وسط New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'وسط' : (num >= 1090 && num <= 1199) },
+        { name: "محير New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'محير' : (num >= 2085 && num <= 2199) },
       ]
     },
     {
