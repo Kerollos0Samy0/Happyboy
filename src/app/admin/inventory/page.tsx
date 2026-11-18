@@ -10,6 +10,7 @@ import { Edit, Trash2, Check, X, Search, Package, Plus, Layers, ChevronDown, Tag
 const getCategoryName = (modelStr: string) => {
   const m = parseInt(modelStr.replace(/\D/g, ''), 10);
   if (isNaN(m)) return "غير معروف";
+  if ((m >= 1090 && m <= 1130) || (m >= 2085 && m <= 2125)) return "New Collection";
   if (m >= 1000 && m <= 1040) return "أولادي صيفي";
   if (m >= 2000 && m <= 2040) return "بناتي صيفي";
   if (m >= 3000 && m <= 3040) return "بيبي أولادي صيفي";
@@ -24,7 +25,7 @@ const getCategoryName = (modelStr: string) => {
 
 const getSizesCount = (name: string, modelNumber: string, sizes: string[] | undefined) => {
   const category = getCategoryName(modelNumber);
-  if (category.includes('بيبي') || category.includes('سمر') || category.includes('شتوي') || category.includes('صيفي') || name.includes('بيبي') || name.includes('سوت') || name.includes('موديل')) return 4;
+  if (category.includes('بيبي') || category.includes('سمر') || category.includes('شتوي') || category.includes('صيفي') || category.includes('Collection') || name.includes('بيبي') || name.includes('سوت') || name.includes('ترينج') || name.includes('موديل')) return 4;
   return sizes && sizes.length > 0 ? sizes.length : 1;
 };
 
@@ -43,6 +44,8 @@ interface Product {
   sizes: string[];
   colors: ColorEntry[];
   isDeleted?: boolean;
+  mainCategory?: string;
+  subCategory?: string;
 }
 
 export default function InventoryPage() {
@@ -406,7 +409,14 @@ export default function InventoryPage() {
   }, 0);
 
   // Grouping Logic
-  const categories = [
+  const categories: { title: string; sections: { name: string; filter: (num: number, p?: Product) => boolean }[] }[] = [
+    {
+      title: "New Collection",
+      sections: [
+        { name: "وسط New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'وسط' : (num >= 1090 && num <= 1130) },
+        { name: "محير New Collection", filter: (num: number, p?: Product) => p?.mainCategory === 'New Collection' ? p?.subCategory === 'محير' : (num >= 2085 && num <= 2125) },
+      ]
+    },
     {
       title: "قسم الأولادي",
       sections: [
@@ -426,8 +436,8 @@ export default function InventoryPage() {
     {
       title: "رياضي",
       sections: [
-        { name: "وسط رياضي", filter: (num: number) => num >= 1000 && num <= 1999 },
-        { name: "محير رياضي", filter: (num: number) => num >= 2000 && num <= 2999 },
+        { name: "وسط رياضي", filter: (num: number, p?: Product) => (p?.mainCategory !== 'New Collection') && num >= 1000 && num <= 1075 },
+        { name: "محير رياضي", filter: (num: number, p?: Product) => (p?.mainCategory !== 'New Collection') && num >= 2000 && num <= 2075 },
       ]
     },
     {
@@ -713,7 +723,7 @@ export default function InventoryPage() {
                 const subProds = unassignedProducts.filter(p => {
                   const num = parseInt(p.modelNumber, 10);
                   if (isNaN(num)) return false;
-                  return sub.filter(num);
+                  return sub.filter(num, p);
                 });
                 
                 unassignedProducts = unassignedProducts.filter(p => !subProds.includes(p));

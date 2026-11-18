@@ -3834,5 +3834,180 @@
     "color": "بيج",
     "barcode": "578",
     "category": "وسط ولادي"
+  },
+  {
+    "modelNumber": "1090",
+    "name": "ترينج وسط كابيشو",
+    "color": "انديجو",
+    "barcode": "599",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1100",
+    "name": "سوت وسط كابيشو",
+    "color": "زيتوني",
+    "barcode": "626",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1100",
+    "name": "سوت وسط كابيشو",
+    "color": "اسود",
+    "barcode": "625",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1105",
+    "name": "سوت وسط كابيشو",
+    "color": "اسود",
+    "barcode": "627",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1105",
+    "name": "سوت وسط كابيشو",
+    "color": "منت",
+    "barcode": "628",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1110",
+    "name": "سوت وسط كابيشو",
+    "color": "انديجو",
+    "barcode": "631",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1115",
+    "name": "سوت وسط كابيشو",
+    "color": "زيتي",
+    "barcode": "636",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1120",
+    "name": "سوت وسط كابيشو",
+    "color": "جيشي",
+    "barcode": "640",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1120",
+    "name": "سوت وسط كابيشو",
+    "color": "شاركول",
+    "barcode": "639",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1125",
+    "name": "سوت وسط كابيشو",
+    "color": "زيتي",
+    "barcode": "644",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1125",
+    "name": "سوت وسط كابيشو",
+    "color": "انديجو",
+    "barcode": "643",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "1130",
+    "name": "سوت وسط كابيشو",
+    "color": "جيشي",
+    "barcode": "647",
+    "category": "وسط New Collection"
+  },
+  {
+    "modelNumber": "2085",
+    "name": "ترينج محير كابيشو",
+    "color": "اسود",
+    "barcode": "652",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2095",
+    "name": "سوت محير كابيشو",
+    "color": "زيتوني",
+    "barcode": "624",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2095",
+    "name": "سوت محير كابيشو",
+    "color": "اسود",
+    "barcode": "623",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2100",
+    "name": "سوت محير كابيشو",
+    "color": "منت",
+    "barcode": "630",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2100",
+    "name": "سوت محير كابيشو",
+    "color": "اسود",
+    "barcode": "629",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2105",
+    "name": "سوت محير كابيشو",
+    "color": "انديجو",
+    "barcode": "633",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2105",
+    "name": "سوت محير كابيشو",
+    "color": "شاركول",
+    "barcode": "634",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2110",
+    "name": "سوت محير كابيشو",
+    "color": "زيتي",
+    "barcode": "638",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2115",
+    "name": "سوت محير كابيشو",
+    "color": "شاركول",
+    "barcode": "641",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2115",
+    "name": "سوت محير كابيشو",
+    "color": "جيشي",
+    "barcode": "642",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2120",
+    "name": "سوت محير كابيشو",
+    "color": "زيتي",
+    "barcode": "646",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2120",
+    "name": "سوت محير كابيشو",
+    "color": "انديجو",
+    "barcode": "645",
+    "category": "محير New Collection"
+  },
+  {
+    "modelNumber": "2125",
+    "name": "سوت محير كابيشو",
+    "color": "جيشي",
+    "barcode": "649",
+    "category": "محير New Collection"
   }
 ]
