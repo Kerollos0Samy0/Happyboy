@@ -4667,5 +4667,96 @@
     "color": "موف (حوض)",
     "barcode": "855",
     "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "330",
+    "name": "ترينج محير حوض",
+    "color": "تفاحي",
+    "barcode": "146",
+    "category": "محير ولادي"
+  },
+  {
+    "modelNumber": "750",
+    "name": "سوت وسط كابيشو",
+    "color": "اسود",
+    "barcode": "856",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "750",
+    "name": "سوت وسط كابيشو",
+    "color": "بيج",
+    "barcode": "857",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "755",
+    "name": "سوت وسط كابيشو",
+    "color": "كافيه",
+    "barcode": "858",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "755",
+    "name": "سوت وسط كابيشو",
+    "color": "فضي",
+    "barcode": "859",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "760",
+    "name": "سوت وسط كابيشو",
+    "color": "اسود",
+    "barcode": "866",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "760",
+    "name": "سوت وسط كابيشو",
+    "color": "بيج",
+    "barcode": "867",
+    "category": "بناتي وسط New Collection"
+  },
+  {
+    "modelNumber": "950",
+    "name": "سوت محير كابيشو",
+    "color": "فضي",
+    "barcode": "860",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "950",
+    "name": "سوت محير كابيشو",
+    "color": "كافيه",
+    "barcode": "861",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "955",
+    "name": "سوت محير كابيشو",
+    "color": "اسود",
+    "barcode": "862",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "955",
+    "name": "سوت محير كابيشو",
+    "color": "بيج",
+    "barcode": "863",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "960",
+    "name": "سوت محير كابيشو",
+    "color": "فضي",
+    "barcode": "864",
+    "category": "بناتي محير New Collection"
+  },
+  {
+    "modelNumber": "960",
+    "name": "سوت محير كابيشو",
+    "color": "كافيه",
+    "barcode": "865",
+    "category": "بناتي محير New Collection"
   }
 ]
