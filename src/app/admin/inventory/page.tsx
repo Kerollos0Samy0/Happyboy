@@ -458,14 +458,14 @@ export default function InventoryPage() {
   const sectionStats = categories.map(cat => ({
     title: cat.title,
     totalPieces: cat.sections.reduce((sum, sec) => {
-      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber), p));
       return sum + prods.reduce((acc, p) => {
         if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + Math.max(0, Number(p.quantity) || 0);
         return acc + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
       }, 0);
     }, 0),
     totalSeries: cat.sections.reduce((sum, sec) => {
-      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber), p));
       return sum + prods.reduce((acc, p) => {
         if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + (Math.max(0, Number(p.quantity) || 0) / getSizesCount(p.name, p.modelNumber, p.sizes));
         const posSum = p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
@@ -473,14 +473,14 @@ export default function InventoryPage() {
       }, 0);
     }, 0),
     totalShortagesPieces: cat.sections.reduce((sum, sec) => {
-      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber), p));
       return sum + prods.reduce((acc, p) => {
         if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + Math.abs(Math.min(0, Number(p.quantity) || 0));
         return acc + p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
       }, 0);
     }, 0),
     totalShortagesSeries: cat.sections.reduce((sum, sec) => {
-      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber), p));
       return sum + prods.reduce((acc, p) => {
         if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return acc + (Math.abs(Math.min(0, Number(p.quantity) || 0)) / getSizesCount(p.name, p.modelNumber, p.sizes));
         const negSum = p.colors.reduce((cSum, c) => cSum + Math.abs(Math.min(0, Number(c.quantity) || 0)), 0);
@@ -488,7 +488,7 @@ export default function InventoryPage() {
       }, 0);
     }, 0),
     sections: cat.sections.map(sec => {
-      const prods = products.filter(p => sec.filter(Number(p.modelNumber)));
+      const prods = products.filter(p => sec.filter(Number(p.modelNumber), p));
       const pieces = prods.reduce((sum, p) => {
         if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) return sum + Math.max(0, Number(p.quantity) || 0);
         return sum + p.colors.reduce((cSum, c) => cSum + Math.max(0, Number(c.quantity) || 0), 0);
@@ -711,7 +711,7 @@ export default function InventoryPage() {
     return (
       <div className="flex flex-col gap-6">
         {categories.map((mainCat, idx) => (
-          <details key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden">
+          <details key={`${idx}-${searchTerm.trim() ? 'searching' : 'default'}`} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={Boolean(searchTerm.trim()) ? true : undefined}>
             <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-600 border border-gray-200">
@@ -735,7 +735,7 @@ export default function InventoryPage() {
                 if (subProds.length === 0) return null;
 
                 return (
-                  <details key={sIdx} className="bg-white rounded-xl shadow-sm border border-gray-100 group/sub overflow-hidden">
+                  <details key={`${sIdx}-${searchTerm.trim() ? 'searching' : 'default'}`} className="bg-white rounded-xl shadow-sm border border-gray-100 group/sub overflow-hidden" open={Boolean(searchTerm.trim()) ? true : undefined}>
                     <summary className="text-base font-bold p-4 text-gray-700 bg-gray-50/50 hover:bg-gray-50 cursor-pointer select-none transition-colors border-b border-gray-100 flex justify-between items-center list-none">
                       <div className="flex items-center gap-3">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
@@ -757,7 +757,7 @@ export default function InventoryPage() {
         ))}
         
         {unassignedProducts.length > 0 && (
-          <details className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden">
+          <details key={`unassigned-${searchTerm.trim() ? 'searching' : 'default'}`} className="bg-white border border-gray-200 rounded-2xl shadow-sm group overflow-hidden" open={Boolean(searchTerm.trim()) ? true : undefined}>
             <summary className="text-xl font-bold p-5 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors flex justify-between items-center list-none border-b border-gray-100 text-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-200">
