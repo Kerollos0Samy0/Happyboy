@@ -184,6 +184,52 @@ export default function InventoryPage() {
     }
   };
 
+  const handleDeleteSingleColor = async (product: Product, colorIndex: number) => {
+    const color = product.colors?.[colorIndex];
+    if (!color) return;
+
+    if (!window.confirm(`هل أنت متأكد من حذف سطر اللون "${color.name || 'بدون اسم'}" (باركود ${color.barcode || '-'}) من موديل ${product.modelNumber}؟`)) {
+      return;
+    }
+
+    try {
+      const updatedColors = product.colors.filter((_, idx) => idx !== colorIndex);
+      const updatedBarcodes = updatedColors.map(c => c.barcode).filter(Boolean);
+      const updatedQty = updatedColors.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+
+      const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
+
+      await updateDoc(doc(db, "products", product.id), {
+        colors: updatedColors,
+        barcodes: updatedBarcodes,
+        quantity: updatedQty,
+      });
+
+      addDoc(collection(db, "inventory_logs"), {
+        productId: product.id,
+        modelNumber: product.modelNumber,
+        productName: product.name,
+        colorName: color.name || "غير محدد",
+        change: -(Number(color.quantity) || 0),
+        newQuantity: 0,
+        reason: `حذف سطر اللون (${color.name} - ${color.barcode})`,
+        employeeName: empName,
+        createdAt: serverTimestamp()
+      }).catch(e => console.warn("Log write failed:", e));
+
+      const newProducts = products.map(p => 
+        p.id === product.id 
+          ? { ...p, colors: updatedColors, barcodes: updatedBarcodes, quantity: updatedQty } 
+          : p
+      );
+      setProducts(newProducts);
+      localStorage.setItem('inventory_products_cache', JSON.stringify(newProducts));
+      localStorage.setItem('inventory_products_time', Date.now().toString());
+    } catch (err: any) {
+      alert("حدث خطأ أثناء حذف اللون: " + (err.message || err));
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm("هل أنت متأكد من الحذف؟")) return;
     try {
@@ -206,7 +252,7 @@ export default function InventoryPage() {
     if (!editForm) return;
     try {
       const newBarcodes = editForm.colors.map(c => c.barcode).filter(Boolean);
-      const updatedData = {
+      const updatedData: any = {
         modelNumber: editForm.modelNumber,
         name: editForm.name,
         price: Number(editForm.price),
@@ -214,6 +260,8 @@ export default function InventoryPage() {
         colors: editForm.colors,
         barcodes: newBarcodes,
       };
+      if (editForm.mainCategory !== undefined) updatedData.mainCategory = editForm.mainCategory;
+      if (editForm.subCategory !== undefined) updatedData.subCategory = editForm.subCategory;
 
       const oldProduct = products.find(p => p.id === id);
       const empName = auth.currentUser?.displayName || auth.currentUser?.email || "Unknown";
@@ -570,11 +618,69 @@ export default function InventoryPage() {
                         </div>
                       )}
                     </td>
-                    <td className="p-4 font-bold text-gray-800" style={{ verticalAlign: 'middle', minWidth: '150px' }} rowSpan={rowSpan}>
+                    <td className="p-4 font-bold text-gray-800" style={{ verticalAlign: 'middle', minWidth: '170px' }} rowSpan={rowSpan}>
                       {isEditing ? (
-                        <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.name} onChange={e => handleEditField('name', e.target.value)} />
+                        <div className="flex flex-col gap-2">
+                          <input type="text" className="w-full bg-white border border-gray-200 rounded p-1.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" value={displayProduct.name} onChange={e => handleEditField('name', e.target.value)} placeholder="اسم الموديل" />
+                          <div className="grid grid-cols-2 gap-1 text-xs">
+                            <div>
+                              <label className="text-[10px] text-gray-500 block mb-0.5 font-bold">التصنيف الرئيسي</label>
+                              <select 
+                                className="w-full bg-white border border-gray-200 rounded p-1 text-xs outline-none"
+                                value={displayProduct.mainCategory || ""}
+                                onChange={e => handleEditField('mainCategory', e.target.value)}
+                              >
+                                <option value="">بدون</option>
+                                <option value="New Collection">New Collection</option>
+                                <option value="ولادي">ولادي</option>
+                                <option value="بناتي">بناتي</option>
+                                <option value="رياضي">رياضي</option>
+                                <option value="سمر ميلتون">سمر ميلتون</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-500 block mb-0.5 font-bold">التصنيف الفرعي</label>
+                              <select 
+                                className="w-full bg-white border border-gray-200 rounded p-1 text-xs outline-none"
+                                value={displayProduct.subCategory || ""}
+                                onChange={e => handleEditField('subCategory', e.target.value)}
+                              >
+                                <option value="">بدون</option>
+                                <option value="رياضي وسط">رياضي وسط</option>
+                                <option value="رياضي محير">رياضي محير</option>
+                                <option value="اولادي وسط">اولادي وسط</option>
+                                <option value="اولادي محير">اولادي محير</option>
+                                <option value="بناتي وسط">بناتي وسط</option>
+                                <option value="بناتي محير">بناتي محير</option>
+                                <option value="وسط">وسط</option>
+                                <option value="محير">محير</option>
+                                <option value="بيبي">بيبي</option>
+                              </select>
+                            </div>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              if (editForm) {
+                                const newColors = [...(editForm.colors || []), { name: "", barcode: "", quantity: 0 }];
+                                setEditForm({ ...editForm, colors: newColors });
+                              }
+                            }}
+                            className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-1.5 rounded border border-blue-200 flex items-center justify-center gap-1 transition-colors"
+                          >
+                            <Plus size={13} />
+                            إضافة لون جديد
+                          </button>
+                        </div>
                       ) : (
-                        displayProduct.name
+                        <div>
+                          <div className="font-bold text-gray-800">{displayProduct.name}</div>
+                          {(displayProduct.mainCategory || displayProduct.subCategory) && (
+                            <div className="text-[11px] text-gray-400 font-normal mt-0.5">
+                              {[displayProduct.mainCategory, displayProduct.subCategory].filter(Boolean).join(" • ")}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="p-4" style={{ verticalAlign: 'middle' }} rowSpan={rowSpan}>
@@ -632,10 +738,37 @@ export default function InventoryPage() {
                     <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                       {isEditing && hasColors ? (
                         <div className="flex items-center gap-1">
-                          <input type="text" className="w-full bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200 rounded p-1 text-xs text-center outline-none" value={displayProduct.colors[0].barcode} disabled title="لا يمكن تعديل الباركود" />
+                          <input 
+                            type="text" 
+                            className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center outline-none focus:ring-1 focus:ring-blue-500 font-mono" 
+                            value={displayProduct.colors[0].barcode} 
+                            onChange={e => handleEditColor(0, 'barcode', e.target.value)}
+                            placeholder="باركود" 
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => handleDeleteColor(0)} 
+                            className="p-1 text-red-500 hover:bg-red-100 hover:text-red-700 rounded transition-colors" 
+                            title="حذف هذا السطر"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       ) : (
-                        hasColors ? displayProduct.colors[0].barcode : "-"
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold text-gray-700 font-mono">
+                            {hasColors ? displayProduct.colors[0].barcode : "-"}
+                          </span>
+                          {hasColors && !isEditing && (
+                            <button 
+                              onClick={() => handleDeleteSingleColor(product, 0)}
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              title="حذف سطر هذا اللون"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
                       )}
                     </td>
 
@@ -687,10 +820,33 @@ export default function InventoryPage() {
                         <td className="p-3 text-xs text-gray-500 font-mono bg-blue-50/10">
                           {isEditing ? (
                             <div className="flex items-center gap-1">
-                              <input type="text" className="w-full bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200 rounded p-1 text-xs text-center outline-none" value={color.barcode} disabled title="لا يمكن تعديل الباركود" />
+                              <input 
+                                type="text" 
+                                className="w-full bg-white border border-gray-200 rounded p-1 text-xs text-center outline-none focus:ring-1 focus:ring-blue-500 font-mono" 
+                                value={color.barcode} 
+                                onChange={e => handleEditColor(idx, 'barcode', e.target.value)}
+                                placeholder="باركود" 
+                              />
+                              <button 
+                                type="button" 
+                                onClick={() => handleDeleteColor(idx)} 
+                                className="p-1 text-red-500 hover:bg-red-100 hover:text-red-700 rounded transition-colors" 
+                                title="حذف هذا السطر"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           ) : (
-                            color.barcode
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="font-bold text-gray-700 font-mono">{color.barcode}</span>
+                              <button 
+                                onClick={() => handleDeleteSingleColor(product, idx)}
+                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="حذف سطر هذا اللون"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
